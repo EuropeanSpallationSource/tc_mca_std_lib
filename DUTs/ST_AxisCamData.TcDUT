@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="ST_AxisCamData" Id="{81b26bd5-e4df-4d59-a572-68aebe86f7b9}">
+    <Declaration><![CDATA[TYPE ST_AxisCamData :
+STRUCT
+	CamTableID	:	MC_CAM_ID;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
