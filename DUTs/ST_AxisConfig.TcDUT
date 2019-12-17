@@ -11,6 +11,8 @@ STRUCT
     fDeceleration       :   LREAL;
     fPosition           :   LREAL;          //Used for absolute positioning
     nHomeSeq            :   UINT;           //Homing sequence to perform
+	
+	fHomePosition		:   LREAL;          
 
 END_STRUCT
 END_TYPE
