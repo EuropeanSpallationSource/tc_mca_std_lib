@@ -46,10 +46,21 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
+
+    fbTonStartupDelay : TON:=(IN:=TRUE,PT:=T#5S);
+    fbTrigStartup     : R_TRIG;
+
+    fbWriteSoftLimMax : FB_WriteFloatParameter;
+    fbWriteSoftLimMin : FB_WriteFloatParameter;
+    fbWriteSoftLimMaxEnable : FB_WriteParameterInNc_v1_00;
+    fbWriteSoftLimMinEnable : FB_WriteParameterInNc_v1_00;
+    fbWriteHomingVelocity : FB_WriteFloatParameter;
+    fbWriteTargetWindowPosition : FB_WriteFloatParameter;
+    fbWriteLagError : FB_WriteFloatParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
-
+A_SetParameters();
 ////Call of all MC Instances//////
 
 fbPower(Axis:=stAxisStruct.Axis);
@@ -179,7 +190,7 @@ CASE stAxisStruct.control.eCommand OF
         fbHome.bLimitFwd:= stAxisStruct.inputs.bLimitFwd;
         fbHome.bEncLatch:= stAxisStruct.inputs.bEncLatch;
         fbHome.bHomeSensor:= stAxisStruct.inputs.bHomeSensor;
-        fbHome.fHomePosition:= 0;
+        fbHome.fHomePosition:= stAxisStruct.config.fHomePosition;
         stAxisStruct.status.bHomed:=fbHome.bHomed;
 
 END_CASE
@@ -188,7 +199,7 @@ END_CASE
 stAxisStruct.status.bBusy:=stAxisStruct.Axis.Status.HasJob;
 
 (*Done*)
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done THEN
+IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbhome.fbhomedirect.bdone OR fbhome.fbhometoswitch.bdone THEN
         stAxisStruct.status.bDone:=TRUE;
 ELSIF stAxisStruct.Axis.Status.HasJob THEN
         stAxisStruct.status.bDone:=FALSE;
@@ -254,6 +265,61 @@ END_IF
 (*Reset bExecute*)
 stAxisStruct.control.bExecute:=FALSE;]]></ST>
     </Implementation>
+    <Action Name="A_SetParameters" Id="{9b021678-0de9-402c-b544-5e0ea3d91be0}">
+      <Implementation>
+        <ST><![CDATA[fbTonStartupDelay();
+fbTrigStartup(CLK:=fbTonStartupDelay.q , Q=> );
+
+fbWriteSoftLimMin(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMin,
+    nDeviceGroup:= 16#5000,
+    nIndexOffset:= 16#D,
+    nData:= stAxisStruct.config.fUserMin,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteSoftLimMax(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMax,
+    nDeviceGroup:= 16#5000,
+    nIndexOffset:= 16#E,
+    nData:= stAxisStruct.config.fUserMax,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteSoftLimMinEnable(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMinEnable,
+    nDeviceGroup:= 16#5000,
+    nIndexOffset:= 16#B,
+    nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMinEnable),
+    Axis:= stAxisStruct.Axis );
+
+fbWriteSoftLimMaxEnable(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMaxEnable,
+    nDeviceGroup:= 16#5000,
+    nIndexOffset:= 16#C,
+    nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMaxEnable),
+    Axis:= stAxisStruct.Axis );
+
+fbWriteHomingVelocity(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteHomingVelocity,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#6,
+    nData:= stAxisStruct.config.fHomingVelocity,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteTargetWindowPosition(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteTargetPositionWindow,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#16,
+    nData:= stAxisStruct.config.fTargetPositionWindow,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteLagError(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteLagError,
+    nDeviceGroup:= 16#6000,
+    nIndexOffset:= 16#12,
+    nData:= stAxisStruct.config.fLagError,
+    Axis:= stAxisStruct.Axis );]]></ST>
+      </Implementation>
+    </Action>
     <LineIds Name="FB_Axis">
       <LineId Id="2448" Count="0" />
       <LineId Id="2659" Count="0" />
@@ -376,6 +442,10 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="202" Count="3" />
       <LineId Id="2" Count="0" />
       <LineId Id="2980" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.A_SetParameters">
+      <LineId Id="52" Count="49" />
+      <LineId Id="1" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
