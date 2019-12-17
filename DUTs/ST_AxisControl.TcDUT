@@ -15,6 +15,14 @@ STRUCT
     bJogFwd             :   BOOL;           //Jog forward
     bJogBwd             :   BOOL;           //Jog backward
 
+    bWriteSoftLimMax : BOOL;
+    bWriteSoftLimMin : BOOL;
+    bWriteSoftLimMaxEnable : BOOL;
+    bWriteSoftLimMinEnable : BOOL;
+    bWriteHomingVelocity : BOOL;
+    bWriteTargetPositionWindow : BOOL;
+    bWriteLagError : BOOL;
+
 END_STRUCT
 END_TYPE
 ]]></Declaration>
