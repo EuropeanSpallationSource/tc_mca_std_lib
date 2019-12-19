@@ -4,13 +4,12 @@
     <Declaration><![CDATA[TYPE ST_AxisConfig :
 STRUCT
 ///////Axis Parameters//////
-    fOverride           :   LREAL := 100;   //Controller override %
-    fVelocity           :   LREAL;          //Velocity must be specified, no default used
-    fAcceleration       :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
-    fDeceleration       :   LREAL;
-    fPosition           :   LREAL;          //Used for absolute positioning
-    nHomeSeq            :   UINT;           //Homing sequence to perform
-
+    fOverride               :   LREAL := 100;   //Controller override %
+    fVelocity               :   LREAL;          //Velocity must be specified, no default used
+    fAcceleration           :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
+    fDeceleration           :   LREAL;
+    fPosition               :   LREAL;          //Used for absolute positioning
+    nHomeSeq                :   UINT;           //Homing sequence to perform
     fHomePosition           :   LREAL;
     fLagError               :   LREAL;
     fTargetPositionWindow   :   LREAL;
@@ -19,9 +18,8 @@ STRUCT
     fAbsMax                 :   REAL;
     fUserMin                :   LREAL;
     fUserMax                :   LREAL;
-
-    bSoftLimMinEnable : BOOL;
-    bSoftLimMaxEnable : BOOL;
+    bSoftLimMinEnable       :   BOOL;
+    bSoftLimMaxEnable       :   BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
