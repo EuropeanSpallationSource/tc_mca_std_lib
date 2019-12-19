@@ -15,13 +15,15 @@ STRUCT
     bJogFwd             :   BOOL;           //Jog forward
     bJogBwd             :   BOOL;           //Jog backward
 
-    bWriteSoftLimMax : BOOL;
-    bWriteSoftLimMin : BOOL;
-    bWriteSoftLimMaxEnable : BOOL;
-    bWriteSoftLimMinEnable : BOOL;
-    bWriteHomingVelocity : BOOL;
-    bWriteTargetPositionWindow : BOOL;
-    bWriteLagError : BOOL;
+
+
+    stSoftLimMax            : ST_NCParameter;
+    stSoftLimMin            : ST_NCParameter;
+    stSoftLimMaxEnable      : ST_NCParameter;
+    stSoftLimMinEnable      : ST_NCParameter;
+    stHomingVelocity        : ST_NCParameter;
+    stTargetPositionWindow  : ST_NCParameter;
+    stLagError              : ST_NCParameter;
 
 END_STRUCT
 END_TYPE

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="ST_NCParameter" Id="{c21c1a85-b621-4d4e-93d1-32c2ccb2f0ca}">
+    <Declaration><![CDATA[TYPE ST_NCParameter :
+STRUCT
+    bWrite  : BOOL;
+    bBusy   : BOOL;
+    bDone   : BOOL;
+    bError  : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

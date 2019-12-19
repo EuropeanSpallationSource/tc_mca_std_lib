@@ -271,52 +271,73 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
 fbTrigStartup(CLK:=fbTonStartupDelay.q , Q=> );
 
 fbWriteSoftLimMin(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMin,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMin.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#D,
     nData:= stAxisStruct.config.fUserMin,
+    bBusy=> stAxisStruct.control.stSoftLimMin.bBusy,
+    bDone=> stAxisStruct.control.stSoftLimMin.bDone,
+    bError=> stAxisStruct.control.stSoftLimMin.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteSoftLimMax(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMax,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMax.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#E,
     nData:= stAxisStruct.config.fUserMax,
+    bBusy=> stAxisStruct.control.stSoftLimMax.bBusy,
+    bDone=> stAxisStruct.control.stSoftLimMax.bDone,
+    bError=> stAxisStruct.control.stSoftLimMax.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteSoftLimMinEnable(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMinEnable,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMinEnable.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#B,
     nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMinEnable),
+    bBusy=> stAxisStruct.control.stSoftLimMinEnable.bBusy,
+    bDone=> stAxisStruct.control.stSoftLimMinEnable.bDone,
+    bError=> stAxisStruct.control.stSoftLimMinEnable.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteSoftLimMaxEnable(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteSoftLimMaxEnable,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMaxEnable.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#C,
     nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMaxEnable),
+    bBusy=> stAxisStruct.control.stSoftLimMaxEnable.bBusy,
+    bDone=> stAxisStruct.control.stSoftLimMaxEnable.bDone,
+    bError=> stAxisStruct.control.stSoftLimMaxEnable.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteHomingVelocity(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteHomingVelocity,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stHomingVelocity.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#6,
     nData:= stAxisStruct.config.fHomingVelocity,
+    bBusy=> stAxisStruct.control.stHomingVelocity.bBusy,
+    bDone=> stAxisStruct.control.stHomingVelocity.bDone,
+    bError=> stAxisStruct.control.stHomingVelocity.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteTargetWindowPosition(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteTargetPositionWindow,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stTargetPositionWindow.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#16,
     nData:= stAxisStruct.config.fTargetPositionWindow,
+    bBusy=> stAxisStruct.control.stTargetPositionWindow.bBusy,
+    bDone=> stAxisStruct.control.stTargetPositionWindow.bDone,
+    bError=> stAxisStruct.control.stTargetPositionWindow.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteLagError(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.bWriteLagError,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stLagError.bWrite,
     nDeviceGroup:= 16#6000,
     nIndexOffset:= 16#12,
     nData:= stAxisStruct.config.fLagError,
+    bBusy=> stAxisStruct.control.stLagError.bBusy,
+    bDone=> stAxisStruct.control.stLagError.bDone,
+    bError=> stAxisStruct.control.stLagError.bError,
     Axis:= stAxisStruct.Axis );]]></ST>
       </Implementation>
     </Action>
@@ -444,7 +465,30 @@ fbWriteLagError(
       <LineId Id="2980" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.A_SetParameters">
-      <LineId Id="52" Count="49" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="55" Count="4" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="60" Count="6" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="68" Count="5" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="74" Count="6" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="81" Count="6" />
+      <LineId Id="127" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="88" Count="6" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="96" Count="5" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="132" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
   </POU>
