@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="HomingFunctions" Id="{4b43cd7d-9379-4ec9-a6c1-b9e43b267ab0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE HomingFunctions :
+(
+    HomeLowLimitSwitch          := 1,   // Home to low limit switch
+    HomeHighLimitSwitch         := 2,   // Home to high limit switch
+    HomeSensorLowLimitSwitch    := 3,   // Home on bHomeSensor via bLimitBwd
+    HomeSensorHighLimitSwitch   := 4,   // Home on bHomeSensor via bLimitFwd
+    HomeEncLatchLowLimitSwitch  := 5,   // Home on Enc Latch via LimtBwd
+    HomeEncLatchHighLimitSwitch := 6,   // Home on Enc Latch via bLimitFwd
+    HomeDirect                  := 15   // Set current position (simplest homing sequence)
+) UINT;
+END_TYPE
+
+
+
+
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
