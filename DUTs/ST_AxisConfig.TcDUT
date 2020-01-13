@@ -20,7 +20,7 @@ STRUCT
     fUserMax                :   LREAL;
     bSoftLimMinEnable       :   BOOL;
     bSoftLimMaxEnable       :   BOOL;
-    eRestorePosition    :   RestorePosition;	//Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
+    eRestorePosition    :   RestorePosition;    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
