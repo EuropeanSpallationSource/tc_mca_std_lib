@@ -199,7 +199,7 @@ END_CASE
 stAxisStruct.status.bBusy:=stAxisStruct.Axis.Status.HasJob;
 
 (*Done*)
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbhome.fbhomedirect.bdone OR fbhome.fbhometoswitch.bdone THEN
+IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done THEN
         stAxisStruct.status.bDone:=TRUE;
 ELSIF stAxisStruct.Axis.Status.HasJob THEN
         stAxisStruct.status.bDone:=FALSE;
@@ -452,7 +452,7 @@ fbWriteLagError(
       <LineId Id="2888" Count="0" />
       <LineId Id="2331" Count="5" />
       <LineId Id="2934" Count="0" />
-      <LineId Id="2332" Count="3" />
+      <LineId Id="2992" Count="3" />
       <LineId Id="2339" Count="0" />
       <LineId Id="2309" Count="0" />
       <LineId Id="2216" Count="0" />
@@ -480,9 +480,7 @@ fbWriteLagError(
       <LineId Id="1995" Count="6" />
       <LineId Id="2272" Count="0" />
       <LineId Id="1934" Count="0" />
-      <LineId Id="202" Count="3" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="2980" Count="0" />
+      <LineId Id="202" Count="1" />
     </LineIds>
     <LineIds Name="FB_Axis.A_SetParameters">
       <LineId Id="52" Count="1" />
