@@ -199,7 +199,7 @@ END_CASE
 stAxisStruct.status.bBusy:=stAxisStruct.Axis.Status.HasJob;
 
 (*Done*)
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done THEN
+IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbHome.fbFinishHoming.Done THEN
         stAxisStruct.status.bDone:=TRUE;
 ELSIF stAxisStruct.Axis.Status.HasJob THEN
         stAxisStruct.status.bDone:=FALSE;
