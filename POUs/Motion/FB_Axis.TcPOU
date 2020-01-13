@@ -97,7 +97,6 @@ FOR i:= 1 TO GVL_APP.axisNum DO
     END_IF
 END_FOR
 
-
 (*Power*)
     fbPower.Enable:=stAxisStruct.control.bEnable;
     fbPower.Enable_Positive:= stAxisStruct.status.bFwEnabled;
@@ -116,7 +115,7 @@ END_IF
 (*Reset*)
     fbReset.Execute:=stAxisStruct.control.bReset AND stAxisStruct.status.bError;
 
-IF stAxisStruct.control.bReset AND NOT stAxisStruct.status.bError THEN
+IF stAxisStruct.control.bReset AND NOT (stAxisStruct.status.bError OR stAxisStruct.status.bWarning) THEN
     stAxisStruct.control.bReset:=FALSE;
 END_IF
 
@@ -186,6 +185,7 @@ CASE stAxisStruct.control.eCommand OF
         fbHome.bReset:= stAxisStruct.control.bReset;
         fbHome.bStop:= stAxisStruct.control.bStop;
         fbHome.nHomeProc:= stAxisStruct.config.nHomeSeq;
+        fbHome.fHomePosition:= stAxisStruct.config.fHomePosition;
         fbHome.bLimitBwd:= stAxisStruct.inputs.bLimitBwd;
         fbHome.bLimitFwd:= stAxisStruct.inputs.bLimitFwd;
         fbHome.bEncLatch:= stAxisStruct.inputs.bEncLatch;
@@ -248,6 +248,18 @@ ELSIF stAxisStruct.Axis.Status.Error  THEN
 ELSE
     stAxisStruct.status.bError:=FALSE;
     stAxisStruct.status.nErrorId:=0;
+END_IF;
+
+(*Warnings from functions and Nc*)
+IF stAxisStruct.status.bWarning AND NOT stAxisStruct.control.bReset THEN
+    stAxisStruct.status.bWarning:=stAxisStruct.status.bWarning;
+    //stAxisStruct.status.nWarningID:=stAxisStruct.status.nWarningID;
+ELSIF fbHome.bWarning THEN
+    stAxisStruct.status.bWarning:=stAxisStruct.status.bError;
+    //stAxisStruct.status.nWarningID:=stAxisStruct.status.nWarningID;
+ELSE
+    stAxisStruct.status.bWarning:=FALSE;
+    //stAxisStruct.status.nWarningId:=0;
 END_IF;
 
 stAxisStruct.status.bGeared:= stAxisStruct.Axis.Status.Coupled;
@@ -373,7 +385,6 @@ fbWriteLagError(
       <LineId Id="2586" Count="2" />
       <LineId Id="2585" Count="0" />
       <LineId Id="2594" Count="0" />
-      <LineId Id="2517" Count="0" />
       <LineId Id="2516" Count="0" />
       <LineId Id="1629" Count="0" />
       <LineId Id="1632" Count="3" />
@@ -440,6 +451,8 @@ fbWriteLagError(
       <LineId Id="2329" Count="1" />
       <LineId Id="2888" Count="0" />
       <LineId Id="2331" Count="5" />
+      <LineId Id="2934" Count="0" />
+      <LineId Id="2332" Count="3" />
       <LineId Id="2339" Count="0" />
       <LineId Id="2309" Count="0" />
       <LineId Id="2216" Count="0" />
@@ -457,7 +470,14 @@ fbWriteLagError(
       <LineId Id="2501" Count="0" />
       <LineId Id="1992" Count="0" />
       <LineId Id="2502" Count="0" />
-      <LineId Id="1993" Count="8" />
+      <LineId Id="1993" Count="1" />
+      <LineId Id="2980" Count="1" />
+      <LineId Id="2989" Count="2" />
+      <LineId Id="2987" Count="1" />
+      <LineId Id="2982" Count="0" />
+      <LineId Id="2984" Count="2" />
+      <LineId Id="2983" Count="0" />
+      <LineId Id="1995" Count="6" />
       <LineId Id="2272" Count="0" />
       <LineId Id="1934" Count="0" />
       <LineId Id="202" Count="3" />
