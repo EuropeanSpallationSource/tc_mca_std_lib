@@ -5,6 +5,7 @@
 STRUCT
 ///////Axis Parameters//////
     fOverride               :   LREAL := 100;   //Controller override %
+	fMaxVelocity			:	LREAL;			
     fVelocity               :   LREAL;          //Velocity must be specified, no default used
     fAcceleration           :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
     fDeceleration           :   LREAL;

@@ -57,6 +57,7 @@ VAR
     fbWriteHomingVelocity : FB_WriteFloatParameter;
     fbWriteTargetWindowPosition : FB_WriteFloatParameter;
     fbWriteLagError : FB_WriteFloatParameter;
+	fbWriteMaxVelocity : FB_WriteFloatParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -350,6 +351,16 @@ fbWriteLagError(
     bBusy=> stAxisStruct.control.stLagError.bBusy,
     bDone=> stAxisStruct.control.stLagError.bDone,
     bError=> stAxisStruct.control.stLagError.bError,
+    Axis:= stAxisStruct.Axis );
+	
+fbWriteMaxVelocity(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stMaxVelocity.bWrite,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#27,
+    nData:= stAxisStruct.config.fMaxVelocity,
+    bBusy=> stAxisStruct.control.stMaxVelocity.bBusy,
+    bDone=> stAxisStruct.control.stMaxVelocity.bDone,
+    bError=> stAxisStruct.control.stMaxVelocity.bError,
     Axis:= stAxisStruct.Axis );]]></ST>
       </Implementation>
     </Action>
@@ -508,6 +519,9 @@ fbWriteLagError(
       <LineId Id="133" Count="1" />
       <LineId Id="132" Count="0" />
       <LineId Id="1" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="140" Count="7" />
+      <LineId Id="139" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

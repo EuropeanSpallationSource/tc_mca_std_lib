@@ -24,6 +24,7 @@ STRUCT
     stHomingVelocity        : ST_NCParameter;
     stTargetPositionWindow  : ST_NCParameter;
     stLagError              : ST_NCParameter;
+	stMaxVelocity           : ST_NCParameter;
 
 END_STRUCT
 END_TYPE
