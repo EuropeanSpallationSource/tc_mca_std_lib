@@ -22,10 +22,10 @@ STRUCT
     stSoftLimMaxEnable      : ST_NCParameter;
     stSoftLimMinEnable      : ST_NCParameter;
     stHomingVelocityToCam   : ST_NCParameter;
-	stHomingVelocityFromCam : ST_NCParameter;
+    stHomingVelocityFromCam : ST_NCParameter;
     stTargetPositionWindow  : ST_NCParameter;
     stLagError              : ST_NCParameter;
-	stMaxVelocity           : ST_NCParameter;
+    stMaxVelocity           : ST_NCParameter;
 
 END_STRUCT
 END_TYPE

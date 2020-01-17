@@ -55,10 +55,10 @@ VAR
     fbWriteSoftLimMaxEnable : FB_WriteParameterInNc_v1_00;
     fbWriteSoftLimMinEnable : FB_WriteParameterInNc_v1_00;
     fbWriteHomingVelocityToCam : FB_WriteFloatParameter;
-	fbWriteHomingVelocityFromCam : FB_WriteFloatParameter;
+    fbWriteHomingVelocityFromCam : FB_WriteFloatParameter;
     fbWriteTargetWindowPosition : FB_WriteFloatParameter;
     fbWriteLagError : FB_WriteFloatParameter;
-	fbWriteMaxVelocity : FB_WriteFloatParameter;
+    fbWriteMaxVelocity : FB_WriteFloatParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -333,7 +333,7 @@ fbWriteHomingVelocityToCam(
     bDone=> stAxisStruct.control.stHomingVelocityToCam.bDone,
     bError=> stAxisStruct.control.stHomingVelocityToCam.bError,
     Axis:= stAxisStruct.Axis );
-	
+
 fbWriteHomingVelocityFromCam(
     bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stHomingVelocityFromCam.bWrite,
     nDeviceGroup:= 16#4000,
@@ -363,7 +363,7 @@ fbWriteLagError(
     bDone=> stAxisStruct.control.stLagError.bDone,
     bError=> stAxisStruct.control.stLagError.bError,
     Axis:= stAxisStruct.Axis );
-	
+
 fbWriteMaxVelocity(
     bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stMaxVelocity.bWrite,
     nDeviceGroup:= 16#4000,
