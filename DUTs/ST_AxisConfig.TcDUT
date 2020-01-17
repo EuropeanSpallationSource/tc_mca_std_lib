@@ -14,7 +14,8 @@ STRUCT
     fHomePosition           :   LREAL;
     fLagError               :   LREAL;
     fTargetPositionWindow   :   LREAL;
-    fHomingVelocity         :   LREAL;
+    fHomingVelocityToCam    :   LREAL;
+	fHomingVelocityFromCam  :   LREAL;
     fAbsMin                 :   REAL;
     fAbsMax                 :   REAL;
     fUserMin                :   LREAL;
