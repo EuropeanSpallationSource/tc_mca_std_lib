@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.6">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <POU Name="EL1809" Id="{1a348214-209a-44e9-9088-e1b46b9010e2}" SpecialFunc="None">
     <Declaration><![CDATA[///EL1809 | HD EtherCAT Terminals, 16-channel digital input 24 V DC, 3 ms
 FUNCTION_BLOCK EL1809
@@ -53,6 +53,9 @@ VAR
 	
 	//FB-s
 	EL1809_Error : FB_TerminalError;
+	
+	bTest: BOOL;
+	bErrorTest: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -109,7 +112,9 @@ END_IF]]></ST>
     <LineIds Name="EL1809">
       <LineId Id="3" Count="1" />
       <LineId Id="101" Count="7" />
-      <LineId Id="9" Count="37" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="11" Count="35" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

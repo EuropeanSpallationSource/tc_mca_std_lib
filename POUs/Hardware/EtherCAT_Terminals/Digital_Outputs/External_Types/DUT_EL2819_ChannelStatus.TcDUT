@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="DUT_EL2819_ChannelStatus" Id="{73fea658-5172-4518-b04d-d58036ce6fdf}">
+    <Declaration><![CDATA[TYPE DUT_EL2819_ChannelStatus :
+STRUCT
+   // Need to add all 64 to get byte and naming consistency
+   bCh1_Overtemperature       : BIT := FALSE;
+   bCh1_Open_Load             : BIT := FALSE;
+   bCh1_Overcurrent           : BIT := FALSE;
+   bCh1_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh2_Overtemperature       : BIT := FALSE;
+   bCh2_Open_Load             : BIT := FALSE;
+   bCh2_Overcurrent           : BIT := FALSE;
+   bCh2_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh3_Overtemperature       : BIT := FALSE;
+   bCh3_Open_Load             : BIT := FALSE;
+   bCh3_Overcurrent           : BIT := FALSE;
+   bCh3_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh4_Overtemperature       : BIT := FALSE;
+   bCh4_Open_Load             : BIT := FALSE;
+   bCh4_Overcurrent           : BIT := FALSE;
+   bCh4_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh5_Overtemperature       : BIT := FALSE;
+   bCh5_Open_Load             : BIT := FALSE;
+   bCh5_Overcurrent           : BIT := FALSE;
+   bCh5_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh6_Overtemperature       : BIT := FALSE;
+   bCh6_Open_Load             : BIT := FALSE;
+   bCh6_Overcurrent           : BIT := FALSE;
+   bCh6_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh7_Overtemperature       : BIT := FALSE;
+   bCh7_Open_Load             : BIT := FALSE;
+   bCh7_Overcurrent           : BIT := FALSE;
+   bCh7_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh8_Overtemperature       : BIT := FALSE;
+   bCh8_Open_Load             : BIT := FALSE;
+   bCh8_Overcurrent           : BIT := FALSE;
+   bCh8_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh9_Overtemperature       : BIT := FALSE;
+   bCh9_Open_Load             : BIT := FALSE;
+   bCh9_Overcurrent           : BIT := FALSE;
+   bCh9_Short_Circuit_to_24V  : BIT := FALSE;
+   bCh10_Overtemperature      : BIT := FALSE;
+   bCh10_Open_Load            : BIT := FALSE;
+   bCh10_Overcurrent          : BIT := FALSE;
+   bCh10_Short_Circuit_to_24V : BIT := FALSE;
+   bCh11_Overtemperature      : BIT := FALSE;
+   bCh11_Open_Load            : BIT := FALSE;
+   bCh11_Overcurrent          : BIT := FALSE;
+   bCh11_Short_Circuit_to_24V : BIT := FALSE;
+   bCh12_Overtemperature      : BIT := FALSE;
+   bCh12_Open_Load            : BIT := FALSE;
+   bCh12_Overcurrent          : BIT := FALSE;
+   bCh12_Short_Circuit_to_24V : BIT := FALSE;
+   bCh13_Overtemperature      : BIT := FALSE;
+   bCh13_Open_Load            : BIT := FALSE;
+   bCh13_Overcurrent          : BIT := FALSE;
+   bCh13_Short_Circuit_to_24V : BIT := FALSE;
+   bCh14_Overtemperature      : BIT := FALSE;
+   bCh14_Open_Load            : BIT := FALSE;
+   bCh14_Overcurrent          : BIT := FALSE;
+   bCh14_Short_Circuit_to_24V : BIT := FALSE;
+   bCh15_Overtemperature      : BIT := FALSE;
+   bCh15_Open_Load            : BIT := FALSE;
+   bCh15_Overcurrent          : BIT := FALSE;
+   bCh15_Short_Circuit_to_24V : BIT := FALSE;
+   bCh16_Overtemperature      : BIT := FALSE;
+   bCh16_Open_Load            : BIT := FALSE;
+   bCh16_Overcurrent          : BIT := FALSE;
+   bCh16_Short_Circuit_to_24V : BIT := FALSE;
+END_STRUCT   
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

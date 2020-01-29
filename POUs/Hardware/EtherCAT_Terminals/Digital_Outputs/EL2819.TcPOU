@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.10">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <POU Name="EL2819" Id="{f53f1521-ea95-4522-96ee-49d4e6c1f88a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK EL2819
 VAR_INPUT
@@ -49,7 +49,18 @@ VAR
 	
 	WcState_WcState AT %I*: BOOL;
 	InfoData_State AT %I*: UINT;
+	Device_Common_Fault AT %I*: BOOL;
+	Device_Overtemerature AT %I*: BOOL;
+	Device_Common_Under_Voltage AT %I*: BOOL;
+	Device_Common_Missing_Voltage AT %I*: BOOL;
 	
+	// 1..16 channels of 4 bits (total 64 bits):
+	//   0: Overtemperature
+	//   1: Open Load
+	//   2: Overccurrent
+    //   3: Short circuit to 24V 
+	stChanneDiag AT %I*: DUT_EL2819_ChannelStatus;
+	pChannelDiag: POINTER TO ULINT:=ADR(stChanneDiag);
 	//FB-s
 	EL2819_Error : FB_TerminalError;
 END_VAR
@@ -70,6 +81,11 @@ EL2819_Error(
 	pErrorSystem := ErrorSystem,
 	bError => bError,
 );
+
+//Check summary alarm
+IF pChannelDiag^ > 0 THEN
+	bError:=TRUE;
+END_IF
 
 IF En THEN
 	IF bError=FALSE THEN
@@ -115,7 +131,13 @@ END_IF]]></ST>
       <LineId Id="117" Count="0" />
       <LineId Id="116" Count="0" />
       <LineId Id="114" Count="0" />
-      <LineId Id="66" Count="20" />
+      <LineId Id="66" Count="8" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="76" Count="10" />
       <LineId Id="98" Count="6" />
       <LineId Id="97" Count="0" />
       <LineId Id="87" Count="8" />
