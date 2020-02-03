@@ -46,7 +46,7 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
-	fbReadWriteParameter: FB_ReadWriteParameter;
+    fbReadWriteParameter: FB_ReadWriteParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -77,10 +77,10 @@ fbGearIn.Execute:=FALSE;
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute:=FALSE;
 fbReadWriteParameter(
-iParameterNumber := stAxisStruct.config.iAxisParameterNumber,
-fWriteParameter := stAxisStruct.config.fWriteAxisParameter, 
-bSet := stAxisStruct.config.bSetAxisParameter,
-stAxisStruct := stAxisStruct);
+iParameterNumber    := stAxisStruct.config.iAxisParameterNumber,
+fWriteParameter     := stAxisStruct.config.fWriteAxisParameter, 
+bSet                := stAxisStruct.config.bSetAxisParameter,
+stAxisStruct        := stAxisStruct);
 
 stAxisStruct.config.fReadAxisParameter := fbReadWriteParameter.fReadParameter;
 
@@ -242,6 +242,9 @@ ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
 ELSIF stAxisStruct.Axis.Status.Error  THEN
     stAxisStruct.status.bError:=stAxisStruct.Axis.Status.Error;
     stAxisStruct.status.nErrorId:=stAxisStruct.Axis.Status.ErrorID;
+ELSIF fbReadWriteparameter.bError THEN
+    stAxisStruct.status.bError:=TRUE;
+    stAxisStruct.status.nErrorId:=fbReadWriteparameter.nErrorID;
 ELSE
     stAxisStruct.status.bError:=FALSE;
     stAxisStruct.status.nErrorId:=0;
@@ -390,7 +393,10 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="1941" Count="1" />
       <LineId Id="2651" Count="2" />
       <LineId Id="1945" Count="30" />
-      <LineId Id="1979" Count="3" />
+      <LineId Id="1979" Count="0" />
+      <LineId Id="3054" Count="1" />
+      <LineId Id="3053" Count="0" />
+      <LineId Id="1980" Count="2" />
       <LineId Id="2501" Count="0" />
       <LineId Id="1992" Count="0" />
       <LineId Id="2502" Count="0" />

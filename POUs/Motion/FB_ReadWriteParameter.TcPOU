@@ -15,41 +15,94 @@
 ///###########################################################
 FUNCTION_BLOCK FB_ReadWriteParameter
 VAR
-	fbSet_RTRIG: R_TRIG;
-	fbWriteParameter: MC_WriteParameter;
-	fbReadParameter: MC_ReadParameter;
+    // Function blocks initialised
+    fbSet_RTRIG:        R_TRIG;
+    fbWriteParameter:   MC_WriteParameter;
+    fbReadParameter:    MC_ReadParameter;
 END_VAR
 VAR_INPUT
-	iParameterNumber: AxisParameters;
-	fWriteParameter: LREAL;
-	bSet: BOOL;
+    iParameterNumber:   AxisParameters; // Enumerated parameter selection
+    fWriteParameter:    LREAL;
+    bSet:               BOOL; // Writes the value to the parameter
+    bReset:             BOOL;
 END_VAR
 VAR_OUTPUT
-	fReadParameter: LREAL;
+    fReadParameter:     LREAL;
+    bError:             BOOL;
+    nErrorId:           UDINT;
 END_VAR
 
 VAR_IN_OUT
-    stAxisStruct: ST_AxisStruct;
+    stAxisStruct:       ST_AxisStruct;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
 //Write Parameter
 fbSet_RTRIG(clk := bSet);
-fbWriteParameter( Axis := stAxisStruct.Axis, Execute := fbSet_RTRIG.Q, ParameterNumber := iParameterNumber, Value := fWriteParameter);
+
+fbWriteParameter( 
+Axis            := stAxisStruct.Axis, 
+Execute         := fbSet_RTRIG.Q, 
+ParameterNumber := iParameterNumber, 
+Value           := fWriteParameter);
+
 
 //Read Parameter
-fbReadParameter( Axis := stAxisStruct.Axis, Enable := TRUE, ParameterNumber := iParameterNumber, ReadMode := 2);
+fbReadParameter( 
+Axis            := stAxisStruct.Axis, 
+Enable          := TRUE, 
+ParameterNumber := iParameterNumber, 
+ReadMode        := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
-	fReadParameter := fbReadParameter.Value;
+    fReadParameter := fbReadParameter.Value;
+END_IF
+
+
+// Error handling
+bReset := stAxisStruct.control.bReset;
+
+IF bReset = TRUE THEN
+    nErrorId := 0;
+    bError := FALSE;
+END_IF
+
+IF fbWriteParameter.Error THEN
+    nErrorId := fbWriteParameter.ErrorID;
+    bError := TRUE;
+ELSIF fbReadParameter.Error THEN
+    nErrorId := fbReadParameter.ErrorID;
+    bError := TRUE;
 END_IF
 ]]></ST>
     </Implementation>
     <LineIds Name="FB_ReadWriteParameter">
-      <LineId Id="39" Count="3" />
-      <LineId Id="44" Count="6" />
+      <LineId Id="39" Count="2" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="111" Count="3" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="115" Count="2" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="47" Count="3" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="90" Count="0" />
       <LineId Id="9" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="107" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
