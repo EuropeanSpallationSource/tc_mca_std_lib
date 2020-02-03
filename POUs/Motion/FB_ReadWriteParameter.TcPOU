@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="FB_ReadWriteParameter" Id="{c67413c7-a2ec-4895-814c-5b6c8c0c7aa9}" SpecialFunc="None">
+    <Declaration><![CDATA[///#########################################################
+///Function block to read and write axis parameters 
+/// Library:
+/// Tc2_MC2.lib
+///
+/// Global Variables:
+///
+/// Data types:
+///
+/// External functions:
+///
+///###########################################################
+FUNCTION_BLOCK FB_ReadWriteParameter
+VAR
+	fbSet_RTRIG: R_TRIG;
+	fbWriteParameter: MC_WriteParameter;
+	fbReadParameter: MC_ReadParameter;
+END_VAR
+VAR_INPUT
+	iParameterNumber: INT;
+	fWriteParameter: LREAL;
+	bSet: BOOL;
+END_VAR
+VAR_OUTPUT
+	fReadParameter: REAL;
+END_VAR
+
+VAR_IN_OUT
+    stAxisStruct: ST_AxisStruct;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+//Write Parameter
+fbSet_RTRIG(clk := bSet);
+fbWriteParameter( Axis := stAxisStruct.Axis, Execute := fbSet_RTRIG.Q, ParameterNumber := iParameterNumber, Value := fWriteParameter);
+
+//Read Parameter
+fbReadParameter( Axis := stAxisStruct.Axis, Enable := TRUE, ParameterNumber := iParameterNumber, ReadMode := 2);
+
+IF NOT fbReadParameter.Error THEN
+	fReadParameter := fbReadParameter.Value;
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ReadWriteParameter">
+      <LineId Id="39" Count="3" />
+      <LineId Id="44" Count="6" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

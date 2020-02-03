@@ -46,6 +46,7 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
+	fbReadWriteParameter: FB_ReadWriteParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -75,6 +76,13 @@ fbGearin(Slave:= stAxisStruct.Axis, Master:= GVL.axes[masterAxis.index].Axis);
 fbGearIn.Execute:=FALSE;
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute:=FALSE;
+fbReadWriteParameter(
+iParameterNumber := stAxisStruct.config.iAxisParameterNumber,
+fWriteParameter := stAxisStruct.config.fWriteAxisParameter, 
+bSet := stAxisStruct.config.bSetAxisParameter,
+stAxisStruct := stAxisStruct);
+
+stAxisStruct.config.fReadAxisParameter := fbReadWriteParameter.fReadParameter;
 
 stAxisStruct.status.bFwEnabled:= stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled:= stAxisStruct.inputs.bLimitBwd;
@@ -291,6 +299,9 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="2493" Count="0" />
       <LineId Id="2201" Count="0" />
       <LineId Id="2446" Count="0" />
+      <LineId Id="2999" Count="4" />
+      <LineId Id="3006" Count="0" />
+      <LineId Id="2998" Count="0" />
       <LineId Id="1627" Count="1" />
       <LineId Id="2515" Count="0" />
       <LineId Id="2595" Count="0" />
@@ -365,7 +376,7 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="2888" Count="0" />
       <LineId Id="2331" Count="5" />
       <LineId Id="2934" Count="0" />
-      <LineId Id="2332" Count="3" />
+      <LineId Id="2992" Count="3" />
       <LineId Id="2339" Count="0" />
       <LineId Id="2309" Count="0" />
       <LineId Id="2216" Count="0" />
@@ -393,9 +404,7 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="1995" Count="6" />
       <LineId Id="2272" Count="0" />
       <LineId Id="1934" Count="0" />
-      <LineId Id="202" Count="3" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="2980" Count="0" />
+      <LineId Id="202" Count="1" />
     </LineIds>
   </POU>
 </TcPlcObject>
