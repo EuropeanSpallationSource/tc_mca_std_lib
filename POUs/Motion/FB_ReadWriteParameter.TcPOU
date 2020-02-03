@@ -20,12 +20,12 @@ VAR
 	fbReadParameter: MC_ReadParameter;
 END_VAR
 VAR_INPUT
-	iParameterNumber: INT;
+	iParameterNumber: AxisParameters;
 	fWriteParameter: LREAL;
 	bSet: BOOL;
 END_VAR
 VAR_OUTPUT
-	fReadParameter: REAL;
+	fReadParameter: LREAL;
 END_VAR
 
 VAR_IN_OUT
