@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="MotionFunctions" Id="{7dfb6efd-1034-45c3-ba43-5dc10decbfbc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE MotionFunctions :
+(
+    MoveAbsolute    := 0,
+    MoveRelative    :=1,
+    Jog             :=2,
+    MoveVelocity    :=3,
+    MoveModulo      :=4,
+    GearIn          :=5,
+    GearOut         :=6,
+    MultiGearIn     :=7,
+    Home            :=10
+):=Jog;
+END_TYPE
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

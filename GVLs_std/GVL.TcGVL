@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <GVL Name="GVL" Id="{913e21aa-a47e-444c-bfce-679b16c0434b}">
+    <Declaration><![CDATA[VAR_GLOBAL
+    stErrorSystemCom    : ST_ErrorSystem;
+    axes            :   ARRAY [1..GVL_APP.axisNum] OF ST_AxisStruct;    //Global array of axisControl structure for holding axis parameters and controls
+    iAxis           :   UINT;                                           //Index for running axis
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+    cSizeOfErrorData : UINT := 256;
+END_VAR
+
+VAR_GLOBAL PERSISTENT
+    axesPersistent  : ARRAY [1..gvl_app.axisNum] OF ST_AxisPersistent;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

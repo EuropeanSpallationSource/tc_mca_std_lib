@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="ST_AxisStruct" Id="{9732127f-85ab-48d1-a591-d13402fe3665}">
+    <Declaration><![CDATA[TYPE ST_AxisStruct :
+STRUCT
+
+///////Actions from EPICS/NICOS/////////
+///////Axis////////
+    control     : ST_AxisControl;
+
+///////Outputs/Status/////////
+    status      : ST_AxisStatus;
+
+///////Axis Parameters//////
+    config      : ST_AxisConfig;
+
+///////Axis Inputs///////
+    inputs      : ST_AxisInputs;
+
+//////Geraing Parameters//////
+    //masterAxis        :   UINT:=1;        //Axes[ ] index for master
+    //fGearRatioNum     :   LREAL;          //GearIn ratio numerator
+    //iGearRatioDen     :   UINT;           //GearIn ratio denominator
+///////Axis Ref/////
+    Axis                :   AXIS_REF;       //Link NC axis to this
+
+    masterAxis          :   ST_GearAxis;    //Single master axis
+    //slaveAxis         :   ARRAY [1..GVL.axisNum]OF ST_GearAxis :=(index:=0, ratio:=0) ;   //Linking single slave axes
+    slaveAxisRatio      :   ARRAY [1..GVL_APP.axisNum] OF LREAL;
+
+
+//////Extra things of original ISIS Structure/////
+
+    //  bSoftLimPosEn       :   BOOL;           //Enable/disable positive direction software limit
+    //  bSoftLimNegEn       :   BOOL;           //Enable/disable negative direction software limit
+    //bPosLagEn         :   BOOL;           //Enable/disable position lag
+
+    //Gearing parameters
+
+    //masterAxes            :   ARRAY[1..4] OF ST_MasterAxis;   //ST to hold index and ratio for masters    - GearInMultiMaster
+    //fDeceleration     :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
+    //  Status              : ST_AxisStatus;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

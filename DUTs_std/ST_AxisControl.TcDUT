@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="ST_AxisControl" Id="{c02b2c99-be98-4acd-b0cb-dc10c1ff77f2}">
+    <Declaration><![CDATA[TYPE ST_AxisControl :
+STRUCT
+
+///////Actions from EPICS/NICOS/////////
+    bExecute            :   BOOL;           //Rising edge to execute move absolute
+    bReset              :   BOOL;           //Reset axis signal, must be combined with other signals
+    bStop               :   BOOL;           //Stop axis movement
+    bEnable             :   BOOL;           //Controller enable
+    eCommand            :   MotionFunctions;
+
+///////Axis////////
+    bJogFwd             :   BOOL;           //Jog forward
+    bJogBwd             :   BOOL;           //Jog backward
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

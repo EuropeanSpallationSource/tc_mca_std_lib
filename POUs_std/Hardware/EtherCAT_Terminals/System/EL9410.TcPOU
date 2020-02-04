@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="EL9410" Id="{4a3117c8-7807-46a2-8f94-5841c9d9b645}" SpecialFunc="None">
+    <Declaration><![CDATA[//EL9410 | E-Bus power supplier and refresher, diagnostics
+FUNCTION_BLOCK EL9410
+
+VAR_INPUT
+    En              : BOOL;
+    iTerminal_ID    : INT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO     : BOOL;
+    bError  : BOOL;
+END_VAR
+
+VAR
+    bUs_Undervoltage    AT %I*  : BOOL;
+    bUp_Undervoltage    AT %I*  : BOOL;
+    WcState_WcState     AT %I*  : BOOL;
+    InfoData_State      AT %I*  : UINT;
+
+    //FB-s
+    EL9410_Error    : FB_TerminalError;
+    PWR_Error       : FB_GenericError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* TODO: Status bits
+*)
+EnO:=En;
+
+IF En THEN
+    IF  bUs_Undervoltage OR bUp_Undervoltage THEN
+        PWR_Error.sErrorMessage     := 'EL9410: ';
+        IF bUs_Undervoltage     THEN    PWR_Error.sErrorMessage := CONCAT (PWR_Error.sErrorMessage, 'Us undervoltage; ');       IF PWR_Error.ErrorPriority > 5  OR PWR_Error.ErrorPriority = 0  THEN PWR_Error.ErrorPriority := 5;  END_IF  END_IF
+        IF bUp_Undervoltage     THEN    PWR_Error.sErrorMessage := CONCAT (PWR_Error.sErrorMessage, 'Up undervoltage; ');       IF PWR_Error.ErrorPriority > 5  OR PWR_Error.ErrorPriority = 0  THEN PWR_Error.ErrorPriority := 5;  END_IF  END_IF
+        PWR_Error.bError    := TRUE;
+    ELSE
+        PWR_Error.sErrorMessage := '';
+        PWR_Error.bError        := FALSE;
+    END_IF
+
+
+END_IF
+
+//Error FB instance
+EL9410_Error(
+    En                  := TRUE,
+    iTerminal_ID        := iTerminal_ID,
+    bWcState            := WcState_WcState,
+    uiInfoData_State    := InfoData_State,
+    pErrorSystem        := ErrorSystem,
+    bError              => bError,
+);
+
+PWR_Error (
+    En                  := En,
+    bError              := ,
+    sErrorMessage       := ,
+    ErrorPriority       := ,
+    iTerminal_ID        := iTerminal_ID,
+    pErrorSystem        := ErrorSystem,
+    EnO                 => ,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="EL9410">
+      <LineId Id="26" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="87" Count="7" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="32" Count="9" />
+      <LineId Id="68" Count="8" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

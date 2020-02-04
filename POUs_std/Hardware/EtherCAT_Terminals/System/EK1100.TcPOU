@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="EK1100" Id="{658f73e7-ff3e-4539-b62c-4f4914e2b326}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK EK1100
+
+VAR_INPUT
+    En              : BOOL;
+    iTerminal_ID    : INT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO     : BOOL;
+    bError  : BOOL;
+END_VAR
+
+VAR
+    InfoData_State  AT %I*  : UINT;
+
+    //FB-s
+    EK1100_Error    : FB_TerminalError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* TODO: DONE!
+*)
+EnO:=En;
+
+//Error FB instance
+EK1100_Error(
+    En                  := TRUE,
+    iTerminal_ID        := iTerminal_ID,
+    bWcState            := FALSE,
+    uiInfoData_State    := InfoData_State,
+    pErrorSystem        := ErrorSystem,
+    bError              => bError,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="EK1100">
+      <LineId Id="28" Count="12" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

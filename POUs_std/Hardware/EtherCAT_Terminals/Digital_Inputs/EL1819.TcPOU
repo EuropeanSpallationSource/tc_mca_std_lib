@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="EL1819" Id="{00fa0d24-98b5-49bc-bf41-0a4a34b46bc9}" SpecialFunc="None">
+    <Declaration><![CDATA[///EL1819 | HD EtherCAT Terminals, 16-channel digital input 24 V DC, 10 µs
+FUNCTION_BLOCK EL1819
+
+VAR_INPUT
+    En              : BOOL;
+    iTerminal_ID    : INT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO         : BOOL;
+    bError      : BOOL;
+END_VAR
+
+VAR
+    WcState_WcState     AT %I*  : BOOL;
+    InfoData_State      AT %I*  : UINT;
+
+    //FB-s
+    EL1819_Error    : FB_TerminalError;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* TODO: DONE!
+*)
+EnO:=En;
+
+//Error FB instance
+EL1819_Error(
+    En                  := TRUE,
+    iTerminal_ID        := iTerminal_ID,
+    bWcState            := WcState_WcState,
+    uiInfoData_State    := InfoData_State,
+    pErrorSystem        := ErrorSystem,
+    bError              => bError,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="EL1819">
+      <LineId Id="129" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="3" Count="1" />
+      <LineId Id="100" Count="7" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

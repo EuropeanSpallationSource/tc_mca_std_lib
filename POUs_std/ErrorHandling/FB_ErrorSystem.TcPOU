@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="FB_ErrorSystem" Id="{978ea49f-a940-4b4e-9f45-8cdde4adcf37}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ErrorSystem
+
+VAR_INPUT
+    En                  : BOOL;                         //Enable input
+    bReset              : BOOL;                         //Delete all Error entry
+    nErrorNum           : ULINT;                        //ErrorID to be acknoledged
+    bACK                : BOOL;                         //Acknoledge the given error and delete it from the list
+    bValidSelection     : BOOL;                         //Visu table valid selection flag
+    nTableRowIndex      : INT;                          //Visu table selected row index
+END_VAR
+
+VAR_OUTPUT
+    EnO                 : BOOL;                         //Enable output
+    nSelectedError      : ULINT;                        //Currently selected errorID
+    pErrorSystem        : POINTER TO ST_ErrorSystem;    //Pointer to ErrorSystem
+END_VAR
+
+VAR_IN_OUT
+
+END_VAR
+
+VAR
+    nFreePos : UINT;                                    //Number of free position in the list
+    nListCnt1 : UINT;                                   //work variable
+    ErrorSystem : ST_ErrorSystem;                       //Data structure of the Error list
+
+    bAckInternal        : BOOL;
+    bResetInternal      : BOOL;
+    nErrorNumInternal   : ULINT;
+
+    Ack_trig        : R_TRIG;
+    RST_trig        : R_TRIG;
+    nNoErrorPrev    : UINT;
+    nNoActivePrev   : UINT;
+    nErrorNumPrev   : ULINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* ================================================================================
+*                                   DESCRIPTION
+* ================================================================================
+* This Function Block implements the core structure of the Error/Warning Handling
+* system. It realizes the datastructure containing every Error Entry, collect
+* statistics about the usage and manage the Error Entries.
+* ================================================================================
+*)
+EnO := En;
+
+//Ponter to ErrorSystem
+pErrorSystem := ADR(ErrorSystem);
+
+//Rising-edge detection on inputs
+Ack_trig (
+    CLK     := bAck,
+    Q       => bAckInternal,
+);
+
+RST_trig (
+    CLK     := bReset,
+    Q       => bResetInternal,
+);
+
+//Entry selection decision
+IF bValidSelection AND nErrorNum = 0 THEN
+    nErrorNumInternal := ErrorSystem.aErrorData[nTableRowIndex].ErrorNum;
+ELSE
+    nErrorNumInternal := nErrorNum;
+END_IF
+
+nSelectedError := nErrorNumInternal;
+
+//Reset the system
+IF bResetInternal THEN
+    MEMSET ( ADR(ErrorSystem.aErrorData[0]), 0, cSizeOfErrorData * SIZEOF(ST_ErrorEntry));
+    ErrorSystem.nNextErrorNum := 1;
+END_IF
+
+//Number of errors
+ErrorSystem.nNoError := 0;
+ErrorSystem.nNoActive := 0;
+ErrorSystem.nNoInactive := 0;
+FOR nListCnt1 := 0 TO cSizeOfErrorData - 1 DO
+    IF ErrorSystem.aErrorData[nListCnt1].ErrorNum <> 0  THEN
+        ErrorSystem.nNoError := ErrorSystem.nNoError+1;
+        IF ErrorSystem.aErrorData[nListCnt1].ErrorState = DUT_ErrorState.Active THEN
+            ErrorSystem.nNoActive := ErrorSystem.nNoActive + 1;
+        ELSE
+            ErrorSystem.nNoInactive := ErrorSystem.nNoInactive + 1;
+        END_IF
+    END_IF
+END_FOR
+
+//Number of free positions
+nFreePos := cSizeOfErrorData - ErrorSystem.nNoError;
+
+//Acknoledge specified Error entry
+IF bAckInternal THEN
+    FOR nListCnt1 := 0 TO cSizeOfErrorData - 1 DO
+        IF ErrorSystem.aErrorData[nListCnt1].ErrorNum = nErrorNumInternal THEN
+            ErrorSystem.aErrorData[nListCnt1].ErrorState := DUT_ErrorState.Acknowledged;
+        END_IF
+    END_FOR
+END_IF
+
+//Deleting acknoledged errors
+FOR nListCnt1 := 0 TO cSizeOfErrorData - 1 DO
+    IF ErrorSystem.aErrorData[nListCnt1].ErrorState = DUT_ErrorState.Acknowledged THEN
+        MEMMOVE (ADR(ErrorSystem.aErrorData[nListCnt1]), ADR(ErrorSystem.aErrorData[nListCnt1+1]), (cSizeOfErrorData - 1 - nListCnt1) * SIZEOF(ST_ErrorEntry));
+        MEMSET(ADR(ErrorSystem.aErrorData[cSizeOfErrorData - 1]), 0, SIZEOF(ST_ErrorEntry));
+    END_IF
+END_FOR
+
+IF ErrorSystem.nNoError <> nNoErrorPrev OR ErrorSystem.nNoActive <> nNoActivePrev  THEN
+    nNoErrorPrev    := ErrorSystem.nNoError;
+    nNoActivePrev   := ErrorSystem.nNoActive;
+    //Copy the structure to GVL
+    MEMCPY ( ADR(GVL.stErrorSystemCom), ADR(ErrorSystem), SIZEOF(ST_ErrorSystem));
+END_IF
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ErrorSystem">
+      <LineId Id="94" Count="1" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="150" Count="1" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="30" Count="4" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="180" Count="2" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="186" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="244" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="37" Count="4" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="250" Count="1" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="247" Count="1" />
+      <LineId Id="252" Count="1" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="51" Count="18" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="372" Count="1" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="378" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="374" Count="1" />
+      <LineId Id="368" Count="1" />
+      <LineId Id="72" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

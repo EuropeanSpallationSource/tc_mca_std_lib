@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="ST_AxisStatus" Id="{9d7cecb1-beaf-45c1-90df-46de240bc048}">
+    <Declaration><![CDATA[TYPE ST_AxisStatus :
+STRUCT
+
+///////Outputs/Status/////////
+    bEnabled            :   BOOL;           //Axis drive enabled
+    bWarning            :   BOOL;           //Warning violation (need to be deinfed all the warning stages)
+    bBusy               :   BOOL;           //Axis busy
+    bDone               :   BOOL;           //Last function block executed successfully
+    bHomed              :   BOOL;           //Axis homed
+    bFwEnabled          :   BOOL;           //Positive movement of axis is enabled/disabled
+    bBwEnabled          :   BOOL;           //Negative movement of axis is enabled/disabled
+    fActPosition        :   LREAL;          //Actual position value
+    fActVelocity        :   LREAL;          //Actual velocity
+    bError              :   BOOL;           //Motion function block has produced error (NC drive not necessarily in error state)
+    nErrorID            :   UDINT;          //Motion function block errorID
+    bGeared             :   BOOL;           //Axis is an active slave
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

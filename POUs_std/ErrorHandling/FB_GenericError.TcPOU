@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="FB_GenericError" Id="{9d17d973-b42e-465f-99f6-fee6d97d056b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GenericError
+
+//Inputs
+VAR_INPUT
+    En                  : BOOL;
+    bError              : BOOL;
+    sErrorMessage       : STRING;
+    ErrorPriority       : INT;
+    iTerminal_ID        : INT;
+    pErrorSystem        : POINTER TO ST_ErrorSystem;
+END_VAR
+
+//Outputs
+VAR_OUTPUT
+    EnO             : BOOL;
+END_VAR
+
+
+VAR
+    LocalEntry          : ST_ErrorEntry;
+    //
+    sMessagePrev        : STRING;
+    bMsgChanged         : BOOL;
+    nErrSysCNT          :UINT;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* ================================================================================
+*                                   DESCRIPTION
+* ================================================================================
+* This Function Block creates a generic connection to the Error System. Unlike
+* FB_TerminalError, this does not evaluate variables. Instead it checks the
+* sErrorMessage & bError input variables. If bError becomes '1', a new entry is
+* created in the Error System. As long as bError stays '1' every change in
+* sErrorMessage inactivate the previous Error and creates a new one with the new
+* message. When bError becomes '0' the last enrty is set to inactive.
+* ================================================================================
+*)
+
+//Connect En to EnO
+EnO := En;
+
+IF En THEN
+    //Check if pointer is OK
+    IF pErrorSystem=0 THEN RETURN; END_IF
+
+    IF sErrorMessage <> sMessagePrev THEN
+        bMsgChanged := TRUE;
+    ELSE
+        bMsgChanged := FALSE;
+    END_IF
+
+    //Update previous value
+    sMessagePrev := sErrorMessage;
+
+    IF bMsgChanged THEN
+        IF bError THEN
+            IF LocalEntry.ErrorState = DUT_ErrorState.Active THEN       //Close active error
+                //Read system time
+                LocalEntry.sDateTimeOff := Tc2_EtherCat.DCTIME64_TO_STRING(Tc2_EtherCAT.F_GetActualDcTime64());
+                LocalEntry.ErrorState   := DUT_ErrorState.Inactive;
+                //Write Off-time to Error System
+                FOR nErrSysCNT := 0 TO cSizeOfErrorData - 1 DO
+                    IF pErrorSystem^.aErrorData[nErrSysCNT].ErrorNum = LocalEntry.ErrorNum THEN
+                        pErrorSystem^.aErrorData[nErrSysCNT].sDateTimeOff   := LocalEntry.sDateTimeOff;
+                        pErrorSystem^.aErrorData[nErrSysCNT].ErrorState     := DUT_ErrorState.Inactive;
+                        EXIT;
+                    END_IF
+                END_FOR
+
+                //Clear ErrorData
+                MEMSET(ADR(LocalEntry), 0, SIZEOF(LocalEntry));
+            END_IF
+
+            //Open a new error
+            LocalEntry.ErrorState       := DUT_ErrorState.Active;                                               //Set Error State
+            LocalEntry.sDateTimeOn      := Tc2_EtherCat.DCTIME64_TO_STRING(Tc2_EtherCAT.F_GetActualDcTime64()); //Convert to string
+            LocalEntry.sErrorMessage    := sErrorMessage;                                                       //Write message into the entry
+            LocalEntry.ErrorPriority    := ErrorPriority;                                                       //Priority
+            LocalEntry.iTerminalID      := iTerminal_ID;                                                        //Terminal_ID
+
+            //Check for overflow
+            IF pErrorSystem^.nNoError >= cSizeOfErrorData THEN
+                pErrorSystem^.nNoOverflow   := pErrorSystem^.nNoOverflow+1;
+            END_IF
+
+            //Write Error Data into Error System
+            LocalEntry.ErrorNum := pErrorSystem^.nNExtErrorNum ;
+            MEMMOVE( ADR(pErrorSystem^.aErrorData[1]), ADR(pErrorSystem^.aErrorData[0]), (cSizeOfErrorData-1) * SIZEOF(ST_ErrorEntry));
+            pErrorSystem^.aErrorData[0] := LocalEntry;
+            pErrorSystem^.nNExtErrorNum := pErrorSystem^.nNExtErrorNum+1;
+
+        ELSE
+            //Close Active Error
+            //Read system time
+            LocalEntry.sDateTimeOff := Tc2_EtherCat.DCTIME64_TO_STRING(Tc2_EtherCAT.F_GetActualDcTime64());
+            LocalEntry.ErrorState   := DUT_ErrorState.Inactive;
+
+            //Write Off time to Error System
+            FOR nErrSysCNT := 0 TO cSizeOfErrorData - 1 DO
+                IF pErrorSystem^.aErrorData[nErrSysCNT].ErrorNum = LocalEntry.ErrorNum THEN
+                    pErrorSystem^.aErrorData[nErrSysCNT].sDateTimeOff   := LocalEntry.sDateTimeOff;
+                    pErrorSystem^.aErrorData[nErrSysCNT].ErrorState     := LocalEntry.ErrorState;
+                    EXIT;
+                END_IF
+            END_FOR
+
+            //Clear ErrorData
+            MEMSET(ADR(LocalEntry), 0, SIZEOF(LocalEntry));
+        END_IF
+    END_IF
+
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_GenericError">
+      <LineId Id="216" Count="3" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="224" Count="1" />
+      <LineId Id="227" Count="2" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="214" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="57" Count="11" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="72" Count="3" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="78" Count="2" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="88" Count="5" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="94" Count="9" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="186" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="41" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="EL3174_0002" Id="{d4261a4c-8c4d-44a0-931d-aac8fef66000}" SpecialFunc="None">
+    <Declaration><![CDATA[//EL3174-0002 | 4-channel analog input, -10/0...+10V, -20/0/+4...20mA, 16 bit, differential
+FUNCTION_BLOCK EL3174_0002
+
+VAR_INPUT
+    En              : BOOL;
+    iTerminal_ID    : INT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO     : BOOL;
+    bError  : BOOL;
+END_VAR
+
+VAR
+    //Channels
+    wCH1_Status     AT %I*  : WORD;
+    wCH2_Status     AT %I*  : WORD;
+    wCH3_Status     AT %I*  : WORD;
+    wCH4_Status     AT %I*  : WORD;
+
+    //Terminal status
+    WcState_WcState AT %I*  : BOOL;
+    InfoData_State  AT %I*  : UINT;
+
+    //FB-s
+    EL3174_0002_Error   : FB_TerminalError;
+    CH1_Error           : FB_GenericError;
+    CH2_Error           : FB_GenericError;
+    CH3_Error           : FB_GenericError;
+    CH4_Error           : FB_GenericError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* TODO: Test on hardware
+*)
+EnO := En;
+
+IF En THEN
+    //Channel #1 Status
+    IF (wCh1_Status AND 16#2057) <> 0 THEN
+        CH1_Error.sErrorMessage := 'EL3174-0002 Channel #1: ';
+        IF wCH1_Status.0    THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Underrange; ');             IF CH1_Error.ErrorPriority > 100 OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCH1_Status.1    THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Overrange; ');              IF CH1_Error.ErrorPriority > 100 OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh1_Status.2    THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Limit 1; ');                IF CH1_Error.ErrorPriority > 100 OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh1_Status.4    THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Limit 2; ');                IF CH1_Error.ErrorPriority > 100 OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh1_Status.6    THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Error; ');                  IF CH1_Error.ErrorPriority > 10  OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 10;     END_IF      END_IF
+        IF wCh1_Status.13   THEN    CH1_Error.sErrorMessage := CONCAT(CH1_Error.sErrorMessage, 'Sync error; ');             IF CH1_Error.ErrorPriority > 10  OR CH1_Error.ErrorPriority = 0     THEN CH1_Error.ErrorPriority := 10;     END_IF      END_IF
+        CH1_Error.bError := TRUE;
+    ELSE
+        CH1_Error.bError        := FALSE;
+        CH1_Error.sErrorMessage := '';
+    END_IF
+
+    //Channel #2 Status
+    IF (wCh2_Status AND 16#2057) <> 0 THEN
+        CH2_Error.sErrorMessage := 'EL3174-0002 Channel #2: ';
+        IF wCH2_Status.0    THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Underrange; ');             IF CH2_Error.ErrorPriority > 100 OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCH2_Status.1    THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Overrange; ');              IF CH2_Error.ErrorPriority > 100 OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh2_Status.2    THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Limit 1; ');                IF CH2_Error.ErrorPriority > 100 OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh2_Status.4    THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Limit 2; ');                IF CH2_Error.ErrorPriority > 100 OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh2_Status.6    THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Error; ');                  IF CH2_Error.ErrorPriority > 10  OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 10;     END_IF      END_IF
+        IF wCh2_Status.13   THEN    CH2_Error.sErrorMessage := CONCAT(CH2_Error.sErrorMessage, 'Sync error; ');             IF CH2_Error.ErrorPriority > 10  OR CH2_Error.ErrorPriority = 0     THEN CH2_Error.ErrorPriority := 10;     END_IF      END_IF
+        CH2_Error.bError := TRUE;
+    ELSE
+        CH2_Error.bError        := FALSE;
+        CH2_Error.sErrorMessage := '';
+    END_IF
+
+    //Channel #3 Status
+    IF (wCh3_Status AND 16#2057) <> 0 THEN
+        CH3_Error.sErrorMessage := 'EL3174-0002 Channel #3: ';
+        IF wCH3_Status.0    THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Underrange; ');             IF CH3_Error.ErrorPriority > 100 OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCH3_Status.1    THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Overrange; ');              IF CH3_Error.ErrorPriority > 100 OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh3_Status.2    THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Limit 1; ');                IF CH3_Error.ErrorPriority > 100 OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh3_Status.4    THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Limit 2; ');                IF CH3_Error.ErrorPriority > 100 OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh3_Status.6    THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Error; ');                  IF CH3_Error.ErrorPriority > 10  OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 10;     END_IF      END_IF
+        IF wCh3_Status.13   THEN    CH3_Error.sErrorMessage := CONCAT(CH3_Error.sErrorMessage, 'Sync error; ');             IF CH3_Error.ErrorPriority > 10  OR CH3_Error.ErrorPriority = 0     THEN CH3_Error.ErrorPriority := 10;     END_IF      END_IF
+        CH3_Error.bError := TRUE;
+    ELSE
+        CH3_Error.bError        := FALSE;
+        CH3_Error.sErrorMessage := '';
+    END_IF
+
+    //Channel #4 Status
+    IF (wCh4_Status AND 16#2057) <> 0 THEN
+        CH4_Error.sErrorMessage := 'EL3174-0002 Channel #4: ';
+        IF wCH4_Status.0    THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Underrange; ');             IF CH4_Error.ErrorPriority > 100 OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCH4_Status.1    THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Overrange; ');              IF CH4_Error.ErrorPriority > 100 OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh4_Status.2    THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Limit 1; ');                IF CH4_Error.ErrorPriority > 100 OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh4_Status.4    THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Limit 2; ');                IF CH4_Error.ErrorPriority > 100 OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 100;    END_IF      END_IF
+        IF wCh4_Status.6    THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Error; ');                  IF CH4_Error.ErrorPriority > 10  OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 10;     END_IF      END_IF
+        IF wCh4_Status.13   THEN    CH4_Error.sErrorMessage := CONCAT(CH4_Error.sErrorMessage, 'Sync error; ');             IF CH4_Error.ErrorPriority > 10  OR CH4_Error.ErrorPriority = 0     THEN CH4_Error.ErrorPriority := 10;     END_IF      END_IF
+        CH4_Error.bError := TRUE;
+    ELSE
+        CH4_Error.bError        := FALSE;
+        CH4_Error.sErrorMessage := '';
+    END_IF
+
+END_IF
+
+
+
+//Error FB instance
+EL3174_0002_Error(
+    En                  := TRUE,
+    iTerminal_ID        := iTerminal_ID,
+    bWcState            := WcState_WcState,
+    uiInfoData_State    := InfoData_State,
+    pErrorSystem        := ErrorSystem,
+    bError              => bError,
+);
+
+CH1_Error (
+    En              := En,
+    bError          := ,
+    sErrorMessage   := ,
+    ErrorPriority   := ,
+    iTerminal_ID    := iTerminal_ID,
+    pErrorSystem    := ErrorSystem,
+    EnO             => ,
+);
+
+CH2_Error (
+    En              := En,
+    bError          := ,
+    sErrorMessage   := ,
+    ErrorPriority   := ,
+    iTerminal_ID    := iTerminal_ID,
+    pErrorSystem    := ErrorSystem,
+    EnO             => ,
+);
+
+CH3_Error (
+    En              := En,
+    bError          := ,
+    sErrorMessage   := ,
+    ErrorPriority   := ,
+    iTerminal_ID    := iTerminal_ID,
+    pErrorSystem    := ErrorSystem,
+    EnO             => ,
+);
+
+CH4_Error (
+    En              := En,
+    bError          := ,
+    sErrorMessage   := ,
+    ErrorPriority   := ,
+    iTerminal_ID    := iTerminal_ID,
+    pErrorSystem    := ErrorSystem,
+    EnO             => ,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="EL3174_0002">
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="136" Count="57" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="133" Count="2" />
+      <LineId Id="42" Count="8" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="196" Count="39" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

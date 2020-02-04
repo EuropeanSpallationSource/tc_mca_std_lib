@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="FB_NC_Error" Id="{09ed5ba1-d044-4b29-990f-e88331c21ce5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_NC_Error
+
+VAR_INPUT
+    En              : BOOL;
+    nNC_ErrorID     : UDINT;
+    nNC_AxisID      : UDINT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO         : BOOL;
+    bError      : BOOL;
+END_VAR
+
+VAR
+    NCError             : FB_GenericError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* ================================================================================
+*                                   DESCRIPTION
+* ================================================================================
+* This Function Block connects FB_DriveVirtual's error output to the Error System.
+* Link the corresponding outputs of FB_DriveVirtual to the inputs of this FB.
+* ================================================================================
+*)
+
+IF En THEN
+    EnO := En;
+
+    IF nNC_ErrorID <> 0 THEN
+        NCError.sErrorMessage   := 'Axis ';
+        NCError.sErrorMessage   := CONCAT (NCError.sErrorMessage, UDINT_TO_STRING(nNC_AxisID));
+        NCError.sErrorMessage   := CONCAT (NCError.sErrorMessage, ' is in error state. NC error ID (Hex): 0x');
+        NCError.sErrorMessage   := CONCAT (NCError.sErrorMessage, DWORD_TO_HEXSTR(nNC_ErrorID,4,FALSE));
+        NCError.ErrorPriority   := 6;
+        NCError.bError          := TRUE;
+    ELSE
+        NCError.sErrorMessage   := '';
+        NCError.bError          := FALSE;
+        NCError.ErrorPriority   := 0;
+    END_IF
+
+END_IF
+
+NCError (
+    En                  := TRUE,
+    bError              := ,
+    sErrorMessage       := ,
+    ErrorPriority       := ,
+    iTerminal_ID        := ,
+    pErrorSystem        := ErrorSystem,
+    EnO     => ,
+);
+
+
+(*
+        NCError.sErrorMessage := CONCAT (NCError.sErrorMessage, ': ');
+        CASE nNC_ErrorID OF
+            //General NC Errors
+            16#4000 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Internal Error; ');
+            16#4001 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Memory Error; ');
+            16#4002 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'NC retain data error (persistent data); ');
+            16#4010 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Channel identifier not allowed; ');
+            16#4011 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Group identifier not allowed; ');
+            16#4012 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis identifier not allowed; ');
+            16#4013 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Encoder identifier not allowed; ');
+            16#4014 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Controller identifier not allowed; ');
+            16#4015 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Drive identifier not allowed; ');
+            16#4016 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Table identifier not allowed; ');
+            16#4020 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4021 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4022 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4023 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4024 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4025 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4030 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Coupling type not allowed; ');
+            16#4031 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis type not allowed; ');
+            16#4040 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis is incompatible; ');
+            16#4050 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Channel not ready for operation; ');
+            16#4051 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Group not ready for operation; ');
+            16#4052 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis not ready for operation; ');
+            16#4060 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Channel exists; ');
+            16#4061 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Group exists; ');
+            16#4062 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis exists; ');
+            16#4063 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Table exists; ');
+            16#4070 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis index not allowed; ');
+            16#4071 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Axis index not allowed; ');
+
+            //Channel Errors
+            16#4101 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Group index not allowed; ');
+            16#4102 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Null pointer; ');
+            16#4103 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No process image; ');
+            16#4104 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'M-function index not allowed; ');
+            16#4105 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'No memmory; ');
+            16#4106 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Not ready; ');
+            16#4107 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Function/command not supported; ');
+            16#4108 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Invalid parameter while starting; ');
+            16#4109 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Channel function/command not executable; ');
+            16#410A :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'ItpGoAhead not executable; ');
+            16#4110 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Error opening a file; ');
+            16#4111 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Syntax error during loading; ');
+            16#4112 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Syntax error  during interpretation; ');
+            16#4113 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Missing subroutine; ');
+            16#4114 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Loading buffer of interpreter is too small; ');
+            16#4117 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Subroutine incomplete; ');
+            16#4118 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Error while loading the NC program; ');
+            16#4119 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Error while loading the NC program; ');
+            16#4120 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Devide by zero; ');
+            16#4121 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Invalide circle parameterization; ');
+            16#4122 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Invalid FPU-Operation; ');
+            16#4130 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Stack overflow: subroutines; ');
+            16#4131 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Stack underflow: subroutines; ');
+            16#4132 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Stack overflow: arithmetic unit; ');
+            16#4133 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Stack underflow: arithmetic unit; ');
+            16#4140 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Register index not allowed; ');
+            16#4141 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Unaccaptable G-function index; ');
+            16#4142 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Unaccaptable M-function index; ');
+            16#4143 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Unacceptable extended address; ');
+            16#4144 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Unaccaptable index of internal H-function; ');
+            16#4145 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Machine data value unacceptable; ');
+            16#4150 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Cannot change tool params here; ');
+            16#4151 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Cannoot calculate tool compensation; ');
+            16#4152 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Tool compensation; ');
+            16#4153 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Tool compensation; ');
+            16#4153 :   NCError.sErrorMessage := CONCAT (NCError.sErrorMessage,     'Tool compensation; ');
+
+
+        END_CASE
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="FB_NC_Error">
+      <LineId Id="76" Count="3" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="50" Count="8" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="6" />
+      <LineId Id="185" Count="74" />
+      <LineId Id="184" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

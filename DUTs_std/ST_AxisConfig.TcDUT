@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="ST_AxisConfig" Id="{e00fe310-8ff8-452a-800a-823efa83b1a3}">
+    <Declaration><![CDATA[TYPE ST_AxisConfig :
+STRUCT
+
+    ///////Axis Parameters//////
+    fOverride           :   LREAL := 100;   //Controller override %
+    fVelocity           :   LREAL;          //Velocity must be specified, no default used
+    fAcceleration       :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
+    fDeceleration       :   LREAL;
+    fPosition           :   LREAL;          //Used for absolute positioning
+    fHomePosition       :   LREAL;          //Used to home to a value other than 0
+    nHomeSeq            :   UINT;           //Homing sequence to perform
+    eRestorePosition    :   RestorePosition;
+    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

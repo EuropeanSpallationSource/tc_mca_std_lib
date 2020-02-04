@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <POU Name="EL2252" Id="{1cc9bdce-6ea8-4421-a606-54f74ba031be}" SpecialFunc="None">
+    <Declaration><![CDATA[///EL2252 | XFC, 2-channel digital output terminal with time stamp, tri-state
+FUNCTION_BLOCK EL2252
+VAR_INPUT
+    En              : BOOL;
+    iTerminal_ID    : INT;
+    ErrorSystem     : POINTER TO ST_ErrorSystem;
+END_VAR
+
+VAR_OUTPUT
+    EnO     : BOOL;
+    bError  : BOOL;
+END_VAR
+
+VAR
+    WcState_WcState     AT %I*: BOOL;
+    InfoData_State      AT %I*: UINT;
+
+    //FB-s
+    EL2252_Error    : FB_TerminalError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+* TODO: DONE!
+*)
+
+EL2252_Error(
+    En                  := TRUE,
+    iTerminal_ID        := iTerminal_ID,
+    bWcState            := WcState_WcState,
+    uiInfoData_State    := InfoData_State,
+    pErrorSystem        := ErrorSystem,
+    bError              => bError,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="EL2252">
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="27" Count="7" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
