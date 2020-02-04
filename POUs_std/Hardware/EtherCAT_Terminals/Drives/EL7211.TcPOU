@@ -16,8 +16,8 @@ VAR_OUTPUT
 END_VAR
 
 VAR
-    //WC_State is handled by NC, so NOT included here.
-    InfoData_State AT %I*: UINT;
+    WcState_WcState AT %I* : BOOL := FALSE;
+    InfoData_State  AT %I* : UINT := 0;
 
     //FB-s
     EL7211_Error    : FB_TerminalError;

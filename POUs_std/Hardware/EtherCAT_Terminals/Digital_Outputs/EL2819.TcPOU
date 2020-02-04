@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <POU Name="EL2819" Id="{f53f1521-ea95-4522-96ee-49d4e6c1f88a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK EL2819
@@ -11,6 +11,7 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage       : STRING;
 END_VAR
 
 VAR
@@ -471,7 +472,59 @@ DEV_Error (
     iTerminal_ID        :=  iTerminal_ID,
     pErrorSystem        :=  ErrorSystem,
     EnO                 =>  ,
-);]]></ST>
+);
+
+// Summary message
+bError:=EL2819_Error.bError OR DEV_Error.bError OR CH1_Error.bError OR
+CH2_Error.bError OR CH3_Error.bError OR CH4_Error.bError OR CH5_Error.bError OR
+CH6_Error.bError OR CH7_Error.bError OR CH8_Error.bError OR CH9_Error.bError OR
+CH10_Error.bError OR CH11_Error.bError OR CH12_Error.bError OR CH13_Error.bError OR
+CH14_Error.bError OR CH15_Error.bError OR CH16_Error.bError;
+
+IF EL2819_Error.bError THEN
+	sErrorMessage:=EL2819_Error.ErrorData.sErrorMessage;
+ELSIF DEV_Error.bError THEN
+	sErrorMessage:=DEV_Error.sErrorMessage;
+ELSIF CH1_Error.bError THEN
+	sErrorMessage:=CH1_Error.sErrorMessage;
+ELSIF CH2_Error.bError THEN
+	sErrorMessage:=CH2_Error.sErrorMessage;
+ELSIF CH3_Error.bError THEN
+	sErrorMessage:=CH3_Error.sErrorMessage;
+ELSIF CH4_Error.bError THEN
+	sErrorMessage:=CH4_Error.sErrorMessage;
+ELSIF CH5_Error.bError THEN
+	sErrorMessage:=CH5_Error.sErrorMessage;
+ELSIF CH6_Error.bError THEN
+	sErrorMessage:=CH6_Error.sErrorMessage;
+ELSIF CH7_Error.bError THEN
+	sErrorMessage:=CH7_Error.sErrorMessage;
+ELSIF CH8_Error.bError THEN
+	sErrorMessage:=CH8_Error.sErrorMessage;
+ELSIF CH9_Error.bError THEN
+	sErrorMessage:=CH9_Error.sErrorMessage;
+ELSIF CH10_Error.bError THEN
+	sErrorMessage:=CH10_Error.sErrorMessage;
+ELSIF CH11_Error.bError THEN
+	sErrorMessage:=CH11_Error.sErrorMessage;
+ELSIF CH12_Error.bError THEN
+	sErrorMessage:=CH12_Error.sErrorMessage;
+ELSIF CH13_Error.bError THEN
+	sErrorMessage:=CH13_Error.sErrorMessage;
+ELSIF CH14_Error.bError THEN
+	sErrorMessage:=CH14_Error.sErrorMessage;
+ELSIF CH15_Error.bError THEN
+	sErrorMessage:=CH15_Error.sErrorMessage;
+ELSIF CH16_Error.bError THEN
+	sErrorMessage:=CH16_Error.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF
+
+
+
+
+]]></ST>
     </Implementation>
     <LineIds Name="EL2819">
       <LineId Id="113" Count="0" />
@@ -550,6 +603,46 @@ DEV_Error (
       <LineId Id="571" Count="0" />
       <LineId Id="285" Count="8" />
       <LineId Id="12" Count="0" />
+      <LineId Id="910" Count="1" />
+      <LineId Id="963" Count="5" />
+      <LineId Id="912" Count="1" />
+      <LineId Id="927" Count="1" />
+      <LineId Id="914" Count="0" />
+      <LineId Id="925" Count="0" />
+      <LineId Id="930" Count="0" />
+      <LineId Id="929" Count="0" />
+      <LineId Id="932" Count="0" />
+      <LineId Id="931" Count="0" />
+      <LineId Id="938" Count="0" />
+      <LineId Id="934" Count="0" />
+      <LineId Id="940" Count="0" />
+      <LineId Id="939" Count="0" />
+      <LineId Id="941" Count="1" />
+      <LineId Id="944" Count="0" />
+      <LineId Id="943" Count="0" />
+      <LineId Id="946" Count="0" />
+      <LineId Id="945" Count="0" />
+      <LineId Id="948" Count="0" />
+      <LineId Id="947" Count="0" />
+      <LineId Id="950" Count="0" />
+      <LineId Id="949" Count="0" />
+      <LineId Id="952" Count="0" />
+      <LineId Id="951" Count="0" />
+      <LineId Id="954" Count="0" />
+      <LineId Id="953" Count="0" />
+      <LineId Id="956" Count="0" />
+      <LineId Id="955" Count="0" />
+      <LineId Id="958" Count="0" />
+      <LineId Id="957" Count="0" />
+      <LineId Id="960" Count="0" />
+      <LineId Id="959" Count="0" />
+      <LineId Id="962" Count="0" />
+      <LineId Id="961" Count="0" />
+      <LineId Id="922" Count="0" />
+      <LineId Id="915" Count="0" />
+      <LineId Id="909" Count="0" />
+      <LineId Id="918" Count="3" />
+      <LineId Id="917" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

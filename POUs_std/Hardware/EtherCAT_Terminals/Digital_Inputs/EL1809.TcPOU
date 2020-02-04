@@ -11,16 +11,33 @@ VAR_INPUT
 END_VAR
 
 VAR_OUTPUT
-    EnO     : BOOL;
-    bError  : BOOL;
+    EnO                 : BOOL;
+    bError              : BOOL;
+	sErrorMessage       : STRING;
+	bBI_1                AT %I*  : BOOL:=FALSE;
+	bBI_2                AT %I*  : BOOL:=FALSE;
+	bBI_3                AT %I*  : BOOL:=FALSE;
+	bBI_4                AT %I*  : BOOL:=FALSE;
+	bBI_5                AT %I*  : BOOL:=FALSE;
+	bBI_6                AT %I*  : BOOL:=FALSE;
+	bBI_7                AT %I*  : BOOL:=FALSE;
+	bBI_8                AT %I*  : BOOL:=FALSE;
+	bBI_9                AT %I*  : BOOL:=FALSE;
+	bBI_10               AT %I*  : BOOL:=FALSE;
+	bBI_11               AT %I*  : BOOL:=FALSE;
+	bBI_12               AT %I*  : BOOL:=FALSE;
+	bBI_13               AT %I*  : BOOL:=FALSE;
+	bBI_14               AT %I*  : BOOL:=FALSE;
+	bBI_15               AT %I*  : BOOL:=FALSE;
+	bBI_16               AT %I*  : BOOL:=FALSE;
 END_VAR
 
 VAR
-    WcState_WcState     AT %I*  : BOOL;
-    InfoData_State      AT %I*  : UINT;
-
+    WcState_WcState     AT %I*  : BOOL := TRUE;  // invalid
+    InfoData_State      AT %I*  : UINT := 0;
+    //dBI_all                     : INT  := 0;
     //FB-s
-    EL1809_Error    : FB_TerminalError;
+    EL1809_Error      : FB_TerminalError;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -28,6 +45,22 @@ END_VAR
 * TODO: DONE!
 *)
 EnO:=En;
+(*dBI_all.0:=bBI_1;
+dBI_all.1:=bBI_2;
+dBI_all.2:=bBI_3;
+dBI_all.3:=bBI_4;
+dBI_all.4:=bBI_5;
+dBI_all.5:=bBI_6;
+dBI_all.6:=bBI_7;
+dBI_all.7:=bBI_8;
+dBI_all.8:=bBI_9;
+dBI_all.9:=bBI_10;
+dBI_all.10:=bBI_11;
+dBI_all.11:=bBI_12;
+dBI_all.12:=bBI_13;
+dBI_all.13:=bBI_14;
+dBI_all.14:=bBI_15;
+dBI_all.15:=bBI_16;*)
 
 //Error FB instance
 EL1809_Error(
@@ -38,14 +71,27 @@ EL1809_Error(
     pErrorSystem        := ErrorSystem,
     bError              => bError,
 );
-]]></ST>
+
+IF bError THEN
+	sErrorMessage:=EL1809_Error.ErrorData.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF]]></ST>
     </Implementation>
     <LineIds Name="EL1809">
       <LineId Id="185" Count="2" />
-      <LineId Id="3" Count="1" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="253" Count="14" />
       <LineId Id="101" Count="7" />
       <LineId Id="9" Count="0" />
+      <LineId Id="210" Count="0" />
       <LineId Id="163" Count="0" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="212" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
