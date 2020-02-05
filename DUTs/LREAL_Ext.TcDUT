@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="LREAL_Ext" Id="{cb404dc4-8fef-404f-b5c4-416d65acd4ac}">
+    <Declaration><![CDATA[TYPE LREAL_Ext :
+STRUCT
+    Value       : LREAL;
+    Permission  : DUT_Permission;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

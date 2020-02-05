@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="BOOL_Ext" Id="{38dd69d1-7334-45df-b09c-e1c65e8f2d5a}">
+    <Declaration><![CDATA[TYPE BOOL_Ext :
+STRUCT
+    Value       : BOOL;
+    Permission  : DUT_Permission;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
