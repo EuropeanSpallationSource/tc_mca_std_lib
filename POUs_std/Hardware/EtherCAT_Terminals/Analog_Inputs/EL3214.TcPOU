@@ -13,6 +13,11 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage : STRING;
+	iAI_1 AT %I* :INT:=0;
+	iAI_2 AT %I* :INT:=0;
+	iAI_3 AT %I* :INT:=0;
+	iAI_4 AT %I* :INT:=0;
 END_VAR
 
 VAR
@@ -137,7 +142,28 @@ CH4_Error (
     iTerminal_ID    := iTerminal_ID,
     pErrorSystem    := ErrorSystem,
     EnO             => ,
-);]]></ST>
+);
+
+bError:=EL3214_Error.bError OR CH1_Error.bError OR CH2_Error.bError OR  CH3_Error.bError OR CH4_Error.bError ;
+
+IF bError THEN
+  IF EL3214_Error.bError THEN
+	sErrorMessage:=EL3214_Error.ErrorData.sErrorMessage;
+  ELSIF CH1_Error.bError THEN
+    sErrorMessage:=CH1_Error.sErrorMessage;
+  ELSIF CH2_Error.bError THEN
+    sErrorMessage:=CH2_Error.sErrorMessage;
+  ELSIF CH3_Error.bError THEN
+    sErrorMessage:=CH3_Error.sErrorMessage;
+  ELSIF CH4_Error.bError THEN
+    sErrorMessage:=CH4_Error.sErrorMessage;
+  ELSE
+	sErrorMessage:='';
+  END_IF
+ELSE 
+  sErrorMessage:='';
+END_IF
+]]></ST>
     </Implementation>
     <LineIds Name="EL3214">
       <LineId Id="50" Count="1" />
@@ -168,6 +194,21 @@ CH4_Error (
       <LineId Id="120" Count="0" />
       <LineId Id="131" Count="8" />
       <LineId Id="130" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="267" Count="3" />
+      <LineId Id="274" Count="1" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="271" Count="1" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="285" Count="1" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="262" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

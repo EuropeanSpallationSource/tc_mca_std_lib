@@ -12,11 +12,12 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage       : STRING;
 END_VAR
 
 VAR
     InfoData_State  AT %I*  : UINT;
-
+    
     //FB-s
     EK1110_Error    : FB_TerminalError;
 END_VAR
@@ -35,13 +36,23 @@ EK1110_Error(
     uiInfoData_State    := InfoData_State,
     pErrorSystem        := ErrorSystem,
     bError              => bError,
-);]]></ST>
+);
+
+IF bError THEN
+	sErrorMessage:=EK1110_Error.ErrorData.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF
+]]></ST>
     </Implementation>
     <LineIds Name="EK1110">
       <LineId Id="33" Count="1" />
       <LineId Id="32" Count="0" />
       <LineId Id="22" Count="9" />
       <LineId Id="9" Count="0" />
+      <LineId Id="56" Count="4" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="62" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <POU Name="EL9410" Id="{4a3117c8-7807-46a2-8f94-5841c9d9b645}" SpecialFunc="None">
     <Declaration><![CDATA[//EL9410 | E-Bus power supplier and refresher, diagnostics
@@ -13,6 +13,7 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage       : STRING;
 END_VAR
 
 VAR
@@ -64,7 +65,22 @@ PWR_Error (
     iTerminal_ID        := iTerminal_ID,
     pErrorSystem        := ErrorSystem,
     EnO                 => ,
-);]]></ST>
+);
+
+bError:=EL9410_Error.bError OR PWR_Error.bError;
+
+IF bError THEN
+  IF EL9410_Error.bError THEN
+	sErrorMessage:=EL9410_Error.ErrorData.sErrorMessage;
+  ELSIF PWR_Error.bError THEN
+	sErrorMessage:=PWR_Error.sErrorMessage;
+  ELSE
+	sErrorMessage:='';
+  END_IF
+ELSE
+  sErrorMessage:='';
+END_IF
+    ]]></ST>
     </Implementation>
     <LineIds Name="EL9410">
       <LineId Id="26" Count="1" />
@@ -79,6 +95,13 @@ PWR_Error (
       <LineId Id="32" Count="9" />
       <LineId Id="68" Count="8" />
       <LineId Id="67" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="121" Count="6" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="130" Count="2" />
+      <LineId Id="129" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

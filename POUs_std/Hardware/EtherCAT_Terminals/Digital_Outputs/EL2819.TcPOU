@@ -481,44 +481,48 @@ CH6_Error.bError OR CH7_Error.bError OR CH8_Error.bError OR CH9_Error.bError OR
 CH10_Error.bError OR CH11_Error.bError OR CH12_Error.bError OR CH13_Error.bError OR
 CH14_Error.bError OR CH15_Error.bError OR CH16_Error.bError;
 
-IF EL2819_Error.bError THEN
+IF bError THEN
+  IF EL2819_Error.bError THEN
 	sErrorMessage:=EL2819_Error.ErrorData.sErrorMessage;
-ELSIF DEV_Error.bError THEN
+  ELSIF DEV_Error.bError THEN
 	sErrorMessage:=DEV_Error.sErrorMessage;
-ELSIF CH1_Error.bError THEN
+  ELSIF CH1_Error.bError THEN
 	sErrorMessage:=CH1_Error.sErrorMessage;
-ELSIF CH2_Error.bError THEN
+  ELSIF CH2_Error.bError THEN
 	sErrorMessage:=CH2_Error.sErrorMessage;
-ELSIF CH3_Error.bError THEN
+  ELSIF CH3_Error.bError THEN
 	sErrorMessage:=CH3_Error.sErrorMessage;
-ELSIF CH4_Error.bError THEN
+  ELSIF CH4_Error.bError THEN
 	sErrorMessage:=CH4_Error.sErrorMessage;
-ELSIF CH5_Error.bError THEN
+  ELSIF CH5_Error.bError THEN
 	sErrorMessage:=CH5_Error.sErrorMessage;
-ELSIF CH6_Error.bError THEN
+  ELSIF CH6_Error.bError THEN
 	sErrorMessage:=CH6_Error.sErrorMessage;
-ELSIF CH7_Error.bError THEN
+  ELSIF CH7_Error.bError THEN
 	sErrorMessage:=CH7_Error.sErrorMessage;
-ELSIF CH8_Error.bError THEN
+  ELSIF CH8_Error.bError THEN
 	sErrorMessage:=CH8_Error.sErrorMessage;
-ELSIF CH9_Error.bError THEN
+  ELSIF CH9_Error.bError THEN
 	sErrorMessage:=CH9_Error.sErrorMessage;
-ELSIF CH10_Error.bError THEN
+  ELSIF CH10_Error.bError THEN
 	sErrorMessage:=CH10_Error.sErrorMessage;
-ELSIF CH11_Error.bError THEN
+  ELSIF CH11_Error.bError THEN
 	sErrorMessage:=CH11_Error.sErrorMessage;
-ELSIF CH12_Error.bError THEN
+  ELSIF CH12_Error.bError THEN
 	sErrorMessage:=CH12_Error.sErrorMessage;
-ELSIF CH13_Error.bError THEN
+  ELSIF CH13_Error.bError THEN
 	sErrorMessage:=CH13_Error.sErrorMessage;
-ELSIF CH14_Error.bError THEN
+  ELSIF CH14_Error.bError THEN
 	sErrorMessage:=CH14_Error.sErrorMessage;
-ELSIF CH15_Error.bError THEN
+  ELSIF CH15_Error.bError THEN
 	sErrorMessage:=CH15_Error.sErrorMessage;
-ELSIF CH16_Error.bError THEN
+  ELSIF CH16_Error.bError THEN
 	sErrorMessage:=CH16_Error.sErrorMessage;
-ELSE
+  ELSE
 	sErrorMessage:='';
+  END_IF
+ELSE
+  sErrorMessage:='';
 END_IF
 
 
@@ -604,7 +608,9 @@ END_IF
       <LineId Id="285" Count="8" />
       <LineId Id="12" Count="0" />
       <LineId Id="910" Count="1" />
-      <LineId Id="963" Count="5" />
+      <LineId Id="963" Count="4" />
+      <LineId Id="1034" Count="0" />
+      <LineId Id="968" Count="0" />
       <LineId Id="912" Count="1" />
       <LineId Id="927" Count="1" />
       <LineId Id="914" Count="0" />
@@ -640,6 +646,8 @@ END_IF
       <LineId Id="961" Count="0" />
       <LineId Id="922" Count="0" />
       <LineId Id="915" Count="0" />
+      <LineId Id="1033" Count="0" />
+      <LineId Id="1031" Count="1" />
       <LineId Id="909" Count="0" />
       <LineId Id="918" Count="3" />
       <LineId Id="917" Count="0" />

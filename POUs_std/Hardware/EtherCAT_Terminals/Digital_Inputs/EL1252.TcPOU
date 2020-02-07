@@ -12,6 +12,9 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage       : STRING;
+	bBI_1                AT %I*  : BOOL:=FALSE;
+	bBI_2                AT %I*  : BOOL:=FALSE;
 END_VAR
 
 VAR
@@ -36,11 +39,23 @@ EL1252_Error(
     uiInfoData_State    := InfoData_State,
     pErrorSystem        := ErrorSystem,
     bError              => bError,
-);]]></ST>
+);
+
+IF bError THEN
+    sErrorMessage:=EL1252_Error.ErrorData.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF
+]]></ST>
     </Implementation>
     <LineIds Name="EL1252">
       <LineId Id="156" Count="12" />
       <LineId Id="2" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="190" Count="1" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="198" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

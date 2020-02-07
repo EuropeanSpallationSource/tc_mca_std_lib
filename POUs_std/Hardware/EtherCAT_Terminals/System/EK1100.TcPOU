@@ -12,6 +12,7 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage       : STRING;
 END_VAR
 
 VAR
@@ -35,11 +36,19 @@ EK1100_Error(
     uiInfoData_State    := InfoData_State,
     pErrorSystem        := ErrorSystem,
     bError              => bError,
-);]]></ST>
+);
+
+IF bError THEN
+	sErrorMessage:=EK1100_Error.ErrorData.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF]]></ST>
     </Implementation>
     <LineIds Name="EK1100">
       <LineId Id="28" Count="12" />
       <LineId Id="9" Count="0" />
+      <LineId Id="61" Count="4" />
+      <LineId Id="60" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

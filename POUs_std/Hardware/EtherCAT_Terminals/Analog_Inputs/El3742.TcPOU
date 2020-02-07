@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
-  <POU Name="EL7201" Id="{014d2d65-7ca8-4015-a842-40448ab49beb}" SpecialFunc="None">
-    <Declaration><![CDATA[//EL7201 | 1-chennel resolver terminal (ESS only use it for resolver input)
-FUNCTION_BLOCK EL7201
+  <POU Name="El3742" Id="{5ca1b1bb-d285-4b0b-865e-18c7a559b02f}" SpecialFunc="None">
+    <Declaration><![CDATA[//EL3742 | 2-channel analog input terminal 0…20 mA, differential input, with oversampling
+FUNCTION_BLOCK El3742
 
 VAR_INPUT
     En: BOOL;
@@ -13,7 +13,7 @@ END_VAR
 VAR_OUTPUT
     EnO: BOOL;
     bError: BOOL;
-	sErrorMessage       : STRING;
+	sErrorMessage : STRING;
 END_VAR
 
 VAR
@@ -21,7 +21,7 @@ VAR
     InfoData_State  AT %I* : UINT := 0;
 
     //FB-s
-    EL7201_Error    : FB_TerminalError;
+    EL3742_Error    : FB_TerminalError;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -31,7 +31,7 @@ END_VAR
 
 EnO:=En;
 
-EL7201_Error(
+EL3742_Error(
     En := TRUE,
     iTerminal_ID := iTerminal_ID,
     bWcState := FALSE,
@@ -41,18 +41,17 @@ EL7201_Error(
 );
 
 IF bError THEN
-	sErrorMessage:=EL7201_Error.ErrorData.sErrorMessage;
+	sErrorMessage:=EL3742_Error.ErrorData.sErrorMessage;
 ELSE
 	sErrorMessage:='';
 END_IF
 ]]></ST>
     </Implementation>
-    <LineIds Name="EL7201">
-      <LineId Id="33" Count="13" />
-      <LineId Id="69" Count="2" />
-      <LineId Id="74" Count="1" />
+    <LineIds Name="El3742">
+      <LineId Id="16" Count="13" />
+      <LineId Id="73" Count="4" />
       <LineId Id="9" Count="0" />
-      <LineId Id="77" Count="0" />
+      <LineId Id="79" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

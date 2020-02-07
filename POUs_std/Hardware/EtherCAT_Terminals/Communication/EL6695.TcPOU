@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
-  <POU Name="EL7201" Id="{014d2d65-7ca8-4015-a842-40448ab49beb}" SpecialFunc="None">
-    <Declaration><![CDATA[//EL7201 | 1-chennel resolver terminal (ESS only use it for resolver input)
-FUNCTION_BLOCK EL7201
+  <POU Name="EL6695" Id="{8b51ccd8-020a-448a-854d-119a2ae1a2af}" SpecialFunc="None">
+    <Declaration><![CDATA[//EL6695 | EtherCAT bridge termina
+FUNCTION_BLOCK EL6695
 
 VAR_INPUT
     En: BOOL;
@@ -21,7 +21,7 @@ VAR
     InfoData_State  AT %I* : UINT := 0;
 
     //FB-s
-    EL7201_Error    : FB_TerminalError;
+    EL6695_Error    : FB_TerminalError;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -31,7 +31,7 @@ END_VAR
 
 EnO:=En;
 
-EL7201_Error(
+EL6695_Error(
     En := TRUE,
     iTerminal_ID := iTerminal_ID,
     bWcState := FALSE,
@@ -41,13 +41,13 @@ EL7201_Error(
 );
 
 IF bError THEN
-	sErrorMessage:=EL7201_Error.ErrorData.sErrorMessage;
+	sErrorMessage:=EL6695_Error.ErrorData.sErrorMessage;
 ELSE
 	sErrorMessage:='';
 END_IF
 ]]></ST>
     </Implementation>
-    <LineIds Name="EL7201">
+    <LineIds Name="EL6695">
       <LineId Id="33" Count="13" />
       <LineId Id="69" Count="2" />
       <LineId Id="74" Count="1" />
