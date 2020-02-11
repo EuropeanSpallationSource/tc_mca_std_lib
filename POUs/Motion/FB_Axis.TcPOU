@@ -103,7 +103,7 @@ END_FOR
     fbPower.Enable:=stAxisStruct.control.bEnable;
     fbPower.Enable_Positive:= stAxisStruct.status.bFwEnabled;
     fbPower.Enable_Negative:= stAxisStruct.status.bBwEnabled;
-    fbPower.Override:= stAxisStruct.config.fOverride.Value;
+    fbPower.Override:= stAxisStruct.config.fOverride;
     stAxisStruct.status.bEnabled:=fbPower.Status;
 
 (*Stop*)
@@ -368,7 +368,7 @@ fbWriteMaxVelocity(
     bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stMaxVelocity.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#27,
-    nData:= stAxisStruct.config.fMaxVelocity.Value,
+    nData:= stAxisStruct.config.fMaximumVelocity,
     bBusy=> stAxisStruct.control.stMaxVelocity.bBusy,
     bDone=> stAxisStruct.control.stMaxVelocity.bDone,
     bError=> stAxisStruct.control.stMaxVelocity.bError,
