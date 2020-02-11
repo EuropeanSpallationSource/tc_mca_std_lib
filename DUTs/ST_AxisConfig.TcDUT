@@ -4,20 +4,28 @@
     <Declaration><![CDATA[TYPE ST_AxisConfig :
 STRUCT
 ///////Axis Parameters//////
-    fOverride               :   LREAL_Ext := (Value := 100.0); //Controller override %
-    fMaxVelocity            :   LREAL_Ext;
+
+    fMaximumVelocity        :   LREAL;  //
+    fMaximumAcceleration    :   LREAL;  //New
+    fMaximumDeceleration    :   LREAL;  //New
+    fDefaultJerk            :   LREAL;  //New
+    nHomeSeq                :   UINT;   //Homing sequence to perform
+    fAbsMin                 :   REAL;
+    fAbsMax                 :   REAL;
+    fOverride               :   LREAL := 100.0; //Controller override %
+
+//Parameters
     fVelocity               :   LREAL_Ext;          //Velocity must be specified, no default used
     fAcceleration           :   LREAL_Ext;          //Not all FBs use, need to change this, 0 is NC default
     fDeceleration           :   LREAL_Ext;
     fPosition               :   LREAL_Ext;          //Used for absolute positioning
-    nHomeSeq                :   UINT;               //Homing sequence to perform
+
     fHomePosition           :   LREAL_Ext;
     fLagError               :   LREAL_Ext;
     fTargetPositionWindow   :   LREAL_Ext;
     fHomingVelocityToCam    :   LREAL_Ext;
     fHomingVelocityFromCam  :   LREAL_Ext;
-    fAbsMin                 :   REAL;
-    fAbsMax                 :   REAL;
+
     fUserMin                :   LREAL_Ext;
     fUserMax                :   LREAL_Ext;
     bSoftLimMinEnable       :   BOOL_Ext;
