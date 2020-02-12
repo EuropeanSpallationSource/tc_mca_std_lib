@@ -59,6 +59,9 @@ VAR
     fbWriteTargetWindowPosition : FB_WriteFloatParameter;
     fbWriteLagError : FB_WriteFloatParameter;
     fbWriteMaxVelocity : FB_WriteFloatParameter;
+    fbWriteMaxAcceleration : FB_WriteFloatParameter;
+    fbWriteMaxDeceleration : FB_WriteFloatParameter;
+    fbWriteDefJerk : FB_WriteFloatParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -372,6 +375,36 @@ fbWriteMaxVelocity(
     bBusy=> stAxisStruct.control.stMaxVelocity.bBusy,
     bDone=> stAxisStruct.control.stMaxVelocity.bDone,
     bError=> stAxisStruct.control.stMaxVelocity.bError,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteMaxAcceleration(
+    bExecute:= fbTrigStartup.Q,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#F1,
+    nData:= stAxisStruct.config.fMaximumAcceleration,
+    bBusy=>,
+    bDone=>,
+    bError=>,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteMaxDeceleration(
+    bExecute:= fbTrigStartup.Q,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#F2,
+    nData:= stAxisStruct.config.fMaximumDeceleration,
+    bBusy=>,
+    bDone=>,
+    bError=>,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteDefJerk(
+    bExecute:= fbTrigStartup.Q,
+    nDeviceGroup:= 16#4000,
+    nIndexOffset:= 16#103,
+    nData:= stAxisStruct.config.fDefaultJerk,
+    bBusy=>,
+    bDone=>,
+    bError=>,
     Axis:= stAxisStruct.Axis );]]></ST>
       </Implementation>
     </Action>
@@ -537,6 +570,15 @@ fbWriteMaxVelocity(
       <LineId Id="138" Count="0" />
       <LineId Id="140" Count="7" />
       <LineId Id="139" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="160" Count="7" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="170" Count="7" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="180" Count="7" />
+      <LineId Id="179" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

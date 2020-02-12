@@ -4,33 +4,30 @@
     <Declaration><![CDATA[TYPE ST_AxisConfig :
 STRUCT
 ///////Axis Parameters//////
-
-    fMaximumVelocity        :   LREAL;  //
-    fMaximumAcceleration    :   LREAL;  //New
-    fMaximumDeceleration    :   LREAL;  //New
-    fDefaultJerk            :   LREAL;  //New
-    nHomeSeq                :   UINT;   //Homing sequence to perform
-    fAbsMin                 :   REAL;
-    fAbsMax                 :   REAL;
-    fOverride               :   LREAL := 100.0; //Controller override %
-
-//Parameters
-    fVelocity               :   LREAL_Ext;          //Velocity must be specified, no default used
-    fAcceleration           :   LREAL_Ext;          //Not all FBs use, need to change this, 0 is NC default
-    fDeceleration           :   LREAL_Ext;
-    fPosition               :   LREAL_Ext;          //Used for absolute positioning
-
-    fHomePosition           :   LREAL_Ext;
-    fLagError               :   LREAL_Ext;
-    fTargetPositionWindow   :   LREAL_Ext;
-    fHomingVelocityToCam    :   LREAL_Ext;
-    fHomingVelocityFromCam  :   LREAL_Ext;
-
-    fUserMin                :   LREAL_Ext;
-    fUserMax                :   LREAL_Ext;
-    bSoftLimMinEnable       :   BOOL_Ext;
-    bSoftLimMaxEnable       :   BOOL_Ext;
-    eRestorePosition        :   RestorePosition;    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
+//Private parameters
+    fMaximumVelocity        :   LREAL;           //Maximum velocity allowed
+    fMaximumAcceleration    :   LREAL;           //Maximum acceleration allowed
+    fMaximumDeceleration    :   LREAL;           //Maximum deceleration allowed
+    fDefaultJerk            :   LREAL;           //Default jerk used in motion functions
+    nHomeSeq                :   UINT;            //Homing sequence to perform
+    fAbsMin                 :   REAL  :=-3E38;   //Absolute minimum position for the axis
+    fAbsMax                 :   REAL  := 3E38;   //Absolute maximum position for the axis
+    fOverride               :   LREAL := 100.0;  //Controller override %
+//Public parameters
+    fVelocity               :   LREAL_Ext;       //Velocity must be specified, no default used
+    fAcceleration           :   LREAL_Ext;       //Acceleration used in motion functions
+    fDeceleration           :   LREAL_Ext;       //Deceleration used in motion functions
+    fPosition               :   LREAL_Ext;       //Used for absolute positioning
+    fHomePosition           :   LREAL_Ext;       //Position is set to this value after a successful homing routine
+    fLagError               :   LREAL_Ext;       //Lag distance value allowed
+    fTargetPositionWindow   :   LREAL_Ext;       //Hysteresis of target position
+    fHomingVelocityToCam    :   LREAL_Ext;       //Velocity during homing routine to sensor
+    fHomingVelocityFromCam  :   LREAL_Ext;       //Velocity during homing routine from sensor
+    fUserMin                :   LREAL_Ext;       //User minimum allowed position for the axis
+    fUserMax                :   LREAL_Ext;       //User maximum allowed position for the axis
+    bSoftLimMinEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMin
+    bSoftLimMaxEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMax
+    eRestorePosition        :   RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
