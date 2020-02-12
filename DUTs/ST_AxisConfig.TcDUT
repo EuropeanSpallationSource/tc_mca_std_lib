@@ -14,10 +14,10 @@ STRUCT
     nHomeSeq            :   UINT;           //Homing sequence to perform
     eRestorePosition    :   RestorePosition;
     //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
-    iAxisParameterNumber: AxisParameters;
-    fWriteAxisParameter :   REAL;
+    //Read/ Write parameters 
+    eAxisParameterNumber:   E_AxisParameters;
     bSetAxisParameter   :   BOOL;
-    
+    fWriteAxisParameter :   LREAL;
     fReadAxisParameter  :   LREAL;
 
 END_STRUCT
