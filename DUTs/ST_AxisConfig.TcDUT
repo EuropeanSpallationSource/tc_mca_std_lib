@@ -13,21 +13,24 @@ STRUCT
     fAbsMin                 :   REAL  :=-3E38;   //Absolute minimum position for the axis
     fAbsMax                 :   REAL  := 3E38;   //Absolute maximum position for the axis
     fOverride               :   LREAL := 100.0;  //Controller override %
-//Public parameters
-    fVelocity               :   LREAL_Ext;       //Velocity must be specified, no default used
-    fAcceleration           :   LREAL_Ext;       //Acceleration used in motion functions
-    fDeceleration           :   LREAL_Ext;       //Deceleration used in motion functions
-    fPosition               :   LREAL_Ext;       //Used for absolute positioning
-    fHomePosition           :   LREAL_Ext;       //Position is set to this value after a successful homing routine
-    fLagError               :   LREAL_Ext;       //Lag distance value allowed
-    fTargetPositionWindow   :   LREAL_Ext;       //Hysteresis of target position
-    fHomingVelocityToCam    :   LREAL_Ext;       //Velocity during homing routine to sensor
-    fHomingVelocityFromCam  :   LREAL_Ext;       //Velocity during homing routine from sensor
-    fUserMin                :   LREAL_Ext;       //User minimum allowed position for the axis
-    fUserMax                :   LREAL_Ext;       //User maximum allowed position for the axis
-    bSoftLimMinEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMin
-    bSoftLimMaxEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMax
     eRestorePosition        :   RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
+
+//Public parameters
+    stVelocity               :   LREAL_Ext;       //Velocity must be specified, no default used
+    stAcceleration           :   LREAL_Ext;       //Acceleration used in motion functions
+    stDeceleration           :   LREAL_Ext;       //Deceleration used in motion functions
+    stPosition               :   LREAL_Ext;       //Used for absolute positioning
+    stHomePosition           :   LREAL_Ext;       //Position is set to this value after a successful homing routine
+    stLagError               :   LREAL_Ext;       //Lag distance value allowed
+    stTargetPositionWindow   :   LREAL_Ext;       //Hysteresis of target position
+    stHomingVelocityToCam    :   LREAL_Ext;       //Velocity during homing routine to sensor
+    stHomingVelocityFromCam  :   LREAL_Ext;       //Velocity during homing routine from sensor
+    stUserMin                :   LREAL_Ext;       //User minimum allowed position for the axis
+    stSoftLimMinEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMin
+    stUserMax                :   LREAL_Ext;       //User maximum allowed position for the axis
+    stSoftLimMaxEnable       :   BOOL_Ext;        //Enable the softlimits set in UserMax
+
+
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

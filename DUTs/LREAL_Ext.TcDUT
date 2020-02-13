@@ -5,6 +5,10 @@
 STRUCT
     Value       : LREAL;
     Permission  : DUT_Permission;
+    bWrite      : BOOL;
+    bBusy       : BOOL;
+    bDone       : BOOL;
+    bError      : BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

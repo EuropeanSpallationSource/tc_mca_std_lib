@@ -111,7 +111,7 @@ END_FOR
 
 (*Stop*)
     fbStop.Execute:= stAxisStruct.control.bStop;
-    fbStop.Deceleration:= stAxisStruct.config.fDeceleration.Value;
+    fbStop.Deceleration:= stAxisStruct.config.stDeceleration.Value;
 
 IF stAxisStruct.control.bStop AND stAxisStruct.Axis.Status.Stopping THEN
     stAxisStruct.control.bStop:=FALSE;
@@ -127,39 +127,39 @@ END_IF
 CASE stAxisStruct.control.eCommand OF
     MotionFunctions.MoveAbsolute:
         fbMoveAbsolute.Execute:=stAxisStruct.control.bExecute;
-        fbMoveAbsolute.Position:=stAxisStruct.config.fPosition.Value;
-        fbMoveAbsolute.Velocity:=ABS(stAxisStruct.config.fVelocity.Value);
-        fbMoveAbsolute.Acceleration:=stAxisStruct.config.fAcceleration.Value;
-        fbMoveAbsolute.Deceleration:=stAxisStruct.config.fDeceleration.Value;
+        fbMoveAbsolute.Position:=stAxisStruct.config.stPosition.Value;
+        fbMoveAbsolute.Velocity:=ABS(stAxisStruct.config.stVelocity.Value);
+        fbMoveAbsolute.Acceleration:=stAxisStruct.config.stAcceleration.Value;
+        fbMoveAbsolute.Deceleration:=stAxisStruct.config.stDeceleration.Value;
 
     MotionFunctions.MoveRelative:
         fbMoveRelative.Execute:=stAxisStruct.control.bExecute;
-        fbMoveRelative.Distance:=stAxisStruct.config.fPosition.Value;
-        fbMoveRelative.Velocity:=ABS(stAxisStruct.config.fVelocity.Value);
-        fbMoveRelative.Acceleration:=stAxisStruct.config.fAcceleration.Value;
-        fbMoveRelative.Deceleration:=stAxisStruct.config.fDeceleration.Value;
+        fbMoveRelative.Distance:=stAxisStruct.config.stPosition.Value;
+        fbMoveRelative.Velocity:=ABS(stAxisStruct.config.stVelocity.Value);
+        fbMoveRelative.Acceleration:=stAxisStruct.config.stAcceleration.Value;
+        fbMoveRelative.Deceleration:=stAxisStruct.config.stDeceleration.Value;
 
     MotionFunctions.Jog:
         fbJog.JogForward:=stAxisStruct.control.bJogFwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.JogBackwards:=stAxisStruct.control.bJogBwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.Mode:=0;
-        fbJog.Velocity:=stAxisStruct.config.fVelocity.Value;
-        fbJog.Acceleration:=stAxisStruct.config.fAcceleration.Value;
-        fbJog.Deceleration:=stAxisStruct.config.fDeceleration.Value;
+        fbJog.Velocity:=stAxisStruct.config.stVelocity.Value;
+        fbJog.Acceleration:=stAxisStruct.config.stAcceleration.Value;
+        fbJog.Deceleration:=stAxisStruct.config.stDeceleration.Value;
 
     MotionFunctions.MoveVelocity:
         fbMoveVelocity.Execute:=stAxisStruct.control.bExecute;
-        fbMoveVelocity.Velocity:=ABS(stAxisStruct.config.fVelocity.Value);
-        fbMoveVelocity.Acceleration:=stAxisStruct.config.fAcceleration.Value;
-        fbMoveVelocity.Deceleration:=stAxisStruct.config.fDeceleration.Value;
-        fbMoveVelocity.Direction:=SEL(stAxisStruct.config.fVelocity.Value<0, MC_Positive_Direction, MC_Negative_Direction);
+        fbMoveVelocity.Velocity:=ABS(stAxisStruct.config.stVelocity.Value);
+        fbMoveVelocity.Acceleration:=stAxisStruct.config.stAcceleration.Value;
+        fbMoveVelocity.Deceleration:=stAxisStruct.config.stDeceleration.Value;
+        fbMoveVelocity.Direction:=SEL(stAxisStruct.config.stVelocity.Value<0, MC_Positive_Direction, MC_Negative_Direction);
 
     MotionFunctions.Movemodulo:
         fbMoveModulo.Execute:=stAxisStruct.control.bExecute;
-        fbMoveModulo.Position:=stAxisStruct.config.fPosition.Value;
-        fbMoveModulo.Velocity:=ABS(stAxisStruct.config.fVelocity.Value);
-        fbMoveModulo.Acceleration:=stAxisStruct.config.fAcceleration.Value;
-        fbMoveModulo.Deceleration:=stAxisStruct.config.fDeceleration.Value;
+        fbMoveModulo.Position:=stAxisStruct.config.stPosition.Value;
+        fbMoveModulo.Velocity:=ABS(stAxisStruct.config.stVelocity.Value);
+        fbMoveModulo.Acceleration:=stAxisStruct.config.stAcceleration.Value;
+        fbMoveModulo.Deceleration:=stAxisStruct.config.stDeceleration.Value;
 
 
     MotionFunctions.GearIn:
@@ -190,12 +190,12 @@ CASE stAxisStruct.control.eCommand OF
         fbHome.bReset:= stAxisStruct.control.bReset;
         fbHome.bStop:= stAxisStruct.control.bStop;
         fbHome.nHomeProc:= stAxisStruct.config.nHomeSeq;
-        fbHome.fHomePosition:= stAxisStruct.config.fHomePosition.Value;
+        fbHome.fHomePosition:= stAxisStruct.config.stHomePosition.Value;
         fbHome.bLimitBwd:= stAxisStruct.inputs.bLimitBwd;
         fbHome.bLimitFwd:= stAxisStruct.inputs.bLimitFwd;
         fbHome.bEncLatch:= stAxisStruct.inputs.bEncLatch;
         fbHome.bHomeSensor:= stAxisStruct.inputs.bHomeSensor;
-        fbHome.fHomePosition:= stAxisStruct.config.fHomePosition.Value;
+        fbHome.fHomePosition:= stAxisStruct.config.stHomePosition.Value;
         stAxisStruct.status.bHomed:=fbHome.bHomed;
 
 END_CASE
@@ -288,93 +288,93 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
 fbTrigStartup(CLK:=fbTonStartupDelay.q , Q=> );
 
 fbWriteSoftLimMin(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMin.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stUserMin.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#D,
-    nData:= stAxisStruct.config.fUserMin.Value,
-    bBusy=> stAxisStruct.control.stSoftLimMin.bBusy,
-    bDone=> stAxisStruct.control.stSoftLimMin.bDone,
-    bError=> stAxisStruct.control.stSoftLimMin.bError,
-    Axis:= stAxisStruct.Axis );
-
-fbWriteSoftLimMax(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMax.bWrite,
-    nDeviceGroup:= 16#5000,
-    nIndexOffset:= 16#E,
-    nData:= stAxisStruct.config.fUserMax.Value,
-    bBusy=> stAxisStruct.control.stSoftLimMax.bBusy,
-    bDone=> stAxisStruct.control.stSoftLimMax.bDone,
-    bError=> stAxisStruct.control.stSoftLimMax.bError,
+    nData:= stAxisStruct.config.stUserMin.Value,
+    bBusy=> stAxisStruct.config.stUserMin.bBusy,
+    bDone=> stAxisStruct.config.stUserMin.bDone,
+    bError=> stAxisStruct.config.stUserMin.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteSoftLimMinEnable(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMinEnable.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stSoftLimMinEnable.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#B,
-    nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMinEnable.Value),
-    bBusy=> stAxisStruct.control.stSoftLimMinEnable.bBusy,
-    bDone=> stAxisStruct.control.stSoftLimMinEnable.bDone,
-    bError=> stAxisStruct.control.stSoftLimMinEnable.bError,
+    nData:= BOOL_TO_DWORD(stAxisStruct.config.stSoftLimMinEnable.Value),
+    bBusy=> stAxisStruct.config.stSoftLimMinEnable.bBusy,
+    bDone=> stAxisStruct.config.stSoftLimMinEnable.bDone,
+    bError=> stAxisStruct.config.stSoftLimMinEnable.bError,
+    Axis:= stAxisStruct.Axis );
+
+fbWriteSoftLimMax(
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stUserMax.bWrite,
+    nDeviceGroup:= 16#5000,
+    nIndexOffset:= 16#E,
+    nData:= stAxisStruct.config.stUserMax.Value,
+    bBusy=> stAxisStruct.config.stUserMax.bBusy,
+    bDone=> stAxisStruct.config.stUserMax.bDone,
+    bError=> stAxisStruct.config.stUserMax.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteSoftLimMaxEnable(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stSoftLimMaxEnable.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stSoftLimMaxEnable.bWrite,
     nDeviceGroup:= 16#5000,
     nIndexOffset:= 16#C,
-    nData:= BOOL_TO_DWORD(stAxisStruct.config.bSoftLimMaxEnable.Value),
-    bBusy=> stAxisStruct.control.stSoftLimMaxEnable.bBusy,
-    bDone=> stAxisStruct.control.stSoftLimMaxEnable.bDone,
-    bError=> stAxisStruct.control.stSoftLimMaxEnable.bError,
+    nData:= BOOL_TO_DWORD(stAxisStruct.config.stSoftLimMaxEnable.Value),
+    bBusy=> stAxisStruct.config.stSoftLimMaxEnable.bBusy,
+    bDone=> stAxisStruct.config.stSoftLimMaxEnable.bDone,
+    bError=> stAxisStruct.config.stSoftLimMaxEnable.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteHomingVelocityToCam(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stHomingVelocityToCam.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stHomingVelocityToCam.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#6,
-    nData:= stAxisStruct.config.fHomingVelocityToCam.Value,
-    bBusy=> stAxisStruct.control.stHomingVelocityToCam.bBusy,
-    bDone=> stAxisStruct.control.stHomingVelocityToCam.bDone,
-    bError=> stAxisStruct.control.stHomingVelocityToCam.bError,
+    nData:= stAxisStruct.config.stHomingVelocityToCam.Value,
+    bBusy=> stAxisStruct.config.stHomingVelocityToCam.bBusy,
+    bDone=> stAxisStruct.config.stHomingVelocityToCam.bDone,
+    bError=> stAxisStruct.config.stHomingVelocityToCam.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteHomingVelocityFromCam(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stHomingVelocityFromCam.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stHomingVelocityFromCam.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#7,
-    nData:= stAxisStruct.config.fHomingVelocityFromCam.Value,
-    bBusy=> stAxisStruct.control.stHomingVelocityFromCam.bBusy,
-    bDone=> stAxisStruct.control.stHomingVelocityFromCam.bDone,
-    bError=> stAxisStruct.control.stHomingVelocityFromCam.bError,
+    nData:= stAxisStruct.config.stHomingVelocityFromCam.Value,
+    bBusy=> stAxisStruct.config.stHomingVelocityFromCam.bBusy,
+    bDone=> stAxisStruct.config.stHomingVelocityFromCam.bDone,
+    bError=> stAxisStruct.config.stHomingVelocityFromCam.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteTargetWindowPosition(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stTargetPositionWindow.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stTargetPositionWindow.bWrite,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#16,
-    nData:= stAxisStruct.config.fTargetPositionWindow.Value,
-    bBusy=> stAxisStruct.control.stTargetPositionWindow.bBusy,
-    bDone=> stAxisStruct.control.stTargetPositionWindow.bDone,
-    bError=> stAxisStruct.control.stTargetPositionWindow.bError,
+    nData:= stAxisStruct.config.stTargetPositionWindow.Value,
+    bBusy=> stAxisStruct.config.stTargetPositionWindow.bBusy,
+    bDone=> stAxisStruct.config.stTargetPositionWindow.bDone,
+    bError=> stAxisStruct.config.stTargetPositionWindow.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteLagError(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stLagError.bWrite,
+    bExecute:= fbTrigStartup.Q OR stAxisStruct.config.stLagError.bWrite,
     nDeviceGroup:= 16#6000,
     nIndexOffset:= 16#12,
-    nData:= stAxisStruct.config.fLagError.Value,
-    bBusy=> stAxisStruct.control.stLagError.bBusy,
-    bDone=> stAxisStruct.control.stLagError.bDone,
-    bError=> stAxisStruct.control.stLagError.bError,
+    nData:= stAxisStruct.config.stLagError.Value,
+    bBusy=> stAxisStruct.config.stLagError.bBusy,
+    bDone=> stAxisStruct.config.stLagError.bDone,
+    bError=> stAxisStruct.config.stLagError.bError,
     Axis:= stAxisStruct.Axis );
 
 fbWriteMaxVelocity(
-    bExecute:= fbTrigStartup.Q OR stAxisStruct.control.stMaxVelocity.bWrite,
+    bExecute:= fbTrigStartup.Q,
     nDeviceGroup:= 16#4000,
     nIndexOffset:= 16#27,
     nData:= stAxisStruct.config.fMaximumVelocity,
-    bBusy=> stAxisStruct.control.stMaxVelocity.bBusy,
-    bDone=> stAxisStruct.control.stMaxVelocity.bDone,
-    bError=> stAxisStruct.control.stMaxVelocity.bError,
+    bBusy=>,
+    bDone=>,
+    bError=>,
     Axis:= stAxisStruct.Axis );
 
 fbWriteMaxAcceleration(
@@ -542,14 +542,15 @@ fbWriteDefJerk(
       <LineId Id="111" Count="0" />
       <LineId Id="55" Count="4" />
       <LineId Id="114" Count="2" />
-      <LineId Id="60" Count="6" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="188" Count="8" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="62" Count="4" />
       <LineId Id="118" Count="1" />
       <LineId Id="117" Count="0" />
       <LineId Id="135" Count="0" />
-      <LineId Id="68" Count="5" />
-      <LineId Id="121" Count="1" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="74" Count="6" />
+      <LineId Id="75" Count="5" />
       <LineId Id="124" Count="1" />
       <LineId Id="123" Count="0" />
       <LineId Id="81" Count="6" />
