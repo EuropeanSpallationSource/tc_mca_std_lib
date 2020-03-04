@@ -93,6 +93,9 @@ fbGearIn.Execute := FALSE;
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
 
+fbGearInMultiMaster(Slave:=stAxisStruct.Axis);
+fbGearInMultiMaster.Enable := FALSE;
+
 stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
 
@@ -322,7 +325,11 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3317" Count="0" />
       <LineId Id="3065" Count="1" />
       <LineId Id="3268" Count="0" />
-      <LineId Id="3067" Count="81" />
+      <LineId Id="3067" Count="1" />
+      <LineId Id="3379" Count="0" />
+      <LineId Id="3378" Count="0" />
+      <LineId Id="3380" Count="0" />
+      <LineId Id="3069" Count="79" />
       <LineId Id="3276" Count="0" />
       <LineId Id="3149" Count="1" />
       <LineId Id="3275" Count="0" />
