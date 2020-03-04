@@ -14,6 +14,8 @@ STRUCT
 ///////Axis Parameters//////
     config      : ST_AxisConfig;
 
+    description : ST_AxisDescription;
+
 ///////Axis Inputs///////
     inputs      : ST_AxisInputs;
 
