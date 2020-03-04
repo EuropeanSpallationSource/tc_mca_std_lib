@@ -16,7 +16,7 @@
 FUNCTION_BLOCK FB_Axis
 VAR
     sVersion: STRING := '1.0.4';
-    stMasterAxis: ST_GearAxis := (index:=1, ratio:=0);
+    stMasterAxis: ST_GearAxis := (nIndex:=1, fRatio:=0);
 
     i: UINT;
 END_VAR
@@ -87,7 +87,7 @@ fbMoveVelocity.Execute := FALSE;
 fbMoveModulo(Axis:=stAxisStruct.Axis);
 fbMoveModulo.Execute := FALSE;
 
-fbGearin(Slave:= stAxisStruct.Axis, Master:= GVL.axes[stMasterAxis.index].Axis);
+fbGearin(Slave:= stAxisStruct.Axis, Master:= GVL.axes[stMasterAxis.nIndex].Axis);
 fbGearIn.Execute := FALSE;
 
 fbGearOut(Slave:=stAxisStruct.Axis);
@@ -106,14 +106,14 @@ FOR i:=1 TO GVL_APP.axisNum DO
     END_IF
 END_FOR
 
-(*Power*)
+// Power
     fbPower.Enable := stAxisStruct.control.bEnable;
     fbPower.Enable_Positive := stAxisStruct.status.bFwEnabled;
     fbPower.Enable_Negative := stAxisStruct.status.bBwEnabled;
     fbPower.Override := stAxisStruct.config.fOverride;
     stAxisStruct.status.bEnabled := fbPower.Status;
 
-(*Stop*)
+// Stop
     fbStop.Execute := stAxisStruct.control.bStop;
     fbStop.Deceleration := stAxisStruct.config.fDeceleration;
 
@@ -121,7 +121,7 @@ IF stAxisStruct.control.bStop AND stAxisStruct.Axis.Status.Stopping THEN
     stAxisStruct.control.bStop := FALSE;
 END_IF
 
-(*Reset*)
+// Reset
     fbReset.Execute := stAxisStruct.control.bReset AND stAxisStruct.status.bError;
 
 IF stAxisStruct.control.bReset AND NOT (stAxisStruct.status.bError OR stAxisStruct.status.bWarning) THEN
@@ -167,17 +167,17 @@ CASE stAxisStruct.control.eCommand OF
 
     MotionFunctions.GearIn:
         fbGearIn.Execute := stAxisStruct.control.bExecute;
-        fbGearIn.RatioNumerator := stMasterAxis.Ratio;
+        fbGearIn.RatioNumerator := stMasterAxis.fRatio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
 
         IF NOT fbGearIn.InGear THEN
-            stMasterAxis.Index := stAxisStruct.stMasterAxis.index;
-            stMasterAxis.Ratio := stAxisStruct.stMasterAxis.ratio;
+            stMasterAxis.nIndex := stAxisStruct.stMasterAxis.nIndex;
+            stMasterAxis.fRatio := stAxisStruct.stMasterAxis.fRatio;
         END_IF
 
         // Confirm slaves have no gearing before attempting to gear in
-        IF fbGearIn.InGear AND (GVL.axes[stMasterAxis.Index].fSlaveAxisRatio[GVL.iAxis]=nNO_GEARING) THEN
-            GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := stMasterAxis.ratio;
+        IF fbGearIn.InGear AND (GVL.axes[stMasterAxis.nIndex].fSlaveAxisRatio[GVL.iAxis]=nNO_GEARING) THEN
+            GVL.axes[stMasterAxis.nIndex].fSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
         END_IF
 
     MotionFunctions.GearOut:
@@ -185,22 +185,22 @@ CASE stAxisStruct.control.eCommand OF
 
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
-            GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+            GVL.axes[stMasterAxis.nIndex].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
 	
     MotionFunctions.GearInMultiMaster:
-		fbGearInMultiMaster.Master1 := GVL.axes[stAxisStruct.stMultiMasterAxis[1].index].Axis;
-		fbGearInMultiMaster.Master2 := GVL.axes[stAxisStruct.stMultiMasterAxis[2].index].Axis;
-		fbGearInMultiMaster.Master3 := GVL.axes[stAxisStruct.stMultiMasterAxis[3].index].Axis;
-		fbGearInMultiMaster.Master4 := GVL.axes[stAxisStruct.stMultiMasterAxis[4].index].Axis;
-		fbGearInMultiMaster.GearRatio1 := stAxisStruct.stMultiMasterAxis[1].ratio;
-		fbGearInMultiMaster.GearRatio2 := stAxisStruct.stMultiMasterAxis[2].ratio;
-		fbGearInMultiMaster.GearRatio3 := stAxisStruct.stMultiMasterAxis[3].ratio;
-		fbGearInMultiMaster.GearRatio4 := stAxisStruct.stMultiMasterAxis[4].ratio;
-		GVL.axes[stAxisStruct.stMultiMasterAxis[1].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[1].ratio;
-		GVL.axes[stAxisStruct.stMultiMasterAxis[2].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[2].ratio;
-		GVL.axes[stAxisStruct.stMultiMasterAxis[3].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[3].ratio;
-		GVL.axes[stAxisStruct.stMultiMasterAxis[4].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[4].ratio;			
+		fbGearInMultiMaster.Master1 := GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].Axis;
+		fbGearInMultiMaster.Master2 := GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].Axis;
+		fbGearInMultiMaster.Master3 := GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].Axis;
+		fbGearInMultiMaster.Master4 := GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].Axis;
+		fbGearInMultiMaster.GearRatio1 := stAxisStruct.stMultiMasterAxis[1].fRatio;
+		fbGearInMultiMaster.GearRatio2 := stAxisStruct.stMultiMasterAxis[2].fRatio;
+		fbGearInMultiMaster.GearRatio3 := stAxisStruct.stMultiMasterAxis[3].fRatio;
+		fbGearInMultiMaster.GearRatio4 := stAxisStruct.stMultiMasterAxis[4].fRatio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].nIndex] := stAxisStruct.stMultiMasterAxis[1].fRatio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].nIndex] := stAxisStruct.stMultiMasterAxis[2].fRatio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].nIndex] := stAxisStruct.stMultiMasterAxis[3].fRatio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].nIndex] := stAxisStruct.stMultiMasterAxis[4].fRatio;			
 		fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
 		
     MotionFunctions.Home:
