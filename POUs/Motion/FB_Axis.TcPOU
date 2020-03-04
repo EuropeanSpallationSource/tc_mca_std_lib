@@ -46,7 +46,9 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
-    fbReadWriteParameter: FB_ReadWriteParameter;
+    fbSetParameter_RTRIG: R_TRIG;
+    fbWriteParameter: MC_WriteParameter;
+    fbReadParameter: MC_ReadParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -76,13 +78,19 @@ fbGearin(Slave:= stAxisStruct.Axis, Master:= GVL.axes[masterAxis.index].Axis);
 fbGearIn.Execute:=FALSE;
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute:=FALSE;
-fbReadWriteParameter(
-iParameterNumber    := stAxisStruct.config.iAxisParameterNumber,
-fWriteParameter     := stAxisStruct.config.fWriteAxisParameter, 
-bSet                := stAxisStruct.config.bSetAxisParameter,
-stAxisStruct        := stAxisStruct);
+fbWriteParameter(Axis := stAxisStruct.Axis);
+fbWriteParameter.Execute := FALSE;
 
-stAxisStruct.config.fReadAxisParameter := fbReadWriteParameter.fReadParameter;
+//Read Parameter
+fbReadParameter( 
+Axis            := stAxisStruct.Axis, 
+Enable          := TRUE, 
+ParameterNumber := stAxisStruct.config.eAxisParameterNumber, 
+ReadMode        := READMODE_CYCLIC);
+
+IF NOT fbReadParameter.Error THEN
+    stAxisStruct.config.fReadAxisParameter := fbReadParameter.Value;
+END_IF
 
 stAxisStruct.status.bFwEnabled:= stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled:= stAxisStruct.inputs.bLimitBwd;
@@ -188,7 +196,14 @@ CASE stAxisStruct.control.eCommand OF
         fbHome.bEncLatch:= stAxisStruct.inputs.bEncLatch;
         fbHome.bHomeSensor:= stAxisStruct.inputs.bHomeSensor;
         fbHome.fHomePosition:= 0;
-        stAxisStruct.status.bHomed:=fbHome.bHomed;
+        stAxisStruct.status.bHomed:=fbHome.bHomed;      
+    
+    MotionFunctions.WriteParameter:
+        fbSetParameter_RTRIG(clk := stAxisStruct.config.bSetAxisParameter);
+        //fbWriteParameter.Axis           := stAxisStruct.Axis; 
+        fbWriteParameter.Execute        := fbSetParameter_RTRIG.Q;
+        fbWriteParameter.ParameterNumber:= stAxisStruct.config.eAxisParameterNumber;
+        fbWriteParameter.Value          := stAxisStruct.config.fWriteAxisParameter;
 
 END_CASE
 
@@ -239,12 +254,15 @@ ELSIF fbGearIn.Error THEN
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.status.bError:=TRUE;
     stAxisStruct.status.nErrorId:=fbGearOut.ErrorID;
+ELSIF fbWriteParameter.Error THEN
+    stAxisStruct.status.bError:=TRUE;    
+    stAxisStruct.status.nErrorId := fbWriteParameter.ErrorID;
+ELSIF fbReadParameter.Error THEN
+    stAxisStruct.status.bError:=TRUE;
+    stAxisStruct.status.nErrorId := fbReadParameter.ErrorID;  
 ELSIF stAxisStruct.Axis.Status.Error  THEN
     stAxisStruct.status.bError:=stAxisStruct.Axis.Status.Error;
     stAxisStruct.status.nErrorId:=stAxisStruct.Axis.Status.ErrorID;
-ELSIF fbReadWriteparameter.bError THEN
-    stAxisStruct.status.bError:=TRUE;
-    stAxisStruct.status.nErrorId:=fbReadWriteparameter.nErrorID;
 ELSE
     stAxisStruct.status.bError:=FALSE;
     stAxisStruct.status.nErrorId:=0;
@@ -302,8 +320,9 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="2493" Count="0" />
       <LineId Id="2201" Count="0" />
       <LineId Id="2446" Count="0" />
-      <LineId Id="2999" Count="4" />
-      <LineId Id="3006" Count="0" />
+      <LineId Id="3201" Count="0" />
+      <LineId Id="3135" Count="0" />
+      <LineId Id="3125" Count="9" />
       <LineId Id="2998" Count="0" />
       <LineId Id="1627" Count="1" />
       <LineId Id="2515" Count="0" />
@@ -379,7 +398,12 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="2888" Count="0" />
       <LineId Id="2331" Count="5" />
       <LineId Id="2934" Count="0" />
-      <LineId Id="2992" Count="3" />
+      <LineId Id="2992" Count="0" />
+      <LineId Id="3204" Count="0" />
+      <LineId Id="3213" Count="1" />
+      <LineId Id="3205" Count="2" />
+      <LineId Id="3203" Count="0" />
+      <LineId Id="2993" Count="2" />
       <LineId Id="2339" Count="0" />
       <LineId Id="2309" Count="0" />
       <LineId Id="2216" Count="0" />
@@ -392,11 +416,11 @@ stAxisStruct.control.bExecute:=FALSE;]]></ST>
       <LineId Id="2771" Count="0" />
       <LineId Id="1941" Count="1" />
       <LineId Id="2651" Count="2" />
-      <LineId Id="1945" Count="30" />
-      <LineId Id="1979" Count="0" />
-      <LineId Id="3054" Count="1" />
-      <LineId Id="3053" Count="0" />
-      <LineId Id="1980" Count="2" />
+      <LineId Id="1945" Count="28" />
+      <LineId Id="3148" Count="4" />
+      <LineId Id="3146" Count="0" />
+      <LineId Id="1974" Count="1" />
+      <LineId Id="1979" Count="3" />
       <LineId Id="2501" Count="0" />
       <LineId Id="1992" Count="0" />
       <LineId Id="2502" Count="0" />
