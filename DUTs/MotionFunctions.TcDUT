@@ -14,7 +14,7 @@ TYPE MotionFunctions :
     GearIn          := 5, //Gears in this axis to be the slave of the axis specified in stMasterAxis with the ratio specified in there
     GearOut         := 6, //Removes gearing set in the above command
     MultiGearIn     := 7, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
-    GearOut         := 8, //Removes gearing set in the above command
+    MultiGearOut    := 8, //Removes gearing set in the above command
     Home            := 10 //Run the homing routine for the axis
 ):=Jog; //Jog is the default behaviour of the axis.
 END_TYPE

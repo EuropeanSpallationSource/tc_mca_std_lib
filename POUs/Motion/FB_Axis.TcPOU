@@ -96,9 +96,9 @@ stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
 
 FOR i:=1 TO GVL_APP.axisNum DO
-    IF (stAxisStruct.slaveAxisRatio[i]<>0) THEN
-        stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.slaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
-        stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.slaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
+    IF (stAxisStruct.fSlaveAxisRatio[i]<>0) THEN
+        stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
+        stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
     END_IF
 END_FOR
 
@@ -168,13 +168,13 @@ CASE stAxisStruct.control.eCommand OF
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
 
         IF NOT fbGearIn.InGear THEN
-            stMasterAxis.Index :=  stAxisStruct.masterAxis.index;
-            stMasterAxis.Ratio := stAxisStruct.masterAxis.ratio;
+            stMasterAxis.Index :=  stAxisStruct.stMasterAxis.index;
+            stMasterAxis.Ratio := stAxisStruct.stMasterAxis.ratio;
         END_IF
 
         // Confirm slaves have no gearing before attempting to gear in
-        IF fbGearIn.InGear AND (GVL.axes[stMasterAxis.Index].slaveAxisRatio[GVL.iAxis]=nNO_GEARING) THEN
-            GVL.axes[stMasterAxis.index].slaveAxisRatio[GVL.iAxis] := stMasterAxis.ratio;
+        IF fbGearIn.InGear AND (GVL.axes[stMasterAxis.Index].fSlaveAxisRatio[GVL.iAxis]=nNO_GEARING) THEN
+            GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := stMasterAxis.ratio;
         END_IF
 
     MotionFunctions.GearOut:
@@ -182,7 +182,7 @@ CASE stAxisStruct.control.eCommand OF
 
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
-            GVL.axes[stMasterAxis.index].slaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+            GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
 
     MotionFunctions.Home:
