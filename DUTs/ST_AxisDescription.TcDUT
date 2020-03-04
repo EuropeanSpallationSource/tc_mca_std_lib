@@ -3,13 +3,13 @@
   <DUT Name="ST_AxisDescription" Id="{50ff6038-4325-4846-892a-422b31e6a32f}">
     <Declaration><![CDATA[TYPE ST_AxisDescription :
 STRUCT
-    sAxisName       : STRING(N_MAX_AXIS_NAME);
-    nUnit           : BYTE;    // Code for the axis base unit (like m or degree)
-    nPrefix         : BYTE;    // Exponent defining unit prefix, e.g. 3 for k(kilo)
-    bIsPseudoAxis   : BOOL;    // Axis is a non-standard axis with application-specific handling
-    eEncoderType    : EncoderTypeClass;
-    eHomeSwitchType : HomeSwitchTypeClass;
-    eMotorType      : MotorTypeClass;
+    sAxisName : STRING(N_MAX_AXIS_NAME);
+    nUnit : BYTE; // Code for the axis base unit (like m or degree)
+    nPrefix : BYTE; // Exponent defining unit prefix, e.g. 3 for k(kilo)
+    bIsPseudoAxis : BOOL; // Axis is a non-standard axis with application-specific handling
+    eEncoderType : E_EncoderTypeClass;
+    eHomeSwitchType : E_HomeSwitchTypeClass;
+    eMotorType : E_MotorTypeClass;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
