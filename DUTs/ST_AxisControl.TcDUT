@@ -4,14 +4,14 @@
     <Declaration><![CDATA[TYPE ST_AxisControl :
 STRUCT
 
-///////Actions from EPICS/NICOS/////////
+    ///////Actions from EPICS/NICOS/////////
     bExecute            :   BOOL;           //Rising edge to execute move absolute
     bReset              :   BOOL;           //Reset axis signal, must be combined with other signals
     bStop               :   BOOL;           //Stop axis movement
     bEnable             :   BOOL;           //Controller enable
     eCommand            :   MotionFunctions;
 
-///////Axis////////
+    ///////Actions not used in control system////////
     bJogFwd             :   BOOL;           //Jog forward
     bJogBwd             :   BOOL;           //Jog backward
 

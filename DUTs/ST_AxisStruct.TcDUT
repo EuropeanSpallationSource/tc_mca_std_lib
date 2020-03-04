@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
 
-///////Actions from EPICS/NICOS/////////
+///////Control from EPICS/NICOS/////////
 ///////Axis////////
     control     : ST_AxisControl;
 
@@ -17,29 +17,13 @@ STRUCT
 ///////Axis Inputs///////
     inputs      : ST_AxisInputs;
 
-//////Geraing Parameters//////
-    //masterAxis        :   UINT:=1;        //Axes[ ] index for master
-    //fGearRatioNum     :   LREAL;          //GearIn ratio numerator
-    //iGearRatioDen     :   UINT;           //GearIn ratio denominator
-///////Axis Ref/////
-    Axis                :   AXIS_REF;       //Link NC axis to this
+///////Axis Ref///////
+    Axis                :   AXIS_REF;       //The NC axis link to the hardware this is controlling
 
-    masterAxis          :   ST_GearAxis;    //Single master axis
-    //slaveAxis         :   ARRAY [1..GVL.axisNum]OF ST_GearAxis :=(index:=0, ratio:=0) ;   //Linking single slave axes
-    slaveAxisRatio      :   ARRAY [1..GVL_APP.axisNum] OF LREAL;
+//////Gearing Parameters///////
+    masterAxis          :   ST_GearAxis;                         //A reference to the axis that this is a slave of
+    slaveAxisRatio      :   ARRAY [1..GVL_APP.axisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
 
-
-//////Extra things of original ISIS Structure/////
-
-    //  bSoftLimPosEn       :   BOOL;           //Enable/disable positive direction software limit
-    //  bSoftLimNegEn       :   BOOL;           //Enable/disable negative direction software limit
-    //bPosLagEn         :   BOOL;           //Enable/disable position lag
-
-    //Gearing parameters
-
-    //masterAxes            :   ARRAY[1..4] OF ST_MasterAxis;   //ST to hold index and ratio for masters    - GearInMultiMaster
-    //fDeceleration     :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
-    //  Status              : ST_AxisStatus;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

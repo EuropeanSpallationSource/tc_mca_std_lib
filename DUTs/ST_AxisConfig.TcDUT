@@ -5,20 +5,22 @@
 STRUCT
 
     ///////Axis Parameters//////
-    fOverride           :   LREAL := 100;   //Controller override %
+    fOverride           :   LREAL := 100;   //Controller override %, used a global scale for an axis in terms of velocity etc. Generally set to 100%.
     fVelocity           :   LREAL;          //Velocity must be specified, no default used
     fAcceleration       :   LREAL;          //Not all FBs use, need to change this, 0 is NC default
     fDeceleration       :   LREAL;
-    fPosition           :   LREAL;          //Used for absolute positioning
-    fHomePosition       :   LREAL;          //Used to home to a value other than 0
+    fPosition           :   LREAL;          //The position to move to for an absolute move and the amount to move in a relative move
+    fHomePosition       :   LREAL;          //The position that the axis should be set to once homing is completed
     nHomeSeq            :   UINT;           //Homing sequence to perform
+
+    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
     eRestorePosition    :   RestorePosition;
-    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home, 2=restore and home
-    //Read/ Write parameters 
-    eAxisParameterNumber:   E_AxisParameters;
-    bSetAxisParameter   :   BOOL;
-    fWriteAxisParameter :   LREAL;
-    fReadAxisParameter  :   LREAL;
+    
+    //Read and Write parameters 
+    eAxisParameterNumber:   E_AxisParameters;   //Enumeration of axis parameters
+    bSetAxisParameter   :   BOOL;               //Write the value in fWriteAxisParameter to the selected eAxisParameterNumber
+    fWriteAxisParameter :   LREAL;              //The value to be writen to eAxisParameterNumber
+    fReadAxisParameter  :   LREAL;              //Read the current value of the selected eAxisParameterNumber
 
 END_STRUCT
 END_TYPE]]></Declaration>

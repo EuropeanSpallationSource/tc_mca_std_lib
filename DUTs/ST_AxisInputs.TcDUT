@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisInputs :
 STRUCT
 
-///////Axis Inputs///////
+    ///////Axis Inputs///////
     bLimitFwd   AT %I*  :   BOOL;           //Forward limit switch
     bLimitBwd   AT %I*  :   BOOL;           //Backward limit switch
     bHomeSensor AT %I*  :   BOOL;           //Reference siganl for homing
