@@ -42,6 +42,7 @@ VAR
     fbMoveModulo: MC_MoveModulo;
     fbGearIn: MC_GearIn;
     fbGearOut: MC_GearOut;
+	fbGearInMultiMaster: MC_GearInMultiMaster;
     fbHome: FB_Homing;
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
@@ -185,6 +186,11 @@ CASE stAxisStruct.control.eCommand OF
             GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
 
+		
+    MotionFunctions.MultiGearIn:		
+		fbGearIn.Execute := stAxisStruct.control.bExecute;
+	
+	
     MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
         fbHome.bReset := stAxisStruct.control.bReset;
@@ -323,7 +329,11 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3152" Count="5" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="1" />
-      <LineId Id="3162" Count="29" />
+      <LineId Id="3377" Count="0" />
+      <LineId Id="3371" Count="0" />
+      <LineId Id="3162" Count="0" />
+      <LineId Id="3372" Count="2" />
+      <LineId Id="3163" Count="28" />
       <LineId Id="3304" Count="0" />
       <LineId Id="3192" Count="2" />
       <LineId Id="3305" Count="0" />
