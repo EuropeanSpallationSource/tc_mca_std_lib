@@ -165,14 +165,13 @@ CASE stAxisStruct.control.eCommand OF
         fbMoveModulo.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveModulo.Deceleration := stAxisStruct.config.fDeceleration;
 
-
     MotionFunctions.GearIn:
         fbGearIn.Execute := stAxisStruct.control.bExecute;
         fbGearIn.RatioNumerator := stMasterAxis.Ratio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
 
         IF NOT fbGearIn.InGear THEN
-            stMasterAxis.Index :=  stAxisStruct.stMasterAxis.index;
+            stMasterAxis.Index := stAxisStruct.stMasterAxis.index;
             stMasterAxis.Ratio := stAxisStruct.stMasterAxis.ratio;
         END_IF
 
@@ -188,19 +187,21 @@ CASE stAxisStruct.control.eCommand OF
             //Clear slave ratio from master axis slave array
             GVL.axes[stMasterAxis.index].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
-
 	
     MotionFunctions.GearInMultiMaster:
 		fbGearInMultiMaster.Master1 := GVL.axes[stAxisStruct.stMultiMasterAxis[1].index].Axis;
 		fbGearInMultiMaster.Master2 := GVL.axes[stAxisStruct.stMultiMasterAxis[2].index].Axis;
 		fbGearInMultiMaster.Master3 := GVL.axes[stAxisStruct.stMultiMasterAxis[3].index].Axis;
 		fbGearInMultiMaster.Master4 := GVL.axes[stAxisStruct.stMultiMasterAxis[4].index].Axis;
-		fbGearInMultiMaster.GearRatio1 := GVL.axes[stAxisStruct.stMultiMasterAxis[1].ratio].Axis;
-		fbGearInMultiMaster.GearRatio2 := GVL.axes[stAxisStruct.stMultiMasterAxis[2].ratio].Axis;
-		fbGearInMultiMaster.GearRatio3 := GVL.axes[stAxisStruct.stMultiMasterAxis[3].ratio].Axis;
-		fbGearInMultiMaster.GearRatio4 := GVL.axes[stAxisStruct.stMultiMasterAxis[4].ratio].Axis;
-        fbGearInMultiMaster.Enable[i] := stAxisStruct.control.bExecute[i];
-	
+		fbGearInMultiMaster.GearRatio1 := stAxisStruct.stMultiMasterAxis[1].ratio;
+		fbGearInMultiMaster.GearRatio2 := stAxisStruct.stMultiMasterAxis[2].ratio;
+		fbGearInMultiMaster.GearRatio3 := stAxisStruct.stMultiMasterAxis[3].ratio;
+		fbGearInMultiMaster.GearRatio4 := stAxisStruct.stMultiMasterAxis[4].ratio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[1].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[1].ratio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[2].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[2].ratio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[3].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[3].ratio;
+		GVL.axes[stAxisStruct.stMultiMasterAxis[4].index].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].index] := stAxisStruct.stMultiMasterAxis[4].ratio;			
+		fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
 		
     MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
@@ -337,20 +338,20 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3379" Count="0" />
       <LineId Id="3378" Count="0" />
       <LineId Id="3380" Count="0" />
-      <LineId Id="3069" Count="79" />
+      <LineId Id="3069" Count="68" />
+      <LineId Id="3139" Count="9" />
       <LineId Id="3276" Count="0" />
       <LineId Id="3149" Count="1" />
       <LineId Id="3275" Count="0" />
       <LineId Id="3152" Count="5" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="1" />
-      <LineId Id="3394" Count="0" />
       <LineId Id="3371" Count="0" />
       <LineId Id="3162" Count="0" />
       <LineId Id="3385" Count="0" />
       <LineId Id="3396" Count="3" />
       <LineId Id="3403" Count="2" />
-      <LineId Id="3391" Count="1" />
+      <LineId Id="3408" Count="4" />
       <LineId Id="3395" Count="0" />
       <LineId Id="3163" Count="28" />
       <LineId Id="3304" Count="0" />
