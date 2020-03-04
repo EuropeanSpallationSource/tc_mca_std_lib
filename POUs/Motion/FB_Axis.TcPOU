@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[///#########################################################
 ///Function block to run a virtual drive with Nc
@@ -214,7 +214,8 @@ CASE stAxisStruct.control.eCommand OF
         stAxisStruct.status.bHomed := fbHome.bHomed;      
     
     MotionFunctions.WriteParameter:
-        fbSetParameter_RTRIG(clk := stAxisStruct.config.bSetAxisParameter);
+        fbSetParameter_RTRIG(clk := stAxisStruct.control.bExecute);
+        
         fbWriteParameter.Execute        := fbSetParameter_RTRIG.Q;
         fbWriteParameter.ParameterNumber:= stAxisStruct.config.eAxisParameterNumber;
         fbWriteParameter.Value          := stAxisStruct.config.fWriteAxisParameter;
@@ -432,6 +433,7 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="2309" Count="0" />
       <LineId Id="2216" Count="0" />
       <LineId Id="1733" Count="0" />
+      <LineId Id="3268" Count="0" />
       <LineId Id="1936" Count="1" />
       <LineId Id="2770" Count="0" />
       <LineId Id="2769" Count="0" />
@@ -459,6 +461,8 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="2272" Count="0" />
       <LineId Id="1934" Count="0" />
       <LineId Id="202" Count="1" />
+      <LineId Id="246" Count="18" />
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
