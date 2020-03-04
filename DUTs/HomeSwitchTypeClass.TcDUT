@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="HomeSwitchTypeClass" Id="{efe4c9b6-f0fb-4dcd-aeb8-a35b3f20f344}">
+    <Declaration><![CDATA[TYPE HomeSwitchTypeClass:
+(
+    NoSwitch          := 0,    //no physical switch for homing present
+    HomeSwitchPresent := 1,    //dedicated homing switch present
+    UseNegLimit       := 2,    //neg limit switch is used as a homing switch
+    UsePosLimit       := 3    //pos limit switch is used as a homing switch
+) := NoSwitch;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
