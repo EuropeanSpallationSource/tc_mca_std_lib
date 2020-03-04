@@ -5,14 +5,16 @@
 {attribute 'strict'}
 TYPE MotionFunctions :
 (
-    /////////All the motion functions that you can tell the PLC to do/////////
+    //All the motion functions that you can tell the PLC to do
     MoveAbsolute    := 0, //Move to a set position
     MoveRelative    := 1, //Move a set distance
     Jog             := 2, //Continous moving in the direction specified by bJogFwd or bJogBwd as long as one is high. Will stop if bExecute goes high. Generally not called by an external control system.
     MoveVelocity    := 3, //Continous moving at a set velocity once bExecute goes high
     MoveModulo      := 4, //Move for 360 deg rotation, see Beckhoff docs
-    GearIn          := 5, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
+    GearIn          := 5, //Gears in this axis to be the slave of the axis specified in stMasterAxis with the ratio specified in there
     GearOut         := 6, //Removes gearing set in the above command
+    MultiGearIn     := 7, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
+    GearOut         := 8, //Removes gearing set in the above command
     Home            := 10 //Run the homing routine for the axis
 ):=Jog; //Jog is the default behaviour of the axis.
 END_TYPE
