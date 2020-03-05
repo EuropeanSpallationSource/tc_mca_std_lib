@@ -104,7 +104,7 @@ stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
 
 FOR i:=1 TO GVL_APP.axisNum DO
-    IF (stAxisStruct.fSlaveAxisRatio[i]<>0) THEN
+    IF stAxisStruct.fSlaveAxisRatio[i]<>0 THEN
         stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
         stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
     END_IF
