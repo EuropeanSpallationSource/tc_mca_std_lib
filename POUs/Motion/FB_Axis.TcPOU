@@ -201,7 +201,7 @@ CASE stAxisStruct.control.eCommand OF
 			
 			FOR i:=1 TO GVL_APP.axisNum DO
 				FOR j:= 1 TO 4 DO
-					GVL.axes[i].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+					GVL.axes[i].fMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
 				END_FOR	
 			END_FOR
         END_IF
@@ -314,28 +314,28 @@ END_IF
 stAxisStruct.status.bGeared:= stAxisStruct.Axis.Status.Coupled;
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 THEN
-	GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
+	GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].fMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
 	stAxisStruct.status.bCoupledGear1:=TRUE;	
 ELSE
 	stAxisStruct.status.bCoupledGear1:=FALSE;	
 END_IF
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 THEN
-	GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
+	GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].fMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
 	stAxisStruct.status.bCoupledGear2:=TRUE;	
 ELSE
 	stAxisStruct.status.bCoupledGear2:=FALSE;	
 END_IF
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 THEN
-	GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
+	GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].fMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
 	stAxisStruct.status.bCoupledGear3:=TRUE;	
 ELSE
 	stAxisStruct.status.bCoupledGear3:=FALSE;	
 END_IF
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 THEN
-	GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
+	GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].fMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
 	stAxisStruct.status.bCoupledGear4:=TRUE;	
 ELSE
 	stAxisStruct.status.bCoupledGear4:=FALSE;	
