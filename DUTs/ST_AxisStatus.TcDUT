@@ -17,6 +17,10 @@ STRUCT
     bError              :   BOOL;           //Motion function block has produced error (NC drive not necessarily in error state)
     nErrorID            :   UDINT;          //Motion function block errorID
     bGeared             :   BOOL;           //Axis is an active slave
+    bCoupledGear1 : BOOL;
+    bCoupledGear2 : BOOL;
+	bCoupledGear3 : BOOL;
+	bCoupledGear4 : BOOL;
 
 END_STRUCT
 END_TYPE
