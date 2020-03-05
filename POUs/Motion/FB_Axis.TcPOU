@@ -19,6 +19,7 @@ VAR
     stMasterAxis: ST_GearAxis := (nIndex:=1, fRatio:=0);
 
     i: UINT;
+	j: UINT;
 END_VAR
 VAR_INPUT
 
@@ -52,16 +53,11 @@ VAR
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     // By default 0 as represents no existing gearing
     nNO_GEARING: UINT := 0;
-	emptyAxis1 : AXIS_REF;
-	emptyAxis2 : AXIS_REF;
-	emptyAxis3 : AXIS_REF;
-	emptyAxis4 : AXIS_REF;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
 
 // Call of all MC Instances
-
 fbPower(Axis:=stAxisStruct.Axis);
 fbPower.Enable := FALSE;
 
@@ -94,23 +90,15 @@ fbMoveModulo.Execute := FALSE;
 fbGearin(Slave:= stAxisStruct.Axis, Master:= GVL.axes[stMasterAxis.nIndex].Axis);
 fbGearIn.Execute := FALSE;
 
+fbGearInMultiMaster(Slave:=stAxisStruct.Axis,
+    Master1:=GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].Axis,
+    Master2:=GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].Axis,
+	Master3:=GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].Axis,
+    Master4:=GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].Axis);
+fbGearInMultiMaster.Enable := FALSE;
+
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
-
-fbGearInMultiMaster(Slave:=stAxisStruct.Axis,
-  Master1:=EmptyAxis1,
-  Master1:=EmptyAxis2,
-  Master3:=EmptyAxis3,
-  Master4:=EmptyAxis4,
-  //Master1:=GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].Axis,
-  //Master2:=GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].Axis,
-  //Master3:=GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].Axis,
-  //Master4:=GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].Axis,
-  GearRatio1:=stAxisStruct.stMultiMasterAxis[1].fRatio,
-  GearRatio2:=stAxisStruct.stMultiMasterAxis[2].fRatio,
-  GearRatio3:=stAxisStruct.stMultiMasterAxis[3].fRatio,
-  GearRatio4:=stAxisStruct.stMultiMasterAxis[4].fRatio);
-fbGearInMultiMaster.Enable := FALSE;
 
 stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
@@ -196,21 +184,28 @@ CASE stAxisStruct.control.eCommand OF
             GVL.axes[stMasterAxis.nIndex].fSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
         END_IF
 
+    MotionFunctions.GearInMultiMaster:
+  		fbGearInMultiMaster.GearRatio1:=stAxisStruct.stMultiMasterAxis[1].fRatio;
+    	fbGearInMultiMaster.GearRatio2:=stAxisStruct.stMultiMasterAxis[2].fRatio;
+    	fbGearInMultiMaster.GearRatio3:=stAxisStruct.stMultiMasterAxis[3].fRatio;
+    	fbGearInMultiMaster.GearRatio4:=stAxisStruct.stMultiMasterAxis[4].fRatio;
+		
+		fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
+		
     MotionFunctions.GearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
 
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
             GVL.axes[stMasterAxis.nIndex].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+			
+			FOR i:=1 TO GVL_APP.axisNum DO
+				FOR j:= 1 TO 4 DO
+					GVL.axes[i].fSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+				END_FOR	
+			END_FOR
         END_IF
-	
-    MotionFunctions.GearInMultiMaster:
-		FOR i:=1 TO 4 DO
-			IF stAxisStruct.stMultiMasterAxis[i].nIndex <> 0 THEN
-				//GVL.axes[stAxisStruct.stMultiMasterAxis[i].nIndex].fSlaveAxisRatio[stAxisStruct.stMultiMasterAxis[1].nIndex] := stAxisStruct.stMultiMasterAxis[i].fRatio;
-			END_IF
-		END_FOR
-		fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
+
 		
     MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
@@ -305,8 +300,6 @@ ELSE
     stAxisStruct.status.bWarning := FALSE;
 END_IF;
 
-stAxisStruct.status.bGeared := stAxisStruct.Axis.Status.Coupled;
-
 // Actual Velocity
 stAxisStruct.status.fActVelocity := stAxisStruct.Axis.NcToPlc.ActVelo;
 
@@ -317,11 +310,43 @@ ELSE
     stAxisStruct.status.fActPosition := stAxisStruct.Axis.NcToPlc.ActPos;
 END_IF
 
+// Gearing Status
+stAxisStruct.status.bGeared:= stAxisStruct.Axis.Status.Coupled;
+
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 THEN
+	GVL.axes[stAxisStruct.stMultiMasterAxis[1].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
+	stAxisStruct.status.bCoupledGear1:=TRUE;	
+ELSE
+	stAxisStruct.status.bCoupledGear1:=FALSE;	
+END_IF
+
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 THEN
+	GVL.axes[stAxisStruct.stMultiMasterAxis[2].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
+	stAxisStruct.status.bCoupledGear2:=TRUE;	
+ELSE
+	stAxisStruct.status.bCoupledGear2:=FALSE;	
+END_IF
+
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 THEN
+	GVL.axes[stAxisStruct.stMultiMasterAxis[3].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
+	stAxisStruct.status.bCoupledGear3:=TRUE;	
+ELSE
+	stAxisStruct.status.bCoupledGear3:=FALSE;	
+END_IF
+
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 THEN
+	GVL.axes[stAxisStruct.stMultiMasterAxis[4].nIndex].fSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
+	stAxisStruct.status.bCoupledGear4:=TRUE;	
+ELSE
+	stAxisStruct.status.bCoupledGear4:=FALSE;	
+END_IF
+
 // Reset bExecute
 stAxisStruct.control.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="3042" Count="5" />
+      <LineId Id="3042" Count="2" />
+      <LineId Id="3046" Count="1" />
       <LineId Id="3258" Count="0" />
       <LineId Id="3048" Count="1" />
       <LineId Id="3259" Count="0" />
@@ -342,33 +367,36 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3063" Count="1" />
       <LineId Id="3317" Count="0" />
       <LineId Id="3065" Count="1" />
+      <LineId Id="3596" Count="0" />
+      <LineId Id="3523" Count="0" />
+      <LineId Id="3578" Count="1" />
+      <LineId Id="3582" Count="0" />
+      <LineId Id="3580" Count="0" />
+      <LineId Id="3522" Count="0" />
       <LineId Id="3268" Count="0" />
-      <LineId Id="3067" Count="1" />
-      <LineId Id="3379" Count="0" />
-      <LineId Id="3378" Count="0" />
-      <LineId Id="3498" Count="0" />
-      <LineId Id="3518" Count="1" />
-      <LineId Id="3517" Count="0" />
-      <LineId Id="3520" Count="0" />
-      <LineId Id="3492" Count="5" />
-      <LineId Id="3482" Count="0" />
-      <LineId Id="3490" Count="0" />
-      <LineId Id="3069" Count="68" />
+      <LineId Id="3067" Count="70" />
       <LineId Id="3139" Count="9" />
       <LineId Id="3276" Count="0" />
       <LineId Id="3149" Count="1" />
       <LineId Id="3275" Count="0" />
-      <LineId Id="3152" Count="5" />
+      <LineId Id="3152" Count="0" />
+      <LineId Id="3532" Count="0" />
+      <LineId Id="3534" Count="0" />
+      <LineId Id="3548" Count="2" />
+      <LineId Id="3546" Count="0" />
+      <LineId Id="3564" Count="0" />
+      <LineId Id="3153" Count="0" />
+      <LineId Id="3533" Count="0" />
+      <LineId Id="3154" Count="3" />
       <LineId Id="3278" Count="0" />
-      <LineId Id="3158" Count="1" />
+      <LineId Id="3158" Count="0" />
+      <LineId Id="3693" Count="0" />
+      <LineId Id="3699" Count="0" />
+      <LineId Id="3694" Count="0" />
+      <LineId Id="3691" Count="1" />
+      <LineId Id="3698" Count="0" />
+      <LineId Id="3159" Count="0" />
       <LineId Id="3371" Count="0" />
-      <LineId Id="3474" Count="0" />
-      <LineId Id="3499" Count="0" />
-      <LineId Id="3501" Count="0" />
-      <LineId Id="3408" Count="0" />
-      <LineId Id="3412" Count="0" />
-      <LineId Id="3502" Count="0" />
-      <LineId Id="3500" Count="0" />
       <LineId Id="3395" Count="0" />
       <LineId Id="3163" Count="28" />
       <LineId Id="3304" Count="0" />
@@ -402,7 +430,29 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3231" Count="4" />
       <LineId Id="3237" Count="1" />
       <LineId Id="3240" Count="1" />
-      <LineId Id="3243" Count="14" />
+      <LineId Id="3243" Count="0" />
+      <LineId Id="3246" Count="9" />
+      <LineId Id="3624" Count="1" />
+      <LineId Id="3650" Count="0" />
+      <LineId Id="3685" Count="0" />
+      <LineId Id="3628" Count="1" />
+      <LineId Id="3641" Count="0" />
+      <LineId Id="3645" Count="1" />
+      <LineId Id="3644" Count="0" />
+      <LineId Id="3672" Count="0" />
+      <LineId Id="3652" Count="4" />
+      <LineId Id="3636" Count="0" />
+      <LineId Id="3673" Count="0" />
+      <LineId Id="3657" Count="0" />
+      <LineId Id="3679" Count="0" />
+      <LineId Id="3659" Count="2" />
+      <LineId Id="3639" Count="0" />
+      <LineId Id="3674" Count="0" />
+      <LineId Id="3663" Count="0" />
+      <LineId Id="3678" Count="0" />
+      <LineId Id="3665" Count="2" />
+      <LineId Id="3662" Count="0" />
+      <LineId Id="3256" Count="1" />
       <LineId Id="203" Count="0" />
     </LineIds>
   </POU>
