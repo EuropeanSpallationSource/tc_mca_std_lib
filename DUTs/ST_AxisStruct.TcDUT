@@ -1,29 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <DUT Name="ST_AxisStruct" Id="{9732127f-85ab-48d1-a591-d13402fe3665}">
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
-
-//Control from SCADA
     control : ST_AxisControl;
-
-//Outputs/Status
     status : ST_AxisStatus;
-
-//Axis Parameters
     config : ST_AxisConfig;
-
-//Axis Inputs
     inputs : ST_AxisInputs;
-
-//Axis Ref
-    Axis : AXIS_REF;       //The NC axis link to the hardware this is controlling
-
-//Gearing Parameters
-    stMasterAxis : ST_GearAxis;                         //A reference to the axis that this is a slave of
-    stMultiMasterAxis : ARRAY [1..4] OF ST_GearAxis;                         //A reference to the axis that this is a slave of
-    fSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
-    fMultiSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL;
+    Axis : AXIS_REF;       // The NC axis link to the hardware this is controlling
 END_STRUCT
 END_TYPE
 ]]></Declaration>
