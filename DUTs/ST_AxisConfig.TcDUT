@@ -3,19 +3,21 @@
   <DUT Name="ST_AxisConfig" Id="{e00fe310-8ff8-452a-800a-823efa83b1a3}">
     <Declaration><![CDATA[TYPE ST_AxisConfig :
 STRUCT
-
-    //Axis Parameters
-    fOverride : LREAL := 100;   //Controller override %, used a global scale for an axis in terms of velocity etc. Generally set to 100%.
-    fVelocity : LREAL;          //Velocity must be specified, no default used
-    fAcceleration : LREAL;          //Not all FBs use, need to change this, 0 is NC default
+    fOverride : LREAL := 100; //Controller override %, used a global scale for an axis in terms of velocity etc. Generally set to 100%.
+    fVelocity : LREAL; //Velocity must be specified, no default used
+    fAcceleration : LREAL; //Not all FBs use, need to change this, 0 is NC default
     fDeceleration : LREAL;
-    fPosition : LREAL;          //The position to move to for an absolute move and the amount to move in a relative move
-    fHomePosition : LREAL;          //The position that the axis should be set to once homing is completed
-    nHomeSeq : UINT;           //Homing sequence to perform
-
-    //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
-    eRestorePosition : RestorePosition;
-
+    fPosition : LREAL; //The position to move to for an absolute move and the amount to move in a relative move
+    fHomePosition : LREAL; //The position that the axis should be set to once homing is completed
+    nHomeSeq : UINT; //Homing sequence to perform
+    eRestorePosition : RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
+ 	// Single master axis parameters
+    stMasterAxis : ST_GearAxis; // A reference to the axis that this is a slave of
+    fSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
+ 	// Multi master axis parameters
+    aMultiMasterAxis : ARRAY [1..4] OF ST_GearAxis;
+    aMultiMasterAxisLatched : ARRAY [1..4] OF ST_GearAxis;	//A kind of readback since one doesn't exist in AXIS_REF
+    aMultiSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
