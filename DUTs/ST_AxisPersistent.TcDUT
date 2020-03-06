@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisPersistent :
 STRUCT
 
-    /////////Settings for restoring positions on power off/////////
+    // Settings for restoring positions on power off 
     iPositionAtShutdown : LREAL;  //The position that the axis was at when CPU shut down
     bMovingAtShutdown   : BOOL;   //True if the axis was moving at shutdown, False otherwise
 
