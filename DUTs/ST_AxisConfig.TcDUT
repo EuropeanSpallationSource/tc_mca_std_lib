@@ -11,12 +11,12 @@ STRUCT
     fHomePosition : LREAL; //The position that the axis should be set to once homing is completed
     nHomeSeq : UINT; //Homing sequence to perform
     eRestorePosition : RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
- 	// Single master axis parameters
+    // Single master axis parameters
     stMasterAxis : ST_GearAxis; // A reference to the axis that this is a slave of
     fSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
- 	// Multi master axis parameters
+    // Multi master axis parameters
     aMultiMasterAxis : ARRAY [1..4] OF ST_GearAxis;
-    aMultiMasterAxisLatched : ARRAY [1..4] OF ST_GearAxis;	//A kind of readback since one doesn't exist in AXIS_REF
+    aMultiMasterAxisLatched : ARRAY [1..4] OF ST_GearAxis;  //A kind of readback since one doesn't exist in AXIS_REF
     aMultiSlaveAxisRatio : ARRAY [1..GVL_APP.axisNum] OF LREAL;
 END_STRUCT
 END_TYPE]]></Declaration>
