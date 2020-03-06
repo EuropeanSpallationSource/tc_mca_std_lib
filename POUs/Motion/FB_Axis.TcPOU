@@ -95,7 +95,6 @@ fbGearInMultiMaster(Slave:=stAxisStruct.Axis,
     Master2:=GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[2].nIndex].Axis,
 	Master3:=GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[3].nIndex].Axis,
     Master4:=GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[4].nIndex].Axis);
-fbGearInMultiMaster.Enable := FALSE;
 
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
@@ -104,9 +103,9 @@ stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
 
 FOR i:=1 TO GVL_APP.axisNum DO
-    IF stAxisStruct.config.fSlaveAxisRatio[i]<>0 THEN
-        stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.config.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
-        stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.config.fSlaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
+    IF stAxisStruct.config.aMultiSlaveAxisRatio[i]<>0 THEN
+        stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.config.aMultiSlaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
+        stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.config.aMultiSlaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
     END_IF
 END_FOR
 
@@ -186,36 +185,28 @@ CASE stAxisStruct.control.eCommand OF
 
     MotionFunctions.GearInMultiMaster:
 		IF stAxisStruct.control.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
-			IF stAxisStruct.config.aMultiMasterAxis[1].nIndex > 0 AND stAxisStruct.config.aMultiMasterAxis[1].nIndex <= gvl_app.axisNum THEN 
-				stAxisStruct.config.aMultiMasterAxisLatched[1].nIndex:=stAxisStruct.config.aMultiMasterAxis[1].nIndex;
-			END_IF
-			
-			IF stAxisStruct.config.aMultiMasterAxis[2].nIndex > 0 AND stAxisStruct.config.aMultiMasterAxis[2].nIndex <= gvl_app.axisNum THEN 		
-				stAxisStruct.config.aMultiMasterAxisLatched[2].nIndex:=stAxisStruct.config.aMultiMasterAxis[2].nIndex;
-			END_IF
-	
-			IF stAxisStruct.config.aMultiMasterAxis[3].nIndex > 0 AND stAxisStruct.config.aMultiMasterAxis[3].nIndex <= gvl_app.axisNum THEN 		
-				stAxisStruct.config.aMultiMasterAxisLatched[3].nIndex:=stAxisStruct.config.aMultiMasterAxis[3].nIndex;
-			END_IF
-			
-			IF stAxisStruct.config.aMultiMasterAxis[4].nIndex > 0 AND stAxisStruct.config.aMultiMasterAxis[4].nIndex <= gvl_app.axisNum THEN 
-				stAxisStruct.config.aMultiMasterAxisLatched[4].nIndex:=stAxisStruct.config.aMultiMasterAxis[4].nIndex;  	
-			END_IF
-
-			stAxisStruct.config.aMultiMasterAxisLatched[1].fRatio:=stAxisStruct.config.aMultiMasterAxis[1].fRatio;
-			stAxisStruct.config.aMultiMasterAxisLatched[2].fRatio:=stAxisStruct.config.aMultiMasterAxis[2].fRatio;
-			stAxisStruct.config.aMultiMasterAxisLatched[3].fRatio:=stAxisStruct.config.aMultiMasterAxis[3].fRatio;
-			stAxisStruct.config.aMultiMasterAxisLatched[4].fRatio:=stAxisStruct.config.aMultiMasterAxis[3].fRatio;			
+			// Latch master references
+			FOR i:= 1 TO 4 DO
+				IF stAxisStruct.config.aMultiMasterAxis[i].nIndex > 0 AND stAxisStruct.config.aMultiMasterAxis[i].nIndex <= gvl_app.axisNum THEN 
+					stAxisStruct.config.aMultiMasterAxisLatched[i].nIndex:=stAxisStruct.config.aMultiMasterAxis[i].nIndex;
+				END_IF
+			END_FOR
+			// Latch gear ratios
+			FOR i:= 1 TO 4 DO
+				stAxisStruct.config.aMultiMasterAxisLatched[i].fRatio:=stAxisStruct.config.aMultiMasterAxis[i].fRatio;
+			END_FOR
+			// Transfer gear ratios to FB
 			fbGearInMultiMaster.GearRatio1:=stAxisStruct.config.aMultiMasterAxisLatched[1].fRatio;
 			fbGearInMultiMaster.GearRatio2:=stAxisStruct.config.aMultiMasterAxisLatched[2].fRatio;
 			fbGearInMultiMaster.GearRatio3:=stAxisStruct.config.aMultiMasterAxisLatched[3].fRatio;		
 			fbGearInMultiMaster.GearRatio4:=stAxisStruct.config.aMultiMasterAxisLatched[4].fRatio;	
-		END_IF
 		
-		fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
+			fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
+		END_IF
 		
     MotionFunctions.GearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
+		fbGearInMultiMaster.Enable := FALSE;
 
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
@@ -397,7 +388,6 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3578" Count="1" />
       <LineId Id="3582" Count="0" />
       <LineId Id="3580" Count="0" />
-      <LineId Id="3522" Count="0" />
       <LineId Id="3268" Count="0" />
       <LineId Id="3067" Count="70" />
       <LineId Id="3139" Count="9" />
@@ -408,16 +398,22 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3532" Count="0" />
       <LineId Id="3534" Count="0" />
       <LineId Id="3788" Count="0" />
-      <LineId Id="3790" Count="14" />
+      <LineId Id="3876" Count="0" />
+      <LineId Id="3882" Count="0" />
+      <LineId Id="3790" Count="2" />
       <LineId Id="3868" Count="0" />
+      <LineId Id="3877" Count="0" />
+      <LineId Id="3873" Count="0" />
       <LineId Id="3805" Count="0" />
-      <LineId Id="3869" Count="2" />
+      <LineId Id="3874" Count="1" />
       <LineId Id="3808" Count="3" />
+      <LineId Id="3880" Count="0" />
+      <LineId Id="3879" Count="0" />
       <LineId Id="3806" Count="0" />
-      <LineId Id="3564" Count="0" />
-      <LineId Id="3153" Count="0" />
       <LineId Id="3533" Count="0" />
-      <LineId Id="3154" Count="3" />
+      <LineId Id="3154" Count="1" />
+      <LineId Id="3881" Count="0" />
+      <LineId Id="3156" Count="1" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="0" />
       <LineId Id="3693" Count="0" />
