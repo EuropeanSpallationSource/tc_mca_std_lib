@@ -203,6 +203,9 @@ CASE stAxisStruct.control.eCommand OF
 
             fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
         END_IF
+		IF fbGearInMultiMaster.Error THEN
+			fbGearInMultiMaster.Enable := FALSE;
+		END_IF
 
     MotionFunctions.GearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
@@ -410,6 +413,7 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3880" Count="0" />
       <LineId Id="3879" Count="0" />
       <LineId Id="3806" Count="0" />
+      <LineId Id="3935" Count="2" />
       <LineId Id="3533" Count="0" />
       <LineId Id="3154" Count="1" />
       <LineId Id="3881" Count="0" />
