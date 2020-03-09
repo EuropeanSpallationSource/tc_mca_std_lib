@@ -203,9 +203,9 @@ CASE stAxisStruct.control.eCommand OF
 
             fbGearInMultiMaster.Enable := stAxisStruct.control.bExecute;
         END_IF
-		IF fbGearInMultiMaster.Error THEN
-			fbGearInMultiMaster.Enable := FALSE;
-		END_IF
+        IF fbGearInMultiMaster.Error THEN
+            fbGearInMultiMaster.Enable := FALSE;
+        END_IF
 
     MotionFunctions.GearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
