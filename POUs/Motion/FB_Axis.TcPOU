@@ -46,6 +46,7 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
+    fbSetPosition : MC_SetPosition;
 
     // Kept static as numerator is LREAL and consistent with multigearing
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
@@ -91,6 +92,9 @@ fbGearIn.Execute := FALSE;
 
 fbGearOut(Slave:=stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
+
+fbSetPosition(Axis:=StAxisStruct.Axis);
+fbSetPosition.Execute := FALSE;
 
 stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
@@ -184,6 +188,10 @@ CASE stAxisStruct.control.eCommand OF
             //Clear slave ratio from master axis slave array
             GVL.axes[stMasterAxis.index].slaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
+        
+    MotionFunctions.SetPosition:
+        fbSetPosition.Position := stAxisStruct.config.fPosition;
+        fbSetPosition.Execute := stAxisStruct.control.bExecute;
 
     MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
@@ -316,13 +324,18 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3317" Count="0" />
       <LineId Id="3065" Count="1" />
       <LineId Id="3268" Count="0" />
-      <LineId Id="3067" Count="81" />
+      <LineId Id="3067" Count="1" />
+      <LineId Id="3371" Count="0" />
+      <LineId Id="3370" Count="0" />
+      <LineId Id="3372" Count="0" />
+      <LineId Id="3069" Count="79" />
       <LineId Id="3276" Count="0" />
       <LineId Id="3149" Count="1" />
       <LineId Id="3275" Count="0" />
       <LineId Id="3152" Count="5" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="1" />
+      <LineId Id="3374" Count="3" />
       <LineId Id="3162" Count="29" />
       <LineId Id="3304" Count="0" />
       <LineId Id="3192" Count="2" />

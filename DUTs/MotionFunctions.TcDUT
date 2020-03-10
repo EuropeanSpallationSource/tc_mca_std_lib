@@ -13,6 +13,7 @@ TYPE MotionFunctions :
     MoveModulo      := 4, //Move for 360 deg rotation, see Beckhoff docs
     GearIn          := 5, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
     GearOut         := 6, //Removes gearing set in the above command
+    SetPosition := 8,
     Home            := 10 //Run the homing routine for the axis
 ):=Jog; //Jog is the default behaviour of the axis.
 END_TYPE
