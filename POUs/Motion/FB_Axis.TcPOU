@@ -192,6 +192,7 @@ CASE stAxisStruct.control.eCommand OF
     MotionFunctions.SetPosition:
         fbSetPosition.Position := stAxisStruct.config.fPosition;
         fbSetPosition.Execute := stAxisStruct.control.bExecute;
+        stAxisStruct.status.bDone := fbSetPosition.Done;
 
     MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
@@ -335,7 +336,7 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3152" Count="5" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="1" />
-      <LineId Id="3374" Count="3" />
+      <LineId Id="3374" Count="4" />
       <LineId Id="3162" Count="29" />
       <LineId Id="3304" Count="0" />
       <LineId Id="3192" Count="2" />
