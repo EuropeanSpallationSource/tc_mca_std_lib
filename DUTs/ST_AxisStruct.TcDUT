@@ -24,7 +24,7 @@ STRUCT
 
 //////Gearing Parameters///////
     masterAxis          :   ST_GearAxis;                         //A reference to the axis that this is a slave of
-    slaveAxisRatio      :   ARRAY [1..GVL_APP.axisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
+    slaveAxisRatio      :   ARRAY [1..GVL_APP.nAxisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
 
 END_STRUCT
 END_TYPE

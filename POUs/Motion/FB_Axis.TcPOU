@@ -95,7 +95,7 @@ fbGearOut.Execute := FALSE;
 stAxisStruct.status.bFwEnabled := stAxisStruct.inputs.bLimitFwd;
 stAxisStruct.status.bBwEnabled := stAxisStruct.inputs.bLimitBwd;
 
-FOR i:=1 TO GVL_APP.axisNum DO
+FOR i:=1 TO GVL_APP.nAxisNum DO
     IF (stAxisStruct.slaveAxisRatio[i]<>0) THEN
         stAxisStruct.status.bFwEnabled := stAxisStruct.status.bFwEnabled AND SEL(stAxisStruct.slaveAxisRatio[i]>0, GVL.axes[i].status.bBwEnabled, GVL.axes[i].status.bFwEnabled);
         stAxisStruct.status.bBwEnabled := stAxisStruct.status.bBwEnabled AND SEL(stAxisStruct.slaveAxisRatio[i]>0, GVL.axes[i].status.bFwEnabled, GVL.axes[i].status.bBwEnabled);
