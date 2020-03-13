@@ -190,7 +190,7 @@ CASE stAxisStruct.control.eCommand OF
         END_IF
         
     MotionFunctions.SetPosition:
-        fbSetPosition.Position := stAxisStruct.config.fPosition;
+        fbSetPosition.Position := stAxisStruct.config.fExtActPos;
         fbSetPosition.Execute := stAxisStruct.control.bExecute;
         stAxisStruct.status.bDone := fbSetPosition.Done;
 
