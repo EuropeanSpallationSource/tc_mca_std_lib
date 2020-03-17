@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <GVL Name="GVL" Id="{913e21aa-a47e-444c-bfce-679b16c0434b}">
     <Declaration><![CDATA[VAR_GLOBAL
-    axes            :   ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct;    //Global array of axisControl structure for holding axis parameters and controls
+    axes            :   ARRAY [1..GVL_APP.nAxisNum] OF ST_AxisStruct;    //Global array of axisControl structure for holding axis parameters and controls
     iAxis           :   UINT;                                           //Index for running axis
 
 END_VAR
@@ -13,7 +13,7 @@ VAR_GLOBAL CONSTANT
 END_VAR
 
 VAR_GLOBAL PERSISTENT
-    axesPersistent  : ARRAY [1..gvl_app.nAXIS_NUM] OF ST_AxisPersistent;
+    axesPersistent  : ARRAY [1..gvl_app.nAxisNum] OF ST_AxisPersistent;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
