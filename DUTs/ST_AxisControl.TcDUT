@@ -3,18 +3,14 @@
   <DUT Name="ST_AxisControl" Id="{c02b2c99-be98-4acd-b0cb-dc10c1ff77f2}">
     <Declaration><![CDATA[TYPE ST_AxisControl :
 STRUCT
-
-    ///////Actions from EPICS/NICOS/////////
-    bExecute            :   BOOL;           //Rising edge to execute move absolute
-    bReset              :   BOOL;           //Reset axis signal, must be combined with other signals
-    bStop               :   BOOL;           //Stop axis movement
-    bEnable             :   BOOL;           //Controller enable
-    eCommand            :   MotionFunctions;
-
-    ///////Actions not used in control system////////
-    bJogFwd             :   BOOL;           //Jog forward
-    bJogBwd             :   BOOL;           //Jog backward
-
+    //Actions from controls system
+    bExecute: BOOL; //Rising edge to execute some motion FB's
+    bReset: BOOL; //Reset axis from Error state
+    bStop: BOOL;
+    bEnable: BOOL; //Enable axis drive
+    bJogFwd: BOOL;
+    bJogBwd: BOOL;
+	eCommand: E_MotionFunctions;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
