@@ -16,7 +16,7 @@ VAR_IN_OUT
     Axis: AXIS_REF;
 END_VAR
 VAR_OUTPUT
-    bHomed:BOOL;
+    bHomed: BOOL;
     bError: BOOL;
     bWarning: BOOL;
     nErrorId: UDINT;
@@ -26,15 +26,18 @@ VAR
     bReadNcVelocities: BOOL;
     nHomeProcLocal: UINT := 0;
     nHomingState: INT := 0;
-    fbExecuteRiseEdge: R_TRIG;
-    fbHomingParameter: MC_HomingParameter;
-    fbLimitSwRef: MC_Ref_Signal_Ref;
-    fbLimitSwRef2: MC_Ref_Signal_Ref;
-    fbHomeSwRef: MC_Ref_Signal_Ref;
-    fbIndexRef: MC_Ref_Signal_Ref;
+	tLimit: TIME :=  T#0H10M;
+//Homing Structures
+    stTrigger: TRIGGER_REF;
+    stLimitSwRef: MC_Ref_Signal_Ref;
+    stLimitSwRef2: MC_Ref_Signal_Ref;
+    stHomeSwRef: MC_Ref_Signal_Ref;
+    stIndexRef: MC_Ref_Signal_Ref;
+	stHomingParameter: MC_HomingParameter;
     stOptions2: ST_Home_Options2;
     stOptions4: ST_Home_Options4;
-    tLimit: TIME :=  T#0H10M;
+//Homing FB's	
+    fbExecuteRiseEdge: R_TRIG;
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
     fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
@@ -43,34 +46,43 @@ VAR
     fbAbortHoming: MC_AbortHoming;
     fbFinishHoming: MC_FinishHoming;
     fbHomeReadNCVelocities: FB_HomeReadNCVelocities;
+	
 
-    stTrigger: TRIGGER_REF;
-    fbTouchProbe: MC_TouchProbe;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF bReset THEN
-    bError:=FALSE;
-    bWarning:=FALSE;
-    bReadNcVelocities:=FALSE;
-    bHomingInProgress:=FALSE;
-    fbAbortHoming.Execute:=FALSE;
-    nErrorId:=0;
-    nHomingState:=0;
+      <ST><![CDATA[fbExecuteRiseEdge();
+fbStepLimitSwitch(Axis:= Axis, Parameter:= stHomingParameter);
+fbStepLimitSwitchDetection(Axis:= Axis, Parameter:= stHomingParameter);
+fbStepAbsoluteSwitch(Axis:= Axis, Parameter:= stHomingParameter);
+fbStepReferencePulse(Axis:= Axis, Parameter:= stHomingParameter);
+fbHomeDirect(Axis:= Axis, Parameter:= stHomingParameter);
+fbAbortHoming(Axis:= Axis, Parameter:= stHomingParameter);
+fbFinishHoming(Axis:= Axis, Parameter:= stHomingParameter);
+fbHomeReadNCVelocities(Axis:= Axis);
+
+IF bReset THEN
+    bError := FALSE;
+    bWarning := FALSE;
+    bReadNcVelocities := FALSE;
+    bHomingInProgress := FALSE;
+    fbAbortHoming.Execute := FALSE;
+    nErrorId := 0;
+    nHomingState := 0;
 END_IF
 
 IF bStop THEN
-    bReadNcVelocities:=FALSE;
-    bHomingInProgress:=FALSE;
-    nHomingState:=0;
+    bReadNcVelocities := FALSE;
+    bHomingInProgress := FALSE;
+    nHomingState := 0;
 END_IF
 
-fbExecuteRiseEdge(CLK:=bExecute);
+fbExecuteRiseEdge.CLK := bExecute;
 IF fbExecuteRiseEdge.Q THEN
-    bHomingInProgress:=TRUE;
-    bReadNcVelocities:=TRUE;
-    fbAbortHoming.Execute:=FALSE;
-    nHomeProcLocal:=nHomeProc;
-    CASE nHomeProcLocal OF
+    bHomingInProgress := TRUE;
+    bReadNcVelocities := TRUE;
+    fbAbortHoming.Execute := FALSE;
+    nHomeProcLocal := nHomeProc;
+(*   CASE nHomeProcLocal OF
       //0X: LIMIT Switch
       01: //Home to bBwdLimit (reverse off limit)
       02: //Home to bFwdLimit (reverse off limit)
@@ -87,12 +99,12 @@ IF fbExecuteRiseEdge.Q THEN
       23: //Home to EncRefPulse via bBwdLimit (two speeds)
       24: //Home to EncRefPulse via bFwdLimit (two speeds)
       //9X: Software
-      90: //Home direct to value
-    ELSE
+      90: //Home direct to value *)
+ELSE
       bError:=TRUE;
       bHomingInProgress := FALSE;
       nErrorId:=16#4FFF;
-  END_CASE
+  //END_CASE
 END_IF
 
 IF bHomingInProgress AND fbHomeReadNcVelocities.bDone AND NOT bError THEN
@@ -331,114 +343,158 @@ ELSE
     nHomingState:=0;
 END_IF
 
-fbHomeReadNCVelocities(
-    En:=TRUE,
-    bExecute:=bReadNCVelocities,
-    bReset:=bReset,
-    Axis:=Axis );
+//fbHomeReadNCVelocities
+fbHomeReadNCVelocities.bExecute := bReadNCVelocities;
+fbHomeReadNCVelocities.bReset := bReset;
 
+//Advance Homing options
 StOptions2.DisableDriveAccess:=TRUE;
 StOptions4.DisableDriveAccess:=TRUE;
 stOptions4.EnableLagErrorDetection:=TRUE;
 
+//stLimitSwRef
 IF fbStepLimitSwitch.Direction=mcPositiveDirection THEN
-    fbLimitSwRef.Level:=NOT(bLimitFwd);
+    stLimitSwRef.Level:=NOT(bLimitFwd);
 ELSIF fbStepLimitSwitch.Direction=mcNegativeDirection THEN
-    fbLimitSwRef.Level:=NOT(bLimitBwd);
+    stLimitSwRef.Level:=NOT(bLimitBwd);
 END_IF
-fbStepLimitSwitch(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    LimitSwitchSignal:= fbLimitSwRef,
-    Options:= StOptions4);
 
+//stLimitSwRef2
 IF fbStepLimitSwitchDetection.Direction=mcPositiveDirection THEN
-    fbLimitSwRef2.Level:=NOT(bLimitFwd);
+    stLimitSwRef2.Level:=NOT(bLimitFwd);
 ELSIF fbStepLimitSwitchDetection.Direction=mcNegativeDirection THEN
-    fbLimitSwRef2.Level:=NOT(bLimitBwd);
-END_IF
-fbStepLimitSwitchDetection(
-    Axis:= AXIS,
-    Parameter:= fbHomingParameter,
-    Execute:= ,
-    Direction:= ,
-    LimitSwitchMode:= ,
-    LimitSwitchSignal:= fbLimitSwRef2,
-    TimeLimit:= tLimit,
-    Options:= StOptions4);
-
-fbHomeSwRef.Level:=bHomeSensor;
-fbHomeSwRef.TouchProbe:=PlcEvent;
-fbHomeSwRef.SignalSource:=SignalSource_Default;
-fbStepAbsoluteSwitch(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    ReferenceSignal:= fbHomeSwRef,
-    TimeLimit:= tLimit,
-    PositiveLimitSwitch:=NOT(bLimitFwd),
-    NegativeLimitSwitch:=NOT(bLimitBwd),
-    Options:= StOptions4);
-
-fbIndexRef.SignalSource:=SignalSource_ZeroPulse;
-fbIndexRef.TouchProbe:=TouchProbe1;
-fbStepReferencePulse(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    ReferenceSignal:= fbIndexRef,
-    TimeLimit:= tLimit,
-    Options:= StOptions4);
-
-fbHomeDirect(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Options:= StOptions2);
-
-fbFinishHoming(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Velocity:=,
-    Options:= StOptions2);
-
-fbAbortHoming(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Options:= StOptions2);
-
-IF fbStepLimitSwitch.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepLimitSwitch.ErrorID;
-ELSIF fbStepLimitSwitchDetection.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepLimitSwitchDetection.ErrorID;
-ELSIF fbStepAbsoluteSwitch.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepAbsoluteSwitch.ErrorID;
-ELSIF fbStepReferencePulse.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepReferencePulse.ErrorID;
-ELSIF fbHomeDirect.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbHomeDirect.ErrorID;
-ELSIF fbAbortHoming.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbAbortHoming.ErrorID;
-ELSIF fbFinishHoming.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbFinishHoming.ErrorID;
+    stLimitSwRef2.Level:=NOT(bLimitBwd);
 END_IF
 
+//fbStepLimitSwitch
+fbStepLimitSwitch.LimitSwitchSignal := stLimitSwRef;
+fbStepLimitSwitch.Options := StOptions4;
+
+//fbStepLimitSwitchDetection
+fbStepLimitSwitchDetection.LimitSwitchSignal := stLimitSwRef2;
+fbStepLimitSwitchDetection.TimeLimit := tLimit;
+fbStepLimitSwitchDetection.Options := StOptions4;
+
+//stHomeSwRef
+stHomeSwRef.Level := bHomeSensor;
+stHomeSwRef.TouchProbe := PlcEvent;
+stHomeSwRef.SignalSource := SignalSource_Default;
+
+//fbStepAbsoluteSwitch
+fbStepAbsoluteSwitch.ReferenceSignal := stHomeSwRef;
+fbStepAbsoluteSwitch.TimeLimit := tLimit;
+fbStepAbsoluteSwitch.PositiveLimitSwitch := NOT(bLimitFwd);
+fbStepAbsoluteSwitch.NegativeLimitSwitch := NOT(bLimitBwd);
+fbStepAbsoluteSwitch.Options := StOptions4;
+
+//stIndexRef
+stIndexRef.SignalSource := SignalSource_ZeroPulse;
+stIndexRef.TouchProbe := TouchProbe1;
+
+//fbStepReferencePulse
+fbStepReferencePulse.ReferenceSignal := stIndexRef;
+fbStepReferencePulse.TimeLimit := tLimit;
+fbStepReferencePulse.Options := StOptions4;
+
+//fbHomeDirect
+fbHomeDirect.Options := StOptions2;
+
+//fbFinishHoming
+fbFinishHoming.Options := StOptions2;
+
+//fbAbortHoming
+fbAbortHoming.Options := StOptions2;
+
+//Home aborted
 IF fbStepLimitSwitch.CommandAborted OR fbStepLimitSwitchDetection.CommandAborted OR fbStepAbsoluteSwitch.CommandAborted OR fbStepReferencePulse.CommandAborted OR fbHomeDirect.CommandAborted THEN
-    nHomingState:=0;
-    bHomingInProgress:=FALSE;
-    bWarning:=TRUE;
+    nHomingState := 0;
+    bHomingInProgress := FALSE;
+    bWarning := TRUE;
 END_IF
 
-bHomed:=Axis.Status.Homed;]]></ST>
+//Homed status
+bHomed := Axis.Status.Homed;
+
+//Error handling
+IF fbStepLimitSwitch.Error THEN
+    bError := TRUE;
+    nErrorId := fbStepLimitSwitch.ErrorID;
+ELSIF fbStepLimitSwitchDetection.Error THEN
+    bError := TRUE;
+    nErrorId := fbStepLimitSwitchDetection.ErrorID;
+ELSIF fbStepAbsoluteSwitch.Error THEN
+    bError := TRUE;
+    nErrorId := fbStepAbsoluteSwitch.ErrorID;
+ELSIF fbStepReferencePulse.Error THEN
+    bError := TRUE;
+    nErrorId := fbStepReferencePulse.ErrorID;
+ELSIF fbHomeDirect.Error THEN
+    bError := TRUE;
+    nErrorId := fbHomeDirect.ErrorID;
+ELSIF fbAbortHoming.Error THEN
+    bError := TRUE;
+    nErrorId := fbAbortHoming.ErrorID;
+ELSIF fbFinishHoming.Error THEN
+    bError := TRUE;
+    nErrorId := fbFinishHoming.ErrorID;
+END_IF]]></ST>
     </Implementation>
     <LineIds Name="FB_Homing">
+      <LineId Id="4310" Count="0" />
+      <LineId Id="4287" Count="0" />
+      <LineId Id="4289" Count="0" />
+      <LineId Id="4307" Count="0" />
+      <LineId Id="4340" Count="0" />
+      <LineId Id="4343" Count="0" />
+      <LineId Id="4354" Count="0" />
+      <LineId Id="4357" Count="0" />
+      <LineId Id="4284" Count="0" />
+      <LineId Id="4358" Count="0" />
       <LineId Id="3852" Count="10" />
-      <LineId Id="3864" Count="373" />
-      <LineId Id="905" Count="0" />
+      <LineId Id="3864" Count="271" />
+      <LineId Id="4290" Count="0" />
+      <LineId Id="4136" Count="0" />
+      <LineId Id="4139" Count="0" />
+      <LineId Id="4291" Count="0" />
+      <LineId Id="4141" Count="3" />
+      <LineId Id="4292" Count="0" />
+      <LineId Id="4145" Count="5" />
+      <LineId Id="4298" Count="5" />
+      <LineId Id="4295" Count="0" />
+      <LineId Id="4304" Count="0" />
+      <LineId Id="4294" Count="0" />
+      <LineId Id="4154" Count="1" />
+      <LineId Id="4297" Count="0" />
+      <LineId Id="4296" Count="0" />
+      <LineId Id="4168" Count="2" />
+      <LineId Id="4305" Count="0" />
+      <LineId Id="4171" Count="3" />
+      <LineId Id="4335" Count="0" />
+      <LineId Id="4177" Count="0" />
+      <LineId Id="4336" Count="0" />
+      <LineId Id="4179" Count="3" />
+      <LineId Id="4337" Count="0" />
+      <LineId Id="4183" Count="2" />
+      <LineId Id="4339" Count="0" />
+      <LineId Id="4338" Count="0" />
+      <LineId Id="4189" Count="2" />
+      <LineId Id="4361" Count="0" />
+      <LineId Id="4192" Count="0" />
+      <LineId Id="4359" Count="0" />
+      <LineId Id="4363" Count="0" />
+      <LineId Id="4362" Count="0" />
+      <LineId Id="4360" Count="0" />
+      <LineId Id="4365" Count="0" />
+      <LineId Id="4364" Count="0" />
+      <LineId Id="4206" Count="0" />
+      <LineId Id="4367" Count="0" />
+      <LineId Id="4374" Count="0" />
+      <LineId Id="4368" Count="4" />
+      <LineId Id="4376" Count="0" />
+      <LineId Id="4373" Count="0" />
+      <LineId Id="4366" Count="0" />
+      <LineId Id="4375" Count="0" />
+      <LineId Id="4208" Count="22" />
     </LineIds>
   </POU>
 </TcPlcObject>
