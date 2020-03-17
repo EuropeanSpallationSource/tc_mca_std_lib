@@ -125,21 +125,21 @@ IF stAxisStruct.control.bReset AND NOT (stAxisStruct.status.bError OR stAxisStru
 END_IF
 
 CASE stAxisStruct.control.eCommand OF
-    MotionFunctions.MoveAbsolute:
+    E_MotionFunctions.MoveAbsolute:
         fbMoveAbsolute.Execute := stAxisStruct.control.bExecute;
         fbMoveAbsolute.Position := stAxisStruct.config.fPosition;
         fbMoveAbsolute.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveAbsolute.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveAbsolute.Deceleration := stAxisStruct.config.fDeceleration;
 
-    MotionFunctions.MoveRelative:
+    E_MotionFunctions.MoveRelative:
         fbMoveRelative.Execute := stAxisStruct.control.bExecute;
         fbMoveRelative.Distance := stAxisStruct.config.fPosition;
         fbMoveRelative.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveRelative.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveRelative.Deceleration := stAxisStruct.config.fDeceleration;
 
-    MotionFunctions.Jog:
+    E_MotionFunctions.Jog:
         fbJog.JogForward := stAxisStruct.control.bJogFwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.JogBackwards := stAxisStruct.control.bJogBwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.Mode := 0;
@@ -147,14 +147,14 @@ CASE stAxisStruct.control.eCommand OF
         fbJog.Acceleration := stAxisStruct.config.fAcceleration;
         fbJog.Deceleration := stAxisStruct.config.fDeceleration;
 
-    MotionFunctions.MoveVelocity:
+    E_MotionFunctions.MoveVelocity:
         fbMoveVelocity.Execute := stAxisStruct.control.bExecute;
         fbMoveVelocity.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveVelocity.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveVelocity.Deceleration := stAxisStruct.config.fDeceleration;
         fbMoveVelocity.Direction := SEL(stAxisStruct.config.fVelocity<0, MC_Positive_Direction, MC_Negative_Direction);
 
-    MotionFunctions.Movemodulo:
+    E_MotionFunctions.Movemodulo:
         fbMoveModulo.Execute := stAxisStruct.control.bExecute;
         fbMoveModulo.Position := stAxisStruct.config.fPosition;
         fbMoveModulo.Velocity := ABS(stAxisStruct.config.fVelocity);
@@ -162,7 +162,7 @@ CASE stAxisStruct.control.eCommand OF
         fbMoveModulo.Deceleration := stAxisStruct.config.fDeceleration;
 
 
-    MotionFunctions.GearIn:
+    E_MotionFunctions.GearIn:
         fbGearIn.Execute := stAxisStruct.control.bExecute;
         fbGearIn.RatioNumerator := stMasterAxis.Ratio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
@@ -177,7 +177,7 @@ CASE stAxisStruct.control.eCommand OF
             GVL.axes[stMasterAxis.index].slaveAxisRatio[GVL.iAxis] := stMasterAxis.ratio;
         END_IF
 
-    MotionFunctions.GearOut:
+    E_MotionFunctions.GearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
 
         IF fbGearOut.Done THEN
@@ -185,7 +185,7 @@ CASE stAxisStruct.control.eCommand OF
             GVL.axes[stMasterAxis.index].slaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_IF
 
-    MotionFunctions.Home:
+    E_MotionFunctions.Home:
         fbHome.bExecute := stAxisStruct.control.bExecute;
         fbHome.bReset := stAxisStruct.control.bReset;
         fbHome.bStop := stAxisStruct.control.bStop;
@@ -193,7 +193,6 @@ CASE stAxisStruct.control.eCommand OF
         fbHome.fHomePosition := stAxisStruct.config.fHomePosition;
         fbHome.bLimitBwd := stAxisStruct.inputs.bLimitBwd;
         fbHome.bLimitFwd := stAxisStruct.inputs.bLimitFwd;
-        fbHome.bEncLatch := stAxisStruct.inputs.bEncLatch;
         fbHome.bHomeSensor := stAxisStruct.inputs.bHomeSensor;
         fbHome.fHomePosition := 0;
         stAxisStruct.status.bHomed := fbHome.bHomed;
@@ -323,7 +322,8 @@ stAxisStruct.control.bExecute := FALSE;]]></ST>
       <LineId Id="3152" Count="5" />
       <LineId Id="3278" Count="0" />
       <LineId Id="3158" Count="1" />
-      <LineId Id="3162" Count="29" />
+      <LineId Id="3162" Count="8" />
+      <LineId Id="3172" Count="19" />
       <LineId Id="3304" Count="0" />
       <LineId Id="3192" Count="2" />
       <LineId Id="3305" Count="0" />

@@ -9,7 +9,6 @@ VAR_INPUT
     nHomeProc: UINT;
     bLimitBwd: BOOL;
     bLimitFwd: BOOL;
-    bEncLatch: BOOL;
     bHomeSensor: BOOL;
     fHomePosition: LREAL;
 END_VAR
