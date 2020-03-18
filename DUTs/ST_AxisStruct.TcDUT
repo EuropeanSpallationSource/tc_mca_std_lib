@@ -3,21 +3,11 @@
   <DUT Name="ST_AxisStruct" Id="{9732127f-85ab-48d1-a591-d13402fe3665}">
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
-//Control from controls system
-    control: ST_AxisControl;
-//Outputs/Status
-    status: ST_AxisStatus;
-//Axis Parameters
-    description: ST_AxisDescription;
-    config: ST_AxisConfig;
-//Axis Inputs
-    inputs: ST_AxisInputs;
-//Gearing Parameters
-    masterAxis: ST_GearAxis; //A reference to the axis that this is a slave of
-    slaveAxisRatio: ARRAY [1..GVL_APP.nAxisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
-
-//Axis Ref
-    Axis: AXIS_REF; //The NC link to the hardware that is controlling
+    control : ST_AxisControl;
+    status : ST_AxisStatus;
+    config : ST_AxisConfig;
+    inputs : ST_AxisInputs;
+    Axis : AXIS_REF; // The NC axis link to the hardware this is controlling
 END_STRUCT
 END_TYPE
 ]]></Declaration>
