@@ -46,8 +46,6 @@ VAR
     fbAbortHoming: MC_AbortHoming;
     fbFinishHoming: MC_FinishHoming;
     fbHomeReadNCVelocities: FB_HomeReadNCVelocities;
-
-
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[fbExecuteRiseEdge();

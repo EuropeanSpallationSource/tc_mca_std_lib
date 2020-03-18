@@ -8486,10 +8486,10 @@ GVL.axes[Main.hmiAxisSelection].control.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogBwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogBwd:= FALSE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -8499,10 +8499,10 @@ GVL.axes[Main.hmiAxisSelection].control.bExecute:=TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogBwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogBwd:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -8685,10 +8685,10 @@ GVL.axes[Main.hmiAxisSelection].control.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogFwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogFwd:= FALSE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -8698,10 +8698,10 @@ GVL.axes[Main.hmiAxisSelection].control.bExecute:=TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogFwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.axes[Main.hmiAxisSelection].control.bJogFwd:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
