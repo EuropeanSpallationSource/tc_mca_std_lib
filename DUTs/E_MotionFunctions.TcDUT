@@ -5,15 +5,16 @@
 {attribute 'strict'}
 TYPE E_MotionFunctions :
 (
-    MoveAbsolute := 0, //Move to a set position
-    MoveRelative := 1, //Move a set distance
-    Jog := 2, //Continous moving in the direction specified by bJogFwd or bJogBwd as long as one is high. Will stop if bExecute goes high. Generally not called by an external control system.
-    MoveVelocity := 3, //Continous moving at a set velocity once bExecute goes high
-    MoveModulo := 4, //Move for 360 deg rotation, see Beckhoff docs
-    GearIn := 5, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
-    GearOut := 6, //Removes gearing set in the above command
-    Home := 10 //Run the homing routine for the axis
-) := Jog; //Jog is the default behaviour of the axis.
+    eMoveAbsolute := 0, //Move to a set position
+    eMoveRelative := 1, //Move a set distance
+    eJog := 2, //Continous moving in the direction specified by bJogFwd or bJogBwd as long as one is high. Will stop if bExecute goes high. Generally not called by an external control system.
+    eMoveVelocity := 3, //Continous moving at a set velocity once bExecute goes high
+    eMoveModulo := 4, //Move for 360 deg rotation, see Beckhoff docs
+    eGearIn := 5, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
+    eGearOut := 6, //Removes gearing set in the above command
+	eGearInMultiMaster := 7, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
+    eHome := 10 //Run the homing routine for the axis
+) := eJog; //Jog is the default behaviour of the axis.
 END_TYPE
 
 ]]></Declaration>

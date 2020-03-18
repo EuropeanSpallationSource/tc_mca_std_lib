@@ -131,21 +131,21 @@ IF stAxisStruct.control.bReset AND NOT (stAxisStruct.status.bError OR stAxisStru
 END_IF
 
 CASE stAxisStruct.control.eCommand OF
-    E_MotionFunctions.MoveAbsolute:
+    E_MotionFunctions.eMoveAbsolute:
         fbMoveAbsolute.Execute := stAxisStruct.control.bExecute;
         fbMoveAbsolute.Position := stAxisStruct.config.fPosition;
         fbMoveAbsolute.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveAbsolute.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveAbsolute.Deceleration := stAxisStruct.config.fDeceleration;
 
-    E_MotionFunctions.MoveRelative:
+    E_MotionFunctions.eMoveRelative:
         fbMoveRelative.Execute := stAxisStruct.control.bExecute;
         fbMoveRelative.Distance := stAxisStruct.config.fPosition;
         fbMoveRelative.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveRelative.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveRelative.Deceleration := stAxisStruct.config.fDeceleration;
 
-    E_MotionFunctions.Jog:
+    E_MotionFunctions.eJog:
         fbJog.JogForward := stAxisStruct.control.bJogFwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.JogBackwards := stAxisStruct.control.bJogBwd AND NOT (stAxisStruct.control.bExecute OR stAxisStruct.status.bError);
         fbJog.Mode := 0;
@@ -153,21 +153,21 @@ CASE stAxisStruct.control.eCommand OF
         fbJog.Acceleration := stAxisStruct.config.fAcceleration;
         fbJog.Deceleration := stAxisStruct.config.fDeceleration;
 
-    E_MotionFunctions.MoveVelocity:
+    E_MotionFunctions.eMoveVelocity:
         fbMoveVelocity.Execute := stAxisStruct.control.bExecute;
         fbMoveVelocity.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveVelocity.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveVelocity.Deceleration := stAxisStruct.config.fDeceleration;
         fbMoveVelocity.Direction := SEL(stAxisStruct.config.fVelocity<0, MC_Positive_Direction, MC_Negative_Direction);
 
-    E_MotionFunctions.Movemodulo:
+    E_MotionFunctions.eMoveModulo:
         fbMoveModulo.Execute := stAxisStruct.control.bExecute;
         fbMoveModulo.Position := stAxisStruct.config.fPosition;
         fbMoveModulo.Velocity := ABS(stAxisStruct.config.fVelocity);
         fbMoveModulo.Acceleration := stAxisStruct.config.fAcceleration;
         fbMoveModulo.Deceleration := stAxisStruct.config.fDeceleration;
 
-    E_MotionFunctions.GearIn:
+    E_MotionFunctions.eGearIn:
         fbGearIn.Execute := stAxisStruct.control.bExecute;
         fbGearIn.RatioNumerator := stMasterAxis.fRatio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
@@ -182,7 +182,7 @@ CASE stAxisStruct.control.eCommand OF
             GVL.aAxes[stMasterAxis.nIndex].config.aSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
         END_IF
 
-    E_MotionFunctions.GearInMultiMaster:
+    E_MotionFunctions.eGearInMultiMaster:
         IF stAxisStruct.control.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             // Latch master references
             FOR i:= 1 TO 4 DO
@@ -206,7 +206,7 @@ CASE stAxisStruct.control.eCommand OF
             fbGearInMultiMaster.Enable := FALSE;
         END_IF
 
-    E_MotionFunctions.GearOut:
+    E_MotionFunctions.eGearOut:
         fbGearOut.Execute:=  stAxisStruct.control.bExecute;
         fbGearInMultiMaster.Enable := FALSE;
 
@@ -219,7 +219,7 @@ CASE stAxisStruct.control.eCommand OF
             END_FOR
         END_IF
 
-    E_MotionFunctions.Home:
+    E_MotionFunctions.eHome:
         fbHome.bExecute := stAxisStruct.control.bExecute;
         fbHome.bReset := stAxisStruct.control.bReset;
         fbHome.bStop := stAxisStruct.control.bStop;
