@@ -26,17 +26,17 @@ VAR
     bReadNcVelocities: BOOL;
     nHomeProcLocal: UINT := 0;
     nHomingState: INT := 0;
-	tLimit: TIME :=  T#0H10M;
+    tLimit: TIME :=  T#0H10M;
 //Homing Structures
     stTrigger: TRIGGER_REF;
     stLimitSwRef: MC_Ref_Signal_Ref;
     stLimitSwRef2: MC_Ref_Signal_Ref;
     stHomeSwRef: MC_Ref_Signal_Ref;
     stIndexRef: MC_Ref_Signal_Ref;
-	stHomingParameter: MC_HomingParameter;
+    stHomingParameter: MC_HomingParameter;
     stOptions2: ST_Home_Options2;
     stOptions4: ST_Home_Options4;
-//Homing FB's	
+//Homing FB's
     fbExecuteRiseEdge: R_TRIG;
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
@@ -46,7 +46,7 @@ VAR
     fbAbortHoming: MC_AbortHoming;
     fbFinishHoming: MC_FinishHoming;
     fbHomeReadNCVelocities: FB_HomeReadNCVelocities;
-	
+
 
 END_VAR]]></Declaration>
     <Implementation>

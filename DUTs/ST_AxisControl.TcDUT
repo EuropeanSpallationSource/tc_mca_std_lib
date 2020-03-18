@@ -10,7 +10,7 @@ STRUCT
     bEnable: BOOL; //Enable axis drive
     bJogFwd: BOOL;
     bJogBwd: BOOL;
-	eCommand: E_MotionFunctions;
+    eCommand: E_MotionFunctions;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
