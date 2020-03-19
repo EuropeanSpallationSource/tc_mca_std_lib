@@ -213,7 +213,7 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.bExecute := stAxisStruct.stControl.bExecute;
         fbHome.bReset := stAxisStruct.stControl.bReset;
         fbHome.bStop := stAxisStruct.stControl.bStop;
-        fbHome.nHomeProc := stAxisStruct.stConfig.nHomeSeq;
+        fbHome.eHomeProc := stAxisStruct.stConfig.eHomeSeq;
         fbHome.fHomePosition := stAxisStruct.stConfig.fHomePosition;
         fbHome.bLimitBwd := stAxisStruct.stInputs.bLimitBwd;
         fbHome.bLimitFwd := stAxisStruct.stInputs.bLimitFwd;

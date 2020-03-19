@@ -10,7 +10,7 @@ STRUCT
     fDeceleration: LREAL;
     fPosition: LREAL; //The position to move to for an absolute move and the amount to move in a relative move
     fHomePosition: LREAL; //The position that the axis should be set to once homing is completed
-    nHomeSeq: UINT; //Homing sequence to perform
+    eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
     
 	// Single master axis parameters

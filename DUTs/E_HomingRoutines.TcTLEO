@@ -5,7 +5,8 @@
 {attribute 'strict'}
 TYPE E_HomingRoutines :
 (
-	//0X: LIMIT Switch
+	eNoHoming := 0, 
+    //0X: LIMIT Switch
     eHomeToBwdLimit :=  1, //Home to bBwdLimit (reverse off limit)
     eHomeToFwdLimit :=  2, //Home to bFwdLimit (reverse off limit)
     eHomeToBwdLimit2speeds :=  3, //Home to bBwdLimit (two speeds)
@@ -22,13 +23,18 @@ TYPE E_HomingRoutines :
     eHomeFwdToEncRef2speeds := 24, //Home to EncRefPulse via bFwdLimit (two speeds)
       //9X: Software
     eHomeDirect := 90 //Home direct to fHomePosition value
-);
+) := eNoHoming;
 END_TYPE
 ]]></Declaration>
     <XmlArchive>
       <Data>
         <o xml:space="preserve" t="TextListEnumerationTextListObject">
           <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"eNoHoming"</v>
+              <v n="TextDefault">"0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
             <o>
               <v n="TextID">"eHomeToBwdLimit"</v>
               <v n="TextDefault">"1"</v>
