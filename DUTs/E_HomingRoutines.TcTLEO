@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <EnumerationTextList Name="E_HomingRoutines" Id="{80602f9f-a7d4-4c82-a41f-735a98acfb74}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_HomingRoutines :
+(
+	//0X: LIMIT Switch
+    eHomeToBwdLimit :=  1, //Home to bBwdLimit (reverse off limit)
+    eHomeToFwdLimit :=  2, //Home to bFwdLimit (reverse off limit)
+    eHomeToBwdLimit2speeds :=  3, //Home to bBwdLimit (two speeds)
+    eHomeToFwdLimit2speeds :=  4, //Home to bFwdLimit (two speeds)
+    //1X: Home Sensor
+    eHomeBwdToReference := 11, //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
+    eHomeFwdToReference := 12, //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
+    eHomeBwdToRef2speeds := 13, //Home to bHome via bBwdLimit (two speeds)
+    eHomeFwdToRef2speeds := 14, //Home to bHome via bFwdLimit (two speeds)
+    //2X: Enc Pulse
+    eHomeBwdToEncRef := 21, //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
+    eHomeFwdToEncRef := 22, //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
+    eHomeBwdToEncRef2speeds := 23, //Home to EncRefPulse via bBwdLimit (two speeds)
+    eHomeFwdToEncRef2speeds := 24, //Home to EncRefPulse via bFwdLimit (two speeds)
+      //9X: Software
+    eHomeDirect := 90 //Home direct to fHomePosition value
+);
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"eHomeToBwdLimit"</v>
+              <v n="TextDefault">"1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToFwdLimit"</v>
+              <v n="TextDefault">"2"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToBwdLimit2speeds"</v>
+              <v n="TextDefault">"3"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToFwdLimit2speeds"</v>
+              <v n="TextDefault">"4"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeBwdToReference"</v>
+              <v n="TextDefault">"11"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeFwdToReference"</v>
+              <v n="TextDefault">"12"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeBwdToRef2speeds"</v>
+              <v n="TextDefault">"13"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeFwdToRef2speeds"</v>
+              <v n="TextDefault">"14"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeBwdToEncRef"</v>
+              <v n="TextDefault">"21"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeFwdToEncRef"</v>
+              <v n="TextDefault">"22"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeBwdToEncRef2speeds"</v>
+              <v n="TextDefault">"23"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeFwdToEncRef2speeds"</v>
+              <v n="TextDefault">"24"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeDirect"</v>
+              <v n="TextDefault">"90"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{8b43949f-7b13-4dd5-952f-b0ef8422789a}</v>
+          <v n="GuidReInit">{8d178625-23ea-466a-8a65-65226f999dac}</v>
+          <v n="GuidExitX">{64392d93-7823-49d3-a6d0-7c6c0c5c0897}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>
