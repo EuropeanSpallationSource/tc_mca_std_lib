@@ -26,7 +26,7 @@ VAR
     bReadNcVelocities: BOOL;
     eHomingState: (eHomeSetParameters:= 0, eHomeFbExecute:= 1, eHomeFbBusy:= 2, eHomeFbDone:= 3, eHomeFb2Execute:= 4,
                    eHomeFb2Busy:= 5, eHomeFb2Done:= 6, eHomeSet2speedsDone:= 7, eHomeFinish:= 8);
-	eHomeProcLocal: E_HomingRoutines;
+    eHomeProcLocal: E_HomingRoutines;
     tLimit: TIME :=  T#0H10M;
 //Homing Structures
     stTrigger: TRIGGER_REF;
@@ -83,24 +83,24 @@ IF fbExecuteRiseEdge.Q THEN
     eHomeProcLocal := eHomeProc;
 //Check for valid Homing routine
    CASE eHomeProcLocal OF
-      	E_HomingRoutines.eNoHoming: 
-    	//0X: LIMIT Switch
-	  	E_HomingRoutines.eHomeToBwdLimit: //Home to bBwdLimit (reverse off limit)
-    	E_HomingRoutines.eHomeToFwdLimit: //Home to bFwdLimit (reverse off limit)
-    	E_HomingRoutines.eHomeToBwdLimit2speeds: //Home to bBwdLimit (two speeds)
-    	E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bFwdLimit (two speeds)
-   	 	//1X: Home Sensor
-    	E_HomingRoutines.eHomeBwdToReference: //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
-   		E_HomingRoutines.eHomeFwdToReference:  //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
-    	E_HomingRoutines.eHomeBwdToRef2speeds: //Home to bHome via bBwdLimit (two speeds)
-    	E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHome via bFwdLimit (two speeds)
-    	//2X: Enc Pulse
-    	E_HomingRoutines.eHomeBwdToEncRef: //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
-    	E_HomingRoutines.eHomeFwdToEncRef: //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
-    	E_HomingRoutines.eHomeBwdToEncRef2speeds: //Home to EncRefPulse via bBwdLimit (two speeds)
-    	E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to EncRefPulse via bFwdLimit (two speeds)
-      	//9X: Software
-    	E_HomingRoutines.eHomeDirect: //Home direct to fHomePosition value
+        E_HomingRoutines.eNoHoming:
+        //0X: LIMIT Switch
+        E_HomingRoutines.eHomeToBwdLimit: //Home to bBwdLimit (reverse off limit)
+        E_HomingRoutines.eHomeToFwdLimit: //Home to bFwdLimit (reverse off limit)
+        E_HomingRoutines.eHomeToBwdLimit2speeds: //Home to bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bFwdLimit (two speeds)
+        //1X: Home Sensor
+        E_HomingRoutines.eHomeBwdToReference: //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeFwdToReference:  //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeBwdToRef2speeds: //Home to bHome via bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHome via bFwdLimit (two speeds)
+        //2X: Enc Pulse
+        E_HomingRoutines.eHomeBwdToEncRef: //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeFwdToEncRef: //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeBwdToEncRef2speeds: //Home to EncRefPulse via bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to EncRefPulse via bFwdLimit (two speeds)
+        //9X: Software
+        E_HomingRoutines.eHomeDirect: //Home direct to fHomePosition value
 ELSE
       bError := TRUE;
       bHomingInProgress := FALSE;
@@ -110,7 +110,7 @@ END_IF
 
 IF bHomingInProgress AND fbHomeReadNcVelocities.bDone AND NOT bError THEN
 CASE eHomeProcLocal OF
-	
+
    E_HomingRoutines.eHomeToBwdLimit,
    E_HomingRoutines.eHomeToFwdLimit: //Home to bLimitBwd(1) or bLimitFwd(2)
         CASE eHomingState OF
@@ -120,28 +120,28 @@ CASE eHomeProcLocal OF
             fbStepLimitSwitch.Velocity := fbHomeReadNcVelocities.fVelocityFromCam;
             fbStepLimitSwitch.Setposition := fHomePosition;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeToBwdLimit: 
-					fbStepLimitSwitch.Direction := mcNegativeDirection;
-                E_HomingRoutines.eHomeToFwdLimit: 
-					fbStepLimitSwitch.Direction := mcPositiveDirection;
+                E_HomingRoutines.eHomeToBwdLimit:
+                    fbStepLimitSwitch.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeToFwdLimit:
+                    fbStepLimitSwitch.Direction := mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepLimitSwitch.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepLimitSwitch.Busy THEN
                 eHomingState := eHomeFbDone;
             END_IF
-			
+
           eHomeFbDone:
             IF fbStepLimitSwitch.Done THEN
                 fbFinishHoming.Execute := TRUE;
                 eHomingState := eHomeFinish;
             END_IF
-			
+
           eHomeFinish:
             IF fbFinishHoming.Done THEN
                 bHomingInProgress := FALSE;
@@ -150,7 +150,7 @@ CASE eHomeProcLocal OF
                 eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-		
+
    E_HomingRoutines.eHomeToBwdLimit2speeds,
    E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bLimitBwd(3) or bLimitFwd(4) using two speeds
         CASE eHomingState OF
@@ -159,22 +159,22 @@ CASE eHomeProcLocal OF
             fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
             fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeToBwdLimit2speeds: 
-					fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
-                E_HomingRoutines.eHomeToFwdLimit2speeds: 
-					fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
+                E_HomingRoutines.eHomeToBwdLimit2speeds:
+                    fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
+                E_HomingRoutines.eHomeToFwdLimit2speeds:
+                    fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepLimitSwitchDetection.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
                 eHomingState := eHomeFbDone;
             END_IF
-			
+
           eHomeFbDone:
             IF fbStepLimitSwitchDetection.Done THEN
                 fbStepLimitSwitch.Execute := FALSE;
@@ -182,29 +182,29 @@ CASE eHomeProcLocal OF
                 fbStepLimitSwitch.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
                 fbStepLimitSwitch.Setposition := fHomePosition;
                 CASE eHomeProcLocal OF
-                    E_HomingRoutines.eHomeToBwdLimit2speeds: 
-						fbStepLimitSwitch.Direction := mcNegativeDirection;
-                    E_HomingRoutines.eHomeToFwdLimit2speeds: 
-						fbStepLimitSwitch.Direction := mcPositiveDirection;
+                    E_HomingRoutines.eHomeToBwdLimit2speeds:
+                        fbStepLimitSwitch.Direction := mcNegativeDirection;
+                    E_HomingRoutines.eHomeToFwdLimit2speeds:
+                        fbStepLimitSwitch.Direction := mcPositiveDirection;
                 END_CASE
                 eHomingState := eHomeFb2Execute;
             END_IF
-			
+
           eHomeFb2Execute:
             fbStepLimitSwitch.Execute := TRUE;
             eHomingState := eHomeFb2Busy;
-			
+
           eHomeFb2Busy:
             IF fbStepLimitSwitch.Busy THEN
                 eHomingState := eHomeFb2Done;
             END_IF
-			
+
           eHomeFb2Done:
             IF fbStepLimitSwitch.Done THEN
                 fbFinishHoming.Execute := TRUE;
                 eHomingState := eHomeFinish;
             END_IF
-			
+
           eHomeFinish:
             IF fbFinishHoming.Done THEN
                 bHomingInProgress := FALSE;
@@ -213,7 +213,7 @@ CASE eHomeProcLocal OF
                 eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-		
+
     E_HomingRoutines.eHomeBwdToReference,
     E_HomingRoutines.eHomeFwdToReference: //Home to bHome Sensor moving in the negative(11) or positive(12) direction
         CASE eHomingState OF
@@ -223,29 +223,29 @@ CASE eHomeProcLocal OF
             fbStepAbsoluteSwitch.SetPosition := fHomePosition;
             fbStepAbsoluteSwitch.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeBwdToReference: 
-					fbStepAbsoluteSwitch.Direction := mcNegativeDirection;
-                E_HomingRoutines.eHomeFwdToReference: 
-					fbStepAbsoluteSwitch.Direction := mcPositiveDirection;
+                E_HomingRoutines.eHomeBwdToReference:
+                    fbStepAbsoluteSwitch.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToReference:
+                    fbStepAbsoluteSwitch.Direction := mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepAbsoluteSwitch.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepAbsoluteSwitch.Busy THEN
                 eHomingState := eHomeFbDone;
             END_IF
-			
+
           eHomeFbDone:
             IF fbStepAbsoluteSwitch.Done THEN
                 fbStepAbsoluteSwitch.Execute := FALSE;
                 fbFinishHoming.Execute := TRUE;
                 eHomingState := eHomeFinish;
             END_IF
-			
+
           eHomeFinish:
             IF fbFinishHoming.Done THEN
                 bHomingInProgress := FALSE;
@@ -254,7 +254,7 @@ CASE eHomeProcLocal OF
                 eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-		
+
     E_HomingRoutines.eHomeBwdToRef2speeds,
     E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHomeSensor via bLimitBwd(13) or bLimitFwd(14)
         CASE eHomingState OF
@@ -263,35 +263,35 @@ CASE eHomeProcLocal OF
             fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
             fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeBwdToRef2speeds: 
-					fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
-                E_HomingRoutines.eHomeFwdToRef2speeds: 
-					fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
+                E_HomingRoutines.eHomeBwdToRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepLimitSwitchDetection.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
                 eHomingState := eHomeSet2speedsDone;
             END_IF
-			
+
           eHomeSet2speedsDone:
             IF fbStepLimitSwitchDetection.Done THEN
                 fbStepLimitSwitchDetection.Execute := FALSE;
                 CASE eHomeProcLocal OF
-                    E_HomingRoutines.eHomeBwdToRef2speeds: 
-						eHomeProcLocal := E_HomingRoutines.eHomeFwdToReference;
-                    E_HomingRoutines.eHomeFwdToRef2speeds: 
-						eHomeProcLocal := E_HomingRoutines.eHomeBwdToReference;
+                    E_HomingRoutines.eHomeBwdToRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeFwdToReference;
+                    E_HomingRoutines.eHomeFwdToRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeBwdToReference;
                 END_CASE
                 eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-		
+
     E_HomingRoutines.eHomeBwdToEncRef,
     E_HomingRoutines.eHomeFwdToEncRef: //Home to index pulse of an encoder in the negative(21) or positive(22) direction
         CASE eHomingState OF
@@ -300,29 +300,29 @@ CASE eHomeProcLocal OF
             fbStepReferencePulse.SetPosition := fHomePosition;
             fbStepReferencePulse.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeBwdToEncRef: 
-					fbStepReferencePulse.Direction := mcNegativeDirection;
-                E_HomingRoutines.eHomeFwdToEncRef: 
-					fbStepReferencePulse.Direction := mcPositiveDirection;
+                E_HomingRoutines.eHomeBwdToEncRef:
+                    fbStepReferencePulse.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToEncRef:
+                    fbStepReferencePulse.Direction := mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepReferencePulse.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepReferencePulse.Busy THEN
                 eHomingState := eHomeFbDone;
             END_IF
-			
+
           eHomeFbDone:
             IF fbStepReferencePulse.Done THEN
                 fbStepReferencePulse.Execute := FALSE;
                 fbFinishHoming.Execute := TRUE;
                 eHomingState := eHomeFinish;
             END_IF
-			
+
           eHomeFinish:
             IF fbFinishHoming.Done THEN
                 bHomingInProgress := FALSE;
@@ -331,7 +331,7 @@ CASE eHomeProcLocal OF
                 eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-		
+
     E_HomingRoutines.eHomeBwdToEncRef2speeds,
     E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to index pulse of an encoder via bLimitBwd(23) or bLimitFwd(24)
         CASE eHomingState OF
@@ -340,52 +340,52 @@ CASE eHomeProcLocal OF
             fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
             fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
             CASE eHomeProcLocal OF
-                E_HomingRoutines.eHomeBwdToEncRef2speeds: 
-					fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
-                E_HomingRoutines.eHomeFwdToEncRef2speeds: 
-					fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
+                E_HomingRoutines.eHomeBwdToEncRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToEncRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
             END_CASE
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbStepLimitSwitchDetection.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
                 eHomingState := eHomeSet2speedsDone;
             END_IF
-			
+
           eHomeSet2speedsDone:
             IF fbStepLimitSwitchDetection.Done THEN
                 fbStepLimitSwitchDetection.Execute := FALSE;
                 CASE eHomeProcLocal OF
-                    E_HomingRoutines.eHomeBwdToEncRef2speeds: 
-						eHomeProcLocal := E_HomingRoutines.eHomeFwdToEncRef;
-                    E_HomingRoutines.eHomeFwdToEncRef2speeds: 
-						eHomeProcLocal := E_HomingRoutines.eHomeBwdToEncRef;
+                    E_HomingRoutines.eHomeBwdToEncRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeFwdToEncRef;
+                    E_HomingRoutines.eHomeFwdToEncRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeBwdToEncRef;
                 END_CASE
                 eHomingState :=eHomeSetParameters ;
             END_IF
         END_CASE
-		
+
     E_HomingRoutines.eHomeDirect: //Set current position as home without moving
        CASE eHomingState OF
           eHomeSetParameters:
             fbHomeDirect.Execute := FALSE;
             fbHomeDirect.SetPosition := fHomePosition;
             eHomingState := eHomeFbExecute;
-			
+
           eHomeFbExecute:
             fbHomeDirect.Execute := TRUE;
             eHomingState := eHomeFbBusy;
-			
+
           eHomeFbBusy:
             IF fbHomeDirect.Busy THEN
                 eHomingState := eHomeFinish;
             END_IF
-			
-          eHomeFinish: 
+
+          eHomeFinish:
             IF fbHomeDirect.Done THEN
                 fbHomeDirect.Execute := FALSE;
                 bHomingInProgress := FALSE;
@@ -462,10 +462,10 @@ fbFinishHoming.Options := StOptions2;
 fbAbortHoming.Options := StOptions2;
 
 //Home aborted
-IF fbStepLimitSwitch.CommandAborted OR 
-   fbStepLimitSwitchDetection.CommandAborted OR 
-   fbStepAbsoluteSwitch.CommandAborted OR 
-   fbStepReferencePulse.CommandAborted OR 
+IF fbStepLimitSwitch.CommandAborted OR
+   fbStepLimitSwitchDetection.CommandAborted OR
+   fbStepAbsoluteSwitch.CommandAborted OR
+   fbStepReferencePulse.CommandAborted OR
    fbHomeDirect.CommandAborted THEN
      eHomingState := eHomeSetParameters;
      bHomingInProgress := FALSE;

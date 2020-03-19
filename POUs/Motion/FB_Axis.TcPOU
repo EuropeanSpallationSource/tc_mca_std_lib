@@ -9,7 +9,7 @@ END_VAR
 
 VAR CONSTANT
     nMULTI_MASTER_MAX_AXES: UINT := 4;
-	// Kept static as numerator is LREAL and consistent with multigearing
+    // Kept static as numerator is LREAL and consistent with multigearing
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     // By default 0 as represents no existing gearing
     nNO_GEARING: UINT := 0;
@@ -37,9 +37,9 @@ VAR
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
     stMasterAxis: ST_GearAxis := (nIndex:= 1, fRatio:= 0);
-	iAxisIndex: UINT;
+    iAxisIndex: UINT;
     iMultiMastersAxesIndex: UINT;
-    iSlaveAxesIndex: UINT;	
+    iSlaveAxesIndex: UINT;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -204,7 +204,7 @@ CASE stAxisStruct.stControl.eCommand OF
             //Clear slave ratio from master axis slave array
             GVL.aAxes[stMasterAxis.nIndex].stConfig.aSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
 
-            FOR iSlaveAxesIndex:= 1 TO GVL_APP.nAxisNum DO				
+            FOR iSlaveAxesIndex:= 1 TO GVL_APP.nAxisNum DO
                 GVL.aAxes[iSlaveAxesIndex].stConfig.aMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
             END_FOR
         END_IF
@@ -255,39 +255,39 @@ ELSIF fbMoveVelocity.Error THEN
 ELSIF fbMoveRelative.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveRelative.ErrorID;
-	
+
 ELSIF fbMoveAbsolute.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveAbsolute.ErrorID;
-	
+
 ELSIF fbMoveModulo.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveModulo.ErrorID;
-	
+
 ELSIF fbHome.bError THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbHome.nErrorID;
-	
+
 ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
-	
+
 ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
-	
+
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearInMultiMaster.ErrorID;
-	
+
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearOut.ErrorID;
-	
+
 ELSIF stAxisStruct.Axis.Status.Error  THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
     stAxisStruct.stStatus.nErrorId := stAxisStruct.Axis.Status.ErrorID;
-	
+
 ELSE
     stAxisStruct.stStatus.bError := FALSE;
     stAxisStruct.stStatus.nErrorId := 0;
