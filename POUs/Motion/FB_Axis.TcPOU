@@ -159,12 +159,12 @@ CASE stAxisStruct.stControl.eCommand OF
         fbGearIn.Execute := stAxisStruct.stControl.bExecute;
         fbGearIn.RatioNumerator := stMasterAxis.fRatio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
-		
+
         IF NOT fbGearIn.InGear THEN
             stMasterAxis.nIndex := stAxisStruct.stConfig.stMasterAxis.nIndex;
             stMasterAxis.fRatio := stAxisStruct.stConfig.stMasterAxis.fRatio;
         END_IF
-		
+
         // Confirm slaves have no gearing before attempting to gear in
          IF fbGearIn.InGear AND (GVL.aAxes[stMasterAxis.nIndex].stConfig.aSlaveAxisRatio[GVL.iAxis] = nNO_GEARING) THEN
             GVL.aAxes[stMasterAxis.nIndex].stConfig.aSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
@@ -189,7 +189,7 @@ CASE stAxisStruct.stControl.eCommand OF
             fbGearInMultiMaster.GearRatio4 := stAxisStruct.stConfig.aMultiMasterAxisLatched[4].fRatio;
             fbGearInMultiMaster.Enable := stAxisStruct.stControl.bExecute;
         END_IF
-		
+
         IF fbGearInMultiMaster.Error THEN
             fbGearInMultiMaster.Enable := FALSE;
         END_IF
@@ -197,7 +197,7 @@ CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eGearOut:
         fbGearOut.Execute := stAxisStruct.stControl.bExecute;
         fbGearInMultiMaster.Enable := FALSE;
-		
+
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
             GVL.aAxes[stMasterAxis.nIndex].stConfig.aSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
@@ -278,8 +278,8 @@ ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.nErrorId := fbGearInMultiMaster.ErrorID;
 
 ELSIF fbGearInMultiMaster.Error THEN
-    stAxisStruct.status.bError:=TRUE;
-    stAxisStruct.status.nErrorId:=fbGearInMultiMaster.ErrorID;
+    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
 
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError := TRUE;
@@ -345,34 +345,34 @@ ELSE
 END_IF
 
 // Gearing Status
-stAxisStruct.status.bGeared:= stAxisStruct.Axis.Status.Coupled;
+stAxisStruct.stStatus.bGeared:= stAxisStruct.Axis.Status.Coupled;
 
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.config.aMultiMasterAxisLatched[1].nIndex <> 0 THEN
-    GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[1].nIndex].config.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
-    stAxisStruct.status.bCoupledGear1:=TRUE;
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.aMultiMasterAxisLatched[1].nIndex <> 0 THEN
+    GVL.aAxes[stAxisStruct.stConfig.aMultiMasterAxisLatched[1].nIndex].stConfig.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
+    stAxisStruct.stStatus.bCoupledGear1:=TRUE;
 ELSE
-    stAxisStruct.status.bCoupledGear1:=FALSE;
+    stAxisStruct.stStatus.bCoupledGear1:=FALSE;
 END_IF
 
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 AND stAxisStruct.config.aMultiMasterAxisLatched[2].nIndex <> 0 THEN
-    GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[2].nIndex].config.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
-    stAxisStruct.status.bCoupledGear2:=TRUE;
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 AND stAxisStruct.stConfig.aMultiMasterAxisLatched[2].nIndex <> 0 THEN
+    GVL.aAxes[stAxisStruct.stConfig.aMultiMasterAxisLatched[2].nIndex].stConfig.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
+    stAxisStruct.stStatus.bCoupledGear2:=TRUE;
 ELSE
-    stAxisStruct.status.bCoupledGear2:=FALSE;
+    stAxisStruct.stStatus.bCoupledGear2:=FALSE;
 END_IF
 
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 AND stAxisStruct.config.aMultiMasterAxisLatched[3].nIndex <> 0 THEN
-    GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[3].nIndex].config.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
-    stAxisStruct.status.bCoupledGear3:=TRUE;
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 AND stAxisStruct.stConfig.aMultiMasterAxisLatched[3].nIndex <> 0 THEN
+    GVL.aAxes[stAxisStruct.stConfig.aMultiMasterAxisLatched[3].nIndex].stConfig.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
+    stAxisStruct.stStatus.bCoupledGear3:=TRUE;
 ELSE
-    stAxisStruct.status.bCoupledGear3:=FALSE;
+    stAxisStruct.stStatus.bCoupledGear3:=FALSE;
 END_IF
 
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 AND stAxisStruct.config.aMultiMasterAxisLatched[4].nIndex <> 0 THEN
-    GVL.axes[stAxisStruct.config.aMultiMasterAxisLatched[4].nIndex].config.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
-    stAxisStruct.status.bCoupledGear4:=TRUE;
+IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 AND stAxisStruct.stConfig.aMultiMasterAxisLatched[4].nIndex <> 0 THEN
+    GVL.aAxes[stAxisStruct.stConfig.aMultiMasterAxisLatched[4].nIndex].stConfig.aMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
+    stAxisStruct.stStatus.bCoupledGear4:=TRUE;
 ELSE
-    stAxisStruct.status.bCoupledGear4:=FALSE;
+    stAxisStruct.stStatus.bCoupledGear4:=FALSE;
 END_IF
 
 // Reset bExecute
@@ -512,6 +512,8 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="3624" Count="1" />
       <LineId Id="3650" Count="0" />
       <LineId Id="3685" Count="0" />
+      <LineId Id="306" Count="30" />
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
