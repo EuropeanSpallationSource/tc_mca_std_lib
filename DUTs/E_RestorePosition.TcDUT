@@ -5,8 +5,8 @@
 {attribute 'strict'}
 TYPE E_RestorePosition :
 (
-    DontRestore :=0,
-    RestoreWithoutHome := 1 //Redefined the position of the axis to that when the power was lost
+    eDontRestore :=0,
+    eRestoreWithoutHome := 1 //Redefined the position of the axis to that when the power was lost
 );
 END_TYPE]]></Declaration>
   </DUT>

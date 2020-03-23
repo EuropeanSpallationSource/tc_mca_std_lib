@@ -5,8 +5,8 @@
 {attribute 'strict'}
 TYPE E_MotionFunctions :
 (
-    eMoveAbsolute := 0, //Move to a set position
-    eMoveRelative := 1, //Move a set distance
+    eMoveAbsolute := 0,
+    eMoveRelative := 1,
     eJog := 2, //Continous moving in the direction specified by bJogFwd or bJogBwd as long as one is high. Will stop if bExecute goes high. Generally not called by an external control system.
     eMoveVelocity := 3, //Continous moving at a set velocity once bExecute goes high
     eMoveModulo := 4, //Move for 360 deg rotation, see Beckhoff docs

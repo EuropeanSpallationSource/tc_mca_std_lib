@@ -5,8 +5,8 @@
 (
     eNoSwitch := 0, //no physical switch for homing present
     eHomeSwitchPresent := 1, //dedicated homing switch present
-    eUseNegLimit := 2, //neg limit switch is used as a homing switch
-    eUsePosLimit := 3 //pos limit switch is used as a homing switch
+    eUseBwdLimit := 2, //Bwd limit switch is used as a homing switch
+    eUseFwdLimit := 3 //Fwd limit switch is used as a homing switch
 ) := eNoSwitch;
 END_TYPE
 ]]></Declaration>

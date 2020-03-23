@@ -11,7 +11,7 @@ VAR_GLOBAL CONSTANT
 END_VAR
 
 VAR_GLOBAL PERSISTENT
-    aAxesPersistent: ARRAY [1..gvl_app.nAxisNum] OF ST_AxisPersistent;
+    aAxesPersistent: ARRAY [1..GVL_APP.nAxisNum] OF ST_AxisPersistent;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
