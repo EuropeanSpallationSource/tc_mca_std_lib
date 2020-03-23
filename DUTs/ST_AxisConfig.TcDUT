@@ -13,14 +13,14 @@ STRUCT
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
-    // Single master axis parameters
-    stMasterAxis : ST_GearAxis; // A reference to the axis that this is a slave of
-    afSlaveAxisRatio : ARRAY [1..GVL_APP.nAxisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
+    //Single master axis parameters
+    stMasterAxis: ST_GearAxis; //A reference to the axis that this is a slave of
+    afSlaveAxisRatio: ARRAY [1..GVL_APP.nAxisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
 
-   // Multi master axis parameters
-    astMultiMasterAxis : ARRAY [1..4] OF ST_GearAxis;
-    astMultiMasterAxisLatched : ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
-    afMultiSlaveAxisRatio : ARRAY [1..GVL_APP.nAxisNum] OF LREAL;
+   //Multi master axis parameters
+    astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
+    astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
+    afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAxisNum] OF LREAL;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
