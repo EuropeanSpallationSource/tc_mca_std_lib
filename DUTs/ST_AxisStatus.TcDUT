@@ -12,10 +12,10 @@ STRUCT
     bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
     bGeared: BOOL; //Axis is an active slave
-    bCoupledGear1 : BOOL;
-    bCoupledGear2 : BOOL;
-    bCoupledGear3 : BOOL;
-    bCoupledGear4 : BOOL;
+    bCoupledGear1: BOOL;
+    bCoupledGear2: BOOL;
+    bCoupledGear3: BOOL;
+    bCoupledGear4: BOOL;
     fActPosition: LREAL; //Actual position value
     fActVelocity: LREAL; //Actual velocity
     bError: BOOL; //Motion function block has produced error (NC drive not necessarily in error state)
