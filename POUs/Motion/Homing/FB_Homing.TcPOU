@@ -10,7 +10,7 @@ VAR_INPUT
     bLimitFwd: BOOL;
     bHomeSensor: BOOL;
     fHomePosition: LREAL;
-	eHomeProc: E_HomingRoutines;
+    eHomeProc: E_HomingRoutines;
 END_VAR
 VAR_IN_OUT
     Axis: AXIS_REF;
