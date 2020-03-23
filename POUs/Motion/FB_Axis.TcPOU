@@ -269,10 +269,6 @@ ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
 
-ELSIF fbGearIn.Error THEN
-    stAxisStruct.stStatus.bError := TRUE;
-    stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
-
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearInMultiMaster.ErrorID;
@@ -379,7 +375,8 @@ END_IF
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="4042" Count="333" />
+      <LineId Id="4042" Count="225" />
+      <LineId Id="4272" Count="103" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
