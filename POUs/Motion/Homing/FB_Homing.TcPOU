@@ -6,11 +6,11 @@ VAR_INPUT
     bExecute: BOOL;
     bReset: BOOL;
     bStop: BOOL;
-    eHomeProc: E_HomingRoutines;
     bLimitBwd: BOOL;
     bLimitFwd: BOOL;
     bHomeSensor: BOOL;
     fHomePosition: LREAL;
+	eHomeProc: E_HomingRoutines;
 END_VAR
 VAR_IN_OUT
     Axis: AXIS_REF;
@@ -50,14 +50,14 @@ VAR
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[fbExecuteRiseEdge();
-fbStepLimitSwitch(Axis:= Axis, Parameter:= stHomingParameter);
-fbStepLimitSwitchDetection(Axis:= Axis, Parameter:= stHomingParameter);
-fbStepAbsoluteSwitch(Axis:= Axis, Parameter:= stHomingParameter);
-fbStepReferencePulse(Axis:= Axis, Parameter:= stHomingParameter);
-fbHomeDirect(Axis:= Axis, Parameter:= stHomingParameter);
-fbAbortHoming(Axis:= Axis, Parameter:= stHomingParameter);
-fbFinishHoming(Axis:= Axis, Parameter:= stHomingParameter);
-fbHomeReadNCVelocities(Axis:= Axis);
+fbStepLimitSwitch(Axis := Axis, Parameter := stHomingParameter);
+fbStepLimitSwitchDetection(Axis := Axis, Parameter := stHomingParameter);
+fbStepAbsoluteSwitch(Axis := Axis, Parameter := stHomingParameter);
+fbStepReferencePulse(Axis := Axis, Parameter := stHomingParameter);
+fbHomeDirect(Axis := Axis, Parameter := stHomingParameter);
+fbAbortHoming(Axis := Axis, Parameter := stHomingParameter);
+fbFinishHoming(Axis := Axis, Parameter := stHomingParameter);
+fbHomeReadNCVelocities(Axis := Axis);
 
 IF bReset THEN
     bError := FALSE;
