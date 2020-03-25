@@ -28,7 +28,7 @@ VAR
                    eHomeFb2Busy:= 5, eHomeFb2Done:= 6, eHomeSet2speedsDone:= 7, eHomeFinish:= 8);
     eHomeProcLocal: E_HomingRoutines;
     tLimit: TIME :=  T#0H10M;
-	
+
     //Homing Structures
     stTrigger: TRIGGER_REF;
     stLimitSwRef: MC_Ref_Signal_Ref;
@@ -38,7 +38,7 @@ VAR
     stHomingParameter: MC_HomingParameter;
     stOptions2: ST_Home_Options2;
     stOptions4: ST_Home_Options4;
-	
+
     //Homing FB's
     fbExecuteRiseEdge: R_TRIG;
     fbStepLimitSwitch: MC_StepLimitSwitch;

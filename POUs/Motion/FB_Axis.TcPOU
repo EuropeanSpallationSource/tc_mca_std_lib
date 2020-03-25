@@ -23,8 +23,8 @@ VAR
     iAxisIndex: UINT;
     iMultiMastersAxesIndex: UINT;
     iSlaveAxesIndex: UINT;
-	
-	stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
+
+    stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
     fbReset: MC_Reset;
     fbPower: MC_Power;
     fbStop: MC_Stop;

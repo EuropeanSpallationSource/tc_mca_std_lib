@@ -6,25 +6,25 @@
 TYPE E_HomingRoutines :
 (
     eNoHoming := 0,
-	
+
     //0X: Home to LIMIT Switch
     eHomeToBwdLimit :=  1, //Home to bBwdLimit (reverse off limit)
     eHomeToFwdLimit :=  2, //Home to bFwdLimit (reverse off limit)
     eHomeToBwdLimit2speeds :=  3, //Home to bBwdLimit (two speeds)
     eHomeToFwdLimit2speeds :=  4, //Home to bFwdLimit (two speeds)
-	
+
     //1X: Home to reference Sensor
     eHomeBwdToReference := 11, //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
     eHomeFwdToReference := 12, //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
     eHomeBwdToRef2speeds := 13, //Home to bHome via bBwdLimit (two speeds)
     eHomeFwdToRef2speeds := 14, //Home to bHome via bFwdLimit (two speeds)
-	
+
     //2X: Home to Enc Index Pulse
     eHomeBwdToEncRef := 21, //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
     eHomeFwdToEncRef := 22, //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
     eHomeBwdToEncRef2speeds := 23, //Home to EncRefPulse via bBwdLimit (two speeds)
     eHomeFwdToEncRef2speeds := 24, //Home to EncRefPulse via bFwdLimit (two speeds)
-	
+
     //9X: Set home to a specified position
     eHomeDirect := 90 //Home direct to fHomePosition value
 ) := eNoHoming;
