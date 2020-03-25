@@ -28,7 +28,8 @@ VAR
                    eHomeFb2Busy:= 5, eHomeFb2Done:= 6, eHomeSet2speedsDone:= 7, eHomeFinish:= 8);
     eHomeProcLocal: E_HomingRoutines;
     tLimit: TIME :=  T#0H10M;
-//Homing Structures
+	
+    //Homing Structures
     stTrigger: TRIGGER_REF;
     stLimitSwRef: MC_Ref_Signal_Ref;
     stLimitSwRef2: MC_Ref_Signal_Ref;
@@ -37,7 +38,8 @@ VAR
     stHomingParameter: MC_HomingParameter;
     stOptions2: ST_Home_Options2;
     stOptions4: ST_Home_Options4;
-//Homing FB's
+	
+    //Homing FB's
     fbExecuteRiseEdge: R_TRIG;
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
@@ -81,25 +83,21 @@ IF fbExecuteRiseEdge.Q THEN
     bReadNcVelocities := TRUE;
     fbAbortHoming.Execute := FALSE;
     eHomeProcLocal := eHomeProc;
-//Check for valid Homing routine
+   //Check for valid Homing routine
    CASE eHomeProcLocal OF
         E_HomingRoutines.eNoHoming:
-        //0X: LIMIT Switch
         E_HomingRoutines.eHomeToBwdLimit: //Home to bBwdLimit (reverse off limit)
         E_HomingRoutines.eHomeToFwdLimit: //Home to bFwdLimit (reverse off limit)
         E_HomingRoutines.eHomeToBwdLimit2speeds: //Home to bBwdLimit (two speeds)
         E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bFwdLimit (two speeds)
-        //1X: Home Sensor
         E_HomingRoutines.eHomeBwdToReference: //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
         E_HomingRoutines.eHomeFwdToReference:  //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
         E_HomingRoutines.eHomeBwdToRef2speeds: //Home to bHome via bBwdLimit (two speeds)
         E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHome via bFwdLimit (two speeds)
-        //2X: Enc Pulse
         E_HomingRoutines.eHomeBwdToEncRef: //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
         E_HomingRoutines.eHomeFwdToEncRef: //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
         E_HomingRoutines.eHomeBwdToEncRef2speeds: //Home to EncRefPulse via bBwdLimit (two speeds)
         E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to EncRefPulse via bFwdLimit (two speeds)
-        //9X: Software
         E_HomingRoutines.eHomeDirect: //Home direct to fHomePosition value
 ELSE
       bError := TRUE;
@@ -514,7 +512,10 @@ END_IF]]></ST>
       <LineId Id="3864" Count="10" />
       <LineId Id="4422" Count="0" />
       <LineId Id="3875" Count="0" />
-      <LineId Id="4424" Count="16" />
+      <LineId Id="4424" Count="0" />
+      <LineId Id="4426" Count="3" />
+      <LineId Id="4431" Count="3" />
+      <LineId Id="4436" Count="3" />
       <LineId Id="3892" Count="9" />
       <LineId Id="4450" Count="0" />
       <LineId Id="3902" Count="0" />
