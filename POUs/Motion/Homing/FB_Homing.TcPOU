@@ -24,7 +24,7 @@ END_VAR
 VAR
     bHomingInProgress: BOOL;
     bReadNcVelocities: BOOL;
-    eHomingState: (eHomeSetParameters:= 0, eHomeFbExecute:= 1, eHomeFbBusy:= 2, eHomeFbDone:= 3, eHomeFb2Execute:= 4,
+    eHomingState: (eHomeSetParameters:= 0, eHomeFbExecute:= 1, eHomeFbBusy:= 2, eHomeWaitForFbDone:= 3, eHomeFb2Execute:= 4,
                    eHomeFb2Busy:= 5, eHomeFb2Done:= 6, eHomeSet2speedsDone:= 7, eHomeFinish:= 8);
     eHomeProcLocal: E_HomingRoutines;
     tLimit: TIME :=  T#0H10M;
@@ -131,10 +131,10 @@ CASE eHomeProcLocal OF
 
           eHomeFbBusy:
             IF fbStepLimitSwitch.Busy THEN
-                eHomingState := eHomeFbDone;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
 
-          eHomeFbDone:
+          eHomeWaitForFbDone:
             IF fbStepLimitSwitch.Done THEN
                 fbFinishHoming.Execute := TRUE;
                 eHomingState := eHomeFinish;
@@ -170,10 +170,10 @@ CASE eHomeProcLocal OF
 
           eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
-                eHomingState := eHomeFbDone;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
 
-          eHomeFbDone:
+          eHomeWaitForFbDone:
             IF fbStepLimitSwitchDetection.Done THEN
                 fbStepLimitSwitch.Execute := FALSE;
                 fbStepLimitSwitch.LimitSwitchMode := mcFallingEdge;
@@ -234,10 +234,10 @@ CASE eHomeProcLocal OF
 
           eHomeFbBusy:
             IF fbStepAbsoluteSwitch.Busy THEN
-                eHomingState := eHomeFbDone;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
 
-          eHomeFbDone:
+          eHomeWaitForFbDone:
             IF fbStepAbsoluteSwitch.Done THEN
                 fbStepAbsoluteSwitch.Execute := FALSE;
                 fbFinishHoming.Execute := TRUE;
@@ -311,10 +311,10 @@ CASE eHomeProcLocal OF
 
           eHomeFbBusy:
             IF fbStepReferencePulse.Busy THEN
-                eHomingState := eHomeFbDone;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
 
-          eHomeFbDone:
+          eHomeWaitForFbDone:
             IF fbStepReferencePulse.Done THEN
                 fbStepReferencePulse.Execute := FALSE;
                 fbFinishHoming.Execute := TRUE;
