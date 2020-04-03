@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <GVL Name="GVL" Id="{913e21aa-a47e-444c-bfce-679b16c0434b}">
     <Declaration><![CDATA[VAR_GLOBAL
-    astAxes: ARRAY [1..GVL_APP.nAxisNum] OF ST_AxisStruct; //Global array of ST_AxisStruct for holding axis parameters and controls
+    astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; //Global array of ST_AxisStruct for holding axis parameters and controls
     iAxis: UINT; //Index for for loops while going through axes
 END_VAR
 
@@ -11,7 +11,7 @@ VAR_GLOBAL CONSTANT
 END_VAR
 
 VAR_GLOBAL PERSISTENT
-    astAxesPersistent: ARRAY [1..GVL_APP.nAxisNum] OF ST_AxisPersistent;
+    astAxesPersistent: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisPersistent;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

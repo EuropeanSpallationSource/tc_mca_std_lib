@@ -15,12 +15,12 @@ STRUCT
 
     //Single master axis parameters
     stMasterAxis: ST_GearAxis; //A reference to the axis that this is a slave of
-    afSlaveAxisRatio: ARRAY [1..GVL_APP.nAxisNum] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
+    afSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
 
    //Multi master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
-    afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAxisNum] OF LREAL;
+    afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

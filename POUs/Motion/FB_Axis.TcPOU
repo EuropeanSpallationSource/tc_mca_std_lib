@@ -91,7 +91,7 @@ fbGearOut.Execute := FALSE;
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
 
-FOR iAxisIndex := 1 TO GVL_APP.nAxisNum DO
+FOR iAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
     IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] <> 0) THEN
         stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled);
         stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled);
@@ -175,7 +175,7 @@ CASE stAxisStruct.stControl.eCommand OF
         IF stAxisStruct.stControl.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             //Latch master references
             FOR iMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
-                IF stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex <= GVL_APP.nAxisNum THEN
+                IF stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
                     stAxisStruct.stConfig.astMultiMasterAxisLatched[iMultiMastersAxesIndex].nIndex := stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex;
                 END_IF
             END_FOR
@@ -202,7 +202,7 @@ CASE stAxisStruct.stControl.eCommand OF
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
             GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
-            FOR iSlaveAxesIndex := 1 TO GVL_APP.nAxisNum DO
+            FOR iSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
                 GVL.astAxes[iSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
             END_FOR
         END_IF
