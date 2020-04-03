@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+  <DUT Name="E_EncoderTypeClass" Id="{66179a35-7b0c-4440-b8bf-378ba0f6862b}">
+    <Declaration><![CDATA[TYPE E_EncoderTypeClass :
+(
+    eNoEncoder := 0,
+    eIncrementalEncoder := 1,
+    eAbsoluteEncoder := 2
+) := eNoEncoder;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

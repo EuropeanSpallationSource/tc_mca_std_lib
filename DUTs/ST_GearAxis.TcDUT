@@ -3,8 +3,8 @@
   <DUT Name="ST_GearAxis" Id="{265c814e-8429-46d8-bc92-5fd53f51700c}">
     <Declaration><![CDATA[TYPE ST_GearAxis :
 STRUCT
-    nIndex : UINT:=1; //Index of the master axis
-    fRatio : LREAL:=0; //Gearing ratio between master axis and this one
+    nIndex: UINT := 1; //Index of the master axis
+    fRatio: LREAL := 0; //Gearing ratio between master axis and this one
 END_STRUCT
 END_TYPE
 ]]></Declaration>
