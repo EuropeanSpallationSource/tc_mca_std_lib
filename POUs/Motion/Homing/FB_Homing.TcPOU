@@ -6,18 +6,17 @@ VAR_INPUT
     bExecute: BOOL;
     bReset: BOOL;
     bStop: BOOL;
-    nHomeProc: UINT;
     bLimitBwd: BOOL;
     bLimitFwd: BOOL;
-    bEncLatch: BOOL;
     bHomeSensor: BOOL;
     fHomePosition: LREAL;
+    eHomeProc: E_HomingRoutines;
 END_VAR
 VAR_IN_OUT
     Axis: AXIS_REF;
 END_VAR
 VAR_OUTPUT
-    bHomed:BOOL;
+    bHomed: BOOL;
     bError: BOOL;
     bWarning: BOOL;
     nErrorId: UDINT;
@@ -25,17 +24,23 @@ END_VAR
 VAR
     bHomingInProgress: BOOL;
     bReadNcVelocities: BOOL;
-    nHomeProcLocal: UINT := 0;
-    nHomingState: INT := 0;
-    fbExecuteRiseEdge: R_TRIG;
-    fbHomingParameter: MC_HomingParameter;
-    fbLimitSwRef: MC_Ref_Signal_Ref;
-    fbLimitSwRef2: MC_Ref_Signal_Ref;
-    fbHomeSwRef: MC_Ref_Signal_Ref;
-    fbIndexRef: MC_Ref_Signal_Ref;
+    eHomingState: (eHomeSetParameters:= 0, eHomeFbExecute:= 1, eHomeFbBusy:= 2, eHomeWaitForFbDone:= 3, eHomeFb2Execute:= 4,
+                   eHomeFb2Busy:= 5, eHomeFb2Done:= 6, eHomeSet2speedsDone:= 7, eHomeFinish:= 8);
+    eHomeProcLocal: E_HomingRoutines;
+    tLimit: TIME :=  T#0H10M;
+
+    //Homing Structures
+    stTrigger: TRIGGER_REF;
+    stLimitSwRef: MC_Ref_Signal_Ref;
+    stLimitSwRef2: MC_Ref_Signal_Ref;
+    stHomeSwRef: MC_Ref_Signal_Ref;
+    stIndexRef: MC_Ref_Signal_Ref;
+    stHomingParameter: MC_HomingParameter;
     stOptions2: ST_Home_Options2;
     stOptions4: ST_Home_Options4;
-    tLimit: TIME :=  T#0H10M;
+
+    //Homing FB's
+    fbExecuteRiseEdge: R_TRIG;
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
     fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
@@ -44,402 +49,634 @@ VAR
     fbAbortHoming: MC_AbortHoming;
     fbFinishHoming: MC_FinishHoming;
     fbHomeReadNCVelocities: FB_HomeReadNCVelocities;
-
-    stTrigger: TRIGGER_REF;
-    fbTouchProbe: MC_TouchProbe;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF bReset THEN
-    bError:=FALSE;
-    bWarning:=FALSE;
-    bReadNcVelocities:=FALSE;
-    bHomingInProgress:=FALSE;
-    fbAbortHoming.Execute:=FALSE;
-    nErrorId:=0;
-    nHomingState:=0;
+      <ST><![CDATA[fbExecuteRiseEdge();
+fbStepLimitSwitch(Axis := Axis, Parameter := stHomingParameter);
+fbStepLimitSwitchDetection(Axis := Axis, Parameter := stHomingParameter);
+fbStepAbsoluteSwitch(Axis := Axis, Parameter := stHomingParameter);
+fbStepReferencePulse(Axis := Axis, Parameter := stHomingParameter);
+fbHomeDirect(Axis := Axis, Parameter := stHomingParameter);
+fbAbortHoming(Axis := Axis, Parameter := stHomingParameter);
+fbFinishHoming(Axis := Axis, Parameter := stHomingParameter);
+fbHomeReadNCVelocities(Axis := Axis);
+
+IF bReset THEN
+    bError := FALSE;
+    bWarning := FALSE;
+    bReadNcVelocities := FALSE;
+    bHomingInProgress := FALSE;
+    fbAbortHoming.Execute := FALSE;
+    nErrorId := 0;
+    eHomingState := eHomeSetParameters;
 END_IF
 
 IF bStop THEN
-    bReadNcVelocities:=FALSE;
-    bHomingInProgress:=FALSE;
-    nHomingState:=0;
+    bReadNcVelocities := FALSE;
+    bHomingInProgress := FALSE;
+    eHomingState := eHomeSetParameters;
 END_IF
 
-fbExecuteRiseEdge(CLK:=bExecute);
+fbExecuteRiseEdge.CLK := bExecute;
 IF fbExecuteRiseEdge.Q THEN
-    bHomingInProgress:=TRUE;
-    bReadNcVelocities:=TRUE;
-    fbAbortHoming.Execute:=FALSE;
-    nHomeProcLocal:=nHomeProc;
-    CASE nHomeProcLocal OF
-      //0X: LIMIT Switch
-      01: //Home to bBwdLimit (reverse off limit)
-      02: //Home to bFwdLimit (reverse off limit)
-      03: //Home to bBwdLimit (two speeds)
-      04: //Home to bFwdLimit (two speeds)
-      //1X: Home Sensor
-      11: //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
-      12: //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
-      13: //Home to bHome via bBwdLimit (two speeds)
-      14: //Home to bHome via bFwdLimit (two speeds)
-      //2X: Enc Pulse
-      21: //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
-      22: //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
-      23: //Home to EncRefPulse via bBwdLimit (two speeds)
-      24: //Home to EncRefPulse via bFwdLimit (two speeds)
-      //9X: Software
-      90: //Home direct to value
-    ELSE
-      bError:=TRUE;
+    bHomingInProgress := TRUE;
+    bReadNcVelocities := TRUE;
+    fbAbortHoming.Execute := FALSE;
+    eHomeProcLocal := eHomeProc;
+   //Check for valid Homing routine
+   CASE eHomeProcLocal OF
+        E_HomingRoutines.eNoHoming:
+        E_HomingRoutines.eHomeToBwdLimit: //Home to bBwdLimit (reverse off limit)
+        E_HomingRoutines.eHomeToFwdLimit: //Home to bFwdLimit (reverse off limit)
+        E_HomingRoutines.eHomeToBwdLimit2speeds: //Home to bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bFwdLimit (two speeds)
+        E_HomingRoutines.eHomeBwdToReference: //Home to bHome in Bwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeFwdToReference:  //Home to bHome in Fwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeBwdToRef2speeds: //Home to bHome via bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHome via bFwdLimit (two speeds)
+        E_HomingRoutines.eHomeBwdToEncRef: //Home to EncRefPulse in Bwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeFwdToEncRef: //Home to EncRefPulse in Fwd direction (single speed - will reverse back if limit hit)
+        E_HomingRoutines.eHomeBwdToEncRef2speeds: //Home to EncRefPulse via bBwdLimit (two speeds)
+        E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to EncRefPulse via bFwdLimit (two speeds)
+        E_HomingRoutines.eHomeDirect: //Home direct to fHomePosition value
+ELSE
+      bError := TRUE;
       bHomingInProgress := FALSE;
-      nErrorId:=16#4FFF;
+      nErrorId := 16#4FFF;
   END_CASE
 END_IF
 
 IF bHomingInProgress AND fbHomeReadNcVelocities.bDone AND NOT bError THEN
-CASE nHomeProcLocal OF
-   1,2: //Home to bLimitBwd(1) or bLimitFwd(2)
-        CASE nHomingState OF
-          0:
-            fbStepLimitSwitch.Execute:=FALSE;
-            fbStepLimitSwitch.LimitSwitchMode:=mcFallingEdge;
-            fbStepLimitSwitch.Velocity:=fbHomeReadNcVelocities.fVelocityFromCam;
-            fbStepLimitSwitch.Setposition:=fHomePosition;
-            CASE nHomeProcLocal OF
-                1: fbStepLimitSwitch.Direction:=mcNegativeDirection;
-                2: fbStepLimitSwitch.Direction:=mcPositiveDirection;
+CASE eHomeProcLocal OF
+
+   E_HomingRoutines.eHomeToBwdLimit,
+   E_HomingRoutines.eHomeToFwdLimit: //Home to bLimitBwd(1) or bLimitFwd(2)
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepLimitSwitch.Execute := FALSE;
+            fbStepLimitSwitch.LimitSwitchMode := mcFallingEdge;
+            fbStepLimitSwitch.Velocity := fbHomeReadNcVelocities.fVelocityFromCam;
+            fbStepLimitSwitch.Setposition := fHomePosition;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeToBwdLimit:
+                    fbStepLimitSwitch.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeToFwdLimit:
+                    fbStepLimitSwitch.Direction := mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepLimitSwitch.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepLimitSwitch.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepLimitSwitch.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
-          3:
+
+          eHomeWaitForFbDone:
             IF fbStepLimitSwitch.Done THEN
-                fbFinishHoming.Execute:=TRUE;
-                nHomingState:=nHomingState+1;
+                fbFinishHoming.Execute := TRUE;
+                eHomingState := eHomeFinish;
             END_IF
-          4:
+
+          eHomeFinish:
             IF fbFinishHoming.Done THEN
-                bHomingInProgress:=FALSE;
-                fbFinishHoming.Execute:=FALSE;
-                bReadNcVelocities:=FALSE;
-                nHomingState:=0;
+                bHomingInProgress := FALSE;
+                fbFinishHoming.Execute := FALSE;
+                bReadNcVelocities := FALSE;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-   3,4: //Home to bLimitBwd(3) or bLimitFwd(4) using two speeds
-        CASE nHomingState OF
-          0:
-            fbStepLimitSwitchDetection.Execute:=FALSE;
-            fbStepLimitSwitchDetection.LimitSwitchMode:=mcRisingEdge;
-            fbStepLimitSwitchDetection.Velocity:=fbHomeReadNCVelocities.fVelocityToCam;
-            CASE nHomeProcLocal OF
-                3: fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
-                4: fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
+
+   E_HomingRoutines.eHomeToBwdLimit2speeds,
+   E_HomingRoutines.eHomeToFwdLimit2speeds: //Home to bLimitBwd(3) or bLimitFwd(4) using two speeds
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepLimitSwitchDetection.Execute := FALSE;
+            fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
+            fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeToBwdLimit2speeds:
+                    fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
+                E_HomingRoutines.eHomeToFwdLimit2speeds:
+                    fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepLimitSwitchDetection.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepLimitSwitchDetection.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
-          3:
+
+          eHomeWaitForFbDone:
             IF fbStepLimitSwitchDetection.Done THEN
-                fbStepLimitSwitch.Execute:=FALSE;
-                fbStepLimitSwitch.LimitSwitchMode:=mcFallingEdge;
-                fbStepLimitSwitch.Velocity:=fbHomeReadNCVelocities.fVelocityFromCam;
-                fbStepLimitSwitch.Setposition:=fHomePosition;
-                CASE nHomeProcLocal OF
-                    3: fbStepLimitSwitch.Direction:=mcNegativeDirection;
-                    4: fbStepLimitSwitch.Direction:=mcPositiveDirection;
+                fbStepLimitSwitch.Execute := FALSE;
+                fbStepLimitSwitch.LimitSwitchMode := mcFallingEdge;
+                fbStepLimitSwitch.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
+                fbStepLimitSwitch.Setposition := fHomePosition;
+                CASE eHomeProcLocal OF
+                    E_HomingRoutines.eHomeToBwdLimit2speeds:
+                        fbStepLimitSwitch.Direction := mcNegativeDirection;
+                    E_HomingRoutines.eHomeToFwdLimit2speeds:
+                        fbStepLimitSwitch.Direction := mcPositiveDirection;
                 END_CASE
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeFb2Execute;
             END_IF
-          4:
-            fbStepLimitSwitch.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          5:
+
+          eHomeFb2Execute:
+            fbStepLimitSwitch.Execute := TRUE;
+            eHomingState := eHomeFb2Busy;
+
+          eHomeFb2Busy:
             IF fbStepLimitSwitch.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeFb2Done;
             END_IF
-          6:
+
+          eHomeFb2Done:
             IF fbStepLimitSwitch.Done THEN
-                fbFinishHoming.Execute:=TRUE;
-                nHomingState:=nHomingState+1;
+                fbFinishHoming.Execute := TRUE;
+                eHomingState := eHomeFinish;
             END_IF
-          7:
+
+          eHomeFinish:
             IF fbFinishHoming.Done THEN
-                bHomingInProgress:=FALSE;
-                fbFinishHoming.Execute:=FALSE;
-                bReadNCVelocities:=FALSE;
-                nHomingState:=0;
+                bHomingInProgress := FALSE;
+                fbFinishHoming.Execute := FALSE;
+                bReadNCVelocities := FALSE;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-    11,12: //Home to bHome Sensor moving in the negative(11) or positive(12) direction
-        CASE nHomingState OF
-          0:
-            fbStepAbsoluteSwitch.Execute:=FALSE;
-            fbStepAbsoluteSwitch.SwitchMode:=mcRisingEdge;
-            fbStepAbsoluteSwitch.SetPosition:=fHomePosition;
-            fbStepAbsoluteSwitch.Velocity:=fbHomeReadNCVelocities.fVelocityFromCam;
-            CASE nHomeProcLocal OF
-                11: fbStepAbsoluteSwitch.Direction:=mcNegativeDirection;
-                12: fbStepAbsoluteSwitch.Direction:=mcPositiveDirection;
+
+    E_HomingRoutines.eHomeBwdToReference,
+    E_HomingRoutines.eHomeFwdToReference: //Home to bHome Sensor moving in the negative(11) or positive(12) direction
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepAbsoluteSwitch.Execute := FALSE;
+            fbStepAbsoluteSwitch.SwitchMode := mcRisingEdge;
+            fbStepAbsoluteSwitch.SetPosition := fHomePosition;
+            fbStepAbsoluteSwitch.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeBwdToReference:
+                    fbStepAbsoluteSwitch.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToReference:
+                    fbStepAbsoluteSwitch.Direction := mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepAbsoluteSwitch.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepAbsoluteSwitch.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepAbsoluteSwitch.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
-          3:
+
+          eHomeWaitForFbDone:
             IF fbStepAbsoluteSwitch.Done THEN
-                fbStepAbsoluteSwitch.Execute:=FALSE;
-                fbFinishHoming.Execute:=TRUE;
-                nHomingState:=nHomingState+1;
+                fbStepAbsoluteSwitch.Execute := FALSE;
+                fbFinishHoming.Execute := TRUE;
+                eHomingState := eHomeFinish;
             END_IF
-          4:
+
+          eHomeFinish:
             IF fbFinishHoming.Done THEN
-                bHomingInProgress:=FALSE;
-                fbFinishHoming.Execute:=FALSE;
-                bReadNCVelocities:=FALSE;
-                nHomingState:=0;
+                bHomingInProgress := FALSE;
+                fbFinishHoming.Execute := FALSE;
+                bReadNCVelocities := FALSE;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-    13,14: //Home to bHomeSensor via bLimitBwd(13) or bLimitFwd(14)
-        CASE nHomingState OF
-          0:
-            fbStepLimitSwitchDetection.Execute:=FALSE;
-            fbStepLimitSwitchDetection.LimitSwitchMode:=mcRisingEdge;
-            fbStepLimitSwitchDetection.Velocity:=fbHomeReadNCVelocities.fVelocityToCam;
-            CASE nHomeProcLocal OF
-                13: fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
-                14: fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
+
+    E_HomingRoutines.eHomeBwdToRef2speeds,
+    E_HomingRoutines.eHomeFwdToRef2speeds: //Home to bHomeSensor via bLimitBwd(13) or bLimitFwd(14)
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepLimitSwitchDetection.Execute := FALSE;
+            fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
+            fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeBwdToRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepLimitSwitchDetection.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepLimitSwitchDetection.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeSet2speedsDone;
             END_IF
-          3:
+
+          eHomeSet2speedsDone:
             IF fbStepLimitSwitchDetection.Done THEN
-                fbStepLimitSwitchDetection.Execute:=FALSE;
-                CASE nHomeProcLocal OF
-                    13: nHomeProcLocal:=12;
-                    14: nHomeProcLocal:=11;
+                fbStepLimitSwitchDetection.Execute := FALSE;
+                CASE eHomeProcLocal OF
+                    E_HomingRoutines.eHomeBwdToRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeFwdToReference;
+                    E_HomingRoutines.eHomeFwdToRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeBwdToReference;
                 END_CASE
-                nHomingState:=0;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-    21,22: //Home to index pulse of an encoder in the negative(21) or positive(22) direction
-        CASE nHomingState OF
-          0:
-            fbStepReferencePulse.Execute:=FALSE;
-            fbStepReferencePulse.SetPosition:=fHomePosition;
-            fbStepReferencePulse.Velocity:=fbHomeReadNCVelocities.fVelocityFromCam;
-            CASE nHomeProcLocal OF
-                21: fbStepReferencePulse.Direction:=mcNegativeDirection;
-                22: fbStepReferencePulse.Direction:=mcPositiveDirection;
+
+    E_HomingRoutines.eHomeBwdToEncRef,
+    E_HomingRoutines.eHomeFwdToEncRef: //Home to index pulse of an encoder in the negative(21) or positive(22) direction
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepReferencePulse.Execute := FALSE;
+            fbStepReferencePulse.SetPosition := fHomePosition;
+            fbStepReferencePulse.Velocity := fbHomeReadNCVelocities.fVelocityFromCam;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeBwdToEncRef:
+                    fbStepReferencePulse.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToEncRef:
+                    fbStepReferencePulse.Direction := mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepReferencePulse.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepReferencePulse.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepReferencePulse.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeWaitForFbDone;
             END_IF
-          3:
+
+          eHomeWaitForFbDone:
             IF fbStepReferencePulse.Done THEN
-                fbStepReferencePulse.Execute:=FALSE;
-                fbFinishHoming.Execute:=TRUE;
-                nHomingState:=nHomingState+1;
+                fbStepReferencePulse.Execute := FALSE;
+                fbFinishHoming.Execute := TRUE;
+                eHomingState := eHomeFinish;
             END_IF
-          4:
+
+          eHomeFinish:
             IF fbFinishHoming.Done THEN
-                bHomingInProgress:=FALSE;
-                fbFinishHoming.Execute:=FALSE;
-                bReadNCVelocities:=FALSE;
-                nHomingState:=0;
+                bHomingInProgress := FALSE;
+                fbFinishHoming.Execute := FALSE;
+                bReadNCVelocities := FALSE;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
-    23,24: //Home to index pulse of an encoder via bLimitBwd(23) or bLimitFwd(24)
-        CASE nHomingState OF
-          0:
-            fbStepLimitSwitchDetection.Execute:=FALSE;
-            fbStepLimitSwitchDetection.LimitSwitchMode:=mcRisingEdge;
-            fbStepLimitSwitchDetection.Velocity:=fbHomeReadNCVelocities.fVelocityToCam;
-            CASE nHomeProcLocal OF
-                23: fbStepLimitSwitchDetection.Direction:=mcNegativeDirection;
-                24: fbStepLimitSwitchDetection.Direction:=mcPositiveDirection;
+
+    E_HomingRoutines.eHomeBwdToEncRef2speeds,
+    E_HomingRoutines.eHomeFwdToEncRef2speeds: //Home to index pulse of an encoder via bLimitBwd(23) or bLimitFwd(24)
+        CASE eHomingState OF
+          eHomeSetParameters:
+            fbStepLimitSwitchDetection.Execute := FALSE;
+            fbStepLimitSwitchDetection.LimitSwitchMode := mcRisingEdge;
+            fbStepLimitSwitchDetection.Velocity := fbHomeReadNCVelocities.fVelocityToCam;
+            CASE eHomeProcLocal OF
+                E_HomingRoutines.eHomeBwdToEncRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcNegativeDirection;
+                E_HomingRoutines.eHomeFwdToEncRef2speeds:
+                    fbStepLimitSwitchDetection.Direction := mcPositiveDirection;
             END_CASE
-            nHomingState:=nHomingState+1;
-          1:
-            fbStepLimitSwitchDetection.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2:
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbStepLimitSwitchDetection.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbStepLimitSwitchDetection.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeSet2speedsDone;
             END_IF
-          3:
+
+          eHomeSet2speedsDone:
             IF fbStepLimitSwitchDetection.Done THEN
-                fbStepLimitSwitchDetection.Execute:=FALSE;
-                CASE nHomeProcLocal OF
-                    23: nHomeProcLocal:=22;
-                    24: nHomeProcLocal:=21;
+                fbStepLimitSwitchDetection.Execute := FALSE;
+                CASE eHomeProcLocal OF
+                    E_HomingRoutines.eHomeBwdToEncRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeFwdToEncRef;
+                    E_HomingRoutines.eHomeFwdToEncRef2speeds:
+                        eHomeProcLocal := E_HomingRoutines.eHomeBwdToEncRef;
                 END_CASE
-                nHomingState:=0;
+                eHomingState :=eHomeSetParameters ;
             END_IF
         END_CASE
-    90: //Set current position without moving
-       CASE nHomingState OF
-          0:
-            fbHomeDirect.Execute:=FALSE;
-            fbHomeDirect.SetPosition:=fHomePosition;
-            nHomingState:=nHomingState+1;
-          1:
-            fbHomeDirect.Execute:=TRUE;
-            nHomingState:=nHomingState+1;
-          2: // Check that started
+
+    E_HomingRoutines.eHomeDirect: //Set current position as home without moving
+       CASE eHomingState OF
+          eHomeSetParameters:
+            fbHomeDirect.Execute := FALSE;
+            fbHomeDirect.SetPosition := fHomePosition;
+            eHomingState := eHomeFbExecute;
+
+          eHomeFbExecute:
+            fbHomeDirect.Execute := TRUE;
+            eHomingState := eHomeFbBusy;
+
+          eHomeFbBusy:
             IF fbHomeDirect.Busy THEN
-                nHomingState:=nHomingState+1;
+                eHomingState := eHomeFinish;
             END_IF
-          3: // Check that finished
+
+          eHomeFinish:
             IF fbHomeDirect.Done THEN
-                fbHomeDirect.Execute:=FALSE;
-                bHomingInProgress:=FALSE;
-                bReadNCVelocities:=FALSE;
-                nHomingState:=0;
+                fbHomeDirect.Execute := FALSE;
+                bHomingInProgress := FALSE;
+                bReadNCVelocities := FALSE;
+                eHomingState := eHomeSetParameters;
             END_IF
         END_CASE
 END_CASE
 ELSE
-    fbStepLimitSwitch.Execute:=FALSE;
-    fbStepLimitSwitchDetection.Execute:=FALSE;
-    fbStepAbsoluteSwitch.Execute:=FALSE;
-    fbStepReferencePulse.Execute:=FALSE;
-    fbHomeDirect.Execute:=FALSE;
-    nHomingState:=0;
+    fbStepLimitSwitch.Execute := FALSE;
+    fbStepLimitSwitchDetection.Execute := FALSE;
+    fbStepAbsoluteSwitch.Execute := FALSE;
+    fbStepReferencePulse.Execute := FALSE;
+    fbHomeDirect.Execute := FALSE;
+    eHomingState := eHomeSetParameters;
 END_IF
 
-fbHomeReadNCVelocities(
-    En:=TRUE,
-    bExecute:=bReadNCVelocities,
-    bReset:=bReset,
-    Axis:=Axis );
+//fbHomeReadNCVelocities
+fbHomeReadNCVelocities.bExecute := bReadNCVelocities;
+fbHomeReadNCVelocities.bReset := bReset;
 
-StOptions2.DisableDriveAccess:=TRUE;
-StOptions4.DisableDriveAccess:=TRUE;
-stOptions4.EnableLagErrorDetection:=TRUE;
+//Advance Homing options
+StOptions2.DisableDriveAccess := TRUE;
+StOptions4.DisableDriveAccess := TRUE;
+stOptions4.EnableLagErrorDetection := TRUE;
 
-IF fbStepLimitSwitch.Direction=mcPositiveDirection THEN
-    fbLimitSwRef.Level:=NOT(bLimitFwd);
-ELSIF fbStepLimitSwitch.Direction=mcNegativeDirection THEN
-    fbLimitSwRef.Level:=NOT(bLimitBwd);
+//stLimitSwRef
+IF fbStepLimitSwitch.Direction = mcPositiveDirection THEN
+    stLimitSwRef.Level := NOT(bLimitFwd);
+ELSIF fbStepLimitSwitch.Direction = mcNegativeDirection THEN
+    stLimitSwRef.Level := NOT(bLimitBwd);
 END_IF
-fbStepLimitSwitch(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    LimitSwitchSignal:= fbLimitSwRef,
-    Options:= StOptions4);
 
-IF fbStepLimitSwitchDetection.Direction=mcPositiveDirection THEN
-    fbLimitSwRef2.Level:=NOT(bLimitFwd);
-ELSIF fbStepLimitSwitchDetection.Direction=mcNegativeDirection THEN
-    fbLimitSwRef2.Level:=NOT(bLimitBwd);
+//stLimitSwRef2
+IF fbStepLimitSwitchDetection.Direction = mcPositiveDirection THEN
+    stLimitSwRef2.Level := NOT(bLimitFwd);
+ELSIF fbStepLimitSwitchDetection.Direction = mcNegativeDirection THEN
+    stLimitSwRef2.Level := NOT(bLimitBwd);
 END_IF
-fbStepLimitSwitchDetection(
-    Axis:= AXIS,
-    Parameter:= fbHomingParameter,
-    Execute:= ,
-    Direction:= ,
-    LimitSwitchMode:= ,
-    LimitSwitchSignal:= fbLimitSwRef2,
-    TimeLimit:= tLimit,
-    Options:= StOptions4);
 
-fbHomeSwRef.Level:=bHomeSensor;
-fbHomeSwRef.TouchProbe:=PlcEvent;
-fbHomeSwRef.SignalSource:=SignalSource_Default;
-fbStepAbsoluteSwitch(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    ReferenceSignal:= fbHomeSwRef,
-    TimeLimit:= tLimit,
-    PositiveLimitSwitch:=NOT(bLimitFwd),
-    NegativeLimitSwitch:=NOT(bLimitBwd),
-    Options:= StOptions4);
+//fbStepLimitSwitch
+fbStepLimitSwitch.LimitSwitchSignal := stLimitSwRef;
+fbStepLimitSwitch.Options := StOptions4;
 
-fbIndexRef.SignalSource:=SignalSource_ZeroPulse;
-fbIndexRef.TouchProbe:=TouchProbe1;
-fbStepReferencePulse(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    ReferenceSignal:= fbIndexRef,
-    TimeLimit:= tLimit,
-    Options:= StOptions4);
+//fbStepLimitSwitchDetection
+fbStepLimitSwitchDetection.LimitSwitchSignal := stLimitSwRef2;
+fbStepLimitSwitchDetection.TimeLimit := tLimit;
+fbStepLimitSwitchDetection.Options := StOptions4;
 
-fbHomeDirect(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Options:= StOptions2);
+//stHomeSwRef
+stHomeSwRef.Level := bHomeSensor;
+stHomeSwRef.TouchProbe := PlcEvent;
+stHomeSwRef.SignalSource := SignalSource_Default;
 
-fbFinishHoming(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Velocity:=,
-    Options:= StOptions2);
+//fbStepAbsoluteSwitch
+fbStepAbsoluteSwitch.ReferenceSignal := stHomeSwRef;
+fbStepAbsoluteSwitch.TimeLimit := tLimit;
+fbStepAbsoluteSwitch.PositiveLimitSwitch := NOT(bLimitFwd);
+fbStepAbsoluteSwitch.NegativeLimitSwitch := NOT(bLimitBwd);
+fbStepAbsoluteSwitch.Options := StOptions4;
 
-fbAbortHoming(
-    Axis:= Axis,
-    Parameter:= fbHomingParameter,
-    Options:= StOptions2);
+//stIndexRef
+stIndexRef.SignalSource := SignalSource_ZeroPulse;
+stIndexRef.TouchProbe := TouchProbe1;
 
+//fbStepReferencePulse
+fbStepReferencePulse.ReferenceSignal := stIndexRef;
+fbStepReferencePulse.TimeLimit := tLimit;
+fbStepReferencePulse.Options := StOptions4;
+
+//Set options in Homing FB's
+fbHomeDirect.Options := StOptions2;
+fbFinishHoming.Options := StOptions2;
+fbAbortHoming.Options := StOptions2;
+
+//Home aborted
+IF fbStepLimitSwitch.CommandAborted OR
+   fbStepLimitSwitchDetection.CommandAborted OR
+   fbStepAbsoluteSwitch.CommandAborted OR
+   fbStepReferencePulse.CommandAborted OR
+   fbHomeDirect.CommandAborted THEN
+     eHomingState := eHomeSetParameters;
+     bHomingInProgress := FALSE;
+     bWarning := TRUE;
+END_IF
+
+//Homed status
+bHomed := Axis.Status.Homed;
+
+//Error handling
 IF fbStepLimitSwitch.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepLimitSwitch.ErrorID;
+    bError := TRUE;
+    nErrorId := fbStepLimitSwitch.ErrorID;
 ELSIF fbStepLimitSwitchDetection.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepLimitSwitchDetection.ErrorID;
+    bError := TRUE;
+    nErrorId := fbStepLimitSwitchDetection.ErrorID;
 ELSIF fbStepAbsoluteSwitch.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepAbsoluteSwitch.ErrorID;
+    bError := TRUE;
+    nErrorId := fbStepAbsoluteSwitch.ErrorID;
 ELSIF fbStepReferencePulse.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbStepReferencePulse.ErrorID;
+    bError := TRUE;
+    nErrorId := fbStepReferencePulse.ErrorID;
 ELSIF fbHomeDirect.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbHomeDirect.ErrorID;
+    bError := TRUE;
+    nErrorId := fbHomeDirect.ErrorID;
 ELSIF fbAbortHoming.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbAbortHoming.ErrorID;
+    bError := TRUE;
+    nErrorId := fbAbortHoming.ErrorID;
 ELSIF fbFinishHoming.Error THEN
-    bError:=TRUE;
-    nErrorId:=fbFinishHoming.ErrorID;
-END_IF
-
-IF fbStepLimitSwitch.CommandAborted OR fbStepLimitSwitchDetection.CommandAborted OR fbStepAbsoluteSwitch.CommandAborted OR fbStepReferencePulse.CommandAborted OR fbHomeDirect.CommandAborted THEN
-    nHomingState:=0;
-    bHomingInProgress:=FALSE;
-    bWarning:=TRUE;
-END_IF
-
-bHomed:=Axis.Status.Homed;]]></ST>
+    bError := TRUE;
+    nErrorId := fbFinishHoming.ErrorID;
+END_IF]]></ST>
     </Implementation>
     <LineIds Name="FB_Homing">
+      <LineId Id="4310" Count="0" />
+      <LineId Id="4287" Count="0" />
+      <LineId Id="4289" Count="0" />
+      <LineId Id="4307" Count="0" />
+      <LineId Id="4340" Count="0" />
+      <LineId Id="4343" Count="0" />
+      <LineId Id="4354" Count="0" />
+      <LineId Id="4357" Count="0" />
+      <LineId Id="4284" Count="0" />
+      <LineId Id="4358" Count="0" />
       <LineId Id="3852" Count="10" />
-      <LineId Id="3864" Count="373" />
-      <LineId Id="905" Count="0" />
+      <LineId Id="3864" Count="10" />
+      <LineId Id="4422" Count="0" />
+      <LineId Id="3875" Count="0" />
+      <LineId Id="4424" Count="0" />
+      <LineId Id="4426" Count="3" />
+      <LineId Id="4431" Count="3" />
+      <LineId Id="4436" Count="3" />
+      <LineId Id="3892" Count="9" />
+      <LineId Id="4450" Count="0" />
+      <LineId Id="3902" Count="0" />
+      <LineId Id="4441" Count="0" />
+      <LineId Id="3903" Count="7" />
+      <LineId Id="4455" Count="0" />
+      <LineId Id="3911" Count="0" />
+      <LineId Id="4456" Count="0" />
+      <LineId Id="3912" Count="1" />
+      <LineId Id="4479" Count="0" />
+      <LineId Id="3914" Count="2" />
+      <LineId Id="4481" Count="0" />
+      <LineId Id="3917" Count="3" />
+      <LineId Id="4501" Count="0" />
+      <LineId Id="3921" Count="4" />
+      <LineId Id="4502" Count="0" />
+      <LineId Id="3926" Count="7" />
+      <LineId Id="4449" Count="0" />
+      <LineId Id="3934" Count="0" />
+      <LineId Id="4442" Count="0" />
+      <LineId Id="3935" Count="6" />
+      <LineId Id="4457" Count="0" />
+      <LineId Id="3942" Count="0" />
+      <LineId Id="4458" Count="0" />
+      <LineId Id="3943" Count="1" />
+      <LineId Id="4483" Count="0" />
+      <LineId Id="3945" Count="2" />
+      <LineId Id="4485" Count="0" />
+      <LineId Id="3948" Count="3" />
+      <LineId Id="4486" Count="0" />
+      <LineId Id="3952" Count="7" />
+      <LineId Id="4459" Count="0" />
+      <LineId Id="3960" Count="0" />
+      <LineId Id="4460" Count="0" />
+      <LineId Id="3961" Count="2" />
+      <LineId Id="4487" Count="0" />
+      <LineId Id="3964" Count="2" />
+      <LineId Id="4488" Count="0" />
+      <LineId Id="3967" Count="3" />
+      <LineId Id="4489" Count="0" />
+      <LineId Id="3971" Count="4" />
+      <LineId Id="4490" Count="0" />
+      <LineId Id="3976" Count="7" />
+      <LineId Id="4448" Count="0" />
+      <LineId Id="3984" Count="0" />
+      <LineId Id="4443" Count="0" />
+      <LineId Id="3985" Count="7" />
+      <LineId Id="4461" Count="0" />
+      <LineId Id="3993" Count="0" />
+      <LineId Id="4462" Count="0" />
+      <LineId Id="3994" Count="1" />
+      <LineId Id="4491" Count="0" />
+      <LineId Id="3996" Count="2" />
+      <LineId Id="4492" Count="0" />
+      <LineId Id="3999" Count="3" />
+      <LineId Id="4503" Count="0" />
+      <LineId Id="4003" Count="5" />
+      <LineId Id="4504" Count="0" />
+      <LineId Id="4009" Count="7" />
+      <LineId Id="4447" Count="0" />
+      <LineId Id="4017" Count="0" />
+      <LineId Id="4444" Count="0" />
+      <LineId Id="4018" Count="6" />
+      <LineId Id="4463" Count="0" />
+      <LineId Id="4025" Count="0" />
+      <LineId Id="4464" Count="0" />
+      <LineId Id="4026" Count="1" />
+      <LineId Id="4493" Count="0" />
+      <LineId Id="4028" Count="2" />
+      <LineId Id="4494" Count="0" />
+      <LineId Id="4031" Count="3" />
+      <LineId Id="4505" Count="0" />
+      <LineId Id="4035" Count="4" />
+      <LineId Id="4465" Count="0" />
+      <LineId Id="4040" Count="0" />
+      <LineId Id="4466" Count="0" />
+      <LineId Id="4041" Count="3" />
+      <LineId Id="4446" Count="0" />
+      <LineId Id="4045" Count="0" />
+      <LineId Id="4445" Count="0" />
+      <LineId Id="4046" Count="6" />
+      <LineId Id="4467" Count="0" />
+      <LineId Id="4053" Count="0" />
+      <LineId Id="4468" Count="0" />
+      <LineId Id="4054" Count="1" />
+      <LineId Id="4495" Count="0" />
+      <LineId Id="4056" Count="2" />
+      <LineId Id="4496" Count="0" />
+      <LineId Id="4059" Count="3" />
+      <LineId Id="4506" Count="0" />
+      <LineId Id="4063" Count="5" />
+      <LineId Id="4507" Count="0" />
+      <LineId Id="4069" Count="7" />
+      <LineId Id="4452" Count="0" />
+      <LineId Id="4077" Count="0" />
+      <LineId Id="4451" Count="0" />
+      <LineId Id="4078" Count="6" />
+      <LineId Id="4469" Count="0" />
+      <LineId Id="4085" Count="0" />
+      <LineId Id="4470" Count="0" />
+      <LineId Id="4086" Count="1" />
+      <LineId Id="4497" Count="0" />
+      <LineId Id="4088" Count="2" />
+      <LineId Id="4498" Count="0" />
+      <LineId Id="4091" Count="3" />
+      <LineId Id="4508" Count="0" />
+      <LineId Id="4095" Count="4" />
+      <LineId Id="4471" Count="0" />
+      <LineId Id="4100" Count="0" />
+      <LineId Id="4472" Count="0" />
+      <LineId Id="4101" Count="3" />
+      <LineId Id="4453" Count="0" />
+      <LineId Id="4105" Count="5" />
+      <LineId Id="4499" Count="0" />
+      <LineId Id="4111" Count="2" />
+      <LineId Id="4500" Count="0" />
+      <LineId Id="4114" Count="3" />
+      <LineId Id="4509" Count="0" />
+      <LineId Id="4118" Count="17" />
+      <LineId Id="4290" Count="0" />
+      <LineId Id="4136" Count="0" />
+      <LineId Id="4139" Count="0" />
+      <LineId Id="4291" Count="0" />
+      <LineId Id="4141" Count="3" />
+      <LineId Id="4292" Count="0" />
+      <LineId Id="4145" Count="5" />
+      <LineId Id="4298" Count="5" />
+      <LineId Id="4295" Count="0" />
+      <LineId Id="4304" Count="0" />
+      <LineId Id="4294" Count="0" />
+      <LineId Id="4154" Count="1" />
+      <LineId Id="4297" Count="0" />
+      <LineId Id="4296" Count="0" />
+      <LineId Id="4168" Count="2" />
+      <LineId Id="4305" Count="0" />
+      <LineId Id="4171" Count="3" />
+      <LineId Id="4335" Count="0" />
+      <LineId Id="4177" Count="0" />
+      <LineId Id="4336" Count="0" />
+      <LineId Id="4179" Count="3" />
+      <LineId Id="4337" Count="0" />
+      <LineId Id="4183" Count="2" />
+      <LineId Id="4339" Count="0" />
+      <LineId Id="4338" Count="0" />
+      <LineId Id="4189" Count="2" />
+      <LineId Id="4361" Count="0" />
+      <LineId Id="4192" Count="0" />
+      <LineId Id="4359" Count="1" />
+      <LineId Id="4206" Count="0" />
+      <LineId Id="4367" Count="0" />
+      <LineId Id="4374" Count="0" />
+      <LineId Id="4368" Count="0" />
+      <LineId Id="4474" Count="0" />
+      <LineId Id="4473" Count="0" />
+      <LineId Id="4475" Count="1" />
+      <LineId Id="4369" Count="3" />
+      <LineId Id="4376" Count="0" />
+      <LineId Id="4373" Count="0" />
+      <LineId Id="4366" Count="0" />
+      <LineId Id="4375" Count="0" />
+      <LineId Id="4208" Count="22" />
     </LineIds>
   </POU>
 </TcPlcObject>
