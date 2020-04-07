@@ -14,10 +14,9 @@ STRUCT
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
     //Read and Write parameters 
-    eAxisParameterNumber:   E_AxisParameters;   //Enumeration of axis parameters
-    bSetAxisParameter   :   BOOL;               //Write the value in fWriteAxisParameter to the selected eAxisParameterNumber
-    fWriteAxisParameter :   LREAL;              //The value to be writen to eAxisParameterNumber
-    fReadAxisParameter  :   LREAL;              //Read the current value of the selected eAxisParameterNumber
+    eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
+    fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
+    fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
 
     //Single master axis parameters
     stMasterAxis: ST_GearAxis; //A reference to the axis that this is a slave of

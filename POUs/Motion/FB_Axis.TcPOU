@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis
@@ -97,11 +97,11 @@ fbWriteParameter.Execute := FALSE;
 fbReadParameter( 
 Axis            := stAxisStruct.Axis, 
 Enable          := TRUE, 
-ParameterNumber := stAxisStruct.config.eAxisParameterNumber, 
+ParameterNumber := stAxisStruct.stconfig.eAxisParameters, 
 ReadMode        := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
-    stAxisStruct.config.fReadAxisParameter := fbReadParameter.Value;
+    stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
 //Linking the limit swtiches
@@ -235,12 +235,12 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.bHomeSensor := stAxisStruct.stInputs.bHomeSensor;
         stAxisStruct.stStatus.bHomed := fbHome.bHomed;
     
-    MotionFunctions.WriteParameter:
-        fbSetParameter_RTRIG(clk := stAxisStruct.control.bExecute);
+    E_MotionFunctions.eWriteParameter:
+        fbSetParameter_RTRIG(clk := stAxisStruct.stcontrol.bExecute);
         
         fbWriteParameter.Execute        := fbSetParameter_RTRIG.Q;
-        fbWriteParameter.ParameterNumber:= stAxisStruct.config.eAxisParameterNumber;
-        fbWriteParameter.Value          := stAxisStruct.config.fWriteAxisParameter;
+        fbWriteParameter.ParameterNumber:= stAxisStruct.stConfig.eAxisParameters;
+        fbWriteParameter.Value          := stAxisStruct.stConfig.fWriteAxisParameter;
 
 END_CASE
 
@@ -304,16 +304,16 @@ ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
 
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
-    stAxisStruct.status.bError:=TRUE;
-    stAxisStruct.status.nErrorId:=fbGearOut.ErrorID;
+    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.nErrorId:=fbGearOut.ErrorID;
     
 ELSIF fbWriteParameter.Error THEN
-    stAxisStruct.status.bError:=TRUE;    
-    stAxisStruct.status.nErrorId := fbWriteParameter.ErrorID;
+    stAxisStruct.stStatus.bError:=TRUE;    
+    stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
     
 ELSIF fbReadParameter.Error THEN
-    stAxisStruct.status.bError:=TRUE;
-    stAxisStruct.status.nErrorId := fbReadParameter.ErrorID;  
+    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;  
     
 ELSIF stAxisStruct.Axis.Status.Error  THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
@@ -551,6 +551,8 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="202" Count="1" />
       <LineId Id="246" Count="18" />
       <LineId Id="2" Count="0" />
+      <LineId Id="267" Count="95" />
+      <LineId Id="3269" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
