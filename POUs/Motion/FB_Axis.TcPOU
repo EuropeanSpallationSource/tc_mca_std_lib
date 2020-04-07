@@ -95,10 +95,10 @@ fbWriteParameter.Execute := FALSE;
 
 //Read Parameter
 fbReadParameter( 
-Axis            := stAxisStruct.Axis, 
-Enable          := TRUE, 
-ParameterNumber := stAxisStruct.stconfig.eAxisParameters, 
-ReadMode        := READMODE_CYCLIC);
+    Axis            := stAxisStruct.Axis, 
+    Enable          := TRUE, 
+    ParameterNumber := stAxisStruct.stconfig.eAxisParameters, 
+    ReadMode        := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
