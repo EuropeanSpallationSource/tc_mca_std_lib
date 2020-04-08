@@ -101,7 +101,7 @@ TYPE E_AxisParameters :
     NcSafCycleTime                  := 4000,     (* lreal *) (* IndexOffset= 16#0000_0010 *)
     NcSvbCycleTime                  := 4001      (* lreal *) (* IndexOffset= 16#0000_0012 *)
 
-    );
+);
 END_TYPE
 ]]></Declaration>
     <XmlArchive>
