@@ -94,10 +94,10 @@ fbWriteParameter(Axis := stAxisStruct.Axis);
 fbWriteParameter.Execute := FALSE;
 
 //Read Parameter
-fbReadParameter( 
-    Axis            := stAxisStruct.Axis, 
-    Enable          := TRUE, 
-    ParameterNumber := stAxisStruct.stconfig.eAxisParameters, 
+fbReadParameter(
+    Axis            := stAxisStruct.Axis,
+    Enable          := TRUE,
+    ParameterNumber := stAxisStruct.stconfig.eAxisParameters,
     ReadMode        := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
@@ -234,10 +234,10 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.bLimitFwd := stAxisStruct.stInputs.bLimitFwd;
         fbHome.bHomeSensor := stAxisStruct.stInputs.bHomeSensor;
         stAxisStruct.stStatus.bHomed := fbHome.bHomed;
-    
+
     E_MotionFunctions.eWriteParameter:
         fbSetParameter_RTRIG(clk := stAxisStruct.stcontrol.bExecute);
-        
+
         fbWriteParameter.Execute        := fbSetParameter_RTRIG.Q;
         fbWriteParameter.ParameterNumber:= stAxisStruct.stConfig.eAxisParameters;
         fbWriteParameter.Value          := stAxisStruct.stConfig.fWriteAxisParameter;
@@ -306,15 +306,15 @@ ELSIF fbGearInMultiMaster.Error THEN
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearOut.ErrorID;
-    
+
 ELSIF fbWriteParameter.Error THEN
-    stAxisStruct.stStatus.bError:=TRUE;    
+    stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
-    
+
 ELSIF fbReadParameter.Error THEN
     stAxisStruct.stStatus.bError:=TRUE;
-    stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;  
-    
+    stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;
+
 ELSIF stAxisStruct.Axis.Status.Error  THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
     stAxisStruct.stStatus.nErrorId := stAxisStruct.Axis.Status.ErrorID;

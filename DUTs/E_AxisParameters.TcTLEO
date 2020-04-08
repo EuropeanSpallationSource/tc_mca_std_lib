@@ -94,13 +94,13 @@ TYPE E_AxisParameters :
 (* Beckhoff specific axis functions *)
     (* read/write gear ratio of a slave *)
     AxisGearRatio                   := 3000,     (* lreal *) (* read: IndexGroup=0x4100+ID, IdxOffset=16#0000_0022, *)
-                   (* write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042 *) 
+                   (* write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042 *)
 
 (* Beckhoff specific other parameters *)
     (* new since 1/2011 *)
     NcSafCycleTime                  := 4000,     (* lreal *) (* IndexOffset= 16#0000_0010 *)
     NcSvbCycleTime                  := 4001      (* lreal *) (* IndexOffset= 16#0000_0012 *)
-    
+
     );
 END_TYPE
 ]]></Declaration>

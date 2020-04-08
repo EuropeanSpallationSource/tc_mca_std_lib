@@ -6,23 +6,23 @@
 TYPE AxisParameters :
 (
 (* PLCopen specific parameters *) (* Index-Group 0x4000 + ID*)
-	CommandedPosition 		:= 1,    (* lreal *) (* taken from NcToPlc *)
-	SWLimitPos 				:= 2,    (* lreal *) (* IndexOffset= 16#0001_000E *)
-	SWLimitNeg 				:= 3,    (* lreal *) (* IndexOffset= 16#0001_000D *)
-	EnableLimitPos 			:= 4,    (* bool  *) (* IndexOffset= 16#0001_000C *)
-	EnableLimitNeg 			:= 5,    (* bool  *) (* IndexOffset= 16#0001_000B *)
-	EnablePosLagMonitoring 	:= 6,    (* bool  *) (* IndexOffset= 16#0002_0010 *)
-	MaxPositionLag 			:= 7,    (* lreal *) (* IndexOffset= 16#0002_0012 *)
-	MaxVelocitySystem 		:= 8,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
-	MaxVelocityAppl 		:= 9,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
-	ActualVelocity 			:= 10,   (* lreal *) (* taken from NcToPlc *)
-	CommandedVelocity 		:= 11,   (* lreal *) (* taken from NcToPlc *)
-	MaxAccelerationSystem 	:= 12,   (* lreal *) (* IndexOffset= 16#0000_0101 *)
-	MaxAccelerationAppl 	:= 13,   (* lreal *) (* IndexOffset= 16#0000_0101 *)
-	MaxDecelerationSystem 	:= 14,   (* lreal *) (* IndexOffset= 16#0000_0102 *)
-	MaxDecelerationAppl 	:= 15,   (* lreal *) (* IndexOffset= 16#0000_0102 *)
-	MaxJerkSystem 			:= 16,   (* lreal *) (* IndexOffset= 16#0000_0103 *)
-	MaxJerkAppl 			:= 17,   (* lreal *) (* IndexOffset= 16#0000_0103 *)          
+    CommandedPosition       := 1,    (* lreal *) (* taken from NcToPlc *)
+    SWLimitPos              := 2,    (* lreal *) (* IndexOffset= 16#0001_000E *)
+    SWLimitNeg              := 3,    (* lreal *) (* IndexOffset= 16#0001_000D *)
+    EnableLimitPos          := 4,    (* bool  *) (* IndexOffset= 16#0001_000C *)
+    EnableLimitNeg          := 5,    (* bool  *) (* IndexOffset= 16#0001_000B *)
+    EnablePosLagMonitoring  := 6,    (* bool  *) (* IndexOffset= 16#0002_0010 *)
+    MaxPositionLag          := 7,    (* lreal *) (* IndexOffset= 16#0002_0012 *)
+    MaxVelocitySystem       := 8,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
+    MaxVelocityAppl         := 9,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
+    ActualVelocity          := 10,   (* lreal *) (* taken from NcToPlc *)
+    CommandedVelocity       := 11,   (* lreal *) (* taken from NcToPlc *)
+    MaxAccelerationSystem   := 12,   (* lreal *) (* IndexOffset= 16#0000_0101 *)
+    MaxAccelerationAppl     := 13,   (* lreal *) (* IndexOffset= 16#0000_0101 *)
+    MaxDecelerationSystem   := 14,   (* lreal *) (* IndexOffset= 16#0000_0102 *)
+    MaxDecelerationAppl     := 15,   (* lreal *) (* IndexOffset= 16#0000_0102 *)
+    MaxJerkSystem           := 16,   (* lreal *) (* IndexOffset= 16#0000_0103 *)
+    MaxJerkAppl             := 17,   (* lreal *) (* IndexOffset= 16#0000_0103 *)
 
 (* Beckhoff specific parameters *) (* Index-Group 0x4000 + ID*)
    AxisId := 1000,                   (* lreal *) (* IndexOffset= 16#0000_0001 *)
@@ -94,13 +94,13 @@ TYPE AxisParameters :
 (* Beckhoff specific axis functions *)
    (* read/write gear ratio of a slave *)
    AxisGearRatio := 3000,            (* lreal *) (* read: IndexGroup=0x4100+ID, IdxOffset=16#0000_0022, *)
-                   (* write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042 *) 
+                   (* write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042 *)
 
 (* Beckhoff specific other parameters *)
    (* new since 1/2011 *)
    NcSafCycleTime := 4000,           (* lreal *) (* IndexOffset= 16#0000_0010 *)
    NcSvbCycleTime                    (* lreal *) (* IndexOffset= 16#0000_0012 *)
-	
+
 );
 END_TYPE
 ]]></Declaration>
