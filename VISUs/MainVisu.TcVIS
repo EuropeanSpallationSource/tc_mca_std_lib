@@ -10419,7 +10419,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">743958181L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bWarning"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -10572,7 +10572,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">390574330L</v>
-                          <v n="Value">"bWarning"</v>
+                          <v n="Value">"bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -10596,7 +10596,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">3774423699L</v>
-                          <v n="Value">""bWarning""</v>
+                          <v n="Value">""bCommandAborted""</v>
                         </o>
                         <o>
                           <v n="Id">3719097617L</v>
@@ -10604,7 +10604,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
-                          <v n="Value">"944"</v>
+                          <v n="Value">"225"</v>
                         </o>
                       </l>
                     </o>
@@ -17200,7 +17200,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
             </o>
             <v n="DialogDut">{922df0df-545b-4a6e-ab04-d027f2e1dfa1}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">284</v>
+          <v n="LastUsedIdForIdentifier">285</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>

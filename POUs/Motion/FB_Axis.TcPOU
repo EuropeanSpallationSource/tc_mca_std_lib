@@ -41,6 +41,10 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
+    fbStopFinishedRiseEdge: R_TRIG;
+    fbResetFinishedRiseEdge: R_TRIG;
+    fbCommandAbortedRiseEdge: R_TRIG;
+    fbDoneRiseEdge: R_TRIG;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -108,15 +112,9 @@ stAxisStruct.stStatus.bEnabled := fbPower.Status;
 //Stop
 fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
-IF stAxisStruct.stControl.bStop AND stAxisStruct.Axis.Status.Stopping THEN
-    stAxisStruct.stControl.bStop := FALSE;
-END_IF
 
 //Reset
 fbReset.Execute := stAxisStruct.stControl.bReset AND stAxisStruct.stStatus.bError;
-IF stAxisStruct.stControl.bReset AND NOT (stAxisStruct.stStatus.bError OR stAxisStruct.stStatus.bWarning) THEN
-    stAxisStruct.stControl.bReset := FALSE;
-END_IF
 
 //Motion Functions
 CASE stAxisStruct.stControl.eCommand OF
@@ -219,85 +217,115 @@ CASE stAxisStruct.stControl.eCommand OF
         stAxisStruct.stStatus.bHomed := fbHome.bHomed;
 END_CASE
 
-//Busy
-stAxisStruct.stStatus.bBusy := stAxisStruct.Axis.Status.HasJob;
+//Busy: It is sufficient to take the ouptuts from the eCommand function blocks
+//Attention!! FB_Homing Output Busy has to be added after merging MBP-131
+stAxisStruct.stStatus.bbusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbMoveVelocity.Busy
+    OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy;
 
-//Done
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbHome.fbFinishHoming.Done THEN
-        stAxisStruct.stStatus.bDone := TRUE;
-ELSIF stAxisStruct.Axis.Status.HasJob THEN
-        stAxisStruct.stStatus.bDone := FALSE;
+//CommandAborted from the eCommand function blocks
+//Attention!! FB_Homing Output CommandAborted has to be added after merging MBP-131
+fbCommandAbortedRiseEdge(CLK:= fbMoveAbsolute.CommandAborted OR fbMoveRelative.CommandAborted 
+    OR fbMoveVelocity.CommandAborted OR fbMoveModulo.CommandAborted OR fbJog.CommandAborted 
+    OR fbGearIn.CommandAborted OR fbGearInMultiMaster.CommandAborted OR fbHome.bWarning);
+IF fbCommandAbortedRiseEdge.Q THEN stAxisStruct.stStatus.bCommandAborted := TRUE; END_IF
+
+//Done from the eCommand function blocks
+//Attention!! FB_Homing Output Done has to be added after merging MBP-131
+fbDoneRiseEdge(CLK:= fbMoveAbsolute.Done OR fbMoveRelative.Done 
+    OR fbMoveVelocity.InVelocity OR fbMoveModulo.Done OR fbJog.Done OR fbGearIn.InGear
+    OR fbGearInMultiMaster.InGear OR fbGearOut.Done OR fbHome.bHomed);
+IF fbDoneRiseEdge.Q THEN stAxisStruct.stStatus.bDone := TRUE; END_IF
+
+//Reset Done and CommandAborted with any new eCommand
+fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
+IF fbExecuteRiseEdge.Q THEN 
+    stAxisStruct.stStatus.bDone := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
 END_IF
 
-//Error from functions and Nc
-IF stAxisStruct.stStatus.bError AND NOT stAxisStruct.stControl.bReset THEN
-    stAxisStruct.stStatus.bError := stAxisStruct.stStatus.bError;
-    stAxisStruct.stStatus.nErrorID := stAxisStruct.stStatus.nErrorID;
+//Execution of fbReset ended
+fbResetFinishedRiseEdge(CLK:=fbReset.Done OR FbReset.Error);
+IF fbResetFinishedRiseEdge.Q THEN
+    stAxisStruct.stControl.bReset := FALSE;
+END_IF
 
-ELSIF fbPower.Error THEN
+//Execution of fbStop ended
+fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
+IF fbStopFinishedRiseEdge.Q THEN
+    stAxisStruct.stControl.bStop := FALSE;
+END_IF
+
+//Save the errors from the PLCopen motion functions blocks and from the NC
+IF fbPower.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbPower.ErrorID;
+    stAxisStruct.stError.nPowerErrorID := fbPower.ErrorID;
 
 ELSIF fbHalt.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbHalt.ErrorID;
+    stAxisStruct.stError.nHaltErrorID := fbHalt.ErrorID;
+
+ELSIF fbStop.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbStop.ErrorID;
+    stAxisStruct.stError.nStopErrorID := fbStop.ErrorID;
+
+ELSIF fbReset.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbReset.ErrorID;
+    stAxisStruct.stError.nResetErrorID := fbReset.ErrorID;
 
 ELSIF fbJog.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbJog.ErrorID;
+    stAxisStruct.stError.nJogErrorID := fbJog.ErrorID;
 
 ELSIF fbMoveVelocity.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveVelocity.ErrorID;
+    stAxisStruct.stError.nMoveVelocityErrorID := fbMoveVelocity.ErrorID;
 
 ELSIF fbMoveRelative.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveRelative.ErrorID;
+    stAxisStruct.stError.nMoveRelativeErrorID := fbMoveRelative.ErrorID;
 
 ELSIF fbMoveAbsolute.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveAbsolute.ErrorID;
+    stAxisStruct.stError.nMoveAbsoluteErrorID := fbMoveAbsolute.ErrorID;
 
 ELSIF fbMoveModulo.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveModulo.ErrorID;
+    stAxisStruct.stError.nMoveModuloErrorID := fbMoveModulo.ErrorID;
 
 ELSIF fbHome.bError THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbHome.nErrorID;
+    stAxisStruct.stError.nHomeErrorID := fbHome.nErrorID;
 
 ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
-
-ELSIF fbGearInMultiMaster.Error THEN
-    stAxisStruct.stStatus.bError := TRUE;
-    stAxisStruct.stStatus.nErrorId := fbGearInMultiMaster.ErrorID;
+    stAxisStruct.stError.nGearInErrorId:=fbGearIn.ErrorID;
 
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
+    stAxisStruct.stError.nGearInMultiMasterErrorId:=fbGearInMultiMaster.ErrorID;
 
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearOut.ErrorID;
+    stAxisStruct.stError.nGearOutErrorId := fbGearOut.ErrorID;
 
-ELSIF stAxisStruct.Axis.Status.Error  THEN
+ELSIF stAxisStruct.Axis.Status.Error THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
     stAxisStruct.stStatus.nErrorId := stAxisStruct.Axis.Status.ErrorID;
+    stAxisStruct.stError.nNCErrorId := stAxisStruct.Axis.Status.ErrorID;
 
-ELSE
-    stAxisStruct.stStatus.bError := FALSE;
-    stAxisStruct.stStatus.nErrorId := 0;
-END_IF;
-
-//Warnings from functions and Nc
-IF stAxisStruct.stStatus.bWarning AND NOT stAxisStruct.stControl.bReset THEN
-    stAxisStruct.stStatus.bWarning := stAxisStruct.stStatus.bWarning;
-ELSIF fbHome.bWarning THEN
-    stAxisStruct.stStatus.bWarning := stAxisStruct.stStatus.bError;
-ELSE
-    stAxisStruct.stStatus.bWarning := FALSE;
 END_IF;
 
 //Actual Velocity
@@ -310,38 +338,10 @@ ELSE
     stAxisStruct.stStatus.fActPosition := stAxisStruct.Axis.NcToPlc.ActPos;
 END_IF
 
-//Gearing Status
-stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled;
+//Moving Status from the NC
+stAxisStruct.stStatus.bMoving := stAxisStruct.Axis.Status.Moving;
 
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
-    stAxisStruct.stStatus.bCoupledGear1 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear1 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
-    stAxisStruct.stStatus.bCoupledGear2 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear2 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
-    stAxisStruct.stStatus.bCoupledGear3 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear3 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
-    stAxisStruct.stStatus.bCoupledGear4 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear4 := FALSE;
-END_IF
-
-//Gearing Status
+//Gearing Status from the NC
 stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled;
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
@@ -376,8 +376,75 @@ END_IF
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="4042" Count="225" />
-      <LineId Id="4272" Count="103" />
+      <LineId Id="4042" Count="42" />
+      <LineId Id="4510" Count="0" />
+      <LineId Id="4086" Count="20" />
+      <LineId Id="4110" Count="2" />
+      <LineId Id="4116" Count="102" />
+      <LineId Id="4488" Count="0" />
+      <LineId Id="4219" Count="0" />
+      <LineId Id="4491" Count="0" />
+      <LineId Id="4493" Count="0" />
+      <LineId Id="4492" Count="0" />
+      <LineId Id="4517" Count="0" />
+      <LineId Id="4502" Count="1" />
+      <LineId Id="4501" Count="0" />
+      <LineId Id="4496" Count="0" />
+      <LineId Id="4220" Count="1" />
+      <LineId Id="4518" Count="0" />
+      <LineId Id="4506" Count="2" />
+      <LineId Id="4226" Count="0" />
+      <LineId Id="4527" Count="0" />
+      <LineId Id="4531" Count="4" />
+      <LineId Id="4529" Count="0" />
+      <LineId Id="4537" Count="0" />
+      <LineId Id="4536" Count="0" />
+      <LineId Id="4545" Count="0" />
+      <LineId Id="4539" Count="0" />
+      <LineId Id="4546" Count="2" />
+      <LineId Id="4538" Count="0" />
+      <LineId Id="4550" Count="2" />
+      <LineId Id="4549" Count="0" />
+      <LineId Id="4227" Count="1" />
+      <LineId Id="4233" Count="1" />
+      <LineId Id="4619" Count="1" />
+      <LineId Id="4236" Count="2" />
+      <LineId Id="4617" Count="1" />
+      <LineId Id="4519" Count="0" />
+      <LineId Id="4521" Count="1" />
+      <LineId Id="4615" Count="1" />
+      <LineId Id="4524" Count="2" />
+      <LineId Id="4613" Count="1" />
+      <LineId Id="4520" Count="0" />
+      <LineId Id="4241" Count="1" />
+      <LineId Id="4611" Count="1" />
+      <LineId Id="4244" Count="2" />
+      <LineId Id="4609" Count="1" />
+      <LineId Id="4248" Count="2" />
+      <LineId Id="4607" Count="1" />
+      <LineId Id="4252" Count="2" />
+      <LineId Id="4605" Count="1" />
+      <LineId Id="4256" Count="2" />
+      <LineId Id="4601" Count="1" />
+      <LineId Id="4260" Count="2" />
+      <LineId Id="4603" Count="1" />
+      <LineId Id="4264" Count="3" />
+      <LineId Id="4600" Count="0" />
+      <LineId Id="4276" Count="3" />
+      <LineId Id="4599" Count="0" />
+      <LineId Id="4280" Count="3" />
+      <LineId Id="4598" Count="0" />
+      <LineId Id="4284" Count="3" />
+      <LineId Id="4597" Count="0" />
+      <LineId Id="4291" Count="1" />
+      <LineId Id="4302" Count="9" />
+      <LineId Id="4418" Count="0" />
+      <LineId Id="4417" Count="0" />
+      <LineId Id="4419" Count="0" />
+      <LineId Id="4312" Count="0" />
+      <LineId Id="4434" Count="13" />
+      <LineId Id="4420" Count="13" />
+      <LineId Id="4372" Count="3" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
