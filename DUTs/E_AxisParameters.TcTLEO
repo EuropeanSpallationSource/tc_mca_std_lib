@@ -5,101 +5,101 @@
 {attribute 'strict'}
 TYPE E_AxisParameters :
 (
-(* PLCopen specific parameters *) (* Index-Group 0x4000 + ID*)
-    CommandedPosition               := 1,       (* lreal *) (* taken from NcToPlc *)
-    SWLimitPos                      := 2,       (* lreal *) (* IndexOffset= 16#0001_000E *)
-    SWLimitNeg                      := 3,       (* lreal *) (* IndexOffset= 16#0001_000D *)
-    EnableLimitPos                  := 4,       (* bool  *) (* IndexOffset= 16#0001_000C *)
-    EnableLimitNeg                  := 5,       (* bool  *) (* IndexOffset= 16#0001_000B *)
-    EnablePosLagMonitoring          := 6,       (* bool  *) (* IndexOffset= 16#0002_0010 *)
-    MaxPositionLag                  := 7,       (* lreal *) (* IndexOffset= 16#0002_0012 *)
-    MaxVelocitySystem               := 8,       (* lreal *) (* IndexOffset= 16#0000_0027 *)
-    MaxVelocityAppl                 := 9,       (* lreal *) (* IndexOffset= 16#0000_0027 *)
-    ActualVelocity                  := 10,      (* lreal *) (* taken from NcToPlc *)
-    CommandedVelocity               := 11,      (* lreal *) (* taken from NcToPlc *)
-    MaxAccelerationSystem           := 12,      (* lreal *) (* IndexOffset= 16#0000_0101 *)
-    MaxAccelerationAppl             := 13,      (* lreal *) (* IndexOffset= 16#0000_0101 *)
-    MaxDecelerationSystem           := 14,      (* lreal *) (* IndexOffset= 16#0000_0102 *)
-    MaxDecelerationAppl             := 15,      (* lreal *) (* IndexOffset= 16#0000_0102 *)
-    MaxJerkSystem                   := 16,      (* lreal *) (* IndexOffset= 16#0000_0103 *)
-    MaxJerkAppl                     := 17,      (* lreal *) (* IndexOffset= 16#0000_0103 *)
+//PLCopen specific parameters Index-Group 0x4000 + ID
+    CommandedPosition := 1, //lreal taken from NcToPlc
+    SWLimitPos := 2, //lreal IndexOffset= 16#0001_000E
+    SWLimitNeg := 3, //lreal IndexOffset= 16#0001_000D
+    EnableLimitPos := 4, //bool IndexOffset= 16#0001_000C
+    EnableLimitNeg := 5, //bool IndexOffset= 16#0001_000B
+    EnablePosLagMonitoring := 6, //bool IndexOffset= 16#0002_0010
+    MaxPositionLag := 7, //lreal IndexOffset= 16#0002_0012
+    MaxVelocitySystem := 8, //lreal IndexOffset= 16#0000_0027
+    MaxVelocityAppl := 9, //lreal IndexOffset= 16#0000_0027
+    ActualVelocity := 10, //lreal taken from NcToPlc
+    CommandedVelocity := 11, //lreal taken from NcToPlc
+    MaxAccelerationSystem := 12, //lreal IndexOffset= 16#0000_0101
+    MaxAccelerationAppl := 13, //lreal IndexOffset= 16#0000_0101
+    MaxDecelerationSystem := 14, //lreal IndexOffset= 16#0000_0102
+    MaxDecelerationAppl := 15, //lreal IndexOffset= 16#0000_0102
+    MaxJerkSystem := 16, //lreal IndexOffset= 16#0000_0103
+    MaxJerkAppl := 17, //lreal IndexOffset= 16#0000_0103
 
-(* Beckhoff specific parameters *) (* Index-Group 0x4000 + ID*)
-    AxisId                          := 1000,    (* lreal *) (* IndexOffset= 16#0000_0001 *)
-    AxisVeloManSlow                 := 1001,    (* lreal *) (* IndexOffset= 16#0000_0008 *)
-    AxisVeloManFast                 := 1002,    (* lreal *) (* IndexOffset= 16#0000_0009 *)
-    AxisVeloMax                     := 1003,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
-    AxisAcc                         := 1004,    (* lreal *) (* IndexOffset= 16#0000_0101 *)
-    AxisDec                         := 1005,    (* lreal *) (* IndexOffset= 16#0000_0102 *)
-    AxisJerk                        := 1006,    (* lreal *) (* IndexOffset= 16#0000_0103 *)
-    MaxJerk                         := 1007,    (* lreal *) (* IndexOffset= 16#0000_0103 *)
-    AxisMaxVelocity                 := 1008,    (* lreal *) (* IndexOffset= 16#0000_0027 *)
-    AxisRapidTraverseVelocity       := 1009,    (* lreal *) (* IndexOffset= 16#0000_000A *)
-    AxisManualVelocityFast          := 1010,    (* lreal *) (* IndexOffset= 16#0000_0009 *)
-    AxisManualVelocitySlow          := 1011,    (* lreal *) (* IndexOffset= 16#0000_0008 *)
-    AxisCalibrationVelocityForward  := 1012,    (* lreal *) (* IndexOffset= 16#0000_0006 *)
-    AxisCalibrationVelocityBackward := 1013,    (* lreal *) (* IndexOffset= 16#0000_0007 *)
-    AxisJogIncrementForward         := 1014,    (* lreal *) (* IndexOffset= 16#0000_0018 *)
-    AxisJogIncrementBackward        := 1015,    (* lreal *) (* IndexOffset= 16#0000_0019 *)
-    AxisEnMinSoftPosLimit           := 1016,    (* bool  *) (* IndexOffset= 16#0001_000B *)
-    AxisMinSoftPosLimit             := 1017,    (* lreal *) (* IndexOffset= 16#0001_000D *)
-    AxisEnMaxSoftPosLimit           := 1018,    (* bool  *) (* IndexOffset= 16#0001_000C *)
-    AxisMaxSoftPosLimit             := 1019,    (* lreal *) (* IndexOffset= 16#0001_000E *)
-    AxisEnPositionLagMonitoring     := 1020,    (* bool  *) (* IndexOffset= 16#0002_0010 *)
-    AxisMaxPosLagValue              := 1021,    (* lreal *) (* IndexOffset= 16#0002_0012 *)
-    AxisMaxPosLagFilterTime         := 1022,    (* lreal *) (* IndexOffset= 16#0002_0013 *)
-    AxisEnPositionRangeMonitoring   := 1023,    (* bool  *) (* IndexOffset= 16#0000_000F *)
-    AxisPositionRangeWindow         := 1024,    (* lreal *) (* IndexOffset= 16#0000_0010 *)
-    AxisEnTargetPositionMonitoring  := 1025,    (* bool  *) (* IndexOffset= 16#0000_0015 *)
-    AxisTargetPositionWindow        := 1026,    (* lreal *) (* IndexOffset= 16#0000_0016 *)
-    AxisTargetPositionMonitoringTime:= 1027,    (* lreal *) (* IndexOffset= 16#0000_0017 *)
-    AxisEnInTargetTimeout           := 1028,    (* bool  *) (* IndexOffset= 16#0000_0029 *)
-    AxisInTargetTimeout             := 1029,    (* lreal *) (* IndexOffset= 16#0000_002A *)
-    AxisEnMotionMonitoring          := 1030,    (* bool  *) (* IndexOffset= 16#0000_0011 *)
-    AxisMotionMonitoringWindow      := 1031,    (* lreal *) (* IndexOffset= 16#0000_0028 *)
-    AxisMotionMonitoringTime        := 1032,    (* lreal *) (* IndexOffset= 16#0000_0012 *)
-    AxisDelayTimeVeloPosition       := 1033,    (* lreal *) (* IndexOffset= 16#0000_0104 *)
-    AxisEnLoopingDistance           := 1034,    (* bool  *) (* IndexOffset= 16#0000_0013 *)
-    AxisLoopingDistance             := 1035,    (* lreal *) (* IndexOffset= 16#0000_0014 *)
-    AxisEnBacklashCompensation      := 1036,    (* bool  *) (* IndexOffset= 16#0000_002B *)
-    AxisBacklash                    := 1037,    (* lreal *) (* IndexOffset= 16#0000_002C *)
-    AxisEnDataPersistence           := 1038,    (* bool  *) (* IndexOffset= 16#0000_0030 *)
-    AxisRefVeloOnRefOutput          := 1039,    (* lreal *) (* IndexOffset= 16#0003_0101 *)
-    AxisOverrideType                := 1040,    (* lreal *) (* IndexOffset= 16#0000_0105 *)
-    (* new since 4/2007 *)
-    AxisEncoderScalingFactor        := 1041,    (* lreal *) (* IndexOffset= 16#0001_0006 *)
-    AxisEncoderOffset               := 1042,    (* lreal *) (* IndexOffset= 16#0001_0007 *)
-    AxisEncoderDirectionInverse     := 1043,    (* bool  *) (* IndexOffset= 16#0001_0008 *)
-    AxisEncoderMask                 := 1044,    (* dword *) (* IndexOffset= 16#0001_0015 *)
-    AxisEncoderModuloValue          := 1045,    (* lreal *) (* IndexOffset= 16#0001_0009 *)
-    AxisModuloToleranceWindow       := 1046,    (* lreal *) (* IndexOffset= 16#0001_001B *)
-    AxisEnablePosCorrection         := 1047,    (* bool  *) (* IndexOffset= 16#0001_0016 *)
-    AxisPosCorrectionFilterTime     := 1048,    (* lreal *) (* IndexOffset= 16#0001_0017 *)
-    (* new since 1/2010 *)
-    AxisUnitInterpretation          := 1049,    (* lreal *) (* IndexOffset= 16#0000_0026 *)
-    AxisMotorDirectionInverse       := 1050,    (* bool  *) (* IndexOffset= 16#0003_0006 *)
-    (* new since 1/2011 *)
-    AxisCycleTime                   := 1051,    (* lreal *) (* IndexOffset= 16#0000_0004 *)
-    (* new since 5/2011 *)
-    AxisFastStopSignalType          := 1052,    (* dword *) (* IndexOffset= 16#0000_001E *)
-    AxisFastAcc                     := 1053,    (* lreal *) (* IndexOffset= 16#0000_010A *)
-    AxisFastDec                     := 1054,    (* lreal *) (* IndexOffset= 16#0000_010B *)
-    AxisFastJerk                    := 1055,    (* lreal *) (* IndexOffset= 16#0000_010C *)
+//Beckhoff specific parameters Index-Group 0x4000 + ID
+    AxisId := 1000, //lreal IndexOffset= 16#0000_0001
+    AxisVeloManSlow := 1001, //lreal IndexOffset= 16#0000_0008
+    AxisVeloManFast := 1002, //lreal IndexOffset= 16#0000_0009
+    AxisVeloMax := 1003, //lreal IndexOffset= 16#0000_0027
+    AxisAcc := 1004, //lreal IndexOffset= 16#0000_0101
+    AxisDec := 1005, //lreal IndexOffset= 16#0000_0102
+    AxisJerk := 1006, //lreal IndexOffset= 16#0000_0103
+    MaxJerk := 1007, //lreal IndexOffset= 16#0000_0103
+    AxisMaxVelocity := 1008, //lreal IndexOffset= 16#0000_0027
+    AxisRapidTraverseVelocity := 1009, //lreal IndexOffset= 16#0000_000A
+    AxisManualVelocityFast := 1010, //lreal IndexOffset= 16#0000_0009
+    AxisManualVelocitySlow := 1011, //lreal IndexOffset= 16#0000_0008
+    AxisCalibrationVelocityForward := 1012, //lreal IndexOffset= 16#0000_0006
+    AxisCalibrationVelocityBackward := 1013, //lreal IndexOffset= 16#0000_0007
+    AxisJogIncrementForward := 1014, //lreal IndexOffset= 16#0000_0018
+    AxisJogIncrementBackward := 1015, //lreal IndexOffset= 16#0000_0019
+    AxisEnMinSoftPosLimit := 1016, //bool IndexOffset= 16#0001_000B
+    AxisMinSoftPosLimit := 1017, //lreal IndexOffset= 16#0001_000D
+    AxisEnMaxSoftPosLimit := 1018, //bool IndexOffset= 16#0001_000C
+    AxisMaxSoftPosLimit := 1019, //lreal IndexOffset= 16#0001_000E
+    AxisEnPositionLagMonitoring := 1020, //bool IndexOffset= 16#0002_0010
+    AxisMaxPosLagValue := 1021, //lreal IndexOffset= 16#0002_0012
+    AxisMaxPosLagFilterTime := 1022, //lreal IndexOffset= 16#0002_0013
+    AxisEnPositionRangeMonitoring := 1023, //bool IndexOffset= 16#0000_000F
+    AxisPositionRangeWindow := 1024, //lreal IndexOffset= 16#0000_0010
+    AxisEnTargetPositionMonitoring:= 1025, //bool IndexOffset= 16#0000_0015
+    AxisTargetPositionWindow := 1026, //lreal IndexOffset= 16#0000_0016
+    AxisTargetPositionMonitoringTime := 1027, //lreal IndexOffset= 16#0000_0017
+    AxisEnInTargetTimeout := 1028, //bool IndexOffset= 16#0000_0029
+    AxisInTargetTimeout := 1029, //lreal IndexOffset= 16#0000_002A
+    AxisEnMotionMonitoring := 1030, //bool IndexOffset= 16#0000_0011
+    AxisMotionMonitoringWindow := 1031, //lreal IndexOffset= 16#0000_0028
+    AxisMotionMonitoringTime := 1032, //lreal IndexOffset= 16#0000_0012
+    AxisDelayTimeVeloPosition := 1033, //lreal IndexOffset= 16#0000_0104
+    AxisEnLoopingDistance := 1034, //bool IndexOffset= 16#0000_0013
+    AxisLoopingDistance := 1035, //lreal IndexOffset= 16#0000_0014
+    AxisEnBacklashCompensation := 1036, //bool IndexOffset= 16#0000_002B
+    AxisBacklash := 1037, //lreal IndexOffset= 16#0000_002C
+    AxisEnDataPersistence := 1038, //bool IndexOffset= 16#0000_0030
+    AxisRefVeloOnRefOutput := 1039, //lreal IndexOffset= 16#0003_0101
+    AxisOverrideType := 1040, //lreal IndexOffset= 16#0000_0105
+    //new since 4/2007
+    AxisEncoderScalingFactor := 1041, //lreal IndexOffset= 16#0001_0006
+    AxisEncoderOffset := 1042, //lreal IndexOffset= 16#0001_0007
+    AxisEncoderDirectionInverse := 1043, //bool IndexOffset= 16#0001_0008
+    AxisEncoderMask := 1044, //dword IndexOffset= 16#0001_0015
+    AxisEncoderModuloValue := 1045, //lreal IndexOffset= 16#0001_0009
+    AxisModuloToleranceWindow := 1046, //lreal IndexOffset= 16#0001_001B
+    AxisEnablePosCorrection := 1047, //bool IndexOffset= 16#0001_0016
+    AxisPosCorrectionFilterTime := 1048, //lreal IndexOffset= 16#0001_0017
+    //new since 1/2010
+    AxisUnitInterpretation := 1049, //lreal IndexOffset= 16#0000_0026
+    AxisMotorDirectionInverse := 1050, //bool  IndexOffset= 16#0003_0006
+    //new since 1/2011
+    AxisCycleTime := 1051, //lreal IndexOffset= 16#0000_0004
+    //new since 5/2011
+    AxisFastStopSignalType := 1052, //dword IndexOffset= 16#0000_001E
+    AxisFastAcc := 1053, //lreal IndexOffset= 16#0000_010A
+    AxisFastDec := 1054, //lreal IndexOffset= 16#0000_010B
+    AxisFastJerk := 1055, //lreal IndexOffset= 16#0000_010C
 
-(* Beckhoff specific axis status information - READ ONLY *) (* Index-Group 0x4100 + ID*)
-    AxisTargetPosition              := 2000,     (* lreal *) (* IndexOffset= 16#0000_0013 *)
-    AxisRemainingTimeToGo           := 2001,     (* lreal *) (* IndexOffset= 16#0000_0014 *)
-    AxisRemainingDistanceToGo       := 2002,     (* lreal *) (* IndexOffset= 16#0000_0022, 16#0000_0042 *)
+//Beckhoff specific axis status information - READ ONLY Index-Group 0x4100 + ID
+    AxisTargetPosition := 2000, //lreal IndexOffset= 16#0000_0013
+    AxisRemainingTimeToGo := 2001, //lreal IndexOffset= 16#0000_0014
+    AxisRemainingDistanceToGo := 2002, //lreal IndexOffset= 16#0000_0022, 16#0000_0042
 
-(* Beckhoff specific axis functions *)
-    (* read/write gear ratio of a slave *)
-    AxisGearRatio                   := 3000,     (* lreal *) (* read: IndexGroup=0x4100+ID, IdxOffset=16#0000_0022, *)
-                   (* write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042 *)
+//Beckhoff specific axis functions
+    //read/write gear ratio of a slave
+    AxisGearRatio := 3000, //lreal read: IndexGroup=0x4100+ID, IdxOffset=16#0000_0022,
+                                 //write:IndexGroup=0x4200+ID, IdxOffset=16#0000_0042
 
-(* Beckhoff specific other parameters *)
-    (* new since 1/2011 *)
-    NcSafCycleTime                  := 4000,     (* lreal *) (* IndexOffset= 16#0000_0010 *)
-    NcSvbCycleTime                  := 4001      (* lreal *) (* IndexOffset= 16#0000_0012 *)
+//Beckhoff specific other parameters
+    //new since 1/2011
+    NcSafCycleTime := 4000, //lreal IndexOffset= 16#0000_0010
+    NcSvbCycleTime := 4001 //lreal IndexOffset= 16#0000_0012
 
 );
 END_TYPE
