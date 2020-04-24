@@ -23,7 +23,8 @@ VAR
     iAxisIndex: UINT;
     iMultiMastersAxesIndex: UINT;
     iSlaveAxesIndex: UINT;
-
+    bWaitForStoppingAfterLimitHit : BOOL := FALSE;
+    fbRemovePowerTimer: TOF;
     stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
     fbReset: MC_Reset;
     fbPower: MC_Power;
@@ -39,8 +40,6 @@ VAR
     fbGearInMultiMaster: MC_GearInMultiMaster;
     fbHome: FB_Homing;
     fbExecuteRiseEdge: R_TRIG;
-    fbStopRiseEdge: R_TRIG;
-    fbResetRiseEdge: R_TRIG;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -60,7 +59,10 @@ fbHalt.Execute := FALSE;
 
 fbJog(Axis := stAxisStruct.Axis);
 
-fbHome(Axis := stAxisStruct.Axis);
+fbHome(Axis := stAxisStruct.Axis,
+bLimitBwd := stAxisStruct.stInputs.bLimitBwd,
+bLimitFwd := stAxisStruct.stInputs.bLimitFwd,
+bHomeSensor := stAxisStruct.stInputs.bHomeSensor);
 fbHome.bExecute := FALSE;
 
 fbMoveAbsolute(Axis := stAxisStruct.Axis);
@@ -98,19 +100,31 @@ FOR iAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
     END_IF
 END_FOR
 
+//Timer for keeping power on after limit switch hit, needed for homing routines - if power is lost routines are aborted
+fbRemovePowerTimer(IN := stAxisStruct.stInputs.bLimitFwd AND stAxisStruct.stInputs.bLimitBwd, PT := T#100MS);
+IF fbHome.bBusy AND (fbRemovePowerTimer.Q OR stAxisStruct.Axis.NcToPlc.AxisState=5) THEN //5=PHASE_ACCNEG
+    bWaitForStoppingAfterLimitHit := TRUE;
+ELSE
+    bWaitForStoppingAfterLimitHit := FALSE;
+END_IF
+
 //Power
 fbPower.Enable := stAxisStruct.stControl.bEnable;
-fbPower.Enable_Positive := stAxisStruct.stStatus.bFwEnabled;
-fbPower.Enable_Negative := stAxisStruct.stStatus.bBwEnabled;
+fbPower.Enable_Positive := stAxisStruct.stStatus.bFwEnabled OR bWaitForStoppingAfterLimitHit;
+fbPower.Enable_Negative := stAxisStruct.stStatus.bBwEnabled OR bWaitForStoppingAfterLimitHit;
 fbPower.Override := stAxisStruct.stConfig.fOverride;
 stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
 //Stop
-fbStop.Execute := stAxisStruct.stControl.bStop;
+fbStop.Execute := stAxisStruct.stControl.bStop AND NOT fbHome.bBusy;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
 IF stAxisStruct.stControl.bStop AND stAxisStruct.Axis.Status.Stopping THEN
     stAxisStruct.stControl.bStop := FALSE;
 END_IF
+
+//Halt
+fbHalt.Execute := stAxisStruct.stControl.bStop AND fbHome.bBusy;
+fbHalt.Deceleration := stAxisStruct.stConfig.fDeceleration;
 
 //Reset
 fbReset.Execute := stAxisStruct.stControl.bReset AND stAxisStruct.stStatus.bError;
@@ -208,22 +222,17 @@ CASE stAxisStruct.stControl.eCommand OF
         END_IF
 
     E_MotionFunctions.eHome:
-        fbHome.bExecute := stAxisStruct.stControl.bExecute;
-        fbHome.bReset := stAxisStruct.stControl.bReset;
-        fbHome.bStop := stAxisStruct.stControl.bStop;
-        fbHome.eHomeProc := stAxisStruct.stConfig.eHomeSeq;
+        fbHome.bExecute := stAxisStruct.stControl.bExecute AND NOT stAxisStruct.stStatus.bError;
+        fbHome.eHomeSeq := stAxisStruct.stConfig.eHomeSeq;
         fbHome.fHomePosition := stAxisStruct.stConfig.fHomePosition;
-        fbHome.bLimitBwd := stAxisStruct.stInputs.bLimitBwd;
-        fbHome.bLimitFwd := stAxisStruct.stInputs.bLimitFwd;
-        fbHome.bHomeSensor := stAxisStruct.stInputs.bHomeSensor;
-        stAxisStruct.stStatus.bHomed := fbHome.bHomed;
+        fbHome.fHomeFinishDistance := stAxisStruct.stConfig.fHomeFinishDistance;
 END_CASE
 
 //Busy
 stAxisStruct.stStatus.bBusy := stAxisStruct.Axis.Status.HasJob;
 
 //Done
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbHome.fbFinishHoming.Done THEN
+IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbHome.bDone THEN
         stAxisStruct.stStatus.bDone := TRUE;
 ELSIF stAxisStruct.Axis.Status.HasJob THEN
         stAxisStruct.stStatus.bDone := FALSE;
@@ -291,11 +300,13 @@ ELSE
     stAxisStruct.stStatus.nErrorId := 0;
 END_IF;
 
-//Warnings from functions and Nc
-IF stAxisStruct.stStatus.bWarning AND NOT stAxisStruct.stControl.bReset THEN
+//Warnings
+IF stAxisStruct.stStatus.bWarning AND NOT stAxisStruct.stControl.bExecute THEN
     stAxisStruct.stStatus.bWarning := stAxisStruct.stStatus.bWarning;
-ELSIF fbHome.bWarning THEN
-    stAxisStruct.stStatus.bWarning := stAxisStruct.stStatus.bError;
+
+ELSIF fbHome.bCommandAborted THEN
+    stAxisStruct.stStatus.bWarning := TRUE;
+
 ELSE
     stAxisStruct.stStatus.bWarning := FALSE;
 END_IF;
@@ -310,36 +321,8 @@ ELSE
     stAxisStruct.stStatus.fActPosition := stAxisStruct.Axis.NcToPlc.ActPos;
 END_IF
 
-//Gearing Status
-stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled;
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
-    stAxisStruct.stStatus.bCoupledGear1 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear1 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
-    stAxisStruct.stStatus.bCoupledGear2 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear2 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
-    stAxisStruct.stStatus.bCoupledGear3 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear3 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
-    stAxisStruct.stStatus.bCoupledGear4 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear4 := FALSE;
-END_IF
+//Homing status
+stAxisStruct.stStatus.bHomed := stAxisStruct.Axis.Status.Homed;
 
 //Gearing Status
 stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled;
@@ -376,8 +359,30 @@ END_IF
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="4042" Count="225" />
-      <LineId Id="4272" Count="103" />
+      <LineId Id="4737" Count="17" />
+      <LineId Id="5309" Count="2" />
+      <LineId Id="4755" Count="0" />
+      <LineId Id="4758" Count="38" />
+      <LineId Id="4798" Count="12" />
+      <LineId Id="5166" Count="0" />
+      <LineId Id="4812" Count="3" />
+      <LineId Id="5159" Count="0" />
+      <LineId Id="5161" Count="2" />
+      <LineId Id="4816" Count="96" />
+      <LineId Id="5210" Count="0" />
+      <LineId Id="5312" Count="2" />
+      <LineId Id="4925" Count="44" />
+      <LineId Id="5106" Count="0" />
+      <LineId Id="4971" Count="26" />
+      <LineId Id="5254" Count="0" />
+      <LineId Id="5007" Count="0" />
+      <LineId Id="5256" Count="1" />
+      <LineId Id="5259" Count="2" />
+      <LineId Id="5263" Count="1" />
+      <LineId Id="5266" Count="0" />
+      <LineId Id="5262" Count="0" />
+      <LineId Id="5267" Count="0" />
+      <LineId Id="5008" Count="44" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

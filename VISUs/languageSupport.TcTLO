@@ -136,7 +136,7 @@
               <v n="TextID">"fVelocity"</v>
               <v n="TextDefault">"Target Velocity:"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
-                <v>Geschwindigkeit:</v>
+                <v></v>
               </l>
             </o>
             <o>
@@ -261,6 +261,83 @@
             <o>
               <v n="TextID">"gearOut"</v>
               <v n="TextDefault">"Gear Out"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToLimit_Bwd"</v>
+              <v n="TextDefault">"Bwd Limit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToLimit_Fwd"</v>
+              <v n="TextDefault">"Fwd Limit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToRef_Bwd"</v>
+              <v n="TextDefault">"Home Switch Bwd "</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToRef_Fwd"</v>
+              <v n="TextDefault">"Home Switch Fwd "</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToEncPulse_Bwd"</v>
+              <v n="TextDefault">"Enc Pulse Bwd "</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToEncPulse_Fwd"</v>
+              <v n="TextDefault">"Enc Pulse Fwd"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToEncPulse_viaBwdLimit"</v>
+              <v n="TextDefault">"Enc Pulse via Bwd Limit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToEncPulse_viaFwdLimit"</v>
+              <v n="TextDefault">"Enc Pulse via Fwd Limit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeDirect"</v>
+              <v n="TextDefault">"Home Direct"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"fHomePosition"</v>
+              <v n="TextDefault">"Set Pos after Homing"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"fHomeFinishDistance"</v>
+              <v n="TextDefault">"Relative Move after Homing"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>

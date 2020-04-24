@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
-  <POU Name="FB_HomeReadNcVelocities" Id="{a78232f2-2338-46fa-908d-fbea8ac2e783}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_HomeReadNcVelocities
+  <POU Name="FB_ReadNcVelocities" Id="{a78232f2-2338-46fa-908d-fbea8ac2e783}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ReadNcVelocities
 VAR_INPUT
     bReset: BOOL;
     bExecute: BOOL;
@@ -52,7 +52,7 @@ ELSIF fbReadVelocityFromCam.bError THEN
   nErrorId := fbReadVelocityFromCam.nErrorId;
 END_IF]]></ST>
     </Implementation>
-    <LineIds Name="FB_HomeReadNcVelocities">
+    <LineIds Name="FB_ReadNcVelocities">
       <LineId Id="9" Count="0" />
       <LineId Id="383" Count="1" />
       <LineId Id="140" Count="0" />
