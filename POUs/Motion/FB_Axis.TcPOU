@@ -39,6 +39,7 @@ VAR
     fbGearInMultiMaster: MC_GearInMultiMaster;
     fbHome: FB_Homing;
     fbExecuteRiseEdge: R_TRIG;
+    fbJogRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
@@ -113,8 +114,12 @@ stAxisStruct.stStatus.bEnabled := fbPower.Status;
 fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
 
-//Reset
-fbReset.Execute := stAxisStruct.stControl.bReset AND stAxisStruct.stStatus.bError;
+//Reset only if axis is in error state
+IF stAxisStruct.stStatus.bError THEN 
+    fbReset.Execute := stAxisStruct.stControl.bReset; 
+ELSE
+    stAxisStruct.stControl.bReset := FALSE;
+END_IF
 
 //Motion Functions
 CASE stAxisStruct.stControl.eCommand OF
@@ -233,12 +238,20 @@ IF fbCommandAbortedRiseEdge.Q THEN stAxisStruct.stStatus.bCommandAborted := TRUE
 //Attention!! FB_Homing Output Done has to be added after merging MBP-131
 fbDoneRiseEdge(CLK:= fbMoveAbsolute.Done OR fbMoveRelative.Done 
     OR fbMoveVelocity.InVelocity OR fbMoveModulo.Done OR fbJog.Done OR fbGearIn.InGear
-    OR fbGearInMultiMaster.InGear OR fbGearOut.Done OR fbHome.bHomed);
-IF fbDoneRiseEdge.Q THEN stAxisStruct.stStatus.bDone := TRUE; END_IF
+    OR fbGearInMultiMaster.InGear OR fbGearOut.Done );
+IF fbDoneRiseEdge.Q THEN 
+    stAxisStruct.stStatus.bDone := TRUE; 
+    stAxisStruct.stStatus.bCommandAborted:=FALSE;
+END_IF
 
-//Reset Done and CommandAborted with any new eCommand
+//Reset Done and CommandAborted with any new eCommand (Execute or Jog)
 fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
 IF fbExecuteRiseEdge.Q THEN 
+    stAxisStruct.stStatus.bDone := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
+END_IF
+fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
+IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN 
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
 END_IF
@@ -247,7 +260,29 @@ END_IF
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR FbReset.Error);
 IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stControl.bReset := FALSE;
+    stAxisStruct.stStatus.bError := FALSE;
+    stAxisStruct.stStatus.nErrorID := 0;
+    stAxisStruct.stError.nNCErrorID := 0;
+    stAxisStruct.stError.nGearInErrorID := 0;
+    stAxisStruct.stError.nGearInMultiMasterErrorID := 0;
+    stAxisStruct.stError.nGearOutErrorID := 0;
+    stAxisStruct.stError.nPowerErrorID := 0;
+    stAxisStruct.stError.nResetErrorID := 0;
+    stAxisStruct.stError.nStopErrorID := 0;
+    stAxisStruct.stError.nHaltErrorID := 0;
+    stAxisStruct.stError.nHomeErrorID := 0;
+    stAxisStruct.stError.nJogErrorID := 0;
+    stAxisStruct.stError.nMoveAbsoluteErrorID := 0;
+    stAxisStruct.stError.nMoveRelativeErrorID := 0;
+    stAxisStruct.stError.nMoveModuloErrorID := 0;
+    stAxisStruct.stError.nMoveVelocityErrorID := 0;
+    stAxisStruct.stControl.bExecute := FALSE;
+    stAxisStruct.stControl.bStop := FALSE;
+    stAxisStruct.stControl.bReset := FALSE;
+    stAxisStruct.stControl.bJogBwd := FALSE;
+    stAxisStruct.stControl.bJogFwd := FALSE;
 END_IF
+
 
 //Execution of fbStop ended
 fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
@@ -376,75 +411,10 @@ END_IF
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="4042" Count="42" />
-      <LineId Id="4510" Count="0" />
-      <LineId Id="4086" Count="20" />
-      <LineId Id="4110" Count="2" />
-      <LineId Id="4116" Count="102" />
-      <LineId Id="4488" Count="0" />
-      <LineId Id="4219" Count="0" />
-      <LineId Id="4491" Count="0" />
-      <LineId Id="4493" Count="0" />
-      <LineId Id="4492" Count="0" />
-      <LineId Id="4517" Count="0" />
-      <LineId Id="4502" Count="1" />
-      <LineId Id="4501" Count="0" />
-      <LineId Id="4496" Count="0" />
-      <LineId Id="4220" Count="1" />
-      <LineId Id="4518" Count="0" />
-      <LineId Id="4506" Count="2" />
-      <LineId Id="4226" Count="0" />
-      <LineId Id="4527" Count="0" />
-      <LineId Id="4531" Count="4" />
-      <LineId Id="4529" Count="0" />
-      <LineId Id="4537" Count="0" />
-      <LineId Id="4536" Count="0" />
-      <LineId Id="4545" Count="0" />
-      <LineId Id="4539" Count="0" />
-      <LineId Id="4546" Count="2" />
-      <LineId Id="4538" Count="0" />
-      <LineId Id="4550" Count="2" />
-      <LineId Id="4549" Count="0" />
-      <LineId Id="4227" Count="1" />
-      <LineId Id="4233" Count="1" />
-      <LineId Id="4619" Count="1" />
-      <LineId Id="4236" Count="2" />
-      <LineId Id="4617" Count="1" />
-      <LineId Id="4519" Count="0" />
-      <LineId Id="4521" Count="1" />
-      <LineId Id="4615" Count="1" />
-      <LineId Id="4524" Count="2" />
-      <LineId Id="4613" Count="1" />
-      <LineId Id="4520" Count="0" />
-      <LineId Id="4241" Count="1" />
-      <LineId Id="4611" Count="1" />
-      <LineId Id="4244" Count="2" />
-      <LineId Id="4609" Count="1" />
-      <LineId Id="4248" Count="2" />
-      <LineId Id="4607" Count="1" />
-      <LineId Id="4252" Count="2" />
-      <LineId Id="4605" Count="1" />
-      <LineId Id="4256" Count="2" />
-      <LineId Id="4601" Count="1" />
-      <LineId Id="4260" Count="2" />
-      <LineId Id="4603" Count="1" />
-      <LineId Id="4264" Count="3" />
-      <LineId Id="4600" Count="0" />
-      <LineId Id="4276" Count="3" />
-      <LineId Id="4599" Count="0" />
-      <LineId Id="4280" Count="3" />
-      <LineId Id="4598" Count="0" />
-      <LineId Id="4284" Count="3" />
-      <LineId Id="4597" Count="0" />
-      <LineId Id="4291" Count="1" />
-      <LineId Id="4302" Count="9" />
-      <LineId Id="4418" Count="0" />
-      <LineId Id="4417" Count="0" />
-      <LineId Id="4419" Count="0" />
-      <LineId Id="4312" Count="0" />
-      <LineId Id="4434" Count="13" />
-      <LineId Id="4420" Count="13" />
-      <LineId Id="4372" Count="3" />
+      <LineId Id="4709" Count="201" />
+      <LineId Id="5066" Count="3" />
+      <LineId Id="5065" Count="0" />
+      <LineId Id="4911" Count="152" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
