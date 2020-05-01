@@ -96,7 +96,7 @@ fbGearOut.Execute := FALSE;
 fbWriteParameter(Axis := stAxisStruct.Axis);
 fbWriteParameter.Execute := FALSE;
 
-//Read Parameter
+//Read parameter continuously
 fbReadParameter(
     Axis := stAxisStruct.Axis,
     Enable := TRUE,
@@ -104,6 +104,7 @@ fbReadParameter(
     ReadMode := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
+    stAxisStruct.stConfig.fReadAxisParameterValid := fbReadParameter.Valid;
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
@@ -247,7 +248,7 @@ CASE stAxisStruct.stControl.eCommand OF
 
     E_MotionFunctions.eWriteParameter:
         fbWriteParameter.Execute := stAxisStruct.stcontrol.bExecute;
-        fbWriteParameter.ParameterNumber:= stAxisStruct.stConfig.eAxisParameters;
+        fbWriteParameter.ParameterNumber := stAxisStruct.stConfig.eAxisParameters;
         fbWriteParameter.Value := stAxisStruct.stConfig.fWriteAxisParameter;
 
 END_CASE
@@ -431,6 +432,7 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="1632" Count="3" />
       <LineId Id="1637" Count="0" />
       <LineId Id="1642" Count="0" />
+      <LineId Id="3271" Count="0" />
       <LineId Id="1921" Count="0" />
       <LineId Id="1925" Count="1" />
       <LineId Id="2837" Count="0" />
@@ -534,8 +536,7 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="202" Count="1" />
       <LineId Id="246" Count="18" />
       <LineId Id="2" Count="0" />
-      <LineId Id="267" Count="95" />
-      <LineId Id="3269" Count="0" />
+      <LineId Id="267" Count="80" />
     </LineIds>
   </POU>
 </TcPlcObject>

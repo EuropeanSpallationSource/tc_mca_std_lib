@@ -18,6 +18,7 @@ STRUCT
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
     fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
     fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
+    fReadAxisParameterValid: BOOL; //Is the current data thats been read valid value
 
     //Single master axis parameters
     stMasterAxis: ST_GearAxis; //A reference to the axis that this is a slave of
