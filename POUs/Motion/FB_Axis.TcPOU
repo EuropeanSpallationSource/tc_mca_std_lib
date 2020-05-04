@@ -115,8 +115,8 @@ fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
 
 //Reset only if axis is in error state
-IF stAxisStruct.stStatus.bError THEN 
-    fbReset.Execute := stAxisStruct.stControl.bReset; 
+IF stAxisStruct.stStatus.bError THEN
+    fbReset.Execute := stAxisStruct.stControl.bReset;
 ELSE
     stAxisStruct.stControl.bReset := FALSE;
 END_IF
@@ -229,29 +229,29 @@ stAxisStruct.stStatus.bbusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbM
 
 //CommandAborted from the eCommand function blocks
 //Attention!! FB_Homing Output CommandAborted has to be added after merging MBP-131
-fbCommandAbortedRiseEdge(CLK:= fbMoveAbsolute.CommandAborted OR fbMoveRelative.CommandAborted 
-    OR fbMoveVelocity.CommandAborted OR fbMoveModulo.CommandAborted OR fbJog.CommandAborted 
+fbCommandAbortedRiseEdge(CLK:= fbMoveAbsolute.CommandAborted OR fbMoveRelative.CommandAborted
+    OR fbMoveVelocity.CommandAborted OR fbMoveModulo.CommandAborted OR fbJog.CommandAborted
     OR fbGearIn.CommandAborted OR fbGearInMultiMaster.CommandAborted OR fbHome.bWarning);
 IF fbCommandAbortedRiseEdge.Q THEN stAxisStruct.stStatus.bCommandAborted := TRUE; END_IF
 
 //Done from the eCommand function blocks
 //Attention!! FB_Homing Output Done has to be added after merging MBP-131
-fbDoneRiseEdge(CLK:= fbMoveAbsolute.Done OR fbMoveRelative.Done 
+fbDoneRiseEdge(CLK:= fbMoveAbsolute.Done OR fbMoveRelative.Done
     OR fbMoveVelocity.InVelocity OR fbMoveModulo.Done OR fbJog.Done OR fbGearIn.InGear
     OR fbGearInMultiMaster.InGear OR fbGearOut.Done );
-IF fbDoneRiseEdge.Q THEN 
-    stAxisStruct.stStatus.bDone := TRUE; 
+IF fbDoneRiseEdge.Q THEN
+    stAxisStruct.stStatus.bDone := TRUE;
     stAxisStruct.stStatus.bCommandAborted:=FALSE;
 END_IF
 
 //Reset Done and CommandAborted with any new eCommand (Execute or Jog)
 fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
-IF fbExecuteRiseEdge.Q THEN 
+IF fbExecuteRiseEdge.Q THEN
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
 END_IF
 fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
-IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN 
+IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
 END_IF
