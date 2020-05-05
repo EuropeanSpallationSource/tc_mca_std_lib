@@ -104,7 +104,7 @@ fbReadParameter(
     ReadMode := READMODE_CYCLIC);
 
 IF NOT fbReadParameter.Error THEN
-    stAxisStruct.stConfig.fReadAxisParameterValid := fbReadParameter.Valid;
+    stAxisStruct.stConfig.bReadAxisParameterValid := fbReadParameter.Valid;
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
