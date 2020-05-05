@@ -229,9 +229,10 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.fHomeFinishDistance := stAxisStruct.stConfig.fHomeFinishDistance;
 END_CASE
 
-//Busy: It is sufficient to take the ouptuts from the eCommand function blocks
+//Busy from the motion function blocks
 stAxisStruct.stStatus.bbusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbMoveVelocity.Busy
-    OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy OR fbHome.bBusy;
+    OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy 
+    OR fbHome.bBusy OR fbHalt.Busy OR fbStop.Busy OR fbReset.Busy;
 
 //CommandAborted from the eCommand function blocks
 fbCommandAbortedRiseEdge(CLK:= fbMoveAbsolute.CommandAborted OR fbMoveRelative.CommandAborted
@@ -425,7 +426,9 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="4763" Count="108" />
       <LineId Id="5115" Count="2" />
       <LineId Id="4880" Count="3" />
-      <LineId Id="4885" Count="3" />
+      <LineId Id="4885" Count="1" />
+      <LineId Id="5182" Count="0" />
+      <LineId Id="4887" Count="1" />
       <LineId Id="4890" Count="5" />
       <LineId Id="4897" Count="13" />
       <LineId Id="5066" Count="3" />

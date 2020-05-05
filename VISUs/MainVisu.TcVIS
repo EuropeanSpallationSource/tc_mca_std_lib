@@ -9612,7 +9612,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">743958181L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bWarning"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -9765,7 +9765,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">390574330L</v>
-                          <v n="Value">"bWarning"</v>
+                          <v n="Value">"bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -9797,7 +9797,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
-                          <v n="Value">"944"</v>
+                          <v n="Value">"225"</v>
                         </o>
                       </l>
                     </o>
@@ -9813,100 +9813,6 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     <a n="LMGuids" et="Guid" />
                     <d n="SubElements" t="Hashtable" />
                     <v n="VisualElementId">74</v>
-                    <l n="UserManagementAccessRights" t="ArrayList" />
-                  </o>
-                  <o>
-                    <a n="ConfiguredComplexInputs" et="ComplexInput" />
-                    <l n="Elements" t="ArrayList" />
-                    <n n="VisualElementDescription" />
-                    <o n="VisualElemMemberList" t="VisualElemMemberList">
-                      <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
-                        <o>
-                          <v n="Id">2812299069L</v>
-                          <v n="Value">4294967295U</v>
-                        </o>
-                        <o>
-                          <v n="Id">494569607L</v>
-                          <v n="Value">4278190080U</v>
-                        </o>
-                        <o>
-                          <v n="Id">1649127785L</v>
-                          <v n="Value">10</v>
-                        </o>
-                        <o>
-                          <v n="Id">357335551L</v>
-                          <v n="Value">70</v>
-                        </o>
-                        <o>
-                          <v n="Id">2422045748L</v>
-                          <v n="Value">30</v>
-                        </o>
-                        <o>
-                          <v n="Id">2134141914L</v>
-                          <v n="Value">30</v>
-                        </o>
-                        <o>
-                          <v n="Id">4062784938L</v>
-                          <v n="Value">"Element-Lamp-Lamp1-Yellow"</v>
-                        </o>
-                        <o>
-                          <v n="Id">493260384L</v>
-                          <v n="Value">4294967295U</v>
-                        </o>
-                        <o>
-                          <v n="Id">135947015L</v>
-                          <v n="Value">4278190080U</v>
-                        </o>
-                        <o>
-                          <v n="Id">2678395525L</v>
-                          <v n="Value">1U</v>
-                        </o>
-                        <o>
-                          <v n="Id">2340015797L</v>
-                          <v n="Value">"HCENTER"</v>
-                        </o>
-                        <o>
-                          <v n="Id">2565699834L</v>
-                          <v n="Value">"VCENTER"</v>
-                        </o>
-                        <o>
-                          <v n="Id">296037572L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">390574330L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">571893170L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">743958181L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bBusy"</v>
-                        </o>
-                        <o>
-                          <v n="Id">2597686782L</v>
-                          <v n="Value">false</v>
-                        </o>
-                        <o>
-                          <v n="Id">3719097617L</v>
-                          <v n="Value">0</v>
-                        </o>
-                      </l>
-                    </o>
-                    <v n="VisualElementName">"Lamp1"</v>
-                    <v n="VisualElementTypeName">"VisuFbElemLamp"</v>
-                    <v n="VisualElementIsRectangle">true</v>
-                    <v n="VisualElementIdentifier">"GenElemInst_53"</v>
-                    <n n="VisualElementOfflinePaintCommands" />
-                    <n n="VisualElementFrameInformation" />
-                    <d n="VisualElementInputActions" t="Hashtable" />
-                    <v n="VisualElementIdentification">{f3688ae2-7c74-44f3-8ec1-bbe0f6187c72}</v>
-                    <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
-                    <a n="LMGuids" et="Guid" />
-                    <d n="SubElements" t="Hashtable" />
-                    <v n="VisualElementId">54</v>
                     <l n="UserManagementAccessRights" t="ArrayList" />
                   </o>
                   <o>
@@ -11168,6 +11074,100 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     <a n="LMGuids" et="Guid" />
                     <d n="SubElements" t="Hashtable" />
                     <v n="VisualElementId">86</v>
+                    <l n="UserManagementAccessRights" t="ArrayList" />
+                  </o>
+                  <o>
+                    <a n="ConfiguredComplexInputs" et="ComplexInput" />
+                    <l n="Elements" t="ArrayList" />
+                    <n n="VisualElementDescription" />
+                    <o n="VisualElemMemberList" t="VisualElemMemberList">
+                      <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
+                        <o>
+                          <v n="Id">2812299069L</v>
+                          <v n="Value">4294967295U</v>
+                        </o>
+                        <o>
+                          <v n="Id">494569607L</v>
+                          <v n="Value">4278190080U</v>
+                        </o>
+                        <o>
+                          <v n="Id">1649127785L</v>
+                          <v n="Value">9</v>
+                        </o>
+                        <o>
+                          <v n="Id">357335551L</v>
+                          <v n="Value">71</v>
+                        </o>
+                        <o>
+                          <v n="Id">2422045748L</v>
+                          <v n="Value">30</v>
+                        </o>
+                        <o>
+                          <v n="Id">2134141914L</v>
+                          <v n="Value">30</v>
+                        </o>
+                        <o>
+                          <v n="Id">4062784938L</v>
+                          <v n="Value">"Element-Lamp-Lamp1-Yellow"</v>
+                        </o>
+                        <o>
+                          <v n="Id">493260384L</v>
+                          <v n="Value">4294967295U</v>
+                        </o>
+                        <o>
+                          <v n="Id">135947015L</v>
+                          <v n="Value">4278190080U</v>
+                        </o>
+                        <o>
+                          <v n="Id">2678395525L</v>
+                          <v n="Value">1U</v>
+                        </o>
+                        <o>
+                          <v n="Id">2340015797L</v>
+                          <v n="Value">"HCENTER"</v>
+                        </o>
+                        <o>
+                          <v n="Id">2565699834L</v>
+                          <v n="Value">"VCENTER"</v>
+                        </o>
+                        <o>
+                          <v n="Id">296037572L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">390574330L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">571893170L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">743958181L</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bBusy"</v>
+                        </o>
+                        <o>
+                          <v n="Id">2597686782L</v>
+                          <v n="Value">false</v>
+                        </o>
+                        <o>
+                          <v n="Id">3719097617L</v>
+                          <v n="Value">0</v>
+                        </o>
+                      </l>
+                    </o>
+                    <v n="VisualElementName">"Lamp1"</v>
+                    <v n="VisualElementTypeName">"VisuFbElemLamp"</v>
+                    <v n="VisualElementIsRectangle">true</v>
+                    <v n="VisualElementIdentifier">"GenElemInst_390"</v>
+                    <n n="VisualElementOfflinePaintCommands" />
+                    <n n="VisualElementFrameInformation" />
+                    <d n="VisualElementInputActions" t="Hashtable" />
+                    <v n="VisualElementIdentification">{1011d4bf-f72c-42d0-adc7-dd0bd4b635a7}</v>
+                    <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
+                    <a n="LMGuids" et="Guid" />
+                    <d n="SubElements" t="Hashtable" />
+                    <v n="VisualElementId">384</v>
                     <l n="UserManagementAccessRights" t="ArrayList" />
                   </o>
                 </l>
@@ -18053,7 +18053,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
             </o>
             <v n="DialogDut">{922df0df-545b-4a6e-ab04-d027f2e1dfa1}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">388</v>
+          <v n="LastUsedIdForIdentifier">390</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
