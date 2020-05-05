@@ -231,7 +231,7 @@ END_CASE
 
 //Busy from the motion function blocks
 stAxisStruct.stStatus.bbusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbMoveVelocity.Busy
-    OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy 
+    OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy
     OR fbHome.bBusy OR fbHalt.Busy OR fbStop.Busy OR fbReset.Busy;
 
 //CommandAborted from the eCommand function blocks
