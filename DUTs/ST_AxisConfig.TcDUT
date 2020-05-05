@@ -9,7 +9,7 @@ STRUCT
     fAcceleration: LREAL; //Not all FBs use, 0 is NC default
     fDeceleration: LREAL;
     fPosition: LREAL; //The position to move to for an absolute move and the amount to move in a relative move
-    fHomePosition: LREAL; //The position that the axis should be set to once homing is completed
+    fHomePosition: LREAL := 0; //The position that the axis should be set to once homing is completed
     fHomeFinishDistance: LREAL := 0; //Distrance that the axis should move back into the working zone after homing is finished
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home

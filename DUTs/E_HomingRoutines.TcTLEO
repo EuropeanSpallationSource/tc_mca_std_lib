@@ -5,7 +5,7 @@
 {attribute 'strict'}
 TYPE E_HomingRoutines :
 (
-     eNoHoming := 0,
+    eNoHoming := 0,
 
     //0X: LIMIT Switch
     //Home to bBwdLimit, record position on first approach
