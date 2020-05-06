@@ -14,11 +14,17 @@ STRUCT
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
+    //Read and Write parameters
+    eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
+    fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
+    fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
+    bReadAxisParameterValid: BOOL; //Is the current data thats been read valid value
+
     //Single master axis parameters
     stMasterAxis: ST_GearAxis; //A reference to the axis that this is a slave of
     afSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL; //The gearing between this axis as a master and any slaves. e.g. if this is a 1 to 1 master of axis 2 this will be [0, 1, 0 ...]
 
-   //Multi master axis parameters
+    //Multi master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
