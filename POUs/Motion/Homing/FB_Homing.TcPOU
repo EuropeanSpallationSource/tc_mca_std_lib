@@ -42,7 +42,10 @@ VAR
     stDetectDirection: MC_Home_Direction;
     stHomingParameter: MC_HomingParameter;
     stOptions: ST_Home_Options4;
-    fbReadNcVelocities: FB_ReadNcVelocities;
+    fbVelocityToCam: MC_ReadParameter;
+    fVelocityToCam: LREAL;
+    fbVelocityFromCam: MC_ReadParameter;
+    fVelocityFromCam: LREAL;
     //State machine
     fbExecute: R_TRIG;
     bViaLimitSwitch: BOOL;
@@ -59,11 +62,41 @@ VAR
 END_VAR ]]></Declaration>
     <Implementation>
       <ST><![CDATA[//Constantly read the NC for homing velocities so they are available when a homing is executed
+(*
 fbReadNCVelocities(Axis := Axis);
 IF NOT fbReadNCVelocities.bExecute AND NOT fbReadNCVelocities.bDone THEN
     fbReadNCVelocities.bExecute:= TRUE;
 ELSIF fbReadNCVelocities.bExecute AND fbReadNCVelocities.bDone THEN
     fbReadNCVelocities.bExecute:= FALSE;
+END_IF
+*)
+fbVelocityToCam(
+    Axis := Axis,
+    Enable := TRUE,
+    ParameterNumber := AxisCalibrationVelocityForward,
+    ReadMode := READMODE_CYCLIC);
+
+IF NOT fbVelocityToCam.Error THEN
+    fVelocityToCam := fbVelocityToCam.Value;
+END_IF
+
+fbVelocityFromCam(
+    Axis := Axis,
+    Enable := TRUE,
+    ParameterNumber := AxisCalibrationVelocityBackward,
+    ReadMode := READMODE_CYCLIC);
+
+IF NOT fbVelocityFromCam.Error THEN
+    fVelocityFromCam := fbVelocityFromCam.Value;
+END_IF
+
+IF fbVelocityToCam.Error THEN
+    bError := TRUE;
+    nErrorID := fbVelocityToCam.ErrorID;
+
+ELSIF fbVelocityFromCam.Error THEN
+    bError := TRUE;
+    nErrorID := fbVelocityFromCam.ErrorID;
 END_IF
 
 //Hardware signals
@@ -86,7 +119,7 @@ fbStepLimitSwitchPreparation(
     Direction := stPreparationDirection,
     LimitSwitchMode:= eLimitSwitchMode,
     LimitSwitchSignal:= stLimitSwitchSignal,
-    Velocity := fbReadNCVelocities.fVelocityToCam);
+    Velocity := fVelocityToCam);
 
 fbSetPos(
     Axis := Axis,
@@ -96,7 +129,7 @@ fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbFinishHoming(
     Axis := Axis,
     Parameter := stHomingParameter,
-    Velocity := fbReadNCVelocities.fVelocityFromCam);
+    Velocity := fVelocityFromCam);
 
 fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbAbortHoming(
@@ -288,7 +321,7 @@ fbStepReferencePulseDetection(
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
     ReferenceSignal := stEncPulseSignal,
-    Velocity := fbReadNCVelocities.fVelocityFromCam,
+    Velocity := fbVelocityFromCam.Value,
     Options := stOptions,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
@@ -320,7 +353,7 @@ fbStepLimitSwitchDetection(
     Direction := stDetectDirection,
     LimitSwitchMode := eLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
-    Velocity := fbReadNCVelocities.fVelocityFromCam,
+    Velocity := fbVelocityFromCam.Value,
     Options := stOptions,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
@@ -350,7 +383,7 @@ fbStepAbsoluteSwitchDetection(
     Direction := stDetectDirection,
     SwitchMode := eRefSwitchMode,
     ReferenceSignal := stRefSwitchSignal,
-    Velocity := fbReadNCVelocities.fVelocityFromCam,
+    Velocity := fbVelocityFromCam.Value,
     PositiveLimitSwitch := NOT(bLimitFwd),
     NegativeLimitSwitch := NOT(bLimitBwd),
     Options := stOptions,
@@ -363,7 +396,25 @@ fbStepAbsoluteSwitchDetection(
       </Implementation>
     </Action>
     <LineIds Name="FB_Homing">
-      <LineId Id="3588" Count="78" />
+      <LineId Id="3588" Count="0" />
+      <LineId Id="3858" Count="0" />
+      <LineId Id="3835" Count="4" />
+      <LineId Id="3594" Count="0" />
+      <LineId Id="3857" Count="0" />
+      <LineId Id="3842" Count="6" />
+      <LineId Id="3850" Count="0" />
+      <LineId Id="3840" Count="0" />
+      <LineId Id="3861" Count="7" />
+      <LineId Id="3870" Count="0" />
+      <LineId Id="3860" Count="0" />
+      <LineId Id="3852" Count="1" />
+      <LineId Id="3934" Count="0" />
+      <LineId Id="3851" Count="0" />
+      <LineId Id="3872" Count="1" />
+      <LineId Id="3935" Count="0" />
+      <LineId Id="3875" Count="0" />
+      <LineId Id="3871" Count="0" />
+      <LineId Id="3595" Count="71" />
       <LineId Id="3760" Count="0" />
       <LineId Id="3762" Count="6" />
       <LineId Id="3761" Count="0" />
