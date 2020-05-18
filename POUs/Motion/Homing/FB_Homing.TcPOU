@@ -98,7 +98,7 @@ fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbAbortHoming(
     Axis := Axis,
     Parameter := stHomingParameter);
-    
+
 //Constantly read the NC for homing velocities so they are available when a homing is executed
 fbVelocityToCam(
     Axis := Axis,
