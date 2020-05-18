@@ -61,44 +61,7 @@ VAR
     fRecordedPositionLatched: LREAL;
 END_VAR ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//Constantly read the NC for homing velocities so they are available when a homing is executed
-(*
-fbReadNCVelocities(Axis := Axis);
-IF NOT fbReadNCVelocities.bExecute AND NOT fbReadNCVelocities.bDone THEN
-    fbReadNCVelocities.bExecute:= TRUE;
-ELSIF fbReadNCVelocities.bExecute AND fbReadNCVelocities.bDone THEN
-    fbReadNCVelocities.bExecute:= FALSE;
-END_IF
-*)
-fbVelocityToCam(
-    Axis := Axis,
-    Enable := TRUE,
-    ParameterNumber := AxisCalibrationVelocityForward,
-    ReadMode := READMODE_CYCLIC);
-
-IF NOT fbVelocityToCam.Error THEN
-    fVelocityToCam := fbVelocityToCam.Value;
-END_IF
-
-fbVelocityFromCam(
-    Axis := Axis,
-    Enable := TRUE,
-    ParameterNumber := AxisCalibrationVelocityBackward,
-    ReadMode := READMODE_CYCLIC);
-
-IF NOT fbVelocityFromCam.Error THEN
-    fVelocityFromCam := fbVelocityFromCam.Value;
-END_IF
-
-IF fbVelocityToCam.Error THEN
-    bError := TRUE;
-    nErrorID := fbVelocityToCam.ErrorID;
-
-ELSIF fbVelocityFromCam.Error THEN
-    bError := TRUE;
-    nErrorID := fbVelocityFromCam.ErrorID;
-END_IF
-
+      <ST><![CDATA[
 //Hardware signals
 stLimitSwitchSignal.SignalSource := SignalSource_Default;
 stLimitSwitchSignal.TouchProbe := PlcEvent;
@@ -135,6 +98,38 @@ fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbAbortHoming(
     Axis := Axis,
     Parameter := stHomingParameter);
+    
+//Constantly read the NC for homing velocities so they are available when a homing is executed
+fbVelocityToCam(
+    Axis := Axis,
+    Enable := TRUE,
+    ParameterNumber := AxisCalibrationVelocityForward,
+    ReadMode := READMODE_CYCLIC);
+
+fbVelocityFromCam(
+    Axis := Axis,
+    Enable := TRUE,
+    ParameterNumber := AxisCalibrationVelocityBackward,
+    ReadMode := READMODE_CYCLIC);
+
+    //Only write velocity if the function block has not errored
+IF NOT fbVelocityToCam.Error THEN
+    fVelocityToCam := fbVelocityToCam.Value;
+END_IF
+
+IF NOT fbVelocityFromCam.Error THEN
+    fVelocityFromCam := fbVelocityFromCam.Value;
+END_IF
+
+    //Feeds function block errors through
+IF fbVelocityToCam.Error THEN
+    bError := TRUE;
+    nErrorID := fbVelocityToCam.ErrorID;
+
+ELSIF fbVelocityFromCam.Error THEN
+    bError := TRUE;
+    nErrorID := fbVelocityFromCam.ErrorID;
+END_IF
 
 //ACTs contain function blocks custom to each individual routine for the detection stage
 CASE eHomeSeq OF
@@ -396,25 +391,17 @@ fbStepAbsoluteSwitchDetection(
       </Implementation>
     </Action>
     <LineIds Name="FB_Homing">
-      <LineId Id="3588" Count="0" />
-      <LineId Id="3858" Count="0" />
-      <LineId Id="3835" Count="4" />
-      <LineId Id="3594" Count="0" />
-      <LineId Id="3857" Count="0" />
-      <LineId Id="3842" Count="6" />
-      <LineId Id="3850" Count="0" />
-      <LineId Id="3840" Count="0" />
-      <LineId Id="3861" Count="7" />
-      <LineId Id="3870" Count="0" />
-      <LineId Id="3860" Count="0" />
-      <LineId Id="3852" Count="1" />
-      <LineId Id="3934" Count="0" />
-      <LineId Id="3851" Count="0" />
-      <LineId Id="3872" Count="1" />
-      <LineId Id="3935" Count="0" />
-      <LineId Id="3875" Count="0" />
-      <LineId Id="3871" Count="0" />
-      <LineId Id="3595" Count="71" />
+      <LineId Id="3595" Count="36" />
+      <LineId Id="4012" Count="0" />
+      <LineId Id="4001" Count="10" />
+      <LineId Id="4000" Count="0" />
+      <LineId Id="4030" Count="0" />
+      <LineId Id="4013" Count="0" />
+      <LineId Id="4015" Count="6" />
+      <LineId Id="4031" Count="0" />
+      <LineId Id="4022" Count="7" />
+      <LineId Id="4014" Count="0" />
+      <LineId Id="3632" Count="34" />
       <LineId Id="3760" Count="0" />
       <LineId Id="3762" Count="6" />
       <LineId Id="3761" Count="0" />
