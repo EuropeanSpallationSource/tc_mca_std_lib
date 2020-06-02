@@ -47,6 +47,8 @@ VAR
     fbResetFinishedRiseEdge: R_TRIG;
     fbCommandAbortedRiseEdge: R_TRIG;
     fbDoneRiseEdge: R_TRIG;
+    fbWriteParameter: MC_WriteParameter;
+    fbReadParameter: MC_ReadParameter;	
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -95,6 +97,21 @@ fbGearInMultiMaster(Slave := stAxisStruct.Axis,
 
 fbGearOut(Slave := stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
+
+fbWriteParameter(Axis := stAxisStruct.Axis);
+fbWriteParameter.Execute := FALSE;
+
+//Read parameter continuously
+fbReadParameter(
+    Axis := stAxisStruct.Axis,
+    Enable := TRUE,
+    ParameterNumber := stAxisStruct.stconfig.eAxisParameters,
+    ReadMode := READMODE_CYCLIC);
+
+IF NOT fbReadParameter.Error THEN
+    stAxisStruct.stConfig.bReadAxisParameterValid := fbReadParameter.Valid;
+    stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
+END_IF
 
 //Linking the limit swtiches
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
@@ -227,23 +244,32 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.eHomeSeq := stAxisStruct.stConfig.eHomeSeq;
         fbHome.fHomePosition := stAxisStruct.stConfig.fHomePosition;
         fbHome.fHomeFinishDistance := stAxisStruct.stConfig.fHomeFinishDistance;
+
+    E_MotionFunctions.eWriteParameter:
+        fbWriteParameter.Execute := stAxisStruct.stcontrol.bExecute;
+        fbWriteParameter.ParameterNumber := stAxisStruct.stConfig.eAxisParameters;
+        fbWriteParameter.Value := stAxisStruct.stConfig.fWriteAxisParameter;
+
 END_CASE
 
 //Busy from the motion function blocks
-stAxisStruct.stStatus.bbusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbMoveVelocity.Busy
+stAxisStruct.stStatus.bBusy := fbMoveAbsolute.Busy OR fbMoveRelative.Busy OR fbMoveVelocity.Busy
     OR fbMoveModulo.Busy OR fbJog.Busy OR fbGearIn.Busy OR fbGearInMultiMaster.Busy OR fbGearOut.Busy
+	OR fbReadParameter.Busy OR fbWriteParameter.Busy
     OR fbHome.bBusy OR fbHalt.Busy OR fbStop.Busy OR fbReset.Busy;
 
 //CommandAborted from the eCommand function blocks
 fbCommandAbortedRiseEdge(CLK:= fbMoveAbsolute.CommandAborted OR fbMoveRelative.CommandAborted
     OR fbMoveVelocity.CommandAborted OR fbMoveModulo.CommandAborted OR fbJog.CommandAborted
     OR fbGearIn.CommandAborted OR fbGearInMultiMaster.CommandAborted OR fbHome.bCommandAborted);
-IF fbCommandAbortedRiseEdge.Q THEN stAxisStruct.stStatus.bCommandAborted := TRUE; END_IF
+IF fbCommandAbortedRiseEdge.Q THEN 
+    stAxisStruct.stStatus.bCommandAborted := TRUE; 
+END_IF
 
 //Done from the eCommand function blocks
 fbDoneRiseEdge(CLK:= fbMoveAbsolute.Done OR fbMoveRelative.Done
     OR fbMoveVelocity.InVelocity OR fbMoveModulo.Done OR fbJog.Done OR fbGearIn.InGear
-    OR fbGearInMultiMaster.InGear OR fbGearOut.Done OR fbHome.bDone );
+    OR fbGearInMultiMaster.InGear OR fbGearOut.Done OR fbWriteParameter.Done OR fbHome.bDone );
 IF fbDoneRiseEdge.Q THEN
     stAxisStruct.stStatus.bDone := TRUE;
     stAxisStruct.stStatus.bCommandAborted:=FALSE;
@@ -271,6 +297,8 @@ IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stError.nGearInErrorID := 0;
     stAxisStruct.stError.nGearInMultiMasterErrorID := 0;
     stAxisStruct.stError.nGearOutErrorID := 0;
+    stAxisStruct.stError.fbReadParameterErrorId := 0;
+    stAxisStruct.stError.fbWriteParameterErrorId := 0;
     stAxisStruct.stError.nPowerErrorID := 0;
     stAxisStruct.stError.nResetErrorID := 0;
     stAxisStruct.stError.nStopErrorID := 0;
@@ -287,7 +315,6 @@ IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stControl.bJogBwd := FALSE;
     stAxisStruct.stControl.bJogFwd := FALSE;
 END_IF
-
 
 //Execution of fbStop ended
 fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
@@ -350,7 +377,7 @@ ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
     stAxisStruct.stError.nGearInErrorId:=fbGearIn.ErrorID;
-
+	
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
@@ -360,6 +387,16 @@ ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearOut.ErrorID;
     stAxisStruct.stError.nGearOutErrorId := fbGearOut.ErrorID;
+
+ELSIF fbWriteParameter.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
+    stAxisStruct.stError.fbWriteParameterErrorId:=fbWriteParameter.ErrorID;
+
+ELSIF fbReadParameter.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;
+    stAxisStruct.stError.fbReadParameterErrorId:=fbReadParameter.ErrorID;
 
 ELSIF stAxisStruct.Axis.Status.Error THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
@@ -421,19 +458,33 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     <LineIds Name="FB_Axis">
       <LineId Id="4709" Count="16" />
       <LineId Id="5118" Count="3" />
-      <LineId Id="4727" Count="35" />
+      <LineId Id="4727" Count="24" />
+      <LineId Id="5232" Count="14" />
+      <LineId Id="4752" Count="10" />
       <LineId Id="5122" Count="7" />
       <LineId Id="4763" Count="108" />
       <LineId Id="5115" Count="2" />
-      <LineId Id="4880" Count="3" />
+      <LineId Id="4880" Count="0" />
+      <LineId Id="5253" Count="0" />
+      <LineId Id="5248" Count="3" />
+      <LineId Id="5247" Count="0" />
+      <LineId Id="4881" Count="2" />
       <LineId Id="4885" Count="1" />
+      <LineId Id="5280" Count="0" />
       <LineId Id="5182" Count="0" />
       <LineId Id="4887" Count="1" />
-      <LineId Id="4890" Count="5" />
+      <LineId Id="4890" Count="3" />
+      <LineId Id="5275" Count="1" />
+      <LineId Id="4894" Count="1" />
       <LineId Id="4897" Count="13" />
       <LineId Id="5066" Count="3" />
       <LineId Id="5065" Count="0" />
-      <LineId Id="4911" Count="116" />
+      <LineId Id="4911" Count="10" />
+      <LineId Id="5278" Count="1" />
+      <LineId Id="4922" Count="15" />
+      <LineId Id="4939" Count="71" />
+      <LineId Id="5265" Count="9" />
+      <LineId Id="5011" Count="16" />
       <LineId Id="5132" Count="0" />
       <LineId Id="5134" Count="1" />
       <LineId Id="5028" Count="35" />
