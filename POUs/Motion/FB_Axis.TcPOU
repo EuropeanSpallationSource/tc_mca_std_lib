@@ -132,6 +132,21 @@ IF NOT fbReadParameter.Error THEN
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
+fbWriteParameter(Axis := stAxisStruct.Axis);
+fbWriteParameter.Execute := FALSE;
+
+//Read parameter continuously
+fbReadParameter(
+    Axis := stAxisStruct.Axis,
+    Enable := TRUE,
+    ParameterNumber := stAxisStruct.stconfig.eAxisParameters,
+    ReadMode := READMODE_CYCLIC);
+
+IF NOT fbReadParameter.Error THEN
+    stAxisStruct.stConfig.bReadAxisParameterValid := fbReadParameter.Valid;
+    stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
+END_IF
+
 //Linking the limit swtiches
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
@@ -562,6 +577,7 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="5134" Count="1" />
       <LineId Id="5028" Count="35" />
       <LineId Id="2" Count="0" />
+      <LineId Id="267" Count="80" />
     </LineIds>
   </POU>
 </TcPlcObject>
