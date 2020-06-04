@@ -48,10 +48,10 @@ VAR
     fbCommandAbortedRiseEdge: R_TRIG;
     fbDoneRiseEdge: R_TRIG;
     fbWriteParameter: MC_WriteParameter;
-    fbReadParameter: MC_ReadParameter;	
-	bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
-	bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
-	bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
+    fbReadParameter: MC_ReadParameter;
+    bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
+    bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
+    bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[bBusy := FALSE;
@@ -307,8 +307,8 @@ stAxisStruct.stStatus.bBusy := bBusy;
 
 //CommandAborted from the eCommand function blocks
 fbCommandAbortedRiseEdge(CLK:= bCommandAbortedEdge);
-IF fbCommandAbortedRiseEdge.Q THEN 
-    stAxisStruct.stStatus.bCommandAborted := TRUE; 
+IF fbCommandAbortedRiseEdge.Q THEN
+    stAxisStruct.stStatus.bCommandAborted := TRUE;
 END_IF
 
 //Done from the eCommand function blocks
@@ -420,7 +420,7 @@ ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
     stAxisStruct.stError.nGearInErrorId:=fbGearIn.ErrorID;
-	
+
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
@@ -577,7 +577,7 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="5134" Count="1" />
       <LineId Id="5028" Count="35" />
       <LineId Id="2" Count="0" />
-      <LineId Id="267" Count="80" />
+      <LineId Id="267" Count="14" />
     </LineIds>
   </POU>
 </TcPlcObject>
