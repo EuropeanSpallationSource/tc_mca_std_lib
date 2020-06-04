@@ -125,7 +125,7 @@ fbReadParameter(
     Enable := TRUE,
     ParameterNumber := stAxisStruct.stconfig.eAxisParameters,
     ReadMode := READMODE_CYCLIC);
-bBUSY:= bBUSY OR fbReadParameter.Busy;
+//do no evaluate fbReadParameter.busy, since this is continuously TRUE
 
 IF NOT fbReadParameter.Error THEN
     stAxisStruct.stConfig.bReadAxisParameterValid := fbReadParameter.Valid;
@@ -159,7 +159,7 @@ fbPower.Override := stAxisStruct.stConfig.fOverride;
 stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
 //Stop
-fbStop.Execute := stAxisStruct.stControl.bStop AND NOT fbHome.bBusy;
+fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
 
 //Reset only if axis is in error state
