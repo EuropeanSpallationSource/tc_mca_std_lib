@@ -13,14 +13,17 @@ END_VAR
 VAR_OUTPUT
     EnO     : BOOL;
     bError  : BOOL;
+	sErrorMessage: STRING;
 END_VAR
 
 VAR
-    //WC_State is handled by NC, so NOT included here.
+    
     InfoData_State      AT %I*  : UINT;
-
+    WcState_WcState     AT %I*  : BOOL;
+    
     //FB-s
     EL5021_Error    : FB_TerminalError;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -33,16 +36,25 @@ EnO:=En;
 EL5021_Error(
     En                  := TRUE,
     iTerminal_ID        := iTerminal_ID,
-    bWcState            := FALSE,
+    bWcState            := WcState_WcState,
     uiInfoData_State    := InfoData_State,
     pErrorSystem        := ErrorSystem,
     bError => bError,
-);]]></ST>
+);
+
+IF bError THEN
+    sErrorMessage:=EL5021_Error.ErrorData.sErrorMessage;
+ELSE
+	sErrorMessage:='';
+END_IF
+]]></ST>
     </Implementation>
     <LineIds Name="EL5021">
       <LineId Id="29" Count="1" />
       <LineId Id="32" Count="0" />
       <LineId Id="34" Count="10" />
+      <LineId Id="70" Count="5" />
+      <LineId Id="68" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
