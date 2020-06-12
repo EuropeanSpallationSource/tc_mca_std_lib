@@ -401,14 +401,17 @@ END_IF
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;
 
-actReadNcParameters();]]></ST>
+actReadMcParameters();
+actReadAxisRef();]]></ST>
     </Implementation>
-    <Action Name="actReadAxis_Ref" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
+    <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
       <Implementation>
-        <ST><![CDATA[stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;]]></ST>
+        <ST><![CDATA[stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
+stAxisStruct.stStatus.bSoftLimitMinExceeded:= stAxisStruct.Axis.Status.SoftLimitMinExceeded;
+stAxisStruct.stStatus.bSoftLimitMaxExceeded:= stAxisStruct.Axis.Status.SoftLimitMaxExceeded;]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actReadMC_Parameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
+    <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
       <Implementation>
         <ST><![CDATA[// Soft limits
 fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
@@ -610,11 +613,12 @@ stAxisStruct.stConfig.fTargetPositionWindow:= fbReadTargetPositionWindow.Value;]
       <LineId Id="267" Count="80" />
       <LineId Id="3370" Count="0" />
       <LineId Id="3315" Count="0" />
+      <LineId Id="3424" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Axis.actReadAxis_Ref">
-      <LineId Id="1" Count="0" />
+    <LineIds Name="FB_Axis.actReadAxisRef">
+      <LineId Id="1" Count="2" />
     </LineIds>
-    <LineIds Name="FB_Axis.actReadMC_Parameters">
+    <LineIds Name="FB_Axis.actReadMcParameters">
       <LineId Id="55" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="2" />

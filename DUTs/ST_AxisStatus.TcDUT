@@ -22,6 +22,8 @@ STRUCT
     nErrorID: UDINT; //Motion function block errorID
 
     bInTargetPosition: BOOL;
+    bSoftLimitMinExceeded: BOOL;
+    bSoftLimitMaxExceeded: BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
