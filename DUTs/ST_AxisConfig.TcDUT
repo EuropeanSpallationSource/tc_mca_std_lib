@@ -28,6 +28,16 @@ STRUCT
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
+
+    // Read only NC parameters
+    bEnMinSoftPosLimit: BOOL;
+    fMinSoftPosLimit: LREAL;
+    bEnMaxSoftPosLimit: BOOL;
+    fMaxSoftPosLimit: LREAL;
+    bEnPositionLagMonitoring: BOOL;
+    fMaxPosLagValue: LREAL;
+    bEnTargetPositionMonitoring: BOOL;
+    fTargetPositionWindow: LREAL;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

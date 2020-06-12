@@ -44,6 +44,16 @@ VAR
     fbResetRiseEdge: R_TRIG;
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
+
+    fbReadEnMinSoftPosLimit: MC_ReadParameter;
+    fbReadEnMaxSoftPosLimit: MC_ReadParameter;
+    fbReadMinSoftPosLimit: MC_ReadParameter;
+    fbReadMaxSoftPosLimit: MC_ReadParameter;
+
+    fbReadEnPositionLagMonitoring: MC_ReadParameter;
+    fbReadAxisMaxPosLagValue: MC_ReadParameter;
+    fbReadEnTargetPositionMonitoring: MC_ReadParameter;
+    fbReadTargetPositionWindow: MC_ReadParameter;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
@@ -389,8 +399,64 @@ ELSE
 END_IF
 
 //Reset bExecute
-stAxisStruct.stControl.bExecute := FALSE;]]></ST>
+stAxisStruct.stControl.bExecute := FALSE;
+
+actReadNcParameters();]]></ST>
     </Implementation>
+    <Action Name="actReadNcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
+      <Implementation>
+        <ST><![CDATA[// Soft limits
+fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnMinSoftPosLimit);
+stAxisStruct.stConfig.bEnMinSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMinSoftPosLimit.Value);
+
+fbReadEnMaxSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnMaxSoftPosLimit);
+stAxisStruct.stConfig.bEnMaxSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMaxSoftPosLimit.Value);
+
+fbReadMinSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit);
+stAxisStruct.stConfig.fMinSoftPosLimit:= fbReadMinSoftPosLimit.Value;
+
+fbReadMaxSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaxSoftPosLimit);
+stAxisStruct.stConfig.fMaxSoftPosLimit:= fbReadMaxSoftPosLimit.Value;
+
+// Position Lag Monitoring
+fbReadEnPositionLagMonitoring(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnPositionLagMonitoring);
+stAxisStruct.stConfig.bEnPositionLagMonitoring:= LREAL_TO_BOOL(fbReadEnPositionLagMonitoring.Value);
+
+fbReadAxisMaxPosLagValue(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaxPosLagValue);
+stAxisStruct.stConfig.fMaxPosLagValue:= fbReadAxisMaxPosLagValue.Value;
+
+// Target Position Monitoring
+fbReadEnTargetPositionMonitoring(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit);
+stAxisStruct.stConfig.bEnTargetPositionMonitoring:= LREAL_TO_BOOL(fbReadEnTargetPositionMonitoring.Value);
+
+fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisTargetPositionWindow);
+stAxisStruct.stConfig.fTargetPositionWindow:= fbReadTargetPositionWindow.Value;]]></ST>
+      </Implementation>
+    </Action>
     <LineIds Name="FB_Axis">
       <LineId Id="2448" Count="0" />
       <LineId Id="2659" Count="0" />
@@ -537,6 +603,26 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="246" Count="18" />
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="80" />
+      <LineId Id="3370" Count="0" />
+      <LineId Id="3315" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.actReadNcParameters">
+      <LineId Id="55" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="8" Count="2" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="28" Count="11" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="40" Count="10" />
+      <LineId Id="27" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
