@@ -20,6 +20,8 @@ STRUCT
     fActVelocity: LREAL; //Actual velocity
     bError: BOOL; //Motion function block has produced error (NC drive not necessarily in error state)
     nErrorID: UDINT; //Motion function block errorID
+	
+	bInTargetPosition: BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
