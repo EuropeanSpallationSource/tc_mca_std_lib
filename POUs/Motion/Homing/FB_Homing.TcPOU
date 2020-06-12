@@ -71,34 +71,6 @@ stRefSwitchSignal.Level := bHomeSensor;
 stEncPulseSignal.SignalSource := SignalSource_ZeroPulse;
 stEncPulseSignal.TouchProbe := TouchProbe1;
 
-
-//Common function blocks used for all routines
-stOptions.DisableDriveAccess:=TRUE;
-
-fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
-fbStepLimitSwitchPreparation(
-    Axis := Axis,
-    Parameter := stHomingParameter,
-    Direction := stPreparationDirection,
-    LimitSwitchMode:= eLimitSwitchMode,
-    LimitSwitchSignal:= stLimitSwitchSignal,
-    Velocity := fVelocityToCam);
-
-fbSetPos(
-    Axis := Axis,
-    Position := Axis.NcToPlc.ActPos - fRecordedPositionLatched + fHomePosition);
-
-fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
-fbFinishHoming(
-    Axis := Axis,
-    Parameter := stHomingParameter,
-    Velocity := fVelocityFromCam);
-
-fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
-fbAbortHoming(
-    Axis := Axis,
-    Parameter := stHomingParameter);
-
 //Constantly read the NC for homing velocities so they are available when a homing is executed
 fbVelocityToCam(
     Axis := Axis,
@@ -130,6 +102,33 @@ ELSIF fbVelocityFromCam.Error THEN
     bError := TRUE;
     nErrorID := fbVelocityFromCam.ErrorID;
 END_IF
+
+//Common function blocks used for all routines
+stOptions.DisableDriveAccess:=TRUE;
+
+fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbStepLimitSwitchPreparation(
+    Axis := Axis,
+    Parameter := stHomingParameter,
+    Direction := stPreparationDirection,
+    LimitSwitchMode:= eLimitSwitchMode,
+    LimitSwitchSignal:= stLimitSwitchSignal,
+    Velocity := fVelocityToCam);
+
+fbSetPos(
+    Axis := Axis,
+    Position := Axis.NcToPlc.ActPos - fRecordedPositionLatched + fHomePosition);
+
+fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbFinishHoming(
+    Axis := Axis,
+    Parameter := stHomingParameter,
+    Velocity := fVelocityFromCam);
+
+fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbAbortHoming(
+    Axis := Axis,
+    Parameter := stHomingParameter);
 
 //ACTs contain function blocks custom to each individual routine for the detection stage
 CASE eHomeSeq OF
@@ -316,7 +315,7 @@ fbStepReferencePulseDetection(
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
     ReferenceSignal := stEncPulseSignal,
-    Velocity := fbVelocityFromCam.Value,
+    Velocity := fVelocityFromCam,
     Options := stOptions,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
@@ -348,7 +347,7 @@ fbStepLimitSwitchDetection(
     Direction := stDetectDirection,
     LimitSwitchMode := eLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
-    Velocity := fbVelocityFromCam.Value,
+    Velocity := fVelocityFromCam,
     Options := stOptions,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
@@ -378,7 +377,7 @@ fbStepAbsoluteSwitchDetection(
     Direction := stDetectDirection,
     SwitchMode := eRefSwitchMode,
     ReferenceSignal := stRefSwitchSignal,
-    Velocity := fbVelocityFromCam.Value,
+    Velocity := fVelocityFromCam,
     PositiveLimitSwitch := NOT(bLimitFwd),
     NegativeLimitSwitch := NOT(bLimitBwd),
     Options := stOptions,
@@ -391,17 +390,10 @@ fbStepAbsoluteSwitchDetection(
       </Implementation>
     </Action>
     <LineIds Name="FB_Homing">
-      <LineId Id="3595" Count="36" />
-      <LineId Id="4012" Count="0" />
-      <LineId Id="4001" Count="10" />
-      <LineId Id="4000" Count="0" />
-      <LineId Id="4030" Count="0" />
-      <LineId Id="4013" Count="0" />
-      <LineId Id="4015" Count="6" />
-      <LineId Id="4031" Count="0" />
-      <LineId Id="4022" Count="7" />
-      <LineId Id="4014" Count="0" />
-      <LineId Id="3632" Count="34" />
+      <LineId Id="3595" Count="9" />
+      <LineId Id="4091" Count="29" />
+      <LineId Id="4090" Count="0" />
+      <LineId Id="3605" Count="61" />
       <LineId Id="3760" Count="0" />
       <LineId Id="3762" Count="6" />
       <LineId Id="3761" Count="0" />
