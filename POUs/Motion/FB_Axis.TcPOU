@@ -45,6 +45,18 @@ VAR
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
 
+
+    bReadValid: BOOL := FALSE;
+    bInitialise: BOOL := FALSE;
+
+    fbReadAxisVeloManSlow: MC_ReadParameter;
+    fbReadAxisVeloManFast: MC_ReadParameter;
+    fbReadHomingVelToCam: MC_ReadParameter;
+    fbReadHomingVelFromCam: MC_ReadParameter;
+    fbReadAxisVeloMax: MC_ReadParameter;
+    fbReadAxisAcc: MC_ReadParameter;
+    fbReadAxisDec: MC_ReadParameter;
+
     fbReadEnMinSoftPosLimit: MC_ReadParameter;
     fbReadEnMaxSoftPosLimit: MC_ReadParameter;
     fbReadMinSoftPosLimit: MC_ReadParameter;
@@ -57,6 +69,14 @@ VAR
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
+
+actReadMcParameters();
+actReadAxisRef();
+IF bReadValid AND NOT bInitialise THEN
+    FB_AXIS_INIT();
+    actInitAxisParams();
+    bInitialise:= TRUE;
+END_IF
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -399,21 +419,91 @@ ELSE
 END_IF
 
 //Reset bExecute
-stAxisStruct.stControl.bExecute := FALSE;
-
-actReadMcParameters();
-actReadAxisRef();]]></ST>
+stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
+    <Action Name="actInitAxisParams" Id="{d8e092d2-4ada-4e33-9afe-1e0f135ab8ed}">
+      <Implementation>
+        <ST><![CDATA[stAxisStruct.stConfig.fVelocity:=stAxisStruct.stConfig.fVeloManFast;
+stAxisStruct.stConfig.fAcceleration:=stAxisStruct.stConfig.fDefaultAcc;
+stAxisStruct.stConfig.fDeceleration:=stAxisStruct.stConfig.fDefaultDec;]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
       <Implementation>
-        <ST><![CDATA[stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
+        <ST><![CDATA[// The intention behind this ACT is purely to transfer parameters from the AXIS_REF
+// to our ST_AxisStruct. No logic other than assignments should go in here.
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.CycleCounter;
+stAxisStruct.stStatus.eMotionState:= stAxisStruct.Axis.Status.MotionState;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.Error;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.ErrorID;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.Disabled;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.Stopping;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.Standstill;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.DiscreteMotion;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.ContinuousMotion;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.SynchronizedMotion;
+//stAxisStruct.stStatus.:= stAxisStruct.Axis.Status.Homing;
+stAxisStruct.stStatus.bConstantVelocity:= stAxisStruct.Axis.Status.ConstantVelocity;
+stAxisStruct.stStatus.bAccelerating:= stAxisStruct.Axis.Status.Accelerating;
+stAxisStruct.stStatus.bDecelerating:= stAxisStruct.Axis.Status.Decelerating;
+stAxisStruct.stStatus.bHasJob:= stAxisStruct.Axis.Status.HasJob;
+stAxisStruct.stStatus.bInPositionArea:= stAxisStruct.Axis.Status.InPositionArea;
+stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
+//stAxisStruct.stStatus.bHomed:= stAxisStruct.Axis.Status.Homed;
+stAxisStruct.stStatus.bHomingBusy:= stAxisStruct.Axis.Status.HomingBusy;
 stAxisStruct.stStatus.bSoftLimitMinExceeded:= stAxisStruct.Axis.Status.SoftLimitMinExceeded;
-stAxisStruct.stStatus.bSoftLimitMaxExceeded:= stAxisStruct.Axis.Status.SoftLimitMaxExceeded;]]></ST>
+stAxisStruct.stStatus.bSoftLimitMaxExceeded:= stAxisStruct.Axis.Status.SoftLimitMaxExceeded;
+stAxisStruct.stStatus.bMoving:= stAxisStruct.Axis.Status.Moving;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
       <Implementation>
-        <ST><![CDATA[// Soft limits
+        <ST><![CDATA[bReadValid:= FALSE;
+
+// Slow jogging Velocity
+fbReadAxisVeloManSlow(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloManSlow,
+                        Value=> stAxisStruct.stConfig.fVeloManSlow);
+// Fast jogging velocity
+fbReadAxisVeloManFast(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloManFast,
+                        Value=> stAxisStruct.stConfig.fVeloManFast);
+// Homing velocity to Cam
+fbReadHomingVelToCam(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityForward,
+                        Value=> stAxisStruct.stConfig.fHomingVelToCam);
+// Homing velocity from Cam
+fbReadHomingVelFromCam(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityBackward,
+                        Value=> stAxisStruct.stConfig.fHomingVelFromCam);
+// Max velocity
+fbReadAxisVeloMax(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloMax,
+                        Value=> stAxisStruct.stConfig.fVeloMax);
+// Acceleration
+fbReadAxisAcc(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisAcc,
+                        Value=> stAxisStruct.stConfig.fDefaultAcc);
+//Deceleration
+fbReadAxisDec(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisDec,
+                        Value=> stAxisStruct.stConfig.fDefaultDec);
+
+// Soft limits enabled
 fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
@@ -426,17 +516,17 @@ fbReadEnMaxSoftPosLimit(Axis := stAxisStruct.Axis,
                         ParameterNumber := E_AxisParameters.AxisEnMaxSoftPosLimit);
 stAxisStruct.stConfig.bEnMaxSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMaxSoftPosLimit.Value);
 
+// Soft limit values
 fbReadMinSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit);
-stAxisStruct.stConfig.fMinSoftPosLimit:= fbReadMinSoftPosLimit.Value;
-
+                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit,
+                        Value=>stAxisStruct.stConfig.fMinSoftPosLimit);
 fbReadMaxSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMaxSoftPosLimit);
-stAxisStruct.stConfig.fMaxSoftPosLimit:= fbReadMaxSoftPosLimit.Value;
+                        ParameterNumber := E_AxisParameters.AxisMaxSoftPosLimit,
+                        Value=>stAxisStruct.stConfig.fMaxSoftPosLimit);
 
 // Position Lag Monitoring
 fbReadEnPositionLagMonitoring(Axis := stAxisStruct.Axis,
@@ -448,8 +538,8 @@ stAxisStruct.stConfig.bEnPositionLagMonitoring:= LREAL_TO_BOOL(fbReadEnPositionL
 fbReadAxisMaxPosLagValue(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMaxPosLagValue);
-stAxisStruct.stConfig.fMaxPosLagValue:= fbReadAxisMaxPosLagValue.Value;
+                        ParameterNumber := E_AxisParameters.AxisMaxPosLagValue,
+                        Value=>stAxisStruct.stConfig.fMaxPosLagValue);
 
 // Target Position Monitoring
 fbReadEnTargetPositionMonitoring(Axis := stAxisStruct.Axis,
@@ -461,12 +551,46 @@ stAxisStruct.stConfig.bEnTargetPositionMonitoring:= LREAL_TO_BOOL(fbReadEnTarget
 fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisTargetPositionWindow);
-stAxisStruct.stConfig.fTargetPositionWindow:= fbReadTargetPositionWindow.Value;]]></ST>
+                        ParameterNumber := E_AxisParameters.AxisTargetPositionWindow,
+                        Value=> stAxisStruct.stConfig.fTargetPositionWindow);
+
+bReadValid:= fbReadAxisVeloManSlow.Valid AND
+    fbReadAxisVeloManFast.Valid AND
+    fbReadHomingVelToCam.Valid AND
+    fbReadHomingVelFromCam.Valid AND
+    fbReadAxisVeloMax.Valid AND
+    fbReadAxisAcc.Valid AND
+    fbReadAxisDec.Valid AND
+
+    fbReadEnMinSoftPosLimit.Valid AND
+    fbReadEnMaxSoftPosLimit.Valid AND
+    fbReadMinSoftPosLimit.Valid AND
+    fbReadMaxSoftPosLimit.Valid AND
+
+    fbReadEnPositionLagMonitoring.Valid AND
+    fbReadAxisMaxPosLagValue.Valid AND
+    fbReadEnTargetPositionMonitoring.Valid AND
+    fbReadTargetPositionWindow.Valid;]]></ST>
       </Implementation>
     </Action>
+    <Method Name="FB_AXIS_INIT" Id="{20e75164-5b5e-4ba8-8b0a-38d23edce0d7}">
+      <Declaration><![CDATA[METHOD FB_AXIS_INIT : BOOL
+VAR_INPUT
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_Axis">
-      <LineId Id="2448" Count="0" />
+      <LineId Id="3492" Count="1" />
+      <LineId Id="3489" Count="0" />
+      <LineId Id="3488" Count="0" />
+      <LineId Id="3481" Count="1" />
+      <LineId Id="3506" Count="0" />
+      <LineId Id="3503" Count="0" />
+      <LineId Id="3483" Count="0" />
       <LineId Id="2659" Count="0" />
       <LineId Id="2185" Count="0" />
       <LineId Id="2203" Count="0" />
@@ -611,30 +735,83 @@ stAxisStruct.stConfig.fTargetPositionWindow:= fbReadTargetPositionWindow.Value;]
       <LineId Id="246" Count="18" />
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="80" />
-      <LineId Id="3370" Count="0" />
-      <LineId Id="3315" Count="0" />
-      <LineId Id="3424" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.actInitAxisParams">
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actReadAxisRef">
-      <LineId Id="1" Count="2" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="175" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actReadMcParameters">
+      <LineId Id="157" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="63" Count="4" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="119" Count="4" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="125" Count="4" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="69" Count="4" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="86" Count="3" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="90" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="2" />
-      <LineId Id="6" Count="1" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="7" Count="0" />
       <LineId Id="18" Count="2" />
-      <LineId Id="8" Count="2" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="10" Count="0" />
       <LineId Id="21" Count="2" />
-      <LineId Id="11" Count="2" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="107" Count="0" />
       <LineId Id="24" Count="2" />
       <LineId Id="14" Count="0" />
-      <LineId Id="4" Count="0" />
+      <LineId Id="109" Count="0" />
       <LineId Id="51" Count="0" />
-      <LineId Id="28" Count="11" />
+      <LineId Id="28" Count="10" />
+      <LineId Id="115" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="40" Count="10" />
-      <LineId Id="27" Count="0" />
+      <LineId Id="136" Count="3" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="144" Count="12" />
+      <LineId Id="140" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.FB_AXIS_INIT">
+      <LineId Id="8" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

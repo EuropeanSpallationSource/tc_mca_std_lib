@@ -30,14 +30,21 @@ STRUCT
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
 
     // Read only NC parameters
-    bEnMinSoftPosLimit: BOOL;
-    fMinSoftPosLimit: LREAL;
-    bEnMaxSoftPosLimit: BOOL;
-    fMaxSoftPosLimit: LREAL;
-    bEnPositionLagMonitoring: BOOL;
-    fMaxPosLagValue: LREAL;
-    bEnTargetPositionMonitoring: BOOL;
-    fTargetPositionWindow: LREAL;
+    fVeloManSlow: LREAL; //Read only
+    fVeloManFast: LREAL; //Read only
+    fHomingVelToCam: LREAL; //Read only
+    fHomingVelFromCam: LREAL; //Read only
+    fVeloMax: LREAL; //Read only
+    fDefaultAcc: LREAL; //Read only
+    fDefaultDec: LREAL; //Read only
+    bEnMinSoftPosLimit: BOOL; //Read only
+    fMinSoftPosLimit: LREAL; //Read only
+    bEnMaxSoftPosLimit: BOOL; //Read only
+    fMaxSoftPosLimit: LREAL; //Read only
+    bEnPositionLagMonitoring: BOOL; //Read only
+    fMaxPosLagValue: LREAL; //Read only
+    bEnTargetPositionMonitoring: BOOL; //Read only
+    fTargetPositionWindow: LREAL; //Read only
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
