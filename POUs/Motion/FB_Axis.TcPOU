@@ -162,14 +162,14 @@ stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
 //Stop
 fbStop.Execute := stAxisStruct.stControl.bStop AND NOT fbHome.bBusy;
-fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
+fbStop.Deceleration := stAxisStruct.stControl.fDeceleration;
 IF stAxisStruct.stControl.bStop AND stAxisStruct.Axis.Status.Stopping THEN
     stAxisStruct.stControl.bStop := FALSE;
 END_IF
 
 //Halt
 fbHalt.Execute := stAxisStruct.stControl.bStop AND fbHome.bBusy;
-fbHalt.Deceleration := stAxisStruct.stConfig.fDeceleration;
+fbHalt.Deceleration := stAxisStruct.stControl.fDeceleration;
 
 //Reset
 fbReset.Execute := stAxisStruct.stControl.bReset AND stAxisStruct.stStatus.bError;
@@ -181,39 +181,39 @@ END_IF
 CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eMoveAbsolute:
         fbMoveAbsolute.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveAbsolute.Position := stAxisStruct.stConfig.fPosition;
-        fbMoveAbsolute.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveAbsolute.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveAbsolute.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveAbsolute.Position := stAxisStruct.stControl.fPosition;
+        fbMoveAbsolute.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveAbsolute.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveAbsolute.Deceleration := stAxisStruct.stControl.fDeceleration;
 
     E_MotionFunctions.eMoveRelative:
         fbMoveRelative.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveRelative.Distance := stAxisStruct.stConfig.fPosition;
-        fbMoveRelative.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveRelative.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveRelative.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveRelative.Distance := stAxisStruct.stControl.fPosition;
+        fbMoveRelative.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveRelative.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveRelative.Deceleration := stAxisStruct.stControl.fDeceleration;
 
     E_MotionFunctions.eJog:
         fbJog.JogForward := stAxisStruct.stControl.bJogFwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.JogBackwards := stAxisStruct.stControl.bJogBwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.Mode := 0;
-        fbJog.Velocity := stAxisStruct.stConfig.fVelocity;
-        fbJog.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbJog.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbJog.Velocity := stAxisStruct.stControl.fVelocity;
+        fbJog.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbJog.Deceleration := stAxisStruct.stControl.fDeceleration;
 
     E_MotionFunctions.eMoveVelocity:
         fbMoveVelocity.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveVelocity.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveVelocity.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveVelocity.Deceleration := stAxisStruct.stConfig.fDeceleration;
-        fbMoveVelocity.Direction := SEL(stAxisStruct.stConfig.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
+        fbMoveVelocity.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveVelocity.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveVelocity.Deceleration := stAxisStruct.stControl.fDeceleration;
+        fbMoveVelocity.Direction := SEL(stAxisStruct.stControl.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
 
     E_MotionFunctions.eMoveModulo:
         fbMoveModulo.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveModulo.Position := stAxisStruct.stConfig.fPosition;
-        fbMoveModulo.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveModulo.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveModulo.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveModulo.Position := stAxisStruct.stControl.fPosition;
+        fbMoveModulo.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveModulo.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveModulo.Deceleration := stAxisStruct.stControl.fDeceleration;
 
     E_MotionFunctions.eGearIn:
         fbGearIn.Execute := stAxisStruct.stControl.bExecute;
@@ -422,9 +422,9 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
         <ST><![CDATA[//This code transfers parameters saved in the TwinCAT Axis Parameters
 //to our stAxisConfig as default values.
 //Should only be executed once on PLC reset.
-stAxisStruct.stConfig.fVelocity:=stAxisStruct.stConfig.fVelocityDefaultFast;
-stAxisStruct.stConfig.fAcceleration:=stAxisStruct.stConfig.fDefaultAcc;
-stAxisStruct.stConfig.fDeceleration:=stAxisStruct.stConfig.fDefaultDec;]]></ST>
+stAxisStruct.stControl.fVelocity:=stAxisStruct.stConfig.fVelocityDefaultFast;
+stAxisStruct.stControl.fAcceleration:=stAxisStruct.stConfig.fDefaultAcc;
+stAxisStruct.stControl.fDeceleration:=stAxisStruct.stConfig.fDefaultDec;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
