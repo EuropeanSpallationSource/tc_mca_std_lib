@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <DUT Name="ST_AxisConfig" Id="{e00fe310-8ff8-452a-800a-823efa83b1a3}">
-    <Declaration><![CDATA[TYPE ST_AxisConfig :
+    <Declaration><![CDATA[//These are axis parameters that are set up during commissioning and 
+//in theory don't neeed to be change as part of daily moving of axes.
+//For instance they may be changed due to poor parameter selection
+//or change of instrument configuration. 
+TYPE ST_AxisConfig :
 STRUCT
     //Axis Parameters
     fOverride: LREAL := 100; //Controller override %, used a global scale for an axis in terms of velocity. Generally set to 100%.
@@ -30,13 +34,13 @@ STRUCT
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
 
     // Read only NC parameters
-    fVeloManSlow: LREAL; //Read only
-    fVeloManFast: LREAL; //Read only
-    fHomingVelToCam: LREAL; //Read only
-    fHomingVelFromCam: LREAL; //Read only
-    fVeloMax: LREAL; //Read only
-    fDefaultAcc: LREAL; //Read only
-    fDefaultDec: LREAL; //Read only
+    fVelocityDefaultSlow: LREAL; //Read only - AxisVeloManSlow
+    fVelocityDefaultFast: LREAL; //Read only - AxisVeloManFast
+    fHomingVelToCam: LREAL; //Read only - AxisCalibrationVelocityForward
+    fHomingVelFromCam: LREAL; //Read only - AxisCalibrationVelocityBackward
+    fVeloMax: LREAL; //Read only - fVeloMax
+    fDefaultAcc: LREAL; //Read only - AxisAcc
+    fDefaultDec: LREAL; //Read only - AxisDec
     bEnMinSoftPosLimit: BOOL; //Read only
     fMinSoftPosLimit: LREAL; //Read only
     bEnMaxSoftPosLimit: BOOL; //Read only

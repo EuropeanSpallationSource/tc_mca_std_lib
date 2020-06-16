@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <DUT Name="ST_AxisControl" Id="{c02b2c99-be98-4acd-b0cb-dc10c1ff77f2}">
-    <Declaration><![CDATA[TYPE ST_AxisControl :
+    <Declaration><![CDATA[//These are parameters that are used to initiate axis movements
+//They are commands that are commonly used commands
+TYPE ST_AxisControl :
 STRUCT
     //Actions from controls system
     bExecute: BOOL; //Rising edge to execute some motion FB's
