@@ -64,60 +64,60 @@ fbPower.Enable := FALSE;
 
 fbReset(Axis := stAxisStruct.Axis);
 fbReset.Execute := FALSE;
-bBUSY:= bBUSY OR fbReset.Busy;
+bBusy:= bBusy OR fbReset.Busy;
 
 fbStop(Axis := stAxisStruct.Axis);
 fbStop.Execute := FALSE;
-bBUSY:= bBUSY OR fbStop.Busy;
+bBusy:= bBusy OR fbStop.Busy;
 
 fbHalt(Axis := stAxisStruct.Axis);
 fbHalt.Execute := FALSE;
-bBUSY:= bBUSY OR fbHalt.Busy;
+bBusy:= bBusy OR fbHalt.Busy;
 
 fbJog(Axis := stAxisStruct.Axis);
-bBUSY:= bBUSY OR fbJog.Busy;
+bBusy:= bBusy OR fbJog.Busy;
 
 fbHome(Axis := stAxisStruct.Axis,
 bLimitBwd := stAxisStruct.stInputs.bLimitBwd,
 bLimitFwd := stAxisStruct.stInputs.bLimitFwd,
 bHomeSensor := stAxisStruct.stInputs.bHomeSensor);
 fbHome.bExecute := FALSE;
-bBUSY:= bBUSY OR fbHome.bBusy;
+bBusy:= bBusy OR fbHome.bBusy;
 
 fbMoveAbsolute(Axis := stAxisStruct.Axis);
 fbMoveAbsolute.Execute := FALSE;
-bBUSY:= bBUSY OR fbMoveAbsolute.Busy;
+bBusy:= bBusy OR fbMoveAbsolute.Busy;
 
 fbMoveRelative(Axis := stAxisStruct.Axis);
 fbMoveRelative.Execute := FALSE;
-bBUSY:= bBUSY OR fbReset.Busy;
+bBusy:= bBusy OR fbReset.Busy;
 
 fbMoveVelocity(Axis := stAxisStruct.Axis);
 fbMoveVelocity.Execute := FALSE;
-bBUSY:= bBUSY OR fbMoveRelative.Busy;
+bBusy:= bBusy OR fbMoveRelative.Busy;
 
 fbMoveModulo(Axis := stAxisStruct.Axis);
 fbMoveModulo.Execute := FALSE;
-bBUSY:= bBUSY OR fbMoveModulo.Busy;
+bBusy:= bBusy OR fbMoveModulo.Busy;
 
 fbGearin(Slave := stAxisStruct.Axis, Master := GVL.astAxes[stMasterAxis.nIndex].Axis);
 fbGearIn.Execute := FALSE;
-bBUSY:= bBUSY OR fbGearin.Busy;
+bBusy:= bBusy OR fbGearin.Busy;
 
 fbGearInMultiMaster(Slave := stAxisStruct.Axis,
     Master1 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex].Axis,
     Master2 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
     Master3 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
     Master4 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
-bBUSY:= bBUSY OR fbGearInMultiMaster.Busy;
+bBusy:= bBusy OR fbGearInMultiMaster.Busy;
 
 fbGearOut(Slave := stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
-bBUSY:= bBUSY OR fbGearOut.Busy;
+bBusy:= bBusy OR fbGearOut.Busy;
 
 fbWriteParameter(Axis := stAxisStruct.Axis);
 fbWriteParameter.Execute := FALSE;
-bBUSY:= bBUSY OR fbWriteParameter.Busy;
+bBusy:= bBusy OR fbWriteParameter.Busy;
 
 //Read parameter continuously
 fbReadParameter(
