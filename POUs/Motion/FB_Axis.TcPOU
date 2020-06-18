@@ -20,9 +20,9 @@ VAR_IN_OUT
 END_VAR
 
 VAR
-    iAxisIndex: UINT;
-    iMultiMastersAxesIndex: UINT;
-    iSlaveAxesIndex: UINT;
+    nAxisIndex: UINT;
+    nMultiMastersAxesIndex: UINT;
+    nSlaveAxesIndex: UINT;
     bWaitForStoppingAfterLimitHit : BOOL := FALSE;
     fbRemovePowerTimer: TOF;
     stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
@@ -151,10 +151,10 @@ END_IF
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
 
-FOR iAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
-    IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] <> 0) THEN
-        stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled);
-        stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled);
+FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
+    IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
+        stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR
 
@@ -252,14 +252,14 @@ CASE stAxisStruct.stControl.eCommand OF
 
         IF stAxisStruct.stControl.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             //Latch master references
-            FOR iMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
-                IF stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
-                    stAxisStruct.stConfig.astMultiMasterAxisLatched[iMultiMastersAxesIndex].nIndex := stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex;
+            FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+                IF stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
+                    stAxisStruct.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].nIndex := stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex;
                 END_IF
             END_FOR
             //Latch gear ratios
-            FOR iMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
-                stAxisStruct.stConfig.astMultiMasterAxisLatched[iMultiMastersAxesIndex].fRatio := stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].fRatio;
+            FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+                stAxisStruct.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].fRatio := stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].fRatio;
             END_FOR
             //Transfer gear ratios to FB
             fbGearInMultiMaster.GearRatio1 := stAxisStruct.stConfig.astMultiMasterAxisLatched[1].fRatio;
@@ -281,8 +281,8 @@ CASE stAxisStruct.stControl.eCommand OF
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
             GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
-            FOR iSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
-                GVL.astAxes[iSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+            FOR nSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
+                GVL.astAxes[nSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
             END_FOR
         END_IF
 
@@ -331,7 +331,7 @@ IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog
 END_IF
 
 //Execution of fbReset ended
-fbResetFinishedRiseEdge(CLK:=fbReset.Done OR FbReset.Error);
+fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
 IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stControl.bReset := FALSE;
     stAxisStruct.stStatus.bError := FALSE;
@@ -354,7 +354,6 @@ IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stError.nMoveVelocityErrorID := 0;
     stAxisStruct.stControl.bExecute := FALSE;
     stAxisStruct.stControl.bStop := FALSE;
-    stAxisStruct.stControl.bReset := FALSE;
     stAxisStruct.stControl.bJogBwd := FALSE;
     stAxisStruct.stControl.bJogFwd := FALSE;
 END_IF
@@ -422,7 +421,7 @@ ELSIF fbGearIn.Error THEN
     stAxisStruct.stError.nGearInErrorId:=fbGearIn.ErrorID;
 
 ELSIF fbGearInMultiMaster.Error THEN
-    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
     stAxisStruct.stError.nGearInMultiMasterErrorId:=fbGearInMultiMaster.ErrorID;
 
@@ -434,7 +433,7 @@ ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
 ELSIF fbWriteParameter.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
-    stAxisStruct.stError.fbWriteParameterErrorId:=fbWriteParameter.ErrorID;
+    stAxisStruct.stError.fbWriteParameterErrorId := fbWriteParameter.ErrorID;
 
 ELSIF fbReadParameter.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
@@ -570,7 +569,8 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="4911" Count="10" />
       <LineId Id="5278" Count="1" />
       <LineId Id="4922" Count="15" />
-      <LineId Id="4939" Count="71" />
+      <LineId Id="4939" Count="10" />
+      <LineId Id="4951" Count="59" />
       <LineId Id="5265" Count="9" />
       <LineId Id="5011" Count="16" />
       <LineId Id="5132" Count="0" />
