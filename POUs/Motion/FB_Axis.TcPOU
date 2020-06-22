@@ -20,9 +20,9 @@ VAR_IN_OUT
 END_VAR
 
 VAR
-    iAxisIndex: UINT;
-    iMultiMastersAxesIndex: UINT;
-    iSlaveAxesIndex: UINT;
+    nAxisIndex: UINT;
+    nMultiMastersAxesIndex: UINT;
+    nSlaveAxesIndex: UINT;
     bWaitForStoppingAfterLimitHit : BOOL := FALSE;
     fbRemovePowerTimer: TOF;
     stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
@@ -40,13 +40,23 @@ VAR
     fbGearInMultiMaster: MC_GearInMultiMaster;
     fbHome: FB_Homing;
     fbExecuteRiseEdge: R_TRIG;
+    fbJogRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
+    fbStopFinishedRiseEdge: R_TRIG;
+    fbResetFinishedRiseEdge: R_TRIG;
+    fbCommandAbortedRiseEdge: R_TRIG;
+    fbDoneRiseEdge: R_TRIG;
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
+    bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
+    bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
+    bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[stAxisStruct.Axis.ReadStatus();
+      <ST><![CDATA[bBusy := FALSE;
+
+stAxisStruct.Axis.ReadStatus();
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -54,44 +64,73 @@ fbPower.Enable := FALSE;
 
 fbReset(Axis := stAxisStruct.Axis);
 fbReset.Execute := FALSE;
+bBusy:= bBusy OR fbReset.Busy;
 
 fbStop(Axis := stAxisStruct.Axis);
 fbStop.Execute := FALSE;
+bBusy:= bBusy OR fbStop.Busy;
 
 fbHalt(Axis := stAxisStruct.Axis);
 fbHalt.Execute := FALSE;
+bBusy:= bBusy OR fbHalt.Busy;
 
 fbJog(Axis := stAxisStruct.Axis);
+bBusy:= bBusy OR fbJog.Busy;
 
 fbHome(Axis := stAxisStruct.Axis,
 bLimitBwd := stAxisStruct.stInputs.bLimitBwd,
 bLimitFwd := stAxisStruct.stInputs.bLimitFwd,
 bHomeSensor := stAxisStruct.stInputs.bHomeSensor);
 fbHome.bExecute := FALSE;
+bBusy:= bBusy OR fbHome.bBusy;
 
 fbMoveAbsolute(Axis := stAxisStruct.Axis);
 fbMoveAbsolute.Execute := FALSE;
+bBusy:= bBusy OR fbMoveAbsolute.Busy;
 
 fbMoveRelative(Axis := stAxisStruct.Axis);
 fbMoveRelative.Execute := FALSE;
+bBusy:= bBusy OR fbReset.Busy;
 
 fbMoveVelocity(Axis := stAxisStruct.Axis);
 fbMoveVelocity.Execute := FALSE;
+bBusy:= bBusy OR fbMoveRelative.Busy;
 
 fbMoveModulo(Axis := stAxisStruct.Axis);
 fbMoveModulo.Execute := FALSE;
+bBusy:= bBusy OR fbMoveModulo.Busy;
 
 fbGearin(Slave := stAxisStruct.Axis, Master := GVL.astAxes[stMasterAxis.nIndex].Axis);
 fbGearIn.Execute := FALSE;
+bBusy:= bBusy OR fbGearin.Busy;
 
 fbGearInMultiMaster(Slave := stAxisStruct.Axis,
     Master1 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex].Axis,
     Master2 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
     Master3 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
     Master4 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
+bBusy:= bBusy OR fbGearInMultiMaster.Busy;
 
 fbGearOut(Slave := stAxisStruct.Axis);
 fbGearOut.Execute := FALSE;
+bBusy:= bBusy OR fbGearOut.Busy;
+
+fbWriteParameter(Axis := stAxisStruct.Axis);
+fbWriteParameter.Execute := FALSE;
+bBusy:= bBusy OR fbWriteParameter.Busy;
+
+//Read parameter continuously
+fbReadParameter(
+    Axis := stAxisStruct.Axis,
+    Enable := TRUE,
+    ParameterNumber := stAxisStruct.stconfig.eAxisParameters,
+    ReadMode := READMODE_CYCLIC);
+//do no evaluate fbReadParameter.busy, since this is continuously TRUE
+
+IF NOT fbReadParameter.Error THEN
+    stAxisStruct.stConfig.bReadAxisParameterValid := fbReadParameter.Valid;
+    stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
+END_IF
 
 fbWriteParameter(Axis := stAxisStruct.Axis);
 fbWriteParameter.Execute := FALSE;
@@ -112,10 +151,10 @@ END_IF
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
 
-FOR iAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
-    IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] <> 0) THEN
-        stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled);
-        stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[iAxisIndex] > 0, GVL.astAxes[iAxisIndex].stStatus.bFwEnabled, GVL.astAxes[iAxisIndex].stStatus.bBwEnabled);
+FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
+    IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
+        stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR
 
@@ -135,19 +174,13 @@ fbPower.Override := stAxisStruct.stConfig.fOverride;
 stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
 //Stop
-fbStop.Execute := stAxisStruct.stControl.bStop AND NOT fbHome.bBusy;
+fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
-IF stAxisStruct.stControl.bStop AND stAxisStruct.Axis.Status.Stopping THEN
-    stAxisStruct.stControl.bStop := FALSE;
-END_IF
 
-//Halt
-fbHalt.Execute := stAxisStruct.stControl.bStop AND fbHome.bBusy;
-fbHalt.Deceleration := stAxisStruct.stConfig.fDeceleration;
-
-//Reset
-fbReset.Execute := stAxisStruct.stControl.bReset AND stAxisStruct.stStatus.bError;
-IF stAxisStruct.stControl.bReset AND NOT (stAxisStruct.stStatus.bError OR stAxisStruct.stStatus.bWarning) THEN
+//Reset only if axis is in error state
+IF stAxisStruct.stStatus.bError THEN
+    fbReset.Execute := stAxisStruct.stControl.bReset;
+ELSE
     stAxisStruct.stControl.bReset := FALSE;
 END_IF
 
@@ -159,6 +192,8 @@ CASE stAxisStruct.stControl.eCommand OF
         fbMoveAbsolute.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
         fbMoveAbsolute.Acceleration := stAxisStruct.stConfig.fAcceleration;
         fbMoveAbsolute.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        bDoneEdge := fbMoveAbsolute.Done;
+        bCommandAbortedEdge := fbMoveAbsolute.CommandAborted;
 
     E_MotionFunctions.eMoveRelative:
         fbMoveRelative.Execute := stAxisStruct.stControl.bExecute;
@@ -166,6 +201,8 @@ CASE stAxisStruct.stControl.eCommand OF
         fbMoveRelative.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
         fbMoveRelative.Acceleration := stAxisStruct.stConfig.fAcceleration;
         fbMoveRelative.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        bDoneEdge := fbMoveRelative.Done;
+        bCommandAbortedEdge := fbMoveRelative.CommandAborted;
 
     E_MotionFunctions.eJog:
         fbJog.JogForward := stAxisStruct.stControl.bJogFwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
@@ -174,6 +211,8 @@ CASE stAxisStruct.stControl.eCommand OF
         fbJog.Velocity := stAxisStruct.stConfig.fVelocity;
         fbJog.Acceleration := stAxisStruct.stConfig.fAcceleration;
         fbJog.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        bDoneEdge := fbJog.Done;
+        bCommandAbortedEdge := fbJog.CommandAborted;
 
     E_MotionFunctions.eMoveVelocity:
         fbMoveVelocity.Execute := stAxisStruct.stControl.bExecute;
@@ -181,6 +220,7 @@ CASE stAxisStruct.stControl.eCommand OF
         fbMoveVelocity.Acceleration := stAxisStruct.stConfig.fAcceleration;
         fbMoveVelocity.Deceleration := stAxisStruct.stConfig.fDeceleration;
         fbMoveVelocity.Direction := SEL(stAxisStruct.stConfig.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
+        bCommandAbortedEdge := fbMoveVelocity.CommandAborted;
 
     E_MotionFunctions.eMoveModulo:
         fbMoveModulo.Execute := stAxisStruct.stControl.bExecute;
@@ -188,11 +228,14 @@ CASE stAxisStruct.stControl.eCommand OF
         fbMoveModulo.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
         fbMoveModulo.Acceleration := stAxisStruct.stConfig.fAcceleration;
         fbMoveModulo.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        bDoneEdge := fbMoveModulo.Done;
+        bCommandAbortedEdge := fbMoveModulo.CommandAborted;
 
     E_MotionFunctions.eGearIn:
         fbGearIn.Execute := stAxisStruct.stControl.bExecute;
         fbGearIn.RatioNumerator := stMasterAxis.fRatio;
         fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
+        bCommandAbortedEdge := fbGearIn.CommandAborted;
 
         IF NOT fbGearIn.InGear THEN
             stMasterAxis.nIndex := stAxisStruct.stConfig.stMasterAxis.nIndex;
@@ -205,16 +248,18 @@ CASE stAxisStruct.stControl.eCommand OF
         END_IF
 
     E_MotionFunctions.eGearInMultiMaster:
+        bCommandAbortedEdge := fbGearInMultiMaster.CommandAborted;
+
         IF stAxisStruct.stControl.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             //Latch master references
-            FOR iMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
-                IF stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
-                    stAxisStruct.stConfig.astMultiMasterAxisLatched[iMultiMastersAxesIndex].nIndex := stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].nIndex;
+            FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+                IF stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex > 0 AND stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
+                    stAxisStruct.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].nIndex := stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex;
                 END_IF
             END_FOR
             //Latch gear ratios
-            FOR iMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
-                stAxisStruct.stConfig.astMultiMasterAxisLatched[iMultiMastersAxesIndex].fRatio := stAxisStruct.stConfig.astMultiMasterAxis[iMultiMastersAxesIndex].fRatio;
+            FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+                stAxisStruct.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].fRatio := stAxisStruct.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].fRatio;
             END_FOR
             //Transfer gear ratios to FB
             fbGearInMultiMaster.GearRatio1 := stAxisStruct.stConfig.astMultiMasterAxisLatched[1].fRatio;
@@ -231,12 +276,13 @@ CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eGearOut:
         fbGearOut.Execute := stAxisStruct.stControl.bExecute;
         fbGearInMultiMaster.Enable := FALSE;
+        bDoneEdge := fbGearOut.Done;
 
         IF fbGearOut.Done THEN
             //Clear slave ratio from master axis slave array
             GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
-            FOR iSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
-                GVL.astAxes[iSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
+            FOR nSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
+                GVL.astAxes[nSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
             END_FOR
         END_IF
 
@@ -245,103 +291,162 @@ CASE stAxisStruct.stControl.eCommand OF
         fbHome.eHomeSeq := stAxisStruct.stConfig.eHomeSeq;
         fbHome.fHomePosition := stAxisStruct.stConfig.fHomePosition;
         fbHome.fHomeFinishDistance := stAxisStruct.stConfig.fHomeFinishDistance;
+        bDoneEdge := fbHome.bDone;
+        bCommandAbortedEdge := fbHome.bCommandAborted;
 
     E_MotionFunctions.eWriteParameter:
         fbWriteParameter.Execute := stAxisStruct.stcontrol.bExecute;
         fbWriteParameter.ParameterNumber := stAxisStruct.stConfig.eAxisParameters;
         fbWriteParameter.Value := stAxisStruct.stConfig.fWriteAxisParameter;
+        bDoneEdge := fbWriteParameter.Done;
 
 END_CASE
 
-//Busy
-stAxisStruct.stStatus.bBusy := stAxisStruct.Axis.Status.HasJob;
+//Busy from the motion function blocks
+stAxisStruct.stStatus.bBusy := bBusy;
 
-//Done
-IF fbMoveAbsolute.Done OR fbMoveModulo.Done OR fbMoveRelative.Done OR fbHome.bDone THEN
-        stAxisStruct.stStatus.bDone := TRUE;
-ELSIF stAxisStruct.Axis.Status.HasJob THEN
-        stAxisStruct.stStatus.bDone := FALSE;
+//CommandAborted from the eCommand function blocks
+fbCommandAbortedRiseEdge(CLK:= bCommandAbortedEdge);
+IF fbCommandAbortedRiseEdge.Q THEN
+    stAxisStruct.stStatus.bCommandAborted := TRUE;
 END_IF
 
-//Error from functions and Nc
-IF stAxisStruct.stStatus.bError AND NOT stAxisStruct.stControl.bReset THEN
-    stAxisStruct.stStatus.bError := stAxisStruct.stStatus.bError;
-    stAxisStruct.stStatus.nErrorID := stAxisStruct.stStatus.nErrorID;
+//Done from the eCommand function blocks
+fbDoneRiseEdge(CLK:= bDoneEdge);
+IF fbDoneRiseEdge.Q THEN
+    stAxisStruct.stStatus.bDone := TRUE;
+    stAxisStruct.stStatus.bCommandAborted:=FALSE;
+END_IF
 
-ELSIF fbPower.Error THEN
+//Reset Done and CommandAborted with any new eCommand (Execute or Jog)
+fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
+IF fbExecuteRiseEdge.Q THEN
+    stAxisStruct.stStatus.bDone := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
+END_IF
+fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
+IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN
+    stAxisStruct.stStatus.bDone := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
+END_IF
+
+//Execution of fbReset ended
+fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
+IF fbResetFinishedRiseEdge.Q THEN
+    stAxisStruct.stControl.bReset := FALSE;
+    IF NOT fbReset.Error THEN
+        stAxisStruct.stStatus.bError := FALSE;
+        stAxisStruct.stStatus.nErrorID := 0;
+        stAxisStruct.stError.nResetErrorID := 0;
+    END_IF
+    stAxisStruct.stError.nNCErrorID := 0;
+    stAxisStruct.stError.nGearInErrorID := 0;
+    stAxisStruct.stError.nGearInMultiMasterErrorID := 0;
+    stAxisStruct.stError.nGearOutErrorID := 0;
+    stAxisStruct.stError.fbReadParameterErrorId := 0;
+    stAxisStruct.stError.fbWriteParameterErrorId := 0;
+    stAxisStruct.stError.nPowerErrorID := 0;
+    stAxisStruct.stError.nStopErrorID := 0;
+    stAxisStruct.stError.nHaltErrorID := 0;
+    stAxisStruct.stError.nHomeErrorID := 0;
+    stAxisStruct.stError.nJogErrorID := 0;
+    stAxisStruct.stError.nMoveAbsoluteErrorID := 0;
+    stAxisStruct.stError.nMoveRelativeErrorID := 0;
+    stAxisStruct.stError.nMoveModuloErrorID := 0;
+    stAxisStruct.stError.nMoveVelocityErrorID := 0;
+    stAxisStruct.stControl.bExecute := FALSE;
+    stAxisStruct.stControl.bStop := FALSE;
+    stAxisStruct.stControl.bJogBwd := FALSE;
+    stAxisStruct.stControl.bJogFwd := FALSE;
+END_IF
+
+//Execution of fbStop ended
+fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
+IF fbStopFinishedRiseEdge.Q THEN
+    stAxisStruct.stControl.bStop := FALSE;
+END_IF
+
+//Save the errors from the PLCopen motion functions blocks and from the NC
+IF fbPower.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbPower.ErrorID;
+    stAxisStruct.stError.nPowerErrorID := fbPower.ErrorID;
 
 ELSIF fbHalt.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbHalt.ErrorID;
+    stAxisStruct.stError.nHaltErrorID := fbHalt.ErrorID;
+
+ELSIF fbStop.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbStop.ErrorID;
+    stAxisStruct.stError.nStopErrorID := fbStop.ErrorID;
+
+ELSIF fbReset.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbReset.ErrorID;
+    stAxisStruct.stError.nResetErrorID := fbReset.ErrorID;
 
 ELSIF fbJog.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbJog.ErrorID;
+    stAxisStruct.stError.nJogErrorID := fbJog.ErrorID;
 
 ELSIF fbMoveVelocity.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveVelocity.ErrorID;
+    stAxisStruct.stError.nMoveVelocityErrorID := fbMoveVelocity.ErrorID;
 
 ELSIF fbMoveRelative.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveRelative.ErrorID;
+    stAxisStruct.stError.nMoveRelativeErrorID := fbMoveRelative.ErrorID;
 
 ELSIF fbMoveAbsolute.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveAbsolute.ErrorID;
+    stAxisStruct.stError.nMoveAbsoluteErrorID := fbMoveAbsolute.ErrorID;
 
 ELSIF fbMoveModulo.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbMoveModulo.ErrorID;
+    stAxisStruct.stError.nMoveModuloErrorID := fbMoveModulo.ErrorID;
 
 ELSIF fbHome.bError THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbHome.nErrorID;
+    stAxisStruct.stError.nHomeErrorID := fbHome.nErrorID;
 
 ELSIF fbGearIn.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearIn.ErrorID;
+    stAxisStruct.stError.nGearInErrorId:=fbGearIn.ErrorID;
 
 ELSIF fbGearInMultiMaster.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
-    stAxisStruct.stStatus.nErrorId := fbGearInMultiMaster.ErrorID;
-
-ELSIF fbGearInMultiMaster.Error THEN
-    stAxisStruct.stStatus.bError:=TRUE;
     stAxisStruct.stStatus.nErrorId:=fbGearInMultiMaster.ErrorID;
+    stAxisStruct.stError.nGearInMultiMasterErrorId:=fbGearInMultiMaster.ErrorID;
 
 ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
-    stAxisStruct.stStatus.bError:=TRUE;
-    stAxisStruct.stStatus.nErrorId:=fbGearOut.ErrorID;
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbGearOut.ErrorID;
+    stAxisStruct.stError.nGearOutErrorId := fbGearOut.ErrorID;
 
 ELSIF fbWriteParameter.Error THEN
-    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
+    stAxisStruct.stError.fbWriteParameterErrorId := fbWriteParameter.ErrorID;
 
 ELSIF fbReadParameter.Error THEN
-    stAxisStruct.stStatus.bError:=TRUE;
+    stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;
+    stAxisStruct.stError.fbReadParameterErrorId:=fbReadParameter.ErrorID;
 
-ELSIF stAxisStruct.Axis.Status.Error  THEN
+ELSIF stAxisStruct.Axis.Status.Error THEN
     stAxisStruct.stStatus.bError := stAxisStruct.Axis.Status.Error;
     stAxisStruct.stStatus.nErrorId := stAxisStruct.Axis.Status.ErrorID;
+    stAxisStruct.stError.nNCErrorId := stAxisStruct.Axis.Status.ErrorID;
 
-ELSE
-    stAxisStruct.stStatus.bError := FALSE;
-    stAxisStruct.stStatus.nErrorId := 0;
-END_IF;
-
-//Warnings
-IF stAxisStruct.stStatus.bWarning AND NOT stAxisStruct.stControl.bExecute THEN
-    stAxisStruct.stStatus.bWarning := stAxisStruct.stStatus.bWarning;
-
-ELSIF fbHome.bCommandAborted THEN
-    stAxisStruct.stStatus.bWarning := TRUE;
-
-ELSE
-    stAxisStruct.stStatus.bWarning := FALSE;
 END_IF;
 
 //Actual Velocity
@@ -357,7 +462,10 @@ END_IF
 //Homing status
 stAxisStruct.stStatus.bHomed := stAxisStruct.Axis.Status.Homed;
 
-//Gearing Status
+//Moving Status from the NC
+stAxisStruct.stStatus.bMoving := stAxisStruct.Axis.Status.Moving;
+
+//Gearing Status from the NC
 stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled;
 
 IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
@@ -392,151 +500,92 @@ END_IF
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
     <LineIds Name="FB_Axis">
-      <LineId Id="2448" Count="0" />
-      <LineId Id="2659" Count="0" />
-      <LineId Id="2185" Count="0" />
-      <LineId Id="2203" Count="0" />
-      <LineId Id="2189" Count="0" />
-      <LineId Id="2377" Count="2" />
-      <LineId Id="2190" Count="0" />
-      <LineId Id="2380" Count="0" />
-      <LineId Id="2193" Count="0" />
-      <LineId Id="2381" Count="0" />
-      <LineId Id="2194" Count="1" />
-      <LineId Id="2383" Count="0" />
-      <LineId Id="2197" Count="0" />
-      <LineId Id="2384" Count="0" />
-      <LineId Id="2198" Count="0" />
-      <LineId Id="2385" Count="0" />
-      <LineId Id="2199" Count="0" />
-      <LineId Id="2437" Count="0" />
-      <LineId Id="2200" Count="0" />
-      <LineId Id="2438" Count="0" />
-      <LineId Id="2573" Count="0" />
-      <LineId Id="2493" Count="0" />
-      <LineId Id="2201" Count="0" />
-      <LineId Id="2446" Count="0" />
-      <LineId Id="3201" Count="0" />
-      <LineId Id="3135" Count="0" />
-      <LineId Id="3125" Count="9" />
-      <LineId Id="2998" Count="0" />
-      <LineId Id="1627" Count="1" />
-      <LineId Id="2515" Count="0" />
-      <LineId Id="2595" Count="0" />
-      <LineId Id="2591" Count="0" />
-      <LineId Id="2586" Count="2" />
-      <LineId Id="2585" Count="0" />
-      <LineId Id="2594" Count="0" />
-      <LineId Id="2516" Count="0" />
-      <LineId Id="1629" Count="0" />
-      <LineId Id="1632" Count="3" />
-      <LineId Id="1637" Count="0" />
-      <LineId Id="1642" Count="0" />
-      <LineId Id="3271" Count="0" />
-      <LineId Id="1921" Count="0" />
-      <LineId Id="1925" Count="1" />
-      <LineId Id="2837" Count="0" />
-      <LineId Id="2835" Count="1" />
-      <LineId Id="2205" Count="0" />
-      <LineId Id="2719" Count="0" />
-      <LineId Id="2207" Count="0" />
-      <LineId Id="2209" Count="0" />
-      <LineId Id="2838" Count="0" />
-      <LineId Id="2841" Count="1" />
-      <LineId Id="2762" Count="0" />
-      <LineId Id="2839" Count="0" />
-      <LineId Id="1657" Count="0" />
-      <LineId Id="2366" Count="0" />
-      <LineId Id="2220" Count="0" />
-      <LineId Id="2222" Count="3" />
-      <LineId Id="2238" Count="0" />
-      <LineId Id="2236" Count="0" />
-      <LineId Id="2239" Count="0" />
-      <LineId Id="2241" Count="1" />
-      <LineId Id="2442" Count="0" />
-      <LineId Id="2244" Count="0" />
-      <LineId Id="2254" Count="0" />
-      <LineId Id="2219" Count="0" />
-      <LineId Id="2258" Count="0" />
-      <LineId Id="2443" Count="0" />
-      <LineId Id="2260" Count="0" />
-      <LineId Id="2262" Count="2" />
-      <LineId Id="2274" Count="0" />
-      <LineId Id="2273" Count="0" />
-      <LineId Id="2276" Count="3" />
-      <LineId Id="2281" Count="0" />
-      <LineId Id="2290" Count="1" />
-      <LineId Id="2294" Count="4" />
-      <LineId Id="2303" Count="0" />
-      <LineId Id="2310" Count="0" />
-      <LineId Id="2343" Count="0" />
-      <LineId Id="2504" Count="0" />
-      <LineId Id="2575" Count="0" />
-      <LineId Id="2497" Count="0" />
-      <LineId Id="2506" Count="0" />
-      <LineId Id="2570" Count="1" />
-      <LineId Id="2574" Count="0" />
-      <LineId Id="2572" Count="0" />
-      <LineId Id="2569" Count="0" />
-      <LineId Id="2577" Count="0" />
-      <LineId Id="2583" Count="0" />
-      <LineId Id="2576" Count="0" />
-      <LineId Id="2361" Count="1" />
-      <LineId Id="2498" Count="0" />
-      <LineId Id="2582" Count="0" />
-      <LineId Id="2511" Count="0" />
-      <LineId Id="2584" Count="0" />
-      <LineId Id="2513" Count="0" />
-      <LineId Id="2444" Count="0" />
-      <LineId Id="2364" Count="0" />
-      <LineId Id="2344" Count="0" />
-      <LineId Id="2311" Count="0" />
-      <LineId Id="2329" Count="1" />
-      <LineId Id="2888" Count="0" />
-      <LineId Id="2331" Count="5" />
-      <LineId Id="2934" Count="0" />
-      <LineId Id="2992" Count="0" />
-      <LineId Id="3204" Count="0" />
-      <LineId Id="3213" Count="1" />
-      <LineId Id="3205" Count="2" />
-      <LineId Id="3203" Count="0" />
-      <LineId Id="2993" Count="2" />
-      <LineId Id="2339" Count="0" />
-      <LineId Id="2309" Count="0" />
-      <LineId Id="2216" Count="0" />
-      <LineId Id="1733" Count="0" />
-      <LineId Id="3268" Count="0" />
-      <LineId Id="1936" Count="1" />
-      <LineId Id="2770" Count="0" />
-      <LineId Id="2769" Count="0" />
-      <LineId Id="2772" Count="0" />
-      <LineId Id="2777" Count="2" />
-      <LineId Id="2771" Count="0" />
-      <LineId Id="1941" Count="1" />
-      <LineId Id="2651" Count="2" />
-      <LineId Id="1945" Count="14" />
-      <LineId Id="1962" Count="11" />
-      <LineId Id="3148" Count="4" />
-      <LineId Id="3146" Count="0" />
-      <LineId Id="1974" Count="1" />
-      <LineId Id="1979" Count="3" />
-      <LineId Id="2501" Count="0" />
-      <LineId Id="1992" Count="0" />
-      <LineId Id="2502" Count="0" />
-      <LineId Id="1993" Count="1" />
-      <LineId Id="2980" Count="1" />
-      <LineId Id="2989" Count="2" />
-      <LineId Id="2987" Count="1" />
-      <LineId Id="2982" Count="0" />
-      <LineId Id="2984" Count="2" />
-      <LineId Id="2983" Count="0" />
-      <LineId Id="1995" Count="6" />
-      <LineId Id="2272" Count="0" />
-      <LineId Id="1934" Count="0" />
-      <LineId Id="202" Count="1" />
-      <LineId Id="246" Count="18" />
+      <LineId Id="5284" Count="1" />
+      <LineId Id="4709" Count="7" />
+      <LineId Id="5287" Count="0" />
+      <LineId Id="4717" Count="2" />
+      <LineId Id="5288" Count="0" />
+      <LineId Id="4720" Count="2" />
+      <LineId Id="5289" Count="0" />
+      <LineId Id="4723" Count="1" />
+      <LineId Id="5290" Count="0" />
+      <LineId Id="4725" Count="0" />
+      <LineId Id="5118" Count="3" />
+      <LineId Id="4727" Count="0" />
+      <LineId Id="5291" Count="0" />
+      <LineId Id="4728" Count="2" />
+      <LineId Id="5292" Count="0" />
+      <LineId Id="4731" Count="2" />
+      <LineId Id="5293" Count="0" />
+      <LineId Id="4734" Count="2" />
+      <LineId Id="5294" Count="0" />
+      <LineId Id="4737" Count="2" />
+      <LineId Id="5295" Count="0" />
+      <LineId Id="4740" Count="2" />
+      <LineId Id="5296" Count="0" />
+      <LineId Id="4743" Count="5" />
+      <LineId Id="5297" Count="0" />
+      <LineId Id="4749" Count="2" />
+      <LineId Id="5298" Count="0" />
+      <LineId Id="5232" Count="2" />
+      <LineId Id="5299" Count="0" />
+      <LineId Id="5235" Count="6" />
+      <LineId Id="5300" Count="0" />
+      <LineId Id="5242" Count="4" />
+      <LineId Id="4752" Count="10" />
+      <LineId Id="5122" Count="7" />
+      <LineId Id="4763" Count="26" />
+      <LineId Id="5301" Count="1" />
+      <LineId Id="4790" Count="6" />
+      <LineId Id="5304" Count="1" />
+      <LineId Id="4797" Count="7" />
+      <LineId Id="5306" Count="1" />
+      <LineId Id="4805" Count="6" />
+      <LineId Id="5309" Count="0" />
+      <LineId Id="4812" Count="6" />
+      <LineId Id="5310" Count="1" />
+      <LineId Id="4819" Count="4" />
+      <LineId Id="5313" Count="0" />
+      <LineId Id="4824" Count="11" />
+      <LineId Id="5316" Count="0" />
+      <LineId Id="5314" Count="0" />
+      <LineId Id="4836" Count="25" />
+      <LineId Id="5317" Count="0" />
+      <LineId Id="4862" Count="9" />
+      <LineId Id="5115" Count="2" />
+      <LineId Id="4880" Count="0" />
+      <LineId Id="5319" Count="1" />
+      <LineId Id="5253" Count="0" />
+      <LineId Id="5248" Count="3" />
+      <LineId Id="5321" Count="0" />
+      <LineId Id="5247" Count="0" />
+      <LineId Id="4881" Count="2" />
+      <LineId Id="5182" Count="0" />
+      <LineId Id="4887" Count="1" />
+      <LineId Id="4892" Count="1" />
+      <LineId Id="5275" Count="1" />
+      <LineId Id="4894" Count="1" />
+      <LineId Id="4899" Count="11" />
+      <LineId Id="5066" Count="3" />
+      <LineId Id="5065" Count="0" />
+      <LineId Id="4911" Count="10" />
+      <LineId Id="5278" Count="1" />
+      <LineId Id="4922" Count="6" />
+      <LineId Id="5373" Count="0" />
+      <LineId Id="4929" Count="1" />
+      <LineId Id="5378" Count="0" />
+      <LineId Id="5374" Count="0" />
+      <LineId Id="4931" Count="5" />
+      <LineId Id="5376" Count="0" />
+      <LineId Id="4940" Count="9" />
+      <LineId Id="4951" Count="59" />
+      <LineId Id="5265" Count="9" />
+      <LineId Id="5011" Count="16" />
+      <LineId Id="5132" Count="0" />
+      <LineId Id="5134" Count="1" />
+      <LineId Id="5028" Count="35" />
       <LineId Id="2" Count="0" />
-      <LineId Id="267" Count="80" />
+      <LineId Id="267" Count="14" />
     </LineIds>
   </POU>
 </TcPlcObject>
