@@ -334,8 +334,11 @@ END_IF
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
 IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stControl.bReset := FALSE;
-    stAxisStruct.stStatus.bError := FALSE;
-    stAxisStruct.stStatus.nErrorID := 0;
+    IF NOT fbReset.Error THEN
+        stAxisStruct.stStatus.bError := FALSE;
+        stAxisStruct.stStatus.nErrorID := 0;
+        stAxisStruct.stError.nResetErrorID := 0;
+    END_IF
     stAxisStruct.stError.nNCErrorID := 0;
     stAxisStruct.stError.nGearInErrorID := 0;
     stAxisStruct.stError.nGearInMultiMasterErrorID := 0;
@@ -343,7 +346,6 @@ IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stError.fbReadParameterErrorId := 0;
     stAxisStruct.stError.fbWriteParameterErrorId := 0;
     stAxisStruct.stError.nPowerErrorID := 0;
-    stAxisStruct.stError.nResetErrorID := 0;
     stAxisStruct.stError.nStopErrorID := 0;
     stAxisStruct.stError.nHaltErrorID := 0;
     stAxisStruct.stError.nHomeErrorID := 0;
@@ -568,8 +570,14 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="5065" Count="0" />
       <LineId Id="4911" Count="10" />
       <LineId Id="5278" Count="1" />
-      <LineId Id="4922" Count="15" />
-      <LineId Id="4939" Count="10" />
+      <LineId Id="4922" Count="6" />
+      <LineId Id="5373" Count="0" />
+      <LineId Id="4929" Count="1" />
+      <LineId Id="5378" Count="0" />
+      <LineId Id="5374" Count="0" />
+      <LineId Id="4931" Count="5" />
+      <LineId Id="5376" Count="0" />
+      <LineId Id="4940" Count="9" />
       <LineId Id="4951" Count="59" />
       <LineId Id="5265" Count="9" />
       <LineId Id="5011" Count="16" />
