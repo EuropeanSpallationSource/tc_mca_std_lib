@@ -50,7 +50,7 @@ VAR
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
 
-	// Used in/for actReadMcParameters
+    // Used in/for actReadMcParameters
     bReadValid: BOOL := FALSE;
     bInitialise: BOOL := FALSE;
     fbReadAxisVeloManSlow: MC_ReadParameter;
@@ -560,8 +560,8 @@ stAxisStruct.stStatus.bMoving:= stAxisStruct.Axis.Status.Moving;]]></ST>
       <Implementation>
         <ST><![CDATA[//This act reads the MC parameters using an MC_ReadParameter FB for each variable
 //Intended to be executed once every PLC cycle
-//Another FB is used to trasnfer default axis parameters to the stAxisStruct so 
-//bReadValid is used to halt that trasnfer until the parameters have been 
+//Another FB is used to trasnfer default axis parameters to the stAxisStruct so
+//bReadValid is used to halt that trasnfer until the parameters have been
 //read successfully. It may take a couple of cycles once the PLC starts up.
 
 bReadValid:= FALSE;
