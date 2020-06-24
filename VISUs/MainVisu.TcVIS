@@ -7698,10 +7698,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -7711,10 +7711,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= FALSE;"</v>
                     </o>
                   </a>
                 </d>
@@ -7897,10 +7897,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= TRUE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -7910,10 +7910,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= FALSE;"</v>
                     </o>
                   </a>
                 </d>
@@ -9612,7 +9612,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">743958181L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bWarning"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -9765,7 +9765,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">390574330L</v>
-                          <v n="Value">"bWarning"</v>
+                          <v n="Value">"bCommandAborted"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -9797,7 +9797,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
-                          <v n="Value">"944"</v>
+                          <v n="Value">"225"</v>
                         </o>
                       </l>
                     </o>
@@ -9813,100 +9813,6 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     <a n="LMGuids" et="Guid" />
                     <d n="SubElements" t="Hashtable" />
                     <v n="VisualElementId">74</v>
-                    <l n="UserManagementAccessRights" t="ArrayList" />
-                  </o>
-                  <o>
-                    <a n="ConfiguredComplexInputs" et="ComplexInput" />
-                    <l n="Elements" t="ArrayList" />
-                    <n n="VisualElementDescription" />
-                    <o n="VisualElemMemberList" t="VisualElemMemberList">
-                      <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
-                        <o>
-                          <v n="Id">2812299069L</v>
-                          <v n="Value">4294967295U</v>
-                        </o>
-                        <o>
-                          <v n="Id">494569607L</v>
-                          <v n="Value">4278190080U</v>
-                        </o>
-                        <o>
-                          <v n="Id">1649127785L</v>
-                          <v n="Value">10</v>
-                        </o>
-                        <o>
-                          <v n="Id">357335551L</v>
-                          <v n="Value">70</v>
-                        </o>
-                        <o>
-                          <v n="Id">2422045748L</v>
-                          <v n="Value">30</v>
-                        </o>
-                        <o>
-                          <v n="Id">2134141914L</v>
-                          <v n="Value">30</v>
-                        </o>
-                        <o>
-                          <v n="Id">4062784938L</v>
-                          <v n="Value">"Element-Lamp-Lamp1-Yellow"</v>
-                        </o>
-                        <o>
-                          <v n="Id">493260384L</v>
-                          <v n="Value">4294967295U</v>
-                        </o>
-                        <o>
-                          <v n="Id">135947015L</v>
-                          <v n="Value">4278190080U</v>
-                        </o>
-                        <o>
-                          <v n="Id">2678395525L</v>
-                          <v n="Value">1U</v>
-                        </o>
-                        <o>
-                          <v n="Id">2340015797L</v>
-                          <v n="Value">"HCENTER"</v>
-                        </o>
-                        <o>
-                          <v n="Id">2565699834L</v>
-                          <v n="Value">"VCENTER"</v>
-                        </o>
-                        <o>
-                          <v n="Id">296037572L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">390574330L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">571893170L</v>
-                          <v n="Value">""</v>
-                        </o>
-                        <o>
-                          <v n="Id">743958181L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bBusy"</v>
-                        </o>
-                        <o>
-                          <v n="Id">2597686782L</v>
-                          <v n="Value">false</v>
-                        </o>
-                        <o>
-                          <v n="Id">3719097617L</v>
-                          <v n="Value">0</v>
-                        </o>
-                      </l>
-                    </o>
-                    <v n="VisualElementName">"Lamp1"</v>
-                    <v n="VisualElementTypeName">"VisuFbElemLamp"</v>
-                    <v n="VisualElementIsRectangle">true</v>
-                    <v n="VisualElementIdentifier">"GenElemInst_53"</v>
-                    <n n="VisualElementOfflinePaintCommands" />
-                    <n n="VisualElementFrameInformation" />
-                    <d n="VisualElementInputActions" t="Hashtable" />
-                    <v n="VisualElementIdentification">{f3688ae2-7c74-44f3-8ec1-bbe0f6187c72}</v>
-                    <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
-                    <a n="LMGuids" et="Guid" />
-                    <d n="SubElements" t="Hashtable" />
-                    <v n="VisualElementId">54</v>
                     <l n="UserManagementAccessRights" t="ArrayList" />
                   </o>
                   <o>
@@ -11170,6 +11076,100 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     <v n="VisualElementId">86</v>
                     <l n="UserManagementAccessRights" t="ArrayList" />
                   </o>
+                  <o>
+                    <a n="ConfiguredComplexInputs" et="ComplexInput" />
+                    <l n="Elements" t="ArrayList" />
+                    <n n="VisualElementDescription" />
+                    <o n="VisualElemMemberList" t="VisualElemMemberList">
+                      <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
+                        <o>
+                          <v n="Id">2812299069L</v>
+                          <v n="Value">4294967295U</v>
+                        </o>
+                        <o>
+                          <v n="Id">494569607L</v>
+                          <v n="Value">4278190080U</v>
+                        </o>
+                        <o>
+                          <v n="Id">1649127785L</v>
+                          <v n="Value">9</v>
+                        </o>
+                        <o>
+                          <v n="Id">357335551L</v>
+                          <v n="Value">71</v>
+                        </o>
+                        <o>
+                          <v n="Id">2422045748L</v>
+                          <v n="Value">30</v>
+                        </o>
+                        <o>
+                          <v n="Id">2134141914L</v>
+                          <v n="Value">30</v>
+                        </o>
+                        <o>
+                          <v n="Id">4062784938L</v>
+                          <v n="Value">"Element-Lamp-Lamp1-Yellow"</v>
+                        </o>
+                        <o>
+                          <v n="Id">493260384L</v>
+                          <v n="Value">4294967295U</v>
+                        </o>
+                        <o>
+                          <v n="Id">135947015L</v>
+                          <v n="Value">4278190080U</v>
+                        </o>
+                        <o>
+                          <v n="Id">2678395525L</v>
+                          <v n="Value">1U</v>
+                        </o>
+                        <o>
+                          <v n="Id">2340015797L</v>
+                          <v n="Value">"HCENTER"</v>
+                        </o>
+                        <o>
+                          <v n="Id">2565699834L</v>
+                          <v n="Value">"VCENTER"</v>
+                        </o>
+                        <o>
+                          <v n="Id">296037572L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">390574330L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">571893170L</v>
+                          <v n="Value">""</v>
+                        </o>
+                        <o>
+                          <v n="Id">743958181L</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bBusy"</v>
+                        </o>
+                        <o>
+                          <v n="Id">2597686782L</v>
+                          <v n="Value">false</v>
+                        </o>
+                        <o>
+                          <v n="Id">3719097617L</v>
+                          <v n="Value">0</v>
+                        </o>
+                      </l>
+                    </o>
+                    <v n="VisualElementName">"Lamp1"</v>
+                    <v n="VisualElementTypeName">"VisuFbElemLamp"</v>
+                    <v n="VisualElementIsRectangle">true</v>
+                    <v n="VisualElementIdentifier">"GenElemInst_390"</v>
+                    <n n="VisualElementOfflinePaintCommands" />
+                    <n n="VisualElementFrameInformation" />
+                    <d n="VisualElementInputActions" t="Hashtable" />
+                    <v n="VisualElementIdentification">{1011d4bf-f72c-42d0-adc7-dd0bd4b635a7}</v>
+                    <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
+                    <a n="LMGuids" et="Guid" />
+                    <d n="SubElements" t="Hashtable" />
+                    <v n="VisualElementId">384</v>
+                    <l n="UserManagementAccessRights" t="ArrayList" />
+                  </o>
                 </l>
                 <n n="VisualElementDescription" />
                 <o n="VisualElemMemberList" t="VisualElemMemberList">
@@ -11842,7 +11842,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fVelocity"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fVelocity"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -12197,7 +12197,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fAcceleration"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fAcceleration"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -12552,7 +12552,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fDeceleration"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fDeceleration"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -12907,7 +12907,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fPosition"</v>
+                          <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fPosition"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -17994,7 +17994,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">679</v>
+                      <v n="Value">680</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18029,7 +18029,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">770</v>
+                      <v n="Value">771</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -18085,15 +18085,15 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Rectangle"</v>
                 <v n="VisualElementTypeName">"VisuFbElemSimple"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_286"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_392"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{377d9a32-b7ee-460d-889a-73a386b3716d}</v>
+                <v n="VisualElementIdentification">{3ee87f70-664a-405c-bbb8-361c9c3e2bd6}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">281</v>
+                <v n="VisualElementId">387</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -18156,7 +18156,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">775</v>
+                      <v n="Value">776</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18213,7 +18213,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">790</v>
+                      <v n="Value">791</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -18264,7 +18264,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Button"</v>
                 <v n="VisualElementTypeName">"VisuFbElemButton"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_288"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_394"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
@@ -18276,11 +18276,11 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{a5a0fdfb-8236-4290-9dae-f8604b1b3ed4}</v>
+                <v n="VisualElementIdentification">{045a05af-4c1e-41d9-9810-4fb0c79fe0d7}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">283</v>
+                <v n="VisualElementId">389</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -18369,7 +18369,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">691</v>
+                      <v n="Value">692</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18451,7 +18451,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_292"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_396"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
@@ -18474,11 +18474,11 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{04efb3d9-6e53-4fff-a41e-a77e0bd4a8e8}</v>
+                <v n="VisualElementIdentification">{30cd3300-8079-4a34-b500-76dab25cd02a}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">287</v>
+                <v n="VisualElementId">391</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -18569,7 +18569,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value" t="Int16">736</v>
+                      <v n="Value" t="Int16">737</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18647,15 +18647,15 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_294"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_398"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{8ce0876e-6bbb-46b1-a62d-38debd94d02b}</v>
+                <v n="VisualElementIdentification">{69a25cb3-1bd4-4512-a95b-461d12221c4b}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">289</v>
+                <v n="VisualElementId">393</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -18744,7 +18744,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">736</v>
+                      <v n="Value">737</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18806,7 +18806,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_296"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_400"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
@@ -18829,11 +18829,11 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{6621ee58-5ffd-4c58-ae6f-ae14ada24d95}</v>
+                <v n="VisualElementIdentification">{de495071-d296-4ef4-aeae-33a9858478d5}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">291</v>
+                <v n="VisualElementId">395</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -18922,7 +18922,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value" t="Int16">821</v>
+                      <v n="Value" t="Int16">822</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -18984,7 +18984,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_298"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_402"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
@@ -19007,11 +19007,11 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{f68cee99-cf04-429b-816a-5b20ad2af82e}</v>
+                <v n="VisualElementIdentification">{2e88c3d7-7802-47b4-8f4a-b1ea400f6adb}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">293</v>
+                <v n="VisualElementId">397</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -19102,7 +19102,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value" t="Int16">821</v>
+                      <v n="Value" t="Int16">822</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -19180,15 +19180,15 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_300"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_404"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{58216d16-e65a-4da9-9bb1-5e294951cab9}</v>
+                <v n="VisualElementIdentification">{4b3d80ca-a9e2-4189-8a7d-219debf3242d}</v>
                 <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">295</v>
+                <v n="VisualElementId">399</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
             </l>
@@ -19291,10 +19291,10 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>13be6eec-7fc2-4282-abbf-b24b2da58ba8</v>
-                <v>FB_Exit</v>
-                <v>95930a16-400d-44f0-9930-76888846236f</v>
                 <v>FB_Reinit</v>
                 <v>639e5dca-e06b-4c9e-8c1b-9a863c3c34f7</v>
+                <v>FB_Exit</v>
+                <v>95930a16-400d-44f0-9930-76888846236f</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{a9f37f15-844b-497f-805b-d8708d84591d}</v>
@@ -19338,7 +19338,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
             </o>
             <v n="DialogDut">{922df0df-545b-4a6e-ab04-d027f2e1dfa1}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">300</v>
+          <v n="LastUsedIdForIdentifier">404</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>

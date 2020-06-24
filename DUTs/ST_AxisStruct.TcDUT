@@ -6,6 +6,7 @@ STRUCT
     stControl: ST_AxisControl;
     stStatus: ST_AxisStatus;
     stConfig: ST_AxisConfig;
+    stError: ST_AxisError;
     stInputs: ST_AxisInputs;
     Axis: AXIS_REF; //The NC axis link to the hardware that is controlling
 END_STRUCT
