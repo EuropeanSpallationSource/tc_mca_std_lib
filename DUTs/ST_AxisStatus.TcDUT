@@ -24,11 +24,10 @@ STRUCT
     bError: BOOL; //Motion function block has produced error (NC drive not necessarily in error state)
     nErrorID: UDINT; //Last motion function block errorID or NC errorID
     eMotionState: MC_AXISSTATES;
-    bConstantVelocity: BOOL;// What does this mean?
+    bConstantVelocity: BOOL;
     bAccelerating: BOOL;
     bDecelerating: BOOL;
-    bHasJob: BOOL; // Is this just the same as busy?
-    bInPositionArea: BOOL;  // What does this mean?
+    bHasJob: BOOL;
     bInTargetPosition: BOOL;
     bHomingBusy: BOOL;
     bSoftLimitMinExceeded: BOOL; //Software minimum end position is active/occupied

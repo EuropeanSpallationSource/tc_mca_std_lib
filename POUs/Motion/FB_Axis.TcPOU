@@ -52,7 +52,6 @@ VAR
 
     // Used in/for actReadMcParameters
     bReadValid: BOOL := FALSE;
-    bInitialise: BOOL := FALSE;
     fbReadAxisVeloManSlow: MC_ReadParameter;
     fbReadAxisVeloManFast: MC_ReadParameter;
     fbReadHomingVelToCam: MC_ReadParameter;
@@ -80,10 +79,6 @@ stAxisStruct.Axis.ReadStatus();
 
 actReadMcParameters();
 actReadAxisRef();
-IF bReadValid AND NOT bInitialise THEN
-    actInitAxisParams();
-    bInitialise:= TRUE;
-END_IF
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -526,16 +521,6 @@ END_IF
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
-    <Action Name="actInitAxisParams" Id="{d8e092d2-4ada-4e33-9afe-1e0f135ab8ed}">
-      <Implementation>
-        <ST><![CDATA[//This code transfers parameters saved in the TwinCAT Axis Parameters
-//to our stAxisConfig as default values.
-//Should only be executed once on PLC reset.
-stAxisStruct.stControl.fVelocity:=stAxisStruct.stConfig.fVelocityDefaultFast;
-stAxisStruct.stControl.fAcceleration:=stAxisStruct.stConfig.fDefaultAcc;
-stAxisStruct.stControl.fDeceleration:=stAxisStruct.stConfig.fDefaultDec;]]></ST>
-      </Implementation>
-    </Action>
     <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
       <Implementation>
         <ST><![CDATA[//The intention behind this ACT is purely to transfer parameters from the AXIS_REF
@@ -548,7 +533,6 @@ stAxisStruct.stStatus.bConstantVelocity:= stAxisStruct.Axis.Status.ConstantVeloc
 stAxisStruct.stStatus.bAccelerating:= stAxisStruct.Axis.Status.Accelerating;
 stAxisStruct.stStatus.bDecelerating:= stAxisStruct.Axis.Status.Decelerating;
 stAxisStruct.stStatus.bHasJob:= stAxisStruct.Axis.Status.HasJob;
-stAxisStruct.stStatus.bInPositionArea:= stAxisStruct.Axis.Status.InPositionArea;
 stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
 stAxisStruct.stStatus.bHomingBusy:= stAxisStruct.Axis.Status.HomingBusy;
 stAxisStruct.stStatus.bSoftLimitMinExceeded:= stAxisStruct.Axis.Status.SoftLimitMinExceeded;
@@ -684,10 +668,6 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="3488" Count="0" />
       <LineId Id="3481" Count="0" />
       <LineId Id="3506" Count="0" />
-      <LineId Id="3503" Count="0" />
-      <LineId Id="3483" Count="0" />
-      <LineId Id="2659" Count="0" />
-      <LineId Id="2185" Count="0" />
       <LineId Id="2203" Count="0" />
       <LineId Id="2189" Count="0" />
       <LineId Id="2377" Count="2" />
@@ -833,18 +813,14 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="288" Count="165" />
       <LineId Id="3507" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Axis.actInitAxisParams">
-      <LineId Id="4" Count="2" />
-      <LineId Id="2" Count="1" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Axis.actReadAxisRef">
       <LineId Id="181" Count="1" />
       <LineId Id="212" Count="0" />
       <LineId Id="215" Count="0" />
       <LineId Id="205" Count="0" />
       <LineId Id="184" Count="0" />
-      <LineId Id="194" Count="5" />
+      <LineId Id="194" Count="3" />
+      <LineId Id="199" Count="0" />
       <LineId Id="201" Count="2" />
       <LineId Id="175" Count="0" />
     </LineIds>
