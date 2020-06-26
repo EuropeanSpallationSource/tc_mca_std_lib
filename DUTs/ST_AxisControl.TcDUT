@@ -7,6 +7,7 @@ STRUCT
     bExecute: BOOL; //Rising edge to execute some motion FB's
     bReset: BOOL; //Reset axis from Error state
     bStop: BOOL;
+    bHalt: BOOL;
     bEnable: BOOL; //Enable axis drive
     bJogFwd: BOOL;
     bJogBwd: BOOL;
