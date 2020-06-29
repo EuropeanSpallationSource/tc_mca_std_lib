@@ -78,7 +78,6 @@ END_VAR]]></Declaration>
 stAxisStruct.Axis.ReadStatus();
 
 actReadMcParameters();
-actReadAxisRef();
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -521,32 +520,13 @@ END_IF
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
-    <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
-      <Implementation>
-        <ST><![CDATA[//The intention behind this ACT is purely to transfer parameters from the AXIS_REF
-//to our ST_AxisStruct. No logic other than assignments should go in here.
-stAxisStruct.stStatus.bHomed := stAxisStruct.Axis.Status.Homed; // Appears in FB_Axis too, would like to remove from FB_Axis
-stAxisStruct.stStatus.bMoving := stAxisStruct.Axis.Status.Moving; // Appears in FB_Axis too, would like to remove from FB_Axis
-stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled; // Appears in FB_Axis too, would like to remove from FB_Axis
-stAxisStruct.stStatus.eMotionState:= stAxisStruct.Axis.Status.MotionState;
-stAxisStruct.stStatus.bConstantVelocity:= stAxisStruct.Axis.Status.ConstantVelocity;
-stAxisStruct.stStatus.bAccelerating:= stAxisStruct.Axis.Status.Accelerating;
-stAxisStruct.stStatus.bDecelerating:= stAxisStruct.Axis.Status.Decelerating;
-stAxisStruct.stStatus.bHasJob:= stAxisStruct.Axis.Status.HasJob;
-stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
-stAxisStruct.stStatus.bHomingBusy:= stAxisStruct.Axis.Status.HomingBusy;
-stAxisStruct.stStatus.bSoftLimitMinExceeded:= stAxisStruct.Axis.Status.SoftLimitMinExceeded;
-stAxisStruct.stStatus.bSoftLimitMaxExceeded:= stAxisStruct.Axis.Status.SoftLimitMaxExceeded;
-stAxisStruct.stStatus.bMoving:= stAxisStruct.Axis.Status.Moving;]]></ST>
-      </Implementation>
-    </Action>
     <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
       <Implementation>
-        <ST><![CDATA[//This act reads the MC parameters using an MC_ReadParameter FB for each variable
-//Intended to be executed once every PLC cycle
-//Another FB is used to trasnfer default axis parameters to the stAxisStruct so
-//bReadValid is used to halt that trasnfer until the parameters have been
-//read successfully. It may take a couple of cycles once the PLC starts up.
+        <ST><![CDATA[(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
+Intended TO be executed once every PLC cycle
+Another FB is used TO trasnfer default axis parameters TO the stAxisStruct so
+bReadValid is used TO halt that trasnfer UNTIL the parameters have been
+read successfully. It may take a couple OF cycles once the PLC starts up.*)
 
 bReadValid:= FALSE;
 
@@ -667,7 +647,6 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="3489" Count="0" />
       <LineId Id="3488" Count="0" />
       <LineId Id="3481" Count="0" />
-      <LineId Id="3506" Count="0" />
       <LineId Id="2203" Count="0" />
       <LineId Id="2189" Count="0" />
       <LineId Id="2377" Count="2" />
@@ -812,17 +791,6 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="267" Count="14" />
       <LineId Id="288" Count="165" />
       <LineId Id="3507" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Axis.actReadAxisRef">
-      <LineId Id="181" Count="1" />
-      <LineId Id="212" Count="0" />
-      <LineId Id="215" Count="0" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="194" Count="3" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="201" Count="2" />
-      <LineId Id="175" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actReadMcParameters">
       <LineId Id="160" Count="2" />
