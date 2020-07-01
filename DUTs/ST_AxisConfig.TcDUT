@@ -29,7 +29,8 @@ STRUCT
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
 
-    // Read only NC parameters
+    // Read only MC parameters
+	bReadMcParametersValid: BOOL:= FALSE;
     fVelocityDefaultSlow: LREAL; //Read only - AxisVeloManSlow
     fVelocityDefaultFast: LREAL; //Read only - AxisVeloManFast
     fHomingVelToCam: LREAL; //Read only - AxisCalibrationVelocityForward

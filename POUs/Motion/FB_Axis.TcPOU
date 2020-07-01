@@ -543,8 +543,6 @@ Another FB is used TO trasnfer default axis parameters TO the stAxisStruct so
 bReadValid is used TO halt that trasnfer UNTIL the parameters have been
 read successfully. It may take a couple OF cycles once the PLC starts up.*)
 
-bReadValid:= FALSE;
-
 //Slow jogging Velocity
 fbReadAxisVeloManSlow(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
@@ -640,7 +638,7 @@ fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,
                         Value=> stAxisStruct.stConfig.fTargetPositionWindow);
 
 //All variables are valid
-bReadValid:= fbReadAxisVeloManSlow.Valid AND
+stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
     fbReadAxisVeloManFast.Valid AND
     fbReadHomingVelToCam.Valid AND
     fbReadHomingVelFromCam.Valid AND
@@ -812,8 +810,7 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
     <LineIds Name="FB_Axis.actReadMcParameters">
       <LineId Id="160" Count="2" />
       <LineId Id="165" Count="1" />
-      <LineId Id="164" Count="0" />
-      <LineId Id="157" Count="1" />
+      <LineId Id="158" Count="0" />
       <LineId Id="56" Count="0" />
       <LineId Id="59" Count="3" />
       <LineId Id="97" Count="0" />
