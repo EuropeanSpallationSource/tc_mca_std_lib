@@ -51,6 +51,25 @@ VAR
     fbDoneRiseEdge: R_TRIG;
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
+
+    // Used in/for actReadMcParameters
+    bReadValid: BOOL := FALSE;
+    fbReadAxisVeloManSlow: MC_ReadParameter;
+    fbReadAxisVeloManFast: MC_ReadParameter;
+    fbReadHomingVelToCam: MC_ReadParameter;
+    fbReadHomingVelFromCam: MC_ReadParameter;
+    fbReadAxisVeloMax: MC_ReadParameter;
+    fbReadAxisAcc: MC_ReadParameter;
+    fbReadAxisDec: MC_ReadParameter;
+    fbReadEnMinSoftPosLimit: MC_ReadParameter;
+    fbReadEnMaxSoftPosLimit: MC_ReadParameter;
+    fbReadMinSoftPosLimit: MC_ReadParameter;
+    fbReadMaxSoftPosLimit: MC_ReadParameter;
+    fbReadEnPositionLagMonitoring: MC_ReadParameter;
+    fbReadAxisMaxPosLagValue: MC_ReadParameter;
+    fbReadEnTargetPositionMonitoring: MC_ReadParameter;
+    fbReadTargetPositionWindow: MC_ReadParameter;
+
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
@@ -59,6 +78,9 @@ END_VAR]]></Declaration>
       <ST><![CDATA[bBusy := FALSE;
 
 stAxisStruct.Axis.ReadStatus();
+
+actReadMcParameters();
+actReadAxisRef();
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -177,7 +199,7 @@ stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
 //Stop
 fbStop.Execute := stAxisStruct.stControl.bStop;
-fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
+fbHalt.Deceleration := stAxisStruct.stControl.fDeceleration;
 
 //Halt
 fbHalt.Execute := stAxisStruct.stControl.bHalt;
@@ -194,19 +216,19 @@ END_IF
 CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eMoveAbsolute:
         fbMoveAbsolute.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveAbsolute.Position := stAxisStruct.stConfig.fPosition;
-        fbMoveAbsolute.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveAbsolute.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveAbsolute.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveAbsolute.Position := stAxisStruct.stControl.fPosition;
+        fbMoveAbsolute.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveAbsolute.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveAbsolute.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbMoveAbsolute.Done;
         bCommandAbortedEdge := fbMoveAbsolute.CommandAborted;
 
     E_MotionFunctions.eMoveRelative:
         fbMoveRelative.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveRelative.Distance := stAxisStruct.stConfig.fPosition;
-        fbMoveRelative.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveRelative.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveRelative.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveRelative.Distance := stAxisStruct.stControl.fPosition;
+        fbMoveRelative.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveRelative.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveRelative.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbMoveRelative.Done;
         bCommandAbortedEdge := fbMoveRelative.CommandAborted;
 
@@ -214,26 +236,26 @@ CASE stAxisStruct.stControl.eCommand OF
         fbJog.JogForward := stAxisStruct.stControl.bJogFwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.JogBackwards := stAxisStruct.stControl.bJogBwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.Mode := 0;
-        fbJog.Velocity := stAxisStruct.stConfig.fVelocity;
-        fbJog.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbJog.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbJog.Velocity := stAxisStruct.stControl.fVelocity;
+        fbJog.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbJog.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbJog.Done;
         bCommandAbortedEdge := fbJog.CommandAborted;
 
     E_MotionFunctions.eMoveVelocity:
         fbMoveVelocity.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveVelocity.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveVelocity.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveVelocity.Deceleration := stAxisStruct.stConfig.fDeceleration;
-        fbMoveVelocity.Direction := SEL(stAxisStruct.stConfig.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
+        fbMoveVelocity.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveVelocity.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveVelocity.Deceleration := stAxisStruct.stControl.fDeceleration;
+        fbMoveVelocity.Direction := SEL(stAxisStruct.stControl.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
         bCommandAbortedEdge := fbMoveVelocity.CommandAborted;
 
     E_MotionFunctions.eMoveModulo:
         fbMoveModulo.Execute := stAxisStruct.stControl.bExecute;
-        fbMoveModulo.Position := stAxisStruct.stConfig.fPosition;
-        fbMoveModulo.Velocity := ABS(stAxisStruct.stConfig.fVelocity);
-        fbMoveModulo.Acceleration := stAxisStruct.stConfig.fAcceleration;
-        fbMoveModulo.Deceleration := stAxisStruct.stConfig.fDeceleration;
+        fbMoveModulo.Position := stAxisStruct.stControl.fPosition;
+        fbMoveModulo.Velocity := ABS(stAxisStruct.stControl.fVelocity);
+        fbMoveModulo.Acceleration := stAxisStruct.stControl.fAcceleration;
+        fbMoveModulo.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbMoveModulo.Done;
         bCommandAbortedEdge := fbMoveModulo.CommandAborted;
 
@@ -517,103 +539,360 @@ END_IF
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
+    <Action Name="actReadAxisRef" Id="{6329d269-bae1-47ff-a678-8516c64bd7fa}">
+      <Implementation>
+        <ST><![CDATA[//The intention behind this ACT is purely to transfer parameters from the AXIS_REF
+//to our ST_AxisStruct. No logic other than assignments should go in here.
+stAxisStruct.stStatus.bHomed := stAxisStruct.Axis.Status.Homed; // Appears in FB_Axis too, would like to remove from FB_Axis
+stAxisStruct.stStatus.bMoving := stAxisStruct.Axis.Status.Moving; // Appears in FB_Axis too, would like to remove from FB_Axis
+stAxisStruct.stStatus.bGeared := stAxisStruct.Axis.Status.Coupled; // Appears in FB_Axis too, would like to remove from FB_Axis
+stAxisStruct.stStatus.eMotionState:= stAxisStruct.Axis.Status.MotionState;
+stAxisStruct.stStatus.bConstantVelocity:= stAxisStruct.Axis.Status.ConstantVelocity;
+stAxisStruct.stStatus.bAccelerating:= stAxisStruct.Axis.Status.Accelerating;
+stAxisStruct.stStatus.bDecelerating:= stAxisStruct.Axis.Status.Decelerating;
+stAxisStruct.stStatus.bHasJob:= stAxisStruct.Axis.Status.HasJob;
+stAxisStruct.stStatus.bInTargetPosition:= stAxisStruct.Axis.Status.InTargetPosition;
+stAxisStruct.stStatus.bHomingBusy:= stAxisStruct.Axis.Status.HomingBusy;
+stAxisStruct.stStatus.bSoftLimitMinExceeded:= stAxisStruct.Axis.Status.SoftLimitMinExceeded;
+stAxisStruct.stStatus.bSoftLimitMaxExceeded:= stAxisStruct.Axis.Status.SoftLimitMaxExceeded;
+stAxisStruct.stStatus.bMoving:= stAxisStruct.Axis.Status.Moving;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
+      <Implementation>
+        <ST><![CDATA[//This act reads the MC parameters using an MC_ReadParameter FB for each variable
+//Intended to be executed once every PLC cycle
+//Another FB is used to trasnfer default axis parameters to the stAxisStruct so
+//bReadValid is used to halt that trasnfer until the parameters have been
+//read successfully. It may take a couple of cycles once the PLC starts up.
+
+bReadValid:= FALSE;
+
+//Slow jogging Velocity
+fbReadAxisVeloManSlow(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloManSlow,
+                        Value=> stAxisStruct.stConfig.fVelocityDefaultSlow);
+//Fast jogging velocity
+fbReadAxisVeloManFast(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloManFast,
+                        Value=> stAxisStruct.stConfig.fVelocityDefaultFast);
+//Homing velocity to Cam
+fbReadHomingVelToCam(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityForward,
+                        Value=> stAxisStruct.stConfig.fHomingVelToCam);
+//Homing velocity from Cam
+fbReadHomingVelFromCam(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityBackward,
+                        Value=> stAxisStruct.stConfig.fHomingVelFromCam);
+//Max velocity
+fbReadAxisVeloMax(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisVeloMax,
+                        Value=> stAxisStruct.stConfig.fVeloMax);
+//Acceleration
+fbReadAxisAcc(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisAcc,
+                        Value=> stAxisStruct.stConfig.fDefaultAcc);
+//Deceleration
+fbReadAxisDec(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisDec,
+                        Value=> stAxisStruct.stConfig.fDefaultDec);
+
+//Soft limits enabled
+fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnMinSoftPosLimit);
+stAxisStruct.stConfig.bEnMinSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMinSoftPosLimit.Value);
+
+fbReadEnMaxSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnMaxSoftPosLimit);
+stAxisStruct.stConfig.bEnMaxSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMaxSoftPosLimit.Value);
+
+//Soft limit values
+fbReadMinSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit,
+                        Value=>stAxisStruct.stConfig.fMinSoftPosLimit);
+fbReadMaxSoftPosLimit(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaxSoftPosLimit,
+                        Value=>stAxisStruct.stConfig.fMaxSoftPosLimit);
+
+//Position Lag Monitoring
+fbReadEnPositionLagMonitoring(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnPositionLagMonitoring);
+stAxisStruct.stConfig.bEnPositionLagMonitoring:= LREAL_TO_BOOL(fbReadEnPositionLagMonitoring.Value);
+
+fbReadAxisMaxPosLagValue(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaxPosLagValue,
+                        Value=>stAxisStruct.stConfig.fMaxPosLagValue);
+
+// Target Position Monitoring
+fbReadEnTargetPositionMonitoring(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit);
+stAxisStruct.stConfig.bEnTargetPositionMonitoring:= LREAL_TO_BOOL(fbReadEnTargetPositionMonitoring.Value);
+
+fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisTargetPositionWindow,
+                        Value=> stAxisStruct.stConfig.fTargetPositionWindow);
+
+//All variables are valid
+bReadValid:= fbReadAxisVeloManSlow.Valid AND
+    fbReadAxisVeloManFast.Valid AND
+    fbReadHomingVelToCam.Valid AND
+    fbReadHomingVelFromCam.Valid AND
+    fbReadAxisVeloMax.Valid AND
+    fbReadAxisAcc.Valid AND
+    fbReadAxisDec.Valid AND
+    fbReadEnMinSoftPosLimit.Valid AND
+    fbReadEnMaxSoftPosLimit.Valid AND
+    fbReadMinSoftPosLimit.Valid AND
+    fbReadMaxSoftPosLimit.Valid AND
+    fbReadEnPositionLagMonitoring.Valid AND
+    fbReadAxisMaxPosLagValue.Valid AND
+    fbReadEnTargetPositionMonitoring.Valid AND
+    fbReadTargetPositionWindow.Valid;]]></ST>
+      </Implementation>
+    </Action>
     <LineIds Name="FB_Axis">
-      <LineId Id="5284" Count="1" />
-      <LineId Id="4709" Count="7" />
-      <LineId Id="5287" Count="0" />
-      <LineId Id="4717" Count="2" />
-      <LineId Id="5288" Count="0" />
-      <LineId Id="4720" Count="2" />
-      <LineId Id="5289" Count="0" />
-      <LineId Id="4723" Count="1" />
-      <LineId Id="5290" Count="0" />
-      <LineId Id="4725" Count="0" />
-      <LineId Id="5118" Count="3" />
-      <LineId Id="4727" Count="0" />
-      <LineId Id="5291" Count="0" />
-      <LineId Id="4728" Count="2" />
-      <LineId Id="5292" Count="0" />
-      <LineId Id="4731" Count="2" />
-      <LineId Id="5293" Count="0" />
-      <LineId Id="4734" Count="2" />
-      <LineId Id="5294" Count="0" />
-      <LineId Id="4737" Count="2" />
-      <LineId Id="5295" Count="0" />
-      <LineId Id="4740" Count="2" />
-      <LineId Id="5296" Count="0" />
-      <LineId Id="4743" Count="5" />
-      <LineId Id="5297" Count="0" />
-      <LineId Id="4749" Count="2" />
-      <LineId Id="5298" Count="0" />
-      <LineId Id="5232" Count="2" />
-      <LineId Id="5299" Count="0" />
-      <LineId Id="5235" Count="6" />
-      <LineId Id="5300" Count="0" />
-      <LineId Id="5242" Count="4" />
-      <LineId Id="4752" Count="10" />
-      <LineId Id="5122" Count="7" />
-      <LineId Id="4763" Count="25" />
-      <LineId Id="5435" Count="2" />
-      <LineId Id="5434" Count="0" />
-      <LineId Id="4789" Count="0" />
-      <LineId Id="5301" Count="1" />
-      <LineId Id="4790" Count="6" />
-      <LineId Id="5304" Count="1" />
-      <LineId Id="4797" Count="7" />
-      <LineId Id="5306" Count="1" />
-      <LineId Id="4805" Count="6" />
-      <LineId Id="5309" Count="0" />
-      <LineId Id="4812" Count="6" />
-      <LineId Id="5310" Count="1" />
-      <LineId Id="4819" Count="4" />
-      <LineId Id="5313" Count="0" />
-      <LineId Id="4824" Count="11" />
-      <LineId Id="5316" Count="0" />
-      <LineId Id="5314" Count="0" />
-      <LineId Id="4836" Count="25" />
-      <LineId Id="5317" Count="0" />
-      <LineId Id="4862" Count="9" />
-      <LineId Id="5115" Count="2" />
-      <LineId Id="4880" Count="0" />
-      <LineId Id="5319" Count="1" />
-      <LineId Id="5253" Count="0" />
-      <LineId Id="5248" Count="3" />
-      <LineId Id="5321" Count="0" />
-      <LineId Id="5247" Count="0" />
-      <LineId Id="4881" Count="2" />
-      <LineId Id="5182" Count="0" />
-      <LineId Id="4887" Count="1" />
-      <LineId Id="4892" Count="1" />
-      <LineId Id="5275" Count="1" />
-      <LineId Id="4894" Count="1" />
-      <LineId Id="4899" Count="11" />
-      <LineId Id="5066" Count="3" />
-      <LineId Id="5065" Count="0" />
-      <LineId Id="4911" Count="10" />
-      <LineId Id="5278" Count="1" />
-      <LineId Id="4922" Count="6" />
-      <LineId Id="5373" Count="0" />
-      <LineId Id="4929" Count="1" />
-      <LineId Id="5378" Count="0" />
-      <LineId Id="5374" Count="0" />
-      <LineId Id="4931" Count="5" />
-      <LineId Id="5376" Count="0" />
-      <LineId Id="4940" Count="8" />
-      <LineId Id="5438" Count="1" />
-      <LineId Id="4951" Count="8" />
-      <LineId Id="5440" Count="0" />
-      <LineId Id="5442" Count="4" />
-      <LineId Id="4960" Count="15" />
-      <LineId Id="5448" Count="3" />
-      <LineId Id="5447" Count="0" />
-      <LineId Id="4976" Count="34" />
-      <LineId Id="5265" Count="9" />
-      <LineId Id="5011" Count="16" />
-      <LineId Id="5132" Count="0" />
-      <LineId Id="5134" Count="1" />
-      <LineId Id="5028" Count="35" />
+      <LineId Id="3492" Count="1" />
+      <LineId Id="3489" Count="0" />
+      <LineId Id="3488" Count="0" />
+      <LineId Id="3481" Count="0" />
+      <LineId Id="3506" Count="0" />
+      <LineId Id="2203" Count="0" />
+      <LineId Id="2189" Count="0" />
+      <LineId Id="2377" Count="2" />
+      <LineId Id="2190" Count="0" />
+      <LineId Id="2380" Count="0" />
+      <LineId Id="2193" Count="0" />
+      <LineId Id="2381" Count="0" />
+      <LineId Id="2194" Count="1" />
+      <LineId Id="2383" Count="0" />
+      <LineId Id="2197" Count="0" />
+      <LineId Id="2384" Count="0" />
+      <LineId Id="2198" Count="0" />
+      <LineId Id="2385" Count="0" />
+      <LineId Id="2199" Count="0" />
+      <LineId Id="2437" Count="0" />
+      <LineId Id="2200" Count="0" />
+      <LineId Id="2438" Count="0" />
+      <LineId Id="2573" Count="0" />
+      <LineId Id="2493" Count="0" />
+      <LineId Id="2201" Count="0" />
+      <LineId Id="2446" Count="0" />
+      <LineId Id="3201" Count="0" />
+      <LineId Id="3135" Count="0" />
+      <LineId Id="3125" Count="9" />
+      <LineId Id="2998" Count="0" />
+      <LineId Id="1627" Count="1" />
+      <LineId Id="2515" Count="0" />
+      <LineId Id="2595" Count="0" />
+      <LineId Id="2591" Count="0" />
+      <LineId Id="2586" Count="2" />
+      <LineId Id="2585" Count="0" />
+      <LineId Id="2594" Count="0" />
+      <LineId Id="2516" Count="0" />
+      <LineId Id="1629" Count="0" />
+      <LineId Id="1632" Count="3" />
+      <LineId Id="1637" Count="0" />
+      <LineId Id="1642" Count="0" />
+      <LineId Id="3271" Count="0" />
+      <LineId Id="1921" Count="0" />
+      <LineId Id="1925" Count="1" />
+      <LineId Id="2837" Count="0" />
+      <LineId Id="2835" Count="1" />
+      <LineId Id="2205" Count="0" />
+      <LineId Id="2719" Count="0" />
+      <LineId Id="2207" Count="0" />
+      <LineId Id="2209" Count="0" />
+      <LineId Id="2838" Count="0" />
+      <LineId Id="2841" Count="1" />
+      <LineId Id="2762" Count="0" />
+      <LineId Id="2839" Count="0" />
+      <LineId Id="1657" Count="0" />
+      <LineId Id="2366" Count="0" />
+      <LineId Id="2220" Count="0" />
+      <LineId Id="2222" Count="3" />
+      <LineId Id="2238" Count="0" />
+      <LineId Id="2236" Count="0" />
+      <LineId Id="2239" Count="0" />
+      <LineId Id="2241" Count="1" />
+      <LineId Id="2442" Count="0" />
+      <LineId Id="2244" Count="0" />
+      <LineId Id="2254" Count="0" />
+      <LineId Id="2219" Count="0" />
+      <LineId Id="2258" Count="0" />
+      <LineId Id="2443" Count="0" />
+      <LineId Id="2260" Count="0" />
+      <LineId Id="2262" Count="2" />
+      <LineId Id="2274" Count="0" />
+      <LineId Id="2273" Count="0" />
+      <LineId Id="2276" Count="3" />
+      <LineId Id="2281" Count="0" />
+      <LineId Id="2290" Count="1" />
+      <LineId Id="2294" Count="4" />
+      <LineId Id="2303" Count="0" />
+      <LineId Id="2310" Count="0" />
+      <LineId Id="2343" Count="0" />
+      <LineId Id="2504" Count="0" />
+      <LineId Id="2575" Count="0" />
+      <LineId Id="2497" Count="0" />
+      <LineId Id="2506" Count="0" />
+      <LineId Id="2570" Count="1" />
+      <LineId Id="2574" Count="0" />
+      <LineId Id="2572" Count="0" />
+      <LineId Id="2569" Count="0" />
+      <LineId Id="2577" Count="0" />
+      <LineId Id="2583" Count="0" />
+      <LineId Id="2576" Count="0" />
+      <LineId Id="2361" Count="1" />
+      <LineId Id="2498" Count="0" />
+      <LineId Id="2582" Count="0" />
+      <LineId Id="2511" Count="0" />
+      <LineId Id="2584" Count="0" />
+      <LineId Id="2513" Count="0" />
+      <LineId Id="2444" Count="0" />
+      <LineId Id="2364" Count="0" />
+      <LineId Id="2344" Count="0" />
+      <LineId Id="2311" Count="0" />
+      <LineId Id="2329" Count="1" />
+      <LineId Id="2888" Count="0" />
+      <LineId Id="2331" Count="5" />
+      <LineId Id="2934" Count="0" />
+      <LineId Id="2992" Count="0" />
+      <LineId Id="3204" Count="0" />
+      <LineId Id="3213" Count="1" />
+      <LineId Id="3205" Count="2" />
+      <LineId Id="3203" Count="0" />
+      <LineId Id="2994" Count="1" />
+      <LineId Id="2339" Count="0" />
+      <LineId Id="2309" Count="0" />
+      <LineId Id="2216" Count="0" />
+      <LineId Id="1733" Count="0" />
+      <LineId Id="3268" Count="0" />
+      <LineId Id="1936" Count="1" />
+      <LineId Id="2770" Count="0" />
+      <LineId Id="2769" Count="0" />
+      <LineId Id="2772" Count="0" />
+      <LineId Id="2777" Count="2" />
+      <LineId Id="2771" Count="0" />
+      <LineId Id="1941" Count="1" />
+      <LineId Id="2651" Count="2" />
+      <LineId Id="1945" Count="14" />
+      <LineId Id="1962" Count="11" />
+      <LineId Id="3148" Count="4" />
+      <LineId Id="3146" Count="0" />
+      <LineId Id="1974" Count="1" />
+      <LineId Id="1979" Count="3" />
+      <LineId Id="2501" Count="0" />
+      <LineId Id="1992" Count="0" />
+      <LineId Id="2502" Count="0" />
+      <LineId Id="1993" Count="1" />
+      <LineId Id="2980" Count="1" />
+      <LineId Id="2989" Count="2" />
+      <LineId Id="2987" Count="1" />
+      <LineId Id="2982" Count="0" />
+      <LineId Id="2984" Count="2" />
+      <LineId Id="2983" Count="0" />
+      <LineId Id="1995" Count="6" />
+      <LineId Id="2272" Count="0" />
+      <LineId Id="1934" Count="0" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="246" Count="18" />
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="14" />
+      <LineId Id="288" Count="165" />
+      <LineId Id="3507" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.actReadAxisRef">
+      <LineId Id="181" Count="1" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="194" Count="3" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="201" Count="2" />
+      <LineId Id="175" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.actReadMcParameters">
+      <LineId Id="160" Count="2" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="157" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="63" Count="4" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="119" Count="4" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="125" Count="4" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="69" Count="4" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="86" Count="3" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="28" Count="10" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="40" Count="10" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="137" Count="2" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="144" Count="3" />
+      <LineId Id="149" Count="3" />
+      <LineId Id="154" Count="2" />
+      <LineId Id="140" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
