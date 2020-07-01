@@ -638,6 +638,7 @@ fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,
                         Value=> stAxisStruct.stConfig.fTargetPositionWindow);
 
 //All variables are valid
+stAxisStruct.stConfig.bReadMcParametersValid:= FALSE;
 stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
     fbReadAxisVeloManFast.Valid AND
     fbReadHomingVelToCam.Valid AND
@@ -868,7 +869,9 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="40" Count="10" />
       <LineId Id="136" Count="0" />
       <LineId Id="159" Count="0" />
-      <LineId Id="137" Count="2" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="138" Count="1" />
       <LineId Id="116" Count="0" />
       <LineId Id="144" Count="3" />
       <LineId Id="149" Count="3" />
