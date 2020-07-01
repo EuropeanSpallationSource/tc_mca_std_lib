@@ -199,7 +199,7 @@ fbHalt.Deceleration := stAxisStruct.stControl.fDeceleration;
 
 //Halt
 fbHalt.Execute := stAxisStruct.stControl.bHalt;
-fbHalt.Deceleration := stAxisStruct.stConfig.fDeceleration;
+fbHalt.Deceleration := stAxisStruct.stControl.fDeceleration;
 
 //Reset only if axis is in error state
 IF stAxisStruct.stStatus.bError THEN
