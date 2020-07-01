@@ -155,9 +155,6 @@ IF NOT fbReadParameter.Error THEN
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
-fbWriteParameter(Axis := stAxisStruct.Axis);
-fbWriteParameter.Execute := FALSE;
-
 //Read parameter continuously
 fbReadParameter(
     Axis := stAxisStruct.Axis,
@@ -718,7 +715,7 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="1657" Count="0" />
       <LineId Id="2366" Count="0" />
       <LineId Id="2220" Count="0" />
-      <LineId Id="2222" Count="3" />
+      <LineId Id="2225" Count="0" />
       <LineId Id="2238" Count="0" />
       <LineId Id="2236" Count="0" />
       <LineId Id="2239" Count="0" />
@@ -808,7 +805,9 @@ bReadValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="14" />
       <LineId Id="288" Count="165" />
-      <LineId Id="3507" Count="0" />
+      <LineId Id="3507" Count="5" />
+      <LineId Id="454" Count="9" />
+      <LineId Id="3513" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actReadMcParameters">
       <LineId Id="160" Count="2" />
