@@ -42,8 +42,10 @@ VAR
     fbExecuteRiseEdge: R_TRIG;
     fbJogRiseEdge: R_TRIG;
     fbStopRiseEdge: R_TRIG;
+    fbHaltRiseEdge: R_TRIG;
     fbResetRiseEdge: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
+    fbHaltFinishedRiseEdge: R_TRIG;
     fbResetFinishedRiseEdge: R_TRIG;
     fbCommandAbortedRiseEdge: R_TRIG;
     fbDoneRiseEdge: R_TRIG;
@@ -176,6 +178,10 @@ stAxisStruct.stStatus.bEnabled := fbPower.Status;
 //Stop
 fbStop.Execute := stAxisStruct.stControl.bStop;
 fbStop.Deceleration := stAxisStruct.stConfig.fDeceleration;
+
+//Halt
+fbHalt.Execute := stAxisStruct.stControl.bHalt;
+fbHalt.Deceleration := stAxisStruct.stConfig.fDeceleration;
 
 //Reset only if axis is in error state
 IF stAxisStruct.stStatus.bError THEN
@@ -356,6 +362,7 @@ IF fbResetFinishedRiseEdge.Q THEN
     stAxisStruct.stError.nMoveVelocityErrorID := 0;
     stAxisStruct.stControl.bExecute := FALSE;
     stAxisStruct.stControl.bStop := FALSE;
+    stAxisStruct.stControl.bHalt := FALSE;
     stAxisStruct.stControl.bJogBwd := FALSE;
     stAxisStruct.stControl.bJogFwd := FALSE;
 END_IF
@@ -364,6 +371,12 @@ END_IF
 fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
 IF fbStopFinishedRiseEdge.Q THEN
     stAxisStruct.stControl.bStop := FALSE;
+END_IF
+
+//Execution of fbHalt ended
+fbHaltFinishedRiseEdge(CLK:=fbHalt.Done OR fbHalt.Error OR fbHalt.CommandAborted);
+IF fbHaltFinishedRiseEdge.Q THEN
+    stAxisStruct.stControl.bHalt := FALSE;
 END_IF
 
 //Save the errors from the PLCopen motion functions blocks and from the NC
@@ -381,6 +394,11 @@ ELSIF fbStop.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbStop.ErrorID;
     stAxisStruct.stError.nStopErrorID := fbStop.ErrorID;
+
+ELSIF fbHalt.Error THEN
+    stAxisStruct.stStatus.bError := TRUE;
+    stAxisStruct.stStatus.nErrorId := fbHalt.ErrorID;
+    stAxisStruct.stError.nHaltErrorID := fbHalt.ErrorID;
 
 ELSIF fbReset.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
@@ -534,7 +552,10 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="5242" Count="4" />
       <LineId Id="4752" Count="10" />
       <LineId Id="5122" Count="7" />
-      <LineId Id="4763" Count="26" />
+      <LineId Id="4763" Count="25" />
+      <LineId Id="5435" Count="2" />
+      <LineId Id="5434" Count="0" />
+      <LineId Id="4789" Count="0" />
       <LineId Id="5301" Count="1" />
       <LineId Id="4790" Count="6" />
       <LineId Id="5304" Count="1" />
@@ -577,8 +598,15 @@ stAxisStruct.stControl.bExecute := FALSE;]]></ST>
       <LineId Id="5374" Count="0" />
       <LineId Id="4931" Count="5" />
       <LineId Id="5376" Count="0" />
-      <LineId Id="4940" Count="9" />
-      <LineId Id="4951" Count="59" />
+      <LineId Id="4940" Count="8" />
+      <LineId Id="5438" Count="1" />
+      <LineId Id="4951" Count="8" />
+      <LineId Id="5440" Count="0" />
+      <LineId Id="5442" Count="4" />
+      <LineId Id="4960" Count="15" />
+      <LineId Id="5448" Count="3" />
+      <LineId Id="5447" Count="0" />
+      <LineId Id="4976" Count="34" />
       <LineId Id="5265" Count="9" />
       <LineId Id="5011" Count="16" />
       <LineId Id="5132" Count="0" />
