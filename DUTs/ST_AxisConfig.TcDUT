@@ -30,7 +30,8 @@ STRUCT
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
 
     // Read only MC parameters
-	bReadMcParametersValid: BOOL:= FALSE;
+    bReadMcParametersValid: BOOL:= FALSE;
+    bReadMcParametersError: BOOL:= FALSE;
     fVelocityDefaultSlow: LREAL; //Read only - AxisVeloManSlow
     fVelocityDefaultFast: LREAL; //Read only - AxisVeloManFast
     fHomingVelToCam: LREAL; //Read only - AxisCalibrationVelocityForward

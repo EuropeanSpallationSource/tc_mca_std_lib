@@ -652,7 +652,24 @@ stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
     fbReadEnPositionLagMonitoring.Valid AND
     fbReadAxisMaxPosLagValue.Valid AND
     fbReadEnTargetPositionMonitoring.Valid AND
-    fbReadTargetPositionWindow.Valid;]]></ST>
+    fbReadTargetPositionWindow.Valid;
+
+//One of the variables has a read error
+stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
+    fbReadAxisVeloManFast.Error OR
+    fbReadHomingVelToCam.Error OR
+    fbReadHomingVelFromCam.Valid OR
+    fbReadAxisVeloMax.Error OR
+    fbReadAxisAcc.Error OR
+    fbReadAxisDec.Error OR
+    fbReadEnMinSoftPosLimit.Error OR
+    fbReadEnMaxSoftPosLimit.Error OR
+    fbReadMinSoftPosLimit.Error OR
+    fbReadMaxSoftPosLimit.Error OR
+    fbReadEnPositionLagMonitoring.Error OR
+    fbReadAxisMaxPosLagValue.Error OR
+    fbReadEnTargetPositionMonitoring.Error OR
+    fbReadTargetPositionWindow.Error;]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="FB_Axis">
@@ -857,6 +874,9 @@ stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
       <LineId Id="149" Count="3" />
       <LineId Id="154" Count="2" />
       <LineId Id="140" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="169" Count="14" />
+      <LineId Id="168" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
