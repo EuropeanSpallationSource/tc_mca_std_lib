@@ -547,88 +547,88 @@ read successfully. It may take a couple OF cycles once the PLC starts up.*)
 fbReadAxisVeloManSlow(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisVeloManSlow,
+                        ParameterNumber := E_AxisParameters.AxisManualVelocitySlow,
                         Value=> stAxisStruct.stConfig.fVelocityDefaultSlow);
 //Fast jogging velocity
 fbReadAxisVeloManFast(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisVeloManFast,
+                        ParameterNumber := E_AxisParameters.AxisManualVelocityFast,
                         Value=> stAxisStruct.stConfig.fVelocityDefaultFast);
 //Homing velocity to Cam
 fbReadHomingVelToCam(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityForward,
+                        ParameterNumber := E_AxisParameters.AxisVelocityToCam,
                         Value=> stAxisStruct.stConfig.fHomingVelToCam);
 //Homing velocity from Cam
 fbReadHomingVelFromCam(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisCalibrationVelocityBackward,
+                        ParameterNumber := E_AxisParameters.AxisVelocityFromCam,
                         Value=> stAxisStruct.stConfig.fHomingVelFromCam);
 //Max velocity
 fbReadAxisVeloMax(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisVeloMax,
+                        ParameterNumber := E_AxisParameters.AxisMaxVelocity,
                         Value=> stAxisStruct.stConfig.fVeloMax);
 //Acceleration
 fbReadAxisAcc(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisAcc,
+                        ParameterNumber := E_AxisParameters.AxisAccMax,
                         Value=> stAxisStruct.stConfig.fDefaultAcc);
 //Deceleration
 fbReadAxisDec(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisDec,
+                        ParameterNumber := E_AxisParameters.AxisDecMax,
                         Value=> stAxisStruct.stConfig.fDefaultDec);
 
 //Soft limits enabled
 fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisEnMinSoftPosLimit);
+                        ParameterNumber := E_AxisParameters.EnableLimitBackward);
 stAxisStruct.stConfig.bEnMinSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMinSoftPosLimit.Value);
 
 fbReadEnMaxSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisEnMaxSoftPosLimit);
+                        ParameterNumber := E_AxisParameters.EnableLimitForward);
 stAxisStruct.stConfig.bEnMaxSoftPosLimit:= LREAL_TO_BOOL(fbReadEnMaxSoftPosLimit.Value);
 
 //Soft limit values
 fbReadMinSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit,
+                        ParameterNumber := E_AxisParameters.SWLimitBackward,
                         Value=>stAxisStruct.stConfig.fMinSoftPosLimit);
 fbReadMaxSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMaxSoftPosLimit,
+                        ParameterNumber := E_AxisParameters.SWLimitForward,
                         Value=>stAxisStruct.stConfig.fMaxSoftPosLimit);
 
 //Position Lag Monitoring
 fbReadEnPositionLagMonitoring(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisEnPositionLagMonitoring);
+                        ParameterNumber := E_AxisParameters.EnablePositionLagMonitoring);
 stAxisStruct.stConfig.bEnPositionLagMonitoring:= LREAL_TO_BOOL(fbReadEnPositionLagMonitoring.Value);
 
 fbReadAxisMaxPosLagValue(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMaxPosLagValue,
+                        ParameterNumber := E_AxisParameters.MaxPositionLag,
                         Value=>stAxisStruct.stConfig.fMaxPosLagValue);
 
 // Target Position Monitoring
 fbReadEnTargetPositionMonitoring(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisMinSoftPosLimit);
+                        ParameterNumber := E_AxisParameters.SWLimitBackward);
 stAxisStruct.stConfig.bEnTargetPositionMonitoring:= LREAL_TO_BOOL(fbReadEnTargetPositionMonitoring.Value);
 
 fbReadTargetPositionWindow(Axis := stAxisStruct.Axis,

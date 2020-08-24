@@ -75,13 +75,13 @@ stEncPulseSignal.TouchProbe := TouchProbe1;
 fbVelocityToCam(
     Axis := Axis,
     Enable := TRUE,
-    ParameterNumber := AxisCalibrationVelocityForward,
+    ParameterNumber := E_AxisParameters.AxisVelocityToCam,
     ReadMode := READMODE_CYCLIC);
 
 fbVelocityFromCam(
     Axis := Axis,
     Enable := TRUE,
-    ParameterNumber := AxisCalibrationVelocityBackward,
+    ParameterNumber := E_AxisParameters.AxisVelocityFromCam,
     ReadMode := READMODE_CYCLIC);
 
     //Only write velocity if the function block has not errored
