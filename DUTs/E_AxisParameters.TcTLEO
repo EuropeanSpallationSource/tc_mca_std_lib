@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <EnumerationTextList Name="E_AxisParameters" Id="{9199cc42-106a-4663-aaa5-d49855d9aa9f}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
@@ -70,7 +70,7 @@ TYPE E_AxisParameters :
     AxisFastJerk := 1055, //lreal IndexOffset= 16#0000_010C
     // new since 1/2012 *)
     AxisEncoderScalingNumerator := 1056, //lreal IndexOffset= 16#0001_0023 - available in Tc3
-    AxisEncoderScalingDenominator := 1057, //lreal IndexOffset= 16#0001_0024 - available in Tc3 
+    AxisEncoderScalingDenominator := 1057, //lreal IndexOffset= 16#0001_0024 - available in Tc3
     (* new since 7/2016 *)
     AxisVeloJumpFactor := 1060, //lreal IndexOffset= 16#0000_0106
     AxisToleranceBallAuxAxis := 1061, //lreal IndexOffset= 16#0000_0108
