@@ -4,6 +4,7 @@
     <Declaration><![CDATA[VAR_GLOBAL
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; //Global array of ST_AxisStruct for holding axis parameters and controls
     iAxis: UINT; //Index for for loops while going through axes
+	fbGetCurTaskIndex: GETCURTASKINDEX;
 END_VAR
 
 VAR_GLOBAL CONSTANT
