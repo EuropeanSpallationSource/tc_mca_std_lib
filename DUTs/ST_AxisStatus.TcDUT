@@ -14,7 +14,7 @@ STRUCT
     bMoving: BOOL; //Moving state from the NC
     bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
-	bAxisInterlocked: BOOL; //Axis interlocked
+    bAxisInterlocked: BOOL; //Axis interlocked
     bGeared: BOOL; //Axis is an active slave
     bCoupledGear1: BOOL;
     bCoupledGear2: BOOL;

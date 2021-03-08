@@ -6,7 +6,6 @@ STRUCT
     bLimitFwd AT %I*: BOOL;
     bLimitBwd AT %I*: BOOL;
     bHomeSensor AT %I*: BOOL; //Reference siganl for homing
-	bInterlock: BOOL := FALSE; //Bit for interlocking motors
 END_STRUCT
 END_TYPE
 ]]></Declaration>

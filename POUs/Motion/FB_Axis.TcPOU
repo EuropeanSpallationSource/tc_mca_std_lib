@@ -170,7 +170,7 @@ END_IF
 //Linking the limit swtiches and interlock signal
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
-stAxisStruct.stStatus.bAxisInterlocked := stAxisStruct.stInputs.bInterlock;
+stAxisStruct.stStatus.bAxisInterlocked := stAxisStruct.stControl.bInterlock;
 
 FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
     IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN

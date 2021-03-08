@@ -13,6 +13,7 @@ STRUCT
     bEnable: BOOL; //Enable axis drive
     bJogFwd: BOOL;
     bJogBwd: BOOL;
+    bInterlock: BOOL := FALSE; //Bit for interlocking motors
     eCommand: E_MotionFunctions;
     fVelocity: LREAL; //Velocity must be specified, no default used
     fAcceleration: LREAL; //Not all FBs use, 0 is NC default
