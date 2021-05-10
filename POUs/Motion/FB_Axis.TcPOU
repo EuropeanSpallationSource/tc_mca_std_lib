@@ -660,7 +660,7 @@ stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
 stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
     fbReadAxisVeloManFast.Error OR
     fbReadHomingVelToCam.Error OR
-    fbReadHomingVelFromCam.Valid OR
+    fbReadHomingVelFromCam.Error OR
     fbReadAxisVeloMax.Error OR
     fbReadAxisAcc.Error OR
     fbReadAxisDec.Error OR
