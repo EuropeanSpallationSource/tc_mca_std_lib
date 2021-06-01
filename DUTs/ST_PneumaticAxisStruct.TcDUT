@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="ST_PneumaticAxisStruct" Id="{d6160476-b349-4ae7-92a0-2b29d5177a8e}">
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisStruct :
+STRUCT
+    stPneumaticAxisInputs : ST_PneumaticAxisInputs;
+    stPneumaticAxisControl: ST_PneumaticAxisControl;
+    stPneumaticAxisStatus: ST_PneumaticAxisStatus;
+    stPneumaticAxisError: ST_PneumaticAxisError;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
