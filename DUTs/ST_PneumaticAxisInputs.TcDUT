@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="ST_PneumaticAxisInputs" Id="{5a1ac5ea-cd16-4906-91a9-c21e5f2fe40f}">
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisInputs :
+STRUCT
+    bLimitFwd AT %I*: BOOL; //Status of Limit Switch Fwd
+    bLimitBwd AT %I*: BOOL; //Status of Limit Switch Bwd
+    bSolenoidValveExtend AT %I*: BOOL; //Voltage monitor of solenoid valve to Extend
+    bSolenoidValveRetrac AT %I*: BOOL; //Volatge monitor of solenoid valve to Retract
+    bPermit AT %I*: BOOL; //Permit signal for the movement
+    bPressureExtend AT %I*: BOOL; //Monitor of air pressure for cyclinder extraction
+    bPressureRetract AT %I*: BOOL; //Monitor of air pressure for cylinder retraction
+    nAirPressure AT %I*: REAL; //Monitor of input air pressure for pneumatic valve
+    bExtendCylinderManual AT %I*: BOOL; //Manual control Extend cylinder
+    bRetractCylinderManual AT %I*: BOOL; //Manual control Retract cylinder
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
