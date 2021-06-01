@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="E_PneumaticAxisValveType" Id="{48ffb08e-c0f9-4900-a9c4-14f85e5a2377}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_PneumaticAxisValveType :
+(
+    eSingleSolenoid := 0, //Single solenoid with mechanical spring return
+    eDoubleSolenoid := 1 //Double solenoid
+):= eSingleSolenoid; //Single solenoid with mechanical spring return is default
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
