@@ -73,6 +73,7 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
+    bInitialized: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[bBusy := FALSE;
@@ -80,6 +81,10 @@ END_VAR]]></Declaration>
 stAxisStruct.Axis.ReadStatus();
 
 actReadMcParameters();
+
+IF stAxisStruct.stConfig.bReadMcParametersValid AND NOT bInitialized THEN
+    actInit();
+END_IF
 
 //Call of all MC Instances and set all Executes to FALSE
 fbPower(Axis := stAxisStruct.Axis);
@@ -234,7 +239,7 @@ CASE stAxisStruct.stControl.eCommand OF
         fbJog.JogForward := stAxisStruct.stControl.bJogFwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.JogBackwards := stAxisStruct.stControl.bJogBwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.Mode := 0;
-        fbJog.Velocity := stAxisStruct.stControl.fVelocity;
+        fbJog.Velocity := stAxisStruct.stControl.fJogVelocity;
         fbJog.Acceleration := stAxisStruct.stControl.fAcceleration;
         fbJog.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbJog.Done;
@@ -537,6 +542,18 @@ END_IF
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;]]></ST>
     </Implementation>
+    <Action Name="actInit" Id="{fbff7981-0a80-47f4-875f-ec24f3c93b13}">
+      <Implementation>
+        <ST><![CDATA[//Initialize default values from NC
+stAxisStruct.stControl.fAcceleration := stAxisStruct.stConfig.fDefaultAcc;
+stAxisStruct.stControl.fDeceleration := stAxisStruct.stConfig.fDefaultDec;
+stAxisStruct.stControl.fVelocity := stAxisStruct.stConfig.fVelocityDefaultFast;
+stAxisStruct.stControl.fJogVelocity := stAxisStruct.stConfig.fVelocityDefaultSlow;
+
+
+bInitialized := TRUE;]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
       <Implementation>
         <ST><![CDATA[(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
@@ -661,7 +678,7 @@ stAxisStruct.stConfig.bReadMcParametersValid:= fbReadAxisVeloManSlow.Valid AND
 stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
     fbReadAxisVeloManFast.Error OR
     fbReadHomingVelToCam.Error OR
-    fbReadHomingVelFromCam.Valid OR
+    fbReadHomingVelFromCam.Error OR
     fbReadAxisVeloMax.Error OR
     fbReadAxisAcc.Error OR
     fbReadAxisDec.Error OR
@@ -680,6 +697,9 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="3489" Count="0" />
       <LineId Id="3488" Count="0" />
       <LineId Id="3481" Count="0" />
+      <LineId Id="3660" Count="0" />
+      <LineId Id="3659" Count="0" />
+      <LineId Id="3661" Count="1" />
       <LineId Id="2203" Count="0" />
       <LineId Id="2189" Count="0" />
       <LineId Id="2377" Count="2" />
@@ -828,6 +848,13 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="3507" Count="5" />
       <LineId Id="454" Count="9" />
       <LineId Id="3513" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.actInit">
+      <LineId Id="6" Count="0" />
+      <LineId Id="1" Count="2" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="4" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actReadMcParameters">
       <LineId Id="160" Count="2" />
