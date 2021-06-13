@@ -4,8 +4,7 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticMode :
-(
-    SINGLE_SOLENOID_PLC := 0,
+(   SINGLE_SOLENOID_PLC := 0,
     SINGLE_SOLENOID_MANUAL := 1,
     ERROR := 2,
     RESET := 3
