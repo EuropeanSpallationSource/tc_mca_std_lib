@@ -5,14 +5,14 @@
 STRUCT
     bLimitFwd AT %I*: BOOL; //Status of Limit Switch Fwd
     bLimitBwd AT %I*: BOOL; //Status of Limit Switch Bwd
-    bSolenoidValveExtend AT %I*: BOOL; //Voltage monitor of solenoid valve to Extend
-    bSolenoidValveRetrac AT %I*: BOOL; //Volatge monitor of solenoid valve to Retract
-    bPermit AT %I*: BOOL; //Permit signal for the movement
-    bPressureExtend AT %I*: BOOL; //Monitor of air pressure for cyclinder extraction
-    bPressureRetract AT %I*: BOOL; //Monitor of air pressure for cylinder retraction
-    nAirPressure AT %I*: REAL; //Monitor of input air pressure for pneumatic valve
-    bExtendCylinderManual AT %I*: BOOL; //Manual control Extend cylinder
-    bRetractCylinderManual AT %I*: BOOL; //Manual control Retract cylinder
+    bSolenoidExtendStatus AT %I*: BOOL; //Status of solenoid valve to Extend
+    bSolenoideRetractStatus AT %I*: BOOL; //Status of of solenoid valve to Retract
+    bPermit AT %I*: BOOL; //Status of permit signal for the movement
+    bPressureExtendStatus AT %I*: BOOL; //Monitor of air pressure for cyclinder extraction
+    bPressureRetractStatus AT %I*: BOOL; //Monitor of air pressure for cylinder retraction
+    nAirPressureStatus AT %I*: REAL; //Monitor of input air pressure for pneumatic valve
+    bExtendCylinderManual AT %I*: BOOL; //Status of push button input to extend cylinder
+    bRetractCylinderManual AT %I*: BOOL; //Status of push button input to retract the cylinder
 END_STRUCT
 END_TYPE
 ]]></Declaration>
