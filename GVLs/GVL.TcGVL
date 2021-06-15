@@ -4,8 +4,8 @@
     <Declaration><![CDATA[VAR_GLOBAL
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; //Global array of ST_AxisStruct for holding axis parameters and controls
     astPneumaticAxes: ARRAY [1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF ST_PneumaticAxisStruct; ////Global array of ST_PneumaticAxisStruct for holding axis parameters and controls
-	iAxis: UINT; //Index for for loops while going through axes
-	iPneumaticAxis: UINT; //Index for for loops while going through pneumatic axes
+    iAxis: UINT; //Index for for loops while going through axes
+    iPneumaticAxis: UINT; //Index for for loops while going through pneumatic axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
 END_VAR
