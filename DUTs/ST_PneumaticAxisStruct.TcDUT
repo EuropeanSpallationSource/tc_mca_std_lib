@@ -7,7 +7,7 @@ STRUCT
     stPneumaticAxisControl: ST_PneumaticAxisControl;
     stPneumaticAxisStatus: ST_PneumaticAxisStatus;
     stPneumaticAxisError: ST_PneumaticAxisError;
-	ePneumaticAxisState: E_PneumaticMode;
+    ePneumaticAxisState: E_PneumaticMode;
     ePneumaticAxisErrors: E_PneumaticAxisErrors;
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
