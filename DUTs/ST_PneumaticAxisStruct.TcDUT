@@ -7,6 +7,19 @@ STRUCT
     stPneumaticAxisControl: ST_PneumaticAxisControl;
     stPneumaticAxisStatus: ST_PneumaticAxisStatus;
     stPneumaticAxisError: ST_PneumaticAxisError;
+	ePneumaticAxisState: E_PneumaticMode;
+    ePneumaticAxisErrors: E_PneumaticAxisErrors;
+    fbTimerExtend: TON; //Timing the extraction of the cylinder
+    fbTimerRetract: TON; //Timing the retraction of the cylinder
+    fbTimerExtendManual: TON; //Timing the extraction of the cylinder
+    fbTimerRetractManual: TON; //Timing the retraction of the cylinder
+    fbRSExtendManual: RS; //RS for the input from the extend push button
+    fbRSRetractManual: RS; //RS for the input from the retract push button
+    fbTimerStartMovingExtend: TON; //Timing the start of extraction after the command has been given
+    fbTimerStartMovingRetract: TON; //Timing the start of retraction after the command has been given
+    bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
+    nTimeToExtend: INT; //allowed time for the cylider to extract in seconds
+    nTimeToRetract: INT; //allowed time for the cylinder to retract in seconds
 END_STRUCT
 END_TYPE
 ]]></Declaration>
