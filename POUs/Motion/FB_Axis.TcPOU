@@ -172,10 +172,11 @@ IF NOT fbReadParameter.Error THEN
     stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
 END_IF
 
-//Linking the limit swtiches and interlock signal
+//Linking the limit swtiches and interlock signals
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
-stAxisStruct.stStatus.bAxisInterlocked := stAxisStruct.stControl.bInterlock;
+stAxisStruct.stStatus.bInterlockedFwd := stAxisStruct.stControl.bInterlockFwd;
+stAxisStruct.stStatus.bInterlockedBwd := stAxisStruct.stControl.bInterlockBwd;
 
 FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
     IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
@@ -194,8 +195,8 @@ END_IF
 
 //Power
 fbPower.Enable := stAxisStruct.stControl.bEnable;
-fbPower.Enable_Positive := (stAxisStruct.stStatus.bFwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bAxisInterlocked;
-fbPower.Enable_Negative := (stAxisStruct.stStatus.bBwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bAxisInterlocked;
+fbPower.Enable_Positive := (stAxisStruct.stStatus.bFwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bInterlockedFwd;
+fbPower.Enable_Negative := (stAxisStruct.stStatus.bBwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bInterlockedBwd;
 fbPower.Override := stAxisStruct.stConfig.fOverride;
 stAxisStruct.stStatus.bEnabled := fbPower.Status;
 
@@ -766,6 +767,7 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="2260" Count="0" />
       <LineId Id="2262" Count="2" />
       <LineId Id="3586" Count="0" />
+      <LineId Id="3663" Count="0" />
       <LineId Id="2274" Count="0" />
       <LineId Id="2273" Count="0" />
       <LineId Id="2276" Count="3" />
