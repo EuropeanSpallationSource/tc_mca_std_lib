@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="ST_PneumaticAxisControl" Id="{60247fff-ef28-4c35-9aa0-027d94fb1099}">
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
+STRUCT
+    bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
+    bStartExtend : BOOL; //Variable to control solenoid valve
+    bStartRetract : BOOL; //Variable to control solenoid valve
+
+END_STRUCT
+END_TYPE
+ ]]></Declaration>
+  </DUT>
+</TcPlcObject>

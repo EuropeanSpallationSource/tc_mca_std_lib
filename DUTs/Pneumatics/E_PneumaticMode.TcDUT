@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="E_PneumaticMode" Id="{767ff514-f7ef-4e71-a359-d55b64a86d25}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_PneumaticMode :
+(   SINGLE_SOLENOID_PLC := 0, //Single solenoid valve with spring return
+    SINGLE_SOLENOID_MANUAL := 1,
+    DOUBLE_SOLENOID_PLC := 2, //Double solenoid valve: not yet implemented
+    DOUBLE_SOLENOID_MANUAL := 3,
+    RESET := 4,
+    ERROR := 5
+):= SINGLE_SOLENOID_PLC;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

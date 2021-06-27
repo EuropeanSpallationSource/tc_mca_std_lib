@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="ST_PneumaticAxisOutputs" Id="{51effe12-4bc0-43e3-b66e-2952d0306c78}">
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
+STRUCT
+    bLimitFwdOut AT %Q*: BOOL; //Limit Switch Fwd power output
+    bLimitBwdOut AT %Q*: BOOL; //Limit Switch Bwd power output
+    bSolenoidExtendOut AT %Q*: BOOL; //Solenoid valve Extend power output (for single solenoid)
+    bPressureExtendOut AT %Q*: BOOL; //Power output for air pressure switch
+    bPressureRetractOut AT %Q*: BOOL; //Power output for air pressure switch
+    nAirPressureOut AT %Q*: REAL; //Power output for analog pressure sensor
+    bExtendCylinderManualOut AT %Q*: BOOL; //Power output for push button (extend)
+    bRetractCylinderManualOut AT %Q*: BOOL; //Power output for push button (retract)
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
