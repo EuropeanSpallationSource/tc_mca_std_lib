@@ -36,14 +36,14 @@
             </o>
             <o>
               <v n="TextID">"enFW"</v>
-              <v n="TextDefault">"Enable Forward"</v>
+              <v n="TextDefault">"Fwd Enable"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"enBW"</v>
-              <v n="TextDefault">"Enable Backward"</v>
+              <v n="TextDefault">"Bwd Enable"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -345,6 +345,20 @@
             <o>
               <v n="TextID">"halt"</v>
               <v n="TextDefault">"Halt Motion"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bInterlockBwd"</v>
+              <v n="TextDefault">"Interlock Bwd"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bInterlockFwd"</v>
+              <v n="TextDefault">"Interlock Fwd"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
