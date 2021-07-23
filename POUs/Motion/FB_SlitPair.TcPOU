@@ -1,0 +1,295 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <POU Name="FB_SlitPair" Id="{1223aca9-e4c9-4d31-9356-dca9871f7373}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPair
+VAR_INPUT
+	iBladeNegative : INT; //Axis ID for negatively positioned blade
+	iBladePositive : INT; //Axis ID for positively positioned blade
+	iGapSize : INT; //Axis ID for the size of gap between slit blades
+	iGapCentre : INT; //Axis ID for the centre position of the gap formed by slit blades
+	bEnable : BOOL;	//Enable/Disable the slit set
+	bReset : BOOL;
+	
+	//experimental
+	fEncoderScaling : LREAL;
+	bHomeOverride : BOOL :=FALSE; //Allows overriding of calibration flag requirement for
+	fTolerance : LREAL:=0.02;
+END_VAR
+VAR_OUTPUT
+	bEnabled : BOOL; //Enabled status of function
+	bBusy : BOOL;
+	bError : BOOL;
+	bHoming : BOOL; //TRUE if function is homing axes
+	
+END_VAR
+VAR
+	iState : INT := 0; //statemachine index
+	bAxesEnabled : BOOL:= FALSE;
+	bBladesHomed : BOOL:= FALSE;
+	bGapHomed : BOOL:= FALSE;
+	bBladesCoupled : BOOL:= FALSE;
+	
+	fGapSizePosition : LREAL;
+	fGapCentrePosition : LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[actErrorHandling();
+actGapLimits();
+
+checkBladesHomed(bHomeStatus=>bBladesHomed); //check blade calibration flags
+checkGapHomed(bHomeStatus=>bGapHomed); //check gap calibration flags
+checkBladesCoupled(bCoupledStatus=>bBladesCoupled);
+
+fGapSizePosition:= GVL.astAxes[iBladePositive].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+fGapCentrePosition:= (GVL.astAxes[iBladePositive].stStatus.fActPosition + GVL.astAxes[iBladeNegative].stStatus.fActPosition)/2;
+
+
+CASE iState OF
+	0: //Do nothing unless all axes enabled		
+		IF bAxesEnabled THEN
+			iState:=1;
+		END_IF
+	1: //Homing status
+		IF bBladesHomed THEN
+			iState:=4; //Skip to functioning
+		ELSE
+			iState:=2;	//Homing first
+		END_IF
+	2: //Home blade axes
+		GVL.astAxes[iBladeNegative].stControl.eCommand:=E_MotionFunctions.eHome;
+		GVL.astAxes[iBladePositive].stControl.eCommand:=E_MotionFunctions.eHome;
+		GVL.astAxes[iBladeNegative].stControl.bExecute:=TRUE;
+		GVL.astAxes[iBladePositive].stControl.bExecute:=TRUE;
+		
+		iState:=3;
+		
+	3: //Wait for blade homing completion
+		IF bBladesHomed THEN
+			iState:=4;
+		END_IF
+	
+	4: //"Home" the virtual axes
+		GVL.astAxes[iGapSize].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
+		GVL.astAxes[iGapCentre].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
+		GVL.astAxes[iGapSize].stConfig.fHomePosition:= fGapSizePosition;
+		GVL.astAxes[iGapCentre].stConfig.fHomePosition:= fGapCentrePosition;
+		GVL.astAxes[iGapSize].stControl.eCommand:=E_MotionFunctions.eHome;
+		GVL.astAxes[iGapCentre].stControl.eCommand:=E_MotionFunctions.eHome;
+		GVL.astAxes[iGapSize].stControl.bExecute:=TRUE;
+		GVL.astAxes[iGapCentre].stControl.bExecute:=TRUE;
+		iState:=5;
+	5: //Wait for virtual homing completion
+		IF bGapHomed THEN
+			iState:= 20;
+		END_IF
+		
+	999: //ERROR STATE
+		IF bReset THEN
+			iState:= 0;
+			bError:= FALSE;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <Action Name="actErrorHandling" Id="{2d890ec8-2bb8-4662-99bf-f20cfc75f93d}">
+      <Implementation>
+        <ST><![CDATA[IF (GVL.astAxes[iBladeNegative].stStatus.bError) THEN
+	iState:=999;
+	bError:=TRUE;
+END_IF
+IF (GVL.astAxes[iBladePositive].stStatus.bError) THEN
+	iState:=999;
+	bError:=TRUE;
+END_IF
+IF (GVL.astAxes[iGapSize].stStatus.bError) THEN
+	iState:=999;
+	bError:=TRUE;
+END_IF
+IF (GVL.astAxes[iGapCentre].stStatus.bError) THEN
+	iState:=999;
+	bError:=TRUE;
+END_IF
+
+checkEnabled(bEnableStatus => bAxesEnabled);
+IF iState <> 0 AND NOT bAxesEnabled THEN
+	iState:= 999;
+	bError:= TRUE;
+END_IF
+
+
+
+//Bit hacky way to check we're not massively out- couple be temporary
+IF iState>10 AND ABS(GVL.astAxes[iGapSize].stStatus.fActPosition-fGapSizePosition)>fTolerance THEN
+	iState:=999;
+END_IF
+IF iState>10 AND ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition-fGapCentrePosition)>fTolerance THEN
+	iState:=999;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actGapLimits" Id="{25d5c061-b303-4e71-ae15-49914f4789a8}">
+      <Implementation>
+        <ST><![CDATA[GVL.astAxes[iGapSize].stInputs.bLimitBwd:=TRUE;
+GVL.astAxes[iGapSize].stInputs.bLimitFwd:=TRUE;
+GVL.astAxes[iGapCentre].stInputs.bLimitBwd:=TRUE;
+GVL.astAxes[iGapCentre].stInputs.bLimitFwd:=TRUE;]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="checkBladesCoupled" Id="{b67c9216-9a28-4bc7-afbb-4bdb360ee51b}">
+      <Declaration><![CDATA[METHOD checkBladesCoupled : BOOL
+VAR_OUTPUT
+	bCoupledStatus : BOOL:= TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bGeared THEN
+	bCoupledStatus := FALSE;
+END_IF
+IF NOT GVL.astAxes[iBladePositive].stStatus.bGeared THEN
+	bCoupledStatus := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkBladesHomed" Id="{7ae32968-8cc1-44db-8a5f-f24d48501289}">
+      <Declaration><![CDATA[METHOD checkBladesHomed: BOOL
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bHomeStatus : BOOL:= TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bHomed THEN
+	bHomeStatus:=FALSE;
+END_IF
+IF NOT GVL.astAxes[iBladePositive].stStatus.bHomed THEN
+	bHomeStatus:=FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
+      <Declaration><![CDATA[METHOD checkEnabled : BOOL
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bEnableStatus : BOOL:= TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bEnabled THEN
+	bEnableStatus:=FALSE;
+END_IF
+IF NOT GVL.astAxes[iBladePositive].stStatus.bEnabled THEN
+	bEnableStatus:=FALSE;
+END_IF
+IF NOT GVL.astAxes[iGapSize].stStatus.bEnabled THEN
+	bEnableStatus:=FALSE;
+END_IF
+IF NOT GVL.astAxes[iGapCentre].stStatus.bEnabled THEN
+	bEnableStatus:=FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkGapHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
+      <Declaration><![CDATA[METHOD checkGapHomed : BOOL
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bHomeStatus : BOOL:= TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iGapSize].stStatus.bHomed THEN
+	bHomeStatus:=FALSE;
+END_IF
+IF NOT GVL.astAxes[iGapCentre].stStatus.bHomed THEN
+	bHomeStatus:=FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlitPair">
+      <LineId Id="71" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="61" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="84" Count="11" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="106" Count="3" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="110" Count="2" />
+      <LineId Id="116" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.actErrorHandling">
+      <LineId Id="2" Count="15" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="19" Count="3" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="33" Count="5" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.actGapLimits">
+      <LineId Id="2" Count="2" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkBladesCoupled">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkBladesHomed">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkEnabled">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkGapHomed">
+      <LineId Id="9" Count="5" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
