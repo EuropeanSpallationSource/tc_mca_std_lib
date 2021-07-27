@@ -4,13 +4,11 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticMode :
-(   SINGLE_SOLENOID_PLC := 0, //Single solenoid valve with spring return
-    SINGLE_SOLENOID_MANUAL := 1,
-    DOUBLE_SOLENOID_PLC := 2, //Double solenoid valve: not yet implemented
-    DOUBLE_SOLENOID_MANUAL := 3,
-    RESET := 4,
-    ERROR := 5
-):= SINGLE_SOLENOID_PLC;
+(   SINGLE_SOLENOID_CONTROL := 0, //Single solenoid valve with spring return
+    DOUBLE_SOLENOID_CONTROL := 1, //Double solenoid valve: not yet implemented
+    RESET := 2,
+    ERROR := 3
+):= SINGLE_SOLENOID_CONTROL;
 END_TYPE
 ]]></Declaration>
   </DUT>
