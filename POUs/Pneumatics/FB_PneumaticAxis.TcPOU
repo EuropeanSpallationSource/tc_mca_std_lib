@@ -5,39 +5,44 @@
 
 VAR_IN_OUT
     stPneumaticAxisStruct: ST_PneumaticAxisStruct;
+END_VAR
+VAR
+    fbTimerExtend: TON; //Timing the extraction of the cylinder
+    fbTimerRetract: TON; //Timing the retraction of the cylinder
+    fbTrigRisingEdge: R_TRIG; //Rising edge detection
+    fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
+    fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
 
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[//Single solenoid valve control
+stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd;
+
 IF stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-     stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := TRUE;
      stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'RETRACTED';
      ELSE
     stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := FALSE;
 END_IF
 
 IF stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-     stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted := TRUE;
      stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'EXTRACTED';
      ELSE
      stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted := FALSE;
 END_IF
 
-stPneumaticAxisStruct.fbTrig(clk:=stPneumaticAxisStruct.bReset);
+fbTrigRisingEdge(clk:=stPneumaticAxisStruct.bReset);
 
-IF stPneumaticAxisStruct.fbTrig.Q THEN
+IF fbTrigRisingEdge.Q THEN
     stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.RESET;
 END_IF
 
 
 CASE stPneumaticAxisStruct.ePneumaticAxisState OF
 
-    E_PneumaticMode.SINGLE_SOLENOID_PLC:
-    Single_Solenoid_PLC();
-
-    E_PneumaticMode.SINGLE_SOLENOID_MANUAL:
-    Single_Solenoid_Manual();
+    E_PneumaticMode.SINGLE_SOLENOID_CONTROL:
+    Single_Solenoid();
 
     E_PneumaticMode.ERROR:
     Single_Solenoid_Error();
@@ -67,41 +72,164 @@ END_CASE
 
 ]]></ST>
     </Implementation>
+    <Action Name="ErrorCheckExtendMoving" Id="{8b3d850c-470a-444a-af07-097a9845aaa1}">
+      <Implementation>
+        <ST><![CDATA[//IF the command TO extract is given, but the cylinder hasn't moved from the bLimitBwd
+    IF  fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+             stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
+             stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+    END_IF
+//If the command to extract has timed out
+    IF  fbTimerExtend.Q AND (NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd) THEN
+            stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
+            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+    END_IF
+    ]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ErrorCheckRetractMoving" Id="{3987333b-10f1-4146-b4c3-3344b0a28c8a}">
+      <Implementation>
+        <ST><![CDATA[//IF the command to retract has been given, but the cylinder hasn't moved from bLimitFwd
+        IF  fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
+            stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
+            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+        END_IF
+
+//If the command to retract has timed out
+        IF  fbTimerRetract.Q AND (NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd) THEN
+            stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
+            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+        END_IF
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="Reset" Id="{2dda1b42-e462-445a-870e-db34c0266d90}">
       <Implementation>
-        <ST><![CDATA[   stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend := FALSE;
-   stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract := FALSE;
-   stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-   stPneumaticAxisStruct.bStartExtendManual := FALSE;
-   stPneumaticAxisStruct.bStartRetractManual := FALSE;
-   stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-   stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-   stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-   stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.NO_ERROR;
-   stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+        <ST><![CDATA[stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.NO_ERROR;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.SINGLE_SOLENOID_CONTROL;
 
   ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="Single_Solenoid" Id="{d7d61ab1-a144-43ab-8977-936c72509c4b}">
+      <Implementation>
+        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in ms
+ fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.nTimeToExtend);
+ fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.nTimeToRetract);
+
+
+ stPneumaticAxisStruct.sTimeElapsedExtend :=TIME_TO_STRING(fbTimerExtend.ET);
+ stPneumaticAxisStruct.sTimeElapsedRetract :=TIME_TO_STRING(fbTimerRetract.ET);
+
+//Checking for Permit signal from PSS
+IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit AND (stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving) THEN
+            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+END_IF
+
+//Checking if the Interlock signal is ON
+IF stPneumaticAxisStruct.stPneumaticAxisInputs.bInterlock AND (stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving) THEN
+            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
+END_IF
+
+//Starting the control and signal monitoring of pneumatic actuator
+
+//Starting the timing of extraction movement
+fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
+
+//If the manual momentary push button is used for control of the pneumatic cylinder
+fbTrigExtendManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bExtendCylinderManual);
+
+IF fbTrigExtendManual.Q THEN
+    stPneumaticAxisStruct.bStartExtendManual := TRUE;
+END_IF
+
+
+//Starting the extraction movement
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend OR stPneumaticAxisStruct.bStartExtendManual) AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
+        stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := TRUE;
+        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := TRUE;
+
+ErrorCheckExtendMoving();
+
+END_IF
+
+// Extraction of the cylinder finished, reset timer
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend OR stPneumaticAxisStruct.bStartExtendManual) AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+        stPneumaticAxisStruct.bStateChange := TRUE;
+        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
+        fbTimerExtend (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
+        stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend := FALSE;
+        stPneumaticAxisStruct.bStartExtendManual := FALSE;
+END_IF
+
+
+//Starting the retraction movement and retraction timing
+fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
+
+//If the manual momentary push button is used for control of the pneumatic cylinder
+fbTrigRetractManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bRetractCylinderManual);
+
+IF fbTrigRetractManual.Q THEN
+    stPneumaticAxisStruct.bStartRetractManual := TRUE;
+END_IF
+
+IF  (stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract OR stPneumaticAxisStruct.bStartRetractManual) AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd AND stPneumaticAxisStruct.bStateChange THEN
+        stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := TRUE;
+
+ErrorCheckRetractMoving();
+
+END_IF
+
+// Retraction of the cylinder finished, reset timer
+IF  (stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract OR stPneumaticAxisStruct.bStartRetractManual) AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+        stPneumaticAxisStruct.bStateChange := FALSE;
+        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
+        fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
+        stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract := FALSE;
+        stPneumaticAxisStruct.bStartRetractManual := FALSE;
+END_IF
+
+
+
+
+
+
+
+
+
+
+
+ ]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="Single_Solenoid_Error" Id="{f8576b29-f01d-47be-8f5e-a9ddd919db93}">
       <Implementation>
-        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPermit AND (stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving)THEN
+        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit AND (stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving)THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.NO_PERMIT;
 END_IF
 
-IF  stPneumaticAxisStruct.fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+IF stPneumaticAxisStruct.stPneumaticAxisInputs.bInterlock AND (stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving) THEN
+     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.INTERLOCK_ON;
+END_IF
+
+IF  fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.NOT_MOVING_EXTRACT;
 END_IF
 
-IF  stPneumaticAxisStruct.fbTimerExtend.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+IF  fbTimerExtend.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.EXTRACT_TIMED_OUT;
 END_IF
 
-IF  stPneumaticAxisStruct.fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
+IF  fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.NOT_MOVING_RETRACT;
 END_IF
 
-IF  stPneumaticAxisStruct.fbTimerRetract.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
+IF  fbTimerRetract.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.RETRACT_TIMED_OUT;
 END_IF
 
@@ -131,242 +259,117 @@ CASE  stPneumaticAxisStruct.ePneumaticAxisErrors OF
     stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL';
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
 
-
+    E_PneumaticAxisErrors.INTERLOCK_ON:
+    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: INTERLOCK SIGNAL ON';
+    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
 
 END_CASE
+
+stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+stPneumaticAxisStruct.bStartExtendManual := FALSE;
+stPneumaticAxisStruct.bStartRetractManual := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
 ]]></ST>
-      </Implementation>
-    </Action>
-    <Action Name="Single_Solenoid_Manual" Id="{af314d79-3c09-4c34-8c23-e49aac5aa0f7}">
-      <Implementation>
-        <ST><![CDATA[//Manual control of single solenoid pneumatic actuator
-//It is assumend that momentary push buttons are used to control the output of the solenoid valve
-
-//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-stPneumaticAxisStruct.fbTimerExtend.PT := INT_TO_TIME(stPneumaticAxisStruct.nTimeToExtend * 1000);
-stPneumaticAxisStruct.fbTimerRetract.PT := INT_TO_TIME(stPneumaticAxisStruct.nTimeToRetract * 1000);
-
-stPneumaticAxisStruct.sTimeElapsedExtend :=TIME_TO_STRING(stPneumaticAxisStruct.fbTimerExtend.ET);
-stPneumaticAxisStruct.sTimeElapsedRetract :=TIME_TO_STRING(stPneumaticAxisStruct.fbTimerRetract.ET);
-
-
-//Extend cylinder
-stPneumaticAxisStruct.fbTimerExtend (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
-stPneumaticAxisStruct.fbTrigExtendManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bExtendCylinderManual);
-
-IF stPneumaticAxisStruct.fbTrigExtendManual.Q THEN
-    stPneumaticAxisStruct.bStartExtendManual := TRUE;
-END_IF
-
-IF stPneumaticAxisStruct.bStartExtendManual AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-        stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := TRUE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := TRUE;
-
-        IF stPneumaticAxisStruct.fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-        stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-        IF stPneumaticAxisStruct.fbTimerExtend.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-        stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-        IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPermit AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving THEN
-            stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-    END_IF
-END_IF
-
-//Extraction of the cylinder finished, reset time
-IF stPneumaticAxisStruct.bStartExtendManual  AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-        stPneumaticAxisStruct.bStateChange := TRUE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-        stPneumaticAxisStruct.fbTimerExtend (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
-        stPneumaticAxisStruct.bStartExtendManual := FALSE;
-
-END_IF
-
-//Retract cylinder and start the timing of the movement
-stPneumaticAxisStruct.fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
-stPneumaticAxisStruct.fbTrigRetractManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bRetractCylinderManual);
-
-IF stPneumaticAxisStruct.fbTrigRetractManual.Q THEN
-    stPneumaticAxisStruct.bStartRetractManual := TRUE;
-END_IF
-
-IF stPneumaticAxisStruct.bStartRetractManual AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd AND  stPneumaticAxisStruct.bStateChange THEN
-        stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := TRUE;
-
-        IF stPneumaticAxisStruct.fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-           stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-           stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-        IF stPneumaticAxisStruct.fbTimerRetract.Q AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-          stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-          stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-        IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPermit AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving THEN
-            stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-END_IF
-
-//Retraction of the cylinder finished, reset timer
-IF stPneumaticAxisStruct.bStartRetractManual AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-        stPneumaticAxisStruct.bStateChange := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-        stPneumaticAxisStruct.fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
-        stPneumaticAxisStruct.bStartRetractManual := FALSE;
-END_IF
-
-
-
-]]></ST>
-      </Implementation>
-    </Action>
-    <Action Name="Single_Solenoid_PLC" Id="{d7d61ab1-a144-43ab-8977-936c72509c4b}">
-      <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
- stPneumaticAxisStruct.fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.nTimeToExtend * 1000);
- stPneumaticAxisStruct.fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.nTimeToRetract * 1000);
-
-
- stPneumaticAxisStruct.sTimeElapsedExtend :=TIME_TO_STRING(stPneumaticAxisStruct.fbTimerExtend.ET);
- stPneumaticAxisStruct.sTimeElapsedRetract :=TIME_TO_STRING(stPneumaticAxisStruct.fbTimerRetract.ET);
-
-//Starting the timing of extraction movement
-stPneumaticAxisStruct.fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
-
-//Starting the extraction movement
-IF stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-        //stPneumaticAxisStruct.fbTimerExtend();
-        stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := TRUE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := TRUE;
-
-//IF the command TO extract is given, but the cylinder hasn't moved from the bLimitBwd
-    IF  stPneumaticAxisStruct.fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-             stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-             stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-    END_IF
-//If the command to extract has timed out
-    IF  stPneumaticAxisStruct.fbTimerExtend.Q AND (NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd) THEN
-            stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-    END_IF
-
-    IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPermit AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving THEN
-            stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-    END_IF
-END_IF
-
-// Extraction of the cylinder finished, reset timer
-IF stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-        stPneumaticAxisStruct.bStateChange := TRUE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving := FALSE;
-        stPneumaticAxisStruct.fbTimerExtend (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving);
-        stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend := FALSE;
-END_IF
-
-//Starting the retraction movement and retraction timing
-stPneumaticAxisStruct.fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
-
-IF  stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd AND stPneumaticAxisStruct.bStateChange THEN
-        stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := TRUE;
-
-//IF the command TO retract has been given, but the cylinder hasn't moved from bLimitFwd
-        IF  stPneumaticAxisStruct.fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd THEN
-            stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-//If the command to retract has timed out
-        IF  stPneumaticAxisStruct.fbTimerRetract.Q AND (NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd AND NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd) THEN
-            stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-        IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPermit AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving THEN
-            stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisState := E_PneumaticMode.ERROR;
-        END_IF
-
-END_IF
-
-// Retraction of the cylinder finished, reset timer
-IF  stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract AND stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd THEN
-        stPneumaticAxisStruct.bStateChange := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving := FALSE;
-        stPneumaticAxisStruct.fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving);
-        stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract := FALSE;
-END_IF
-
-
-
-
-
-
-
-
-
-
-
- ]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="FB_PneumaticAxis">
-      <LineId Id="58" Count="0" />
-      <LineId Id="343" Count="11" />
-      <LineId Id="342" Count="0" />
-      <LineId Id="355" Count="0" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="441" Count="0" />
-      <LineId Id="440" Count="0" />
-      <LineId Id="442" Count="1" />
-      <LineId Id="468" Count="0" />
-      <LineId Id="438" Count="0" />
-      <LineId Id="446" Count="12" />
-      <LineId Id="445" Count="0" />
-      <LineId Id="471" Count="0" />
-      <LineId Id="470" Count="0" />
-      <LineId Id="460" Count="0" />
-      <LineId Id="459" Count="0" />
-      <LineId Id="462" Count="1" />
-      <LineId Id="444" Count="0" />
-      <LineId Id="431" Count="0" />
-      <LineId Id="404" Count="0" />
-      <LineId Id="402" Count="0" />
-      <LineId Id="390" Count="0" />
-      <LineId Id="382" Count="0" />
-      <LineId Id="333" Count="1" />
-      <LineId Id="317" Count="0" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="318" Count="0" />
-      <LineId Id="332" Count="0" />
-      <LineId Id="331" Count="0" />
-      <LineId Id="304" Count="0" />
+      <LineId Id="488" Count="53" />
       <LineId Id="262" Count="0" />
     </LineIds>
+    <LineIds Name="FB_PneumaticAxis.ErrorCheckExtendMoving">
+      <LineId Id="2" Count="9" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PneumaticAxis.ErrorCheckRetractMoving">
+      <LineId Id="2" Count="10" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
     <LineIds Name="FB_PneumaticAxis.Reset">
-      <LineId Id="2" Count="0" />
-      <LineId Id="25" Count="1" />
-      <LineId Id="31" Count="1" />
-      <LineId Id="9" Count="0" />
       <LineId Id="8" Count="0" />
-      <LineId Id="21" Count="0" />
       <LineId Id="24" Count="0" />
       <LineId Id="22" Count="0" />
+      <LineId Id="33" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="29" Count="0" />
     </LineIds>
+    <LineIds Name="FB_PneumaticAxis.Single_Solenoid">
+      <LineId Id="48" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="301" Count="1" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="342" Count="2" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="359" Count="1" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="361" Count="1" />
+      <LineId Id="358" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="328" Count="3" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="326" Count="0" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="335" Count="4" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="129" Count="1" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
     <LineIds Name="FB_PneumaticAxis.Single_Solenoid_Error">
       <LineId Id="32" Count="2" />
+      <LineId Id="63" Count="2" />
+      <LineId Id="62" Count="0" />
       <LineId Id="36" Count="1" />
       <LineId Id="40" Count="0" />
       <LineId Id="35" Count="0" />
@@ -393,145 +396,13 @@ END_IF
       <LineId Id="22" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="26" Count="0" />
-      <LineId Id="28" Count="2" />
-      <LineId Id="27" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="67" Count="3" />
       <LineId Id="10" Count="0" />
       <LineId Id="4" Count="0" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.Single_Solenoid_Manual">
-      <LineId Id="2" Count="0" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="39" Count="1" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="164" Count="1" />
-      <LineId Id="163" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="3" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="185" Count="2" />
-      <LineId Id="4" Count="1" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="176" Count="0" />
-      <LineId Id="48" Count="0" />
+      <LineId Id="80" Count="6" />
       <LineId Id="79" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="166" Count="0" />
-      <LineId Id="168" Count="2" />
-      <LineId Id="167" Count="0" />
-      <LineId Id="10" Count="2" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="18" Count="2" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="191" Count="0" />
-      <LineId Id="162" Count="0" />
-      <LineId Id="188" Count="2" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="52" Count="2" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="25" Count="1" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="173" Count="2" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="29" Count="2" />
-      <LineId Id="33" Count="2" />
-      <LineId Id="181" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="104" Count="0" />
       <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.Single_Solenoid_PLC">
-      <LineId Id="48" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="257" Count="0" />
-      <LineId Id="305" Count="0" />
-      <LineId Id="301" Count="1" />
-      <LineId Id="308" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="222" Count="0" />
-      <LineId Id="231" Count="0" />
-      <LineId Id="230" Count="0" />
-      <LineId Id="219" Count="1" />
-      <LineId Id="309" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="221" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="271" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="6" Count="1" />
-      <LineId Id="272" Count="0" />
-      <LineId Id="8" Count="0" />
-      <LineId Id="314" Count="0" />
-      <LineId Id="316" Count="1" />
-      <LineId Id="320" Count="0" />
-      <LineId Id="315" Count="0" />
-      <LineId Id="306" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="248" Count="0" />
-      <LineId Id="21" Count="2" />
-      <LineId Id="235" Count="1" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="300" Count="0" />
-      <LineId Id="237" Count="0" />
-      <LineId Id="58" Count="1" />
-      <LineId Id="273" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="238" Count="0" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="30" Count="1" />
-      <LineId Id="310" Count="2" />
-      <LineId Id="319" Count="0" />
-      <LineId Id="313" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="32" Count="2" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="252" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="278" Count="0" />
-      <LineId Id="280" Count="0" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="196" Count="0" />
-      <LineId Id="195" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="129" Count="1" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="10" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
