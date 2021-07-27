@@ -3,434 +3,428 @@
   <POU Name="FB_SlitPair" Id="{1223aca9-e4c9-4d31-9356-dca9871f7373}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPair
 VAR_INPUT
-	iBladeNegative : UINT; //Axis ID for negatively positioned blade
-	iBladePositive : UINT; //Axis ID for positively positioned blade
-	iGapSize : UINT; //Axis ID for the size of gap between slit blades
-	iGapCentre : UINT; //Axis ID for the centre position of the gap formed by slit blades
-	bEnable : BOOL;	//Enable/Disable the slit set
-	bReset : BOOL;	
-	fEncoderScaling : LREAL:=10000; //default scaling denominator of 10000
+    iBladeNegative: UINT; //Axis ID for negatively positioned blade
+    iBladePositive: UINT; //Axis ID for positively positioned blade
+    iGapSize: UINT; //Axis ID for the size of gap between slit blades
+    iGapCentre: UINT; //Axis ID for the centre position of the gap formed by slit blades
+    bEnable: BOOL; //Enable/disable the slit set
+    bReset: BOOL; //Reset the slit set
+    fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
 END_VAR
 VAR_OUTPUT
-	bEnabled : BOOL; //Enabled status of function
-	bBusy : BOOL;
-	bError : BOOL;
-	bHoming : BOOL := FALSE; //TRUE if function is homing axes
-	
+    bEnabled: BOOL := FALSE; //Enabled status of function
+    bError: BOOL; //Error status of function
+    bHoming: BOOL := FALSE; //TRUE if function is homing axes
 END_VAR
 VAR
-	iState : INT := 0; //statemachine index
-	bAxesEnabled : BOOL:= FALSE;
-	bBladesHomed : BOOL:= FALSE;
-	bGapHomed : BOOL:= FALSE;
-	bBladesCoupled : BOOL:= FALSE;
-	bBladesNotCoupled : BOOL := FALSE;
-	bAnyErrors : BOOL := FALSE;
-	
-	fGapSizePosition : LREAL;
-	iGapSizePosition AT %Q* : UDINT := 0;
-	fGapCentrePosition : LREAL;
-	iGapCentrePosition AT %Q* : UDINT := 0;
-	
-	resetCounterTimeout : UINT :=0;
+    eSlitPairState: E_SlitPairStates := E_SlitPairStates.INIT; //statemachine index
 
-	
+//Internal statuses for logic
+    bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
+    bBladesHomed: BOOL:= FALSE; //TRUE if blade axes are calibrated
+    bGapHomed: BOOL:= FALSE; //TRUE if virtual axes are calibrated
+    bBladesCoupled: BOOL:= FALSE; //TRUE if both blade axes are coupled
+    bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
+    bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
+
+    fGapSizePosition: LREAL;
+    iGapSizePosition AT %Q*: UDINT := 0;
+    fGapCentrePosition: LREAL;
+    iGapCentrePosition AT %Q*: UDINT := 0;
+
+    resetCounterTimeout: UINT :=0;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[(* NOTES
-	Issue with posSync may be due to the axes finishing home but still moving as they're geared in.
-	Would need to introduce a delay (or monitor not moving).
-	The old method of just sending a command to the slave axis no longer works. This used to gear it out but now it stays locked.
-	I may need to add some "memory" to the system so it can retain a user command to a slaved axis, gear out, do the command, then gear back in.
-	Sending HOME to virtual axis will break.
-
+For the virtual axis setup, the encoders need their type changed from "simulation encoder" to "Encoder (Universal)".
+In addition the scale factor needs to be changed to a numerator of 1 and denominator of fEncoderScaling which is 10,000 by default)
+Care needs to be taken with scaling and setup of both real and virtual axes to ensure velocities are not too fast and axes have time to settle before they submit a "complete move"
 *)
-GVL.astAxes[iGapSize].stConfig.eHomeSeq:=E_HomingRoutines.eHomeDirect;
-GVL.astAxes[iGapCentre].stConfig.eHomeSeq:=E_HomingRoutines.eHomeDirect;
 
-actErrorHandling();
-actGapLimits();
+//Configure homing routine of virtual axes
+GVL.astAxes[iGapSize].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+GVL.astAxes[iGapCentre].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
 
-checkBladesHomed(bHomeStatus=>bBladesHomed); //check blade calibration flags
-checkGapHomed(bHomeStatus=>bGapHomed); //check gap calibration flags
-checkBladesCoupled(bCoupledStatus=>bBladesCoupled);
-checkBladesNotCoupled(bNotCoupledStatus=>bBladesNotCoupled);
-anyErrors(axisErrors=> bAnyErrors);
+//Run actions for slit set
+actErrorHandling(); //Error handling subroutine
+actGapLimits(); //Set virtual axis limits to TRUE
+actVirtualAxisPositions(); //Virtual axis encoder position subroutine
+actRunMethods(); //Update statuses
 
-fGapSizePosition:= GVL.astAxes[iBladePositive].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition;
-fGapCentrePosition:= (GVL.astAxes[iBladePositive].stStatus.fActPosition + GVL.astAxes[iBladeNegative].stStatus.fActPosition)/2;
-IF bBladesHomed THEN
-	IF ABS(fGapSizePosition)<10000 THEN
-		iGapSizePosition:= LREAL_TO_UDINT(fGapSizePosition*fEncoderScaling);
-	END_IF
-	IF ABS(fGapCentrePosition)<10000 THEN
-		iGapCentrePosition:= LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
-	END_IF
-END_IF
+CASE eSlitPairState OF
+    E_SlitPairStates.INIT:
+        IF bAxesEnabled AND bEnable THEN
+            eSlitPairState := E_SlitPairStates.INIT_CLEAR_GEARING;
+        END_IF
 
-CASE iState OF
-	0: //Do nothing unless all axes enabled		
-		IF bAxesEnabled THEN
-			iState:=1;
-		END_IF
-	1: //Clear amy residual gearing
-		actClearSlitGearing();
-		iState:=2;
-	2: //Check gearing cleared
-		IF bBladesNotCoupled THEN
-			iState:=10;
-		END_IF
-		
-	10: //Homing status
-		IF bBladesHomed THEN
-			iState:=13; //Skip to functioning
-		ELSE
-			iState:=11;	//Homing first
-		END_IF
-	11: //Home blade axes
-		GVL.astAxes[iBladeNegative].stControl.eCommand:=E_MotionFunctions.eHome;
-		GVL.astAxes[iBladePositive].stControl.eCommand:=E_MotionFunctions.eHome;
-		GVL.astAxes[iBladeNegative].stControl.bExecute:=TRUE;
-		GVL.astAxes[iBladePositive].stControl.bExecute:=TRUE;
-				bHoming:= TRUE;
-		iState:=12;
-		
-	12: //Wait for blade homing completion
-		IF bBladesHomed THEN
-			iState:=13;
-			bHoming:= FALSE;
-		END_IF
-	
-	13: //"Home" the virtual axes
-		GVL.astAxes[iGapSize].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
-		GVL.astAxes[iGapCentre].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
-		GVL.astAxes[iGapSize].stConfig.fHomePosition:= fGapSizePosition;
-		GVL.astAxes[iGapCentre].stConfig.fHomePosition:= fGapCentrePosition;
-		GVL.astAxes[iGapSize].stControl.eCommand:=E_MotionFunctions.eHome;
-		GVL.astAxes[iGapCentre].stControl.eCommand:=E_MotionFunctions.eHome;
-		GVL.astAxes[iGapSize].stControl.bExecute:=TRUE;
-		GVL.astAxes[iGapCentre].stControl.bExecute:=TRUE;
-		iState:=14;
-	14: //Wait for virtual homing completion
-		IF bGapHomed THEN
-			iState:= 20;
-		END_IF
-		
-	20: //Setup gearing
-		actSetupSlitGearing();
-		iState:=21;
-	21: //Wait for gearing complete
-		IF bBladesCoupled THEN
-			iState:=22;
-		END_IF
-	
-	22: //General operational state. Monitor for if any blades are not geared and not busy, they performed an action and need to be regeared.
-		IF NOT bBladesCoupled AND NOT GVL.astAxes[iBladeNegative].stStatus.bBusy AND NOT GVL.astAxes[iBladePositive].stStatus.bBusy THEN
-			iState:=23;
-		END_IF
-	23: //Clear amy residual gearing
-		actClearSlitGearing();
-		iState:=24;
-	24: //Check gearing cleared
-		IF bBladesNotCoupled THEN
-			iState:=13;	//Back to homing, this ensures the setpoint position of the axis is updated.
-		END_IF
-			
-	999: //ERROR STATE
-		resetCounterTimeout:=0;
-		bError:=TRUE;
-		IF bReset THEN
-			iState:= 900;
-		END_IF
-		
-	900: //Try to clear issues
-		actClearSlitGearing();
-		iState:=901;
-	901:
-		IF bBladesNotCoupled THEN
-			iState:=902;	//Back to homing, this ensures the setpoint position of the axis is updated.
-		END_IF
-	902: //RESET ALL AXES
-		GVL.astAxes[iBladeNegative].stControl.bReset := TRUE;
-		GVL.astAxes[iBladePositive].stControl.bReset := TRUE;
-		GVL.astAxes[iGapSize].stControl.bReset := TRUE;
-		GVL.astAxes[iGapCentre].stControl.bReset := TRUE;
-		resetCounterTimeout:= resetCounterTimeout+1;
-		iState:=903;
-	//903: 
-		IF resetCounterTimeout>10 THEN
-			iState:=999;
-			RETURN;
-		END_IF
-		IF bAnyErrors THEN
-			iState:= 902;
-		ELSE
-			iState:=0;
-			bError:= FALSE;			
-		END_IF		
+    E_SlitPairStates.INIT_CLEAR_GEARING:
+        actClearSlitGearing();
+        eSlitPairState := E_SlitPairStates.INIT_GEAROUT_CHECK;
+
+    E_SlitPairStates.INIT_GEAROUT_CHECK: //Check gearOut completion
+        IF bBladesUncoupled THEN
+            eSlitPairState := E_SlitPairStates.CHECK_HOME_STATUS;
+        END_IF
+
+    E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, otherwise home the blades
+        IF bBladesHomed THEN
+            eSlitPairState := E_SlitPairStates.HOME_GAP; //Skip to functioning
+        ELSE
+            eSlitPairState := E_SlitPairStates.HOME_BLADES; //Homing first
+        END_IF
+
+    E_SlitPairStates.HOME_BLADES: //Initiate homing of blade axes. Homing routine must be pre-configured by user
+        GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
+        GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
+        GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
+        GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
+        bHoming := TRUE;
+        eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;
+
+    E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE: //Wait for completion of blade homing routines
+        IF bBladesHomed THEN
+            eSlitPairState := E_SlitPairStates.HOME_GAP;
+            bHoming := FALSE;
+        END_IF
+
+    E_SlitPairStates.HOME_GAP: //"Home" the virtual axes
+        GVL.astAxes[iGapSize].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+        GVL.astAxes[iGapCentre].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+        GVL.astAxes[iGapSize].stConfig.fHomePosition := fGapSizePosition;
+        GVL.astAxes[iGapCentre].stConfig.fHomePosition := fGapCentrePosition;
+        GVL.astAxes[iGapSize].stControl.eCommand := E_MotionFunctions.eHome;
+        GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eHome;
+        GVL.astAxes[iGapSize].stControl.bExecute := TRUE;
+        GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
+        eSlitPairState := E_SlitPairStates.CHECK_GAP_HOME_COMPLETE;
+
+    E_SlitPairStates.CHECK_GAP_HOME_COMPLETE: //Wait for virtual homing completion
+        IF bGapHomed THEN
+            eSlitPairState := E_SlitPairStates.GEARIN_SLITS;
+        END_IF
+
+    E_SlitPairStates.GEARIN_SLITS: //Setup gearing
+        actSetupSlitGearing();
+        eSlitPairState := E_SlitPairStates.CHECK_GEARIN_SLITS_COMPLETE;
+
+    E_SlitPairStates.CHECK_GEARIN_SLITS_COMPLETE: //Wait for gearing complete
+        IF bBladesCoupled THEN
+            eSlitPairState := E_SlitPairStates.SLITS_OPERATIONAL;
+        END_IF
+
+    E_SlitPairStates.SLITS_OPERATIONAL: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
+        bEnabled := TRUE;
+        IF NOT bBladesCoupled AND NOT GVL.astAxes[iBladeNegative].stStatus.bBusy AND NOT GVL.astAxes[iBladePositive].stStatus.bBusy THEN
+            eSlitPairState := E_SlitPairStates.GEAROUT_BLADES;
+        END_IF
+
+    E_SlitPairStates.GEAROUT_BLADES: //Clear amy residual gearing
+        actClearSlitGearing();
+        eSlitPairState := E_SlitPairStates.CHECK_GEAROUT_COMPLETE;
+
+    E_SlitPairStates.CHECK_GEAROUT_COMPLETE: //Check gearing cleared
+        IF bBladesUncoupled THEN
+            eSlitPairState := E_SlitPairStates.HOME_GAP; //Back to homing, this ensures the setpoint position of the axis is updated.
+        END_IF
+
+    E_SlitPairStates.ERROR: //ERROR STATE
+        resetCounterTimeout := 0;
+        bError := TRUE;
+        bEnabled := FALSE;
+        IF bReset THEN
+            eSlitPairState := E_SlitPairStates.ERROR_GEAROUT;
+        END_IF
+
+    E_SlitPairStates.ERROR_GEAROUT: //Try to clear issues
+        actClearSlitGearing();
+        eSlitPairState := E_SlitPairStates.ERROR_GEAROUT_CHECK;
+
+    E_SlitPairStates.ERROR_GEAROUT_CHECK:
+        IF bBladesUncoupled THEN
+            eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES; //Back to homing, this ensures the setpoint position of the axis is updated.
+        END_IF
+
+    E_SlitPairStates.ERROR_RESET_AXES: //RESET ALL AXES
+        GVL.astAxes[iBladeNegative].stControl.bReset := TRUE;
+        GVL.astAxes[iBladePositive].stControl.bReset := TRUE;
+        GVL.astAxes[iGapSize].stControl.bReset := TRUE;
+        GVL.astAxes[iGapCentre].stControl.bReset := TRUE;
+        resetCounterTimeout := resetCounterTimeout + 1;
+        eSlitPairState := E_SlitPairStates.ERROR_RESET_CHECK;
+
+    E_SlitPairStates.ERROR_RESET_CHECK:
+        IF resetCounterTimeout > 10 THEN
+            eSlitPairState := E_SlitPairStates.ERROR;
+            RETURN;
+        END_IF
+        IF bAxisErrorsPresent THEN
+            eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;
+        ELSE
+            eSlitPairState := E_SlitPairStates.INIT;
+            bError := FALSE;
+        END_IF
+
 END_CASE
-bReset:= FALSE;]]></ST>
+bReset := FALSE;]]></ST>
     </Implementation>
     <Action Name="actClearSlitGearing" Id="{e01ab92a-20cf-48ae-913a-9b4bc1f3c9a3}">
       <Implementation>
-        <ST><![CDATA[GVL.astAxes[iBladeNegative].stControl.eCommand:=E_MotionFunctions.eGearOut;
-GVL.astAxes[iBladePositive].stControl.eCommand:=E_MotionFunctions.eGearOut;
-GVL.astAxes[iBladeNegative].stControl.bExecute:= TRUE;
-GVL.astAxes[iBladePositive].stControl.bExecute:= TRUE;]]></ST>
+        <ST><![CDATA[//Action to send gearOut command to blade axes
+GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearOut;
+GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eGearOut;
+GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
+GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actErrorHandling" Id="{2d890ec8-2bb8-4662-99bf-f20cfc75f93d}">
       <Implementation>
-        <ST><![CDATA[IF iState<800 THEN
-	IF (GVL.astAxes[iBladeNegative].stStatus.bError) THEN
-		iState:=999;
-	END_IF
-	IF (GVL.astAxes[iBladePositive].stStatus.bError) THEN
-		iState:=999;
-	END_IF
-	IF (GVL.astAxes[iGapSize].stStatus.bError) THEN
-		iState:=999;
-	END_IF
-	IF (GVL.astAxes[iGapCentre].stStatus.bError) THEN
-		iState:=999;
-	END_IF
+        <ST><![CDATA[//Error handling for slit functionality
+IF NOT bError AND bAxisErrorsPresent THEN
+    eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
-	
-checkEnabled(bEnableStatus => bAxesEnabled);
-IF iState <> 0 AND NOT bAxesEnabled THEN
-	iState:= 999;
-END_IF]]></ST>
+IF eSlitPairState <> 0 AND NOT bAxesEnabled THEN
+    eSlitPairState := E_SlitPairStates.ERROR;
+END_IF
+IF eSlitPairState <> 0 AND NOT bEnable THEN
+    eSlitPairState := E_SlitPairStates.ERROR;
+END_IF
+IF bEnabled AND NOT bBladesHomed THEN
+    eSlitPairState := E_SlitPairStates.ERROR;
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actGapLimits" Id="{25d5c061-b303-4e71-ae15-49914f4789a8}">
       <Implementation>
-        <ST><![CDATA[//No hardware inputs to virtual axes so set true. Will be controlled by slave axis limits.
-
-GVL.astAxes[iGapSize].stInputs.bLimitBwd:=TRUE;
-GVL.astAxes[iGapSize].stInputs.bLimitFwd:=TRUE;
-GVL.astAxes[iGapCentre].stInputs.bLimitBwd:=TRUE;
-GVL.astAxes[iGapCentre].stInputs.bLimitFwd:=TRUE;]]></ST>
+        <ST><![CDATA[//Set Virtual axis inputs to TRUE to enable movement
+GVL.astAxes[iGapSize].stInputs.bLimitBwd := TRUE;
+GVL.astAxes[iGapSize].stInputs.bLimitFwd := TRUE;
+GVL.astAxes[iGapCentre].stInputs.bLimitBwd := TRUE;
+GVL.astAxes[iGapCentre].stInputs.bLimitFwd := TRUE;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actRunMethods" Id="{6bcc71e6-9559-4f3b-a747-0f306a2cb822}">
+      <Implementation>
+        <ST><![CDATA[checkAllAxesEnabled(bOutput => bAxesEnabled);
+checkBladesHomed(bOutput => bBladesHomed);
+checkVirtualHomed(bOutput => bGapHomed);
+checkBladesCoupled(bOutput => bBladesCoupled);
+checkBladesUncoupled(bOutput => bBladesUncoupled);
+checkAllAxisErrors(bOutput =>  bAxisErrorsPresent);]]></ST>
       </Implementation>
     </Action>
     <Action Name="actSetupSlitGearing" Id="{8c35be5d-8704-40d0-99d8-cf48bc76a94c}">
       <Implementation>
-        <ST><![CDATA[GVL.astAxes[iBladeNegative].stControl.eCommand:=E_MotionFunctions.eGearInMultiMaster;
+        <ST><![CDATA[GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[1].fRatio := -0.5;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[2].fRatio := 1;
-GVL.astAxes[iBladePositive].stControl.eCommand:=E_MotionFunctions.eGearInMultiMaster;
+GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[1].fRatio := 0.5;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].fRatio := 1;
-GVL.astAxes[iBladeNegative].stControl.bExecute:= TRUE;
-GVL.astAxes[iBladePositive].stControl.bExecute:= TRUE;]]></ST>
+GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
+GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
       </Implementation>
     </Action>
-    <Method Name="anyErrors" Id="{c3f4c623-4869-4c97-837f-af64e9be8aeb}">
-      <Declaration><![CDATA[METHOD anyErrors : BOOL
-VAR_OUTPUT
-	axisErrors : BOOL :=FALSE;
-END_VAR
-]]></Declaration>
+    <Action Name="actVirtualAxisPositions" Id="{84408ed0-12a9-4a20-9ee2-393320dd5a43}">
       <Implementation>
-        <ST><![CDATA[IF GVL.astAxes[iGapSize].stStatus.bError THEN
-	axisErrors:=TRUE;
-END_IF
-IF GVL.astAxes[iGapCentre].stStatus.bError THEN
-	axisErrors:=TRUE;
-END_IF
-IF GVL.astAxes[iBladeNegative].stStatus.bError THEN
-	axisErrors:=TRUE;
-END_IF
-IF GVL.astAxes[iBladePositive].stStatus.bError THEN
-	axisErrors:=TRUE;
+        <ST><![CDATA[(*Calculate virtual axis positions and convert to UDINT.
+Conversion to UDINT is prohibited if it would exceed UDINT max value of 4,294,967,295.
+If this is not done, it can cause overflow when connected to the encoder input and hard-crash the PLC which will only recover with a power cycle.
+To preserve decimal position data of the LREAL (i.e. anything <1mm) it is necessary to scale the value before converting to UDINT.
+This can be reversed with the correct scaling at the NC encoder level.
+*)
+fGapSizePosition := GVL.astAxes[iBladePositive].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+fGapCentrePosition := (GVL.astAxes[iBladePositive].stStatus.fActPosition + GVL.astAxes[iBladeNegative].stStatus.fActPosition) / 2;
+
+IF bBladesHomed THEN
+    IF ABS(fGapSizePosition) < 100000 THEN
+        iGapSizePosition := LREAL_TO_UDINT(fGapSizePosition*fEncoderScaling);
+    END_IF
+    IF ABS(fGapCentrePosition) < 100000 THEN
+        iGapCentrePosition := LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
+    END_IF
 END_IF]]></ST>
       </Implementation>
-    </Method>
-    <Method Name="checkBladesCoupled" Id="{b67c9216-9a28-4bc7-afbb-4bdb360ee51b}">
-      <Declaration><![CDATA[METHOD checkBladesCoupled : BOOL
+    </Action>
+    <Method Name="checkAllAxesEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
+      <Declaration><![CDATA[(*Method to check if all axes (real and virtual) are enabled.
+Only returns TRUE if BOTH blades are homed*)
+METHOD checkAllAxesEnabled: BOOL
 VAR_OUTPUT
-	bCoupledStatus : BOOL:= TRUE;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bGeared THEN
-	bCoupledStatus := FALSE;
-END_IF
-IF NOT GVL.astAxes[iBladePositive].stStatus.bGeared THEN
-	bCoupledStatus := FALSE;
-END_IF]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="checkBladesHomed" Id="{7ae32968-8cc1-44db-8a5f-f24d48501289}">
-      <Declaration><![CDATA[METHOD checkBladesHomed: BOOL
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-	bHomeStatus : BOOL:= TRUE;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bHomed THEN
-	bHomeStatus:=FALSE;
-END_IF
-IF NOT GVL.astAxes[iBladePositive].stStatus.bHomed THEN
-	bHomeStatus:=FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="checkBladesNotCoupled" Id="{395fac39-106a-4583-b85a-5e2978dacde5}">
-      <Declaration><![CDATA[METHOD checkBladesNotCoupled : BOOL
-VAR_OUTPUT
-	bNotCoupledStatus : BOOL:= TRUE;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF GVL.astAxes[iBladeNegative].stStatus.bGeared THEN
-	bNotCoupledStatus := FALSE;
-END_IF
-IF GVL.astAxes[iBladePositive].stStatus.bGeared THEN
-	bNotCoupledStatus := FALSE;
-END_IF]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="checkEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
-      <Declaration><![CDATA[METHOD checkEnabled : BOOL
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-	bEnableStatus : BOOL:= TRUE;
+    bOutput: BOOL:= TRUE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bEnabled THEN
-	bEnableStatus:=FALSE;
+    bOutput := FALSE;
 END_IF
 IF NOT GVL.astAxes[iBladePositive].stStatus.bEnabled THEN
-	bEnableStatus:=FALSE;
+    bOutput := FALSE;
 END_IF
 IF NOT GVL.astAxes[iGapSize].stStatus.bEnabled THEN
-	bEnableStatus:=FALSE;
+    bOutput := FALSE;
 END_IF
 IF NOT GVL.astAxes[iGapCentre].stStatus.bEnabled THEN
-	bEnableStatus:=FALSE;
+    bOutput := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkAllAxisErrors" Id="{c3f4c623-4869-4c97-837f-af64e9be8aeb}">
+      <Declaration><![CDATA[(*Method to check if an error is present on any axis.
+Returns TRUE if an error is present on any axis *)
+METHOD checkAllAxisErrors: BOOL
+VAR_OUTPUT
+    bOutput: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF GVL.astAxes[iGapSize].stStatus.bError THEN
+    bOutput := TRUE;
 END_IF
-
+IF GVL.astAxes[iGapCentre].stStatus.bError THEN
+    bOutput := TRUE;
+END_IF
+IF GVL.astAxes[iBladeNegative].stStatus.bError THEN
+    bOutput := TRUE;
+END_IF
+IF GVL.astAxes[iBladePositive].stStatus.bError THEN
+    bOutput := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkBladesCoupled" Id="{b67c9216-9a28-4bc7-afbb-4bdb360ee51b}">
+      <Declaration><![CDATA[(*Method to check if both blades are coupled to the virtual axes.
+Only returns TRUE if BOTH blades are coupled *)
+METHOD checkBladesCoupled: BOOL
+VAR_OUTPUT
+    bOutput: BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bGeared THEN
+    bOutput := FALSE;
+END_IF
+IF NOT GVL.astAxes[iBladePositive].stStatus.bGeared THEN
+    bOutput := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkBladesHomed" Id="{7ae32968-8cc1-44db-8a5f-f24d48501289}">
+      <Declaration><![CDATA[(*Method to check if blade axes are homed/have the calibration flag.
+Only returns TRUE if BOTH blades are homed*)
+METHOD checkBladesHomed: BOOL
+VAR_OUTPUT
+    bOutput: BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT GVL.astAxes[iBladeNegative].stStatus.bHomed THEN
+    bOutput := FALSE;
+END_IF
+IF NOT GVL.astAxes[iBladePositive].stStatus.bHomed THEN
+    bOutput := FALSE;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkGapHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
-      <Declaration><![CDATA[METHOD checkGapHomed : BOOL
-VAR_INPUT
-END_VAR
+    <Method Name="checkBladesUncoupled" Id="{395fac39-106a-4583-b85a-5e2978dacde5}">
+      <Declaration><![CDATA[(*Method to check if both blades are uncoupled from the virtual axes.
+Only returns TRUE if BOTH blades are uncoupled *)
+METHOD checkBladesUncoupled: BOOL
 VAR_OUTPUT
-	bHomeStatus : BOOL:= TRUE;
+    bOutput: BOOL:= TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF GVL.astAxes[iBladeNegative].stStatus.bGeared THEN
+    bOutput := FALSE;
+END_IF
+IF GVL.astAxes[iBladePositive].stStatus.bGeared THEN
+    bOutput := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkVirtualHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
+      <Declaration><![CDATA[(*Method to check if the virtual axes for gap size and gap centre are homed/the calibration flag is present.
+Only returns TRUE if BOTH virtual axes are homed *)
+METHOD checkVirtualHomed: BOOL
+VAR_OUTPUT
+    bOutput: BOOL:= TRUE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT GVL.astAxes[iGapSize].stStatus.bHomed THEN
-	bHomeStatus:=FALSE;
+    bOutput := FALSE;
 END_IF
 IF NOT GVL.astAxes[iGapCentre].stStatus.bHomed THEN
-	bHomeStatus:=FALSE;
+    bOutput := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlitPair">
-      <LineId Id="280" Count="0" />
-      <LineId Id="284" Count="0" />
-      <LineId Id="287" Count="0" />
-      <LineId Id="286" Count="0" />
-      <LineId Id="289" Count="2" />
-      <LineId Id="283" Count="0" />
-      <LineId Id="281" Count="1" />
-      <LineId Id="358" Count="0" />
-      <LineId Id="147" Count="5" />
-      <LineId Id="219" Count="0" />
-      <LineId Id="384" Count="0" />
-      <LineId Id="236" Count="0" />
-      <LineId Id="234" Count="0" />
-      <LineId Id="237" Count="0" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="238" Count="0" />
-      <LineId Id="230" Count="0" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="241" Count="1" />
-      <LineId Id="240" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="158" Count="4" />
-      <LineId Id="213" Count="0" />
-      <LineId Id="215" Count="2" />
-      <LineId Id="214" Count="0" />
-      <LineId Id="220" Count="2" />
-      <LineId Id="163" Count="16" />
-      <LineId Id="360" Count="0" />
-      <LineId Id="180" Count="20" />
-      <LineId Id="207" Count="3" />
-      <LineId Id="212" Count="0" />
-      <LineId Id="347" Count="2" />
-      <LineId Id="352" Count="5" />
-      <LineId Id="229" Count="0" />
-      <LineId Id="350" Count="0" />
-      <LineId Id="202" Count="0" />
-      <LineId Id="382" Count="0" />
-      <LineId Id="394" Count="0" />
-      <LineId Id="203" Count="1" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="361" Count="2" />
-      <LineId Id="365" Count="1" />
-      <LineId Id="368" Count="1" />
-      <LineId Id="367" Count="0" />
-      <LineId Id="370" Count="1" />
-      <LineId Id="364" Count="0" />
-      <LineId Id="372" Count="1" />
-      <LineId Id="381" Count="0" />
-      <LineId Id="375" Count="1" />
-      <LineId Id="389" Count="1" />
-      <LineId Id="392" Count="0" />
-      <LineId Id="391" Count="0" />
-      <LineId Id="378" Count="0" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="387" Count="1" />
-      <LineId Id="395" Count="0" />
-      <LineId Id="386" Count="0" />
-      <LineId Id="19" Count="0" />
+      <LineId Id="1687" Count="129" />
       <LineId Id="396" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actClearSlitGearing">
+      <LineId Id="13" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actErrorHandling">
-      <LineId Id="41" Count="0" />
-      <LineId Id="2" Count="1" />
-      <LineId Id="5" Count="2" />
-      <LineId Id="9" Count="2" />
-      <LineId Id="13" Count="2" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="19" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="129" Count="1" />
+      <LineId Id="117" Count="1" />
       <LineId Id="1" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="119" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actGapLimits">
-      <LineId Id="5" Count="1" />
+      <LineId Id="5" Count="0" />
       <LineId Id="2" Count="2" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.actRunMethods">
+      <LineId Id="2" Count="4" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actSetupSlitGearing">
       <LineId Id="2" Count="10" />
       <LineId Id="1" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlitPair.anyErrors">
+    <LineIds Name="FB_SlitPair.actVirtualAxisPositions">
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="4" Count="6" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkAllAxesEnabled">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlitPair.checkAllAxisErrors">
       <LineId Id="5" Count="0" />
       <LineId Id="7" Count="1" />
       <LineId Id="10" Count="1" />
@@ -453,25 +447,13 @@ END_IF
       <LineId Id="11" Count="0" />
       <LineId Id="20" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlitPair.checkBladesNotCoupled">
+    <LineIds Name="FB_SlitPair.checkBladesUncoupled">
       <LineId Id="5" Count="0" />
       <LineId Id="7" Count="1" />
       <LineId Id="10" Count="1" />
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlitPair.checkEnabled">
-      <LineId Id="5" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="12" Count="1" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="20" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkGapHomed">
+    <LineIds Name="FB_SlitPair.checkVirtualHomed">
       <LineId Id="9" Count="5" />
       <LineId Id="5" Count="0" />
     </LineIds>
