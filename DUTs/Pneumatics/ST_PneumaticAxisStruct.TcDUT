@@ -4,15 +4,11 @@
     <Declaration><![CDATA[TYPE ST_PneumaticAxisStruct :
 STRUCT
     stPneumaticAxisInputs : ST_PneumaticAxisInputs;
+    stPneumaticAxisOutputs : ST_PneumaticAxisOutputs;
     stPneumaticAxisControl: ST_PneumaticAxisControl;
     stPneumaticAxisStatus: ST_PneumaticAxisStatus;
     ePneumaticAxisState: E_PneumaticMode;
     ePneumaticAxisErrors: E_PneumaticAxisErrors;
-    fbTimerExtend: TON; //Timing the extraction of the cylinder
-    fbTimerRetract: TON; //Timing the retraction of the cylinder
-    fbTrig: R_TRIG; //Rising edge detection
-    fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
-    fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
     bStartExtendManual: BOOL := FALSE;
     bStartRetractManual: BOOL := FALSE;
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
