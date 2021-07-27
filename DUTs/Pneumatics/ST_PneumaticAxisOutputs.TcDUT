@@ -5,6 +5,7 @@
 STRUCT
     bLimitFwdOut AT %Q*: BOOL; //Limit Switch Fwd power output
     bLimitBwdOut AT %Q*: BOOL; //Limit Switch Bwd power output
+    bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
     bSolenoidExtendOut AT %Q*: BOOL; //Solenoid valve Extend power output (for single solenoid)
     bPressureExtendOut AT %Q*: BOOL; //Power output for air pressure switch
     bPressureRetractOut AT %Q*: BOOL; //Power output for air pressure switch
