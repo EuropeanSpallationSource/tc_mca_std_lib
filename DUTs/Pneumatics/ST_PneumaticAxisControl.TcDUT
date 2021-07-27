@@ -3,7 +3,6 @@
   <DUT Name="ST_PneumaticAxisControl" Id="{60247fff-ef28-4c35-9aa0-027d94fb1099}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
 STRUCT
-    bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
     bStartExtend : BOOL; //Variable to control solenoid valve
     bStartRetract : BOOL; //Variable to control solenoid valve
 
