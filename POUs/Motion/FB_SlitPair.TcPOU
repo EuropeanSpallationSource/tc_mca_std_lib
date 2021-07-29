@@ -26,6 +26,7 @@ VAR
     bBladesCoupled: BOOL:= FALSE; //TRUE if both blade axes are coupled
     bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
+    bFunctionInErrorState: BOOL := FALSE; //TRUE if function block is in one of the error related states
 
     fGapSizePosition: LREAL;
     iGapSizePosition AT %Q*: UDINT := 0;
@@ -183,16 +184,15 @@ GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
 IF NOT bError AND bAxisErrorsPresent THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
-IF eSlitPairState <> 0 AND NOT bAxesEnabled THEN
+IF eSlitPairState <> E_SlitPairStates.INIT AND NOT bAxesEnabled THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
-IF eSlitPairState <> 0 AND NOT bEnable THEN
+IF (eSlitPairState <> E_SlitPairStates.INIT AND NOT bFunctionInErrorState) AND NOT bEnable THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
 IF bEnabled AND NOT bBladesHomed THEN
     eSlitPairState := E_SlitPairStates.ERROR;
-END_IF
-]]></ST>
+END_IF]]></ST>
       </Implementation>
     </Action>
     <Action Name="actGapLimits" Id="{25d5c061-b303-4e71-ae15-49914f4789a8}">
@@ -211,7 +211,8 @@ checkBladesHomed(bOutput => bBladesHomed);
 checkVirtualHomed(bOutput => bGapHomed);
 checkBladesCoupled(bOutput => bBladesCoupled);
 checkBladesUncoupled(bOutput => bBladesUncoupled);
-checkAllAxisErrors(bOutput =>  bAxisErrorsPresent);]]></ST>
+checkAllAxisErrors(bOutput => bAxisErrorsPresent);
+checkErrorState(bOutput => bFunctionInErrorState);]]></ST>
       </Implementation>
     </Action>
     <Action Name="actSetupSlitGearing" Id="{8c35be5d-8704-40d0-99d8-cf48bc76a94c}">
@@ -349,6 +350,30 @@ IF GVL.astAxes[iBladePositive].stStatus.bGeared THEN
 END_IF]]></ST>
       </Implementation>
     </Method>
+    <Method Name="checkErrorState" Id="{283fb96b-f4da-4c0a-8f9d-5c3166e66b83}">
+      <Declaration><![CDATA[METHOD checkErrorState: BOOL
+VAR_OUTPUT
+    bOutput: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eSlitPairState = E_SlitPairStates.ERROR THEN
+    bOutput := TRUE;
+END_IF
+IF eSlitPairState = E_SlitPairStates.ERROR_GEAROUT THEN
+    bOutput := TRUE;
+END_IF
+IF eSlitPairState = E_SlitPairStates.ERROR_GEAROUT_CHECK THEN
+    bOutput := TRUE;
+END_IF
+IF eSlitPairState = E_SlitPairStates.ERROR_RESET_AXES THEN
+    bOutput := TRUE;
+END_IF
+IF eSlitPairState = E_SlitPairStates.ERROR_RESET_CHECK THEN
+    bOutput := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="checkVirtualHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
       <Declaration><![CDATA[(*Method to check if the virtual axes for gap size and gap centre are homed/the calibration flag is present.
 Only returns TRUE if BOTH virtual axes are homed *)
@@ -363,8 +388,7 @@ END_VAR
 END_IF
 IF NOT GVL.astAxes[iGapCentre].stStatus.bHomed THEN
     bOutput := FALSE;
-END_IF
-]]></ST>
+END_IF]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlitPair">
@@ -388,7 +412,6 @@ END_IF
       <LineId Id="120" Count="0" />
       <LineId Id="123" Count="0" />
       <LineId Id="131" Count="1" />
-      <LineId Id="119" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actGapLimits">
       <LineId Id="5" Count="0" />
@@ -398,6 +421,7 @@ END_IF
     <LineIds Name="FB_SlitPair.actRunMethods">
       <LineId Id="2" Count="4" />
       <LineId Id="1" Count="0" />
+      <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actSetupSlitGearing">
       <LineId Id="2" Count="10" />
@@ -453,9 +477,20 @@ END_IF
       <LineId Id="10" Count="1" />
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlitPair.checkErrorState">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlitPair.checkVirtualHomed">
       <LineId Id="9" Count="5" />
-      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
