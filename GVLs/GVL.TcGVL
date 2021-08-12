@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <GVL Name="GVL" Id="{913e21aa-a47e-444c-bfce-679b16c0434b}">
     <Declaration><![CDATA[VAR_GLOBAL
-	//Global array of ST_AxisStruct for holding axis parameters and controls
+    //Global array of ST_AxisStruct for holding axis parameters and controls
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; (*~ (OPC: 1 : available for OPC-clients) 
-	    													(OPC_PROP[0005]: 3 : OPC_PROP_RIGHTS, here read/write) *)
+                                                            (OPC_PROP[0005]: 3 : OPC_PROP_RIGHTS, here read/write) *)
     iAxis: UINT; //Index for for loops while going through axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
