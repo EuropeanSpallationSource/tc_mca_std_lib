@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.0">
   <DUT Name="ST_AxisStruct" Id="{9732127f-85ab-48d1-a591-d13402fe3665}">
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
-    stControl: ST_AxisControl;
+    stControl: ST_AxisControl; (*~ (OPC: 1 : available for OPC-clients) 
+	    					   (OPC_PROP[0005]: 3 : OPC_PROP_RIGHTS, here read/write) *)
     stStatus: ST_AxisStatus;
     stConfig: ST_AxisConfig;
     stError: ST_AxisError;
     stInputs: ST_AxisInputs;
-    Axis: AXIS_REF; //The NC axis link to the hardware that is controlling
+	//The NC axis link to the hardware that is controlling
+    Axis: AXIS_REF; (*~ (OPC: 0 : available for OPC-clients) *)
 END_STRUCT
 END_TYPE
 ]]></Declaration>
