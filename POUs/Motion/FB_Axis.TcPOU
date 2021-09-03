@@ -79,6 +79,8 @@ END_VAR]]></Declaration>
       <ST><![CDATA[bBusy := FALSE;
 
 stAxisStruct.Axis.ReadStatus();
+stAxisStruct.stStatus.bMovingForward:= stAxisStruct.Axis.Status.PositiveDirection;
+stAxisStruct.stStatus.bMovingBackward:= stAxisStruct.Axis.Status.NegativeDirection;
 
 actReadMcParameters();
 
@@ -695,7 +697,7 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
     <LineIds Name="FB_Axis">
       <LineId Id="3492" Count="1" />
       <LineId Id="3489" Count="0" />
-      <LineId Id="3488" Count="0" />
+      <LineId Id="3737" Count="2" />
       <LineId Id="3481" Count="0" />
       <LineId Id="3660" Count="0" />
       <LineId Id="3659" Count="0" />
