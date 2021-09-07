@@ -5,15 +5,15 @@
 {attribute 'strict'}
 TYPE E_PneumaticAxisErrors :
 (
-    NO_ERROR := 0,
-    EXTRACT_TIMED_OUT := 1, //Extraction movement not done in expected time
-    RETRACT_TIMED_OUT := 2, //Retraction movement not done in expected time
-    NOT_MOVING_EXTRACT := 3, //Extract command not executed, cylinder stays in place
-    NOT_MOVING_RETRACT := 4, //Retract command not executed, cylinder stays in place
-    INTERLOCK_ON := 5, //Intelock signal on, cylinder retracts to Limit Bwd
-    NO_PERMIT := 6, //Permit signal lost, cylinder stops
-    AIR_PRESSURE_ERROR := 7 //Air pressure signal out of range
-):= NO_ERROR;
+    eNoError := 0,
+    eExtractTimedOut := 1, //Extraction movement not done in expected time
+    eRetractTimedOut := 2, //Retraction movement not done in expected time
+    eNotMovingExtract := 3, //Extract command not executed, cylinder stays in place
+    eNotMovingRetract := 4, //Retract command not executed, cylinder stays in place
+    eInterlockOn := 5, //Interlock signal on, cylinder retracts to Limit Bwd
+    eNoPermit := 6, //Permit signal lost, cylinder stops
+    eAirPressureError := 7 //Air pressure signal out of range
+):= eNoError;
 END_TYPE
 ]]></Declaration>
   </DUT>
