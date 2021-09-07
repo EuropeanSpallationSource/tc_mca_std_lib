@@ -3,8 +3,8 @@
   <DUT Name="ST_PneumaticAxisControl" Id="{60247fff-ef28-4c35-9aa0-027d94fb1099}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
 STRUCT
-    bStartExtend : BOOL; //Variable to control solenoid valve
-    bStartRetract : BOOL; //Variable to control solenoid valve
+    bExtend: BOOL; //Variable to control solenoid valve
+    bRetract: BOOL; //Variable to control solenoid valve
 
 END_STRUCT
 END_TYPE
