@@ -1414,7 +1414,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.nTimeToExtend"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBVariables.nTimeToExtend"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1432,13 +1432,13 @@
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.nTimeToExtend"</v>
+                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBVariables.nTimeToExtend"</v>
                       <v n="InputType">"Default"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
                       <v n="InputBoxDialogTitle">""</v>
                       <v n="Password">false</v>
-                      <v n="UseTextOutputVariable">true</v>
+                      <v n="UseTextOutputVariable">false</v>
                       <v n="TextOutputVariableInitialized">true</v>
                       <v n="OtherVarConversion">""</v>
                       <v n="Format">""</v>
@@ -3340,7 +3340,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bExtendCylinderManual"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bExtendManual"</v>
                     </o>
                   </l>
                 </o>
@@ -3829,7 +3829,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtend"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bExtend"</v>
                     </o>
                   </l>
                 </o>
@@ -3931,7 +3931,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetract"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bRetract"</v>
                     </o>
                   </l>
                 </o>
@@ -4154,7 +4154,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bValveOn"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn"</v>
                     </o>
                   </l>
                 </o>
@@ -4377,7 +4377,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bExtendMoving"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending"</v>
                     </o>
                   </l>
                 </o>
@@ -4471,7 +4471,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bRetractMoving"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting"</v>
                     </o>
                   </l>
                 </o>
@@ -5334,7 +5334,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.bReset"</v>
+                          <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBVariables.bReset"</v>
                         </o>
                       </l>
                     </o>
@@ -5596,7 +5596,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bRetractCylinderManual"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bRetractManual"</v>
                     </o>
                   </l>
                 </o>
@@ -6486,7 +6486,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.nTimeToRetract"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBVariables.nTimeToRetract"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6504,7 +6504,7 @@
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.nTimeToRetract"</v>
+                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBVariables.nTimeToRetract"</v>
                       <v n="InputType">"Default"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
@@ -6658,11 +6658,11 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"%s"</v>
+                      <v n="Value">"%d"</v>
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.sTimeElapsedExtend"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].fbTimerExtend.ET"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -6670,7 +6670,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"821"</v>
+                      <v n="Value">"982"</v>
                     </o>
                   </l>
                 </o>
@@ -6819,11 +6819,11 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"%s"</v>
+                      <v n="Value">"%d"</v>
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.sTimeElapsedRetract"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].fbTimerRetract.ET"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -6831,7 +6831,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"821"</v>
+                      <v n="Value">"982"</v>
                     </o>
                   </l>
                 </o>
