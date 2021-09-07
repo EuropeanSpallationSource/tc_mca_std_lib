@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="ST_PneumaticAxisFBVariables" Id="{0cf5a73f-3f7b-4191-a68d-fd09f581360b}">
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisFBVariables :
+STRUCT
+    bStartExtendManual: BOOL := FALSE;
+    bStartRetractManual: BOOL := FALSE;
+    bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
+    bReset: BOOL := FALSE; //Reset signal from EPICS
+    nTimeToExtend: INT; //allowed time for the cylider to extract in seconds
+    nTimeToRetract: INT; //allowed time for the cylinder to retract in seconds
+    nTimeElapsedExtend: INT; //Elapsed time while extracting cylinder
+    nTimeElapsedRetract: INT; //Elapsed time while retracting cylinder
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
