@@ -174,7 +174,7 @@ CASE eHomingState OF
             fbAbortHoming.Execute := FALSE;
         END_IF
 
-        IF fbExecute.Q THEN
+        IF fbExecute.Q AND NOT(eHomeSeq = E_HomingRoutines.eNoHoming)THEN
             bBusy:= TRUE;
             eHomingState:= ePreparation;
         END_IF
