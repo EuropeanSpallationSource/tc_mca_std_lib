@@ -12,6 +12,8 @@ STRUCT
     //When InVelocity is set, fbMoveVelocity is still acitve, which is reflected by the bBusy status
     bHomed: BOOL; //Axis homed
     bMoving: BOOL; //Moving state from the NC
+    bMovingForward: BOOL; //Moving forward indicator from NC
+    bMovingBackward: BOOL; //Moving backward indicator from NC
     bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
     bInterlockedFwd: BOOL; //Axis interlocked in the postive direction
