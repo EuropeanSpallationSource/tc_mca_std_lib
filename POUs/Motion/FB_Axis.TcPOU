@@ -282,7 +282,7 @@ CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eGearInMultiMaster:
         bCommandAbortedEdge := fbGearInMultiMaster.CommandAborted;
         fbGearInMultiMaster.Options.AdvancedSlaveDynamics:=TRUE;
-        fbGearInMultiMaster.Options.SyncMode:=E_GEARINMULTIMASTERSYNCMODE.VELOSYNC;
+        fbGearInMultiMaster.Options.SyncMode:=E_GEARINMULTIMASTERSYNCMODE.POSSYNC2;
 
         IF stAxisStruct.stControl.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             //Latch master references
