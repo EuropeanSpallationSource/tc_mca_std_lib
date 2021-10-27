@@ -450,13 +450,12 @@
                           <v n="Value">4278190080U</v>
                         </o>
                         <o>
-                          <v n="Id">164912778
+                          <v n="Id">1649127785L</v>
                           <v n="Value" t="Int16">174</v>
                         </o>
                         <o>
                           <v n="Id">357335551L</v>
                           <v n="Value">381</v>
-
                         </o>
                         <o>
                           <v n="Id">2422045748L</v>
@@ -508,13 +507,12 @@
                           </l>
                         </o>
                         <o>
-                          <v n="Id">550940142L</v
+                          <v n="Id">550940142L</v>
                           <v n="Value">249</v>
                         </o>
                         <o>
                           <v n="Id">1473355128L</v>
                           <v n="Value">396</v>
-
                         </o>
                         <o>
                           <v n="Id">493260384L</v>
@@ -534,11 +532,7 @@
                         </o>
                         <o>
                           <v n="Id">390574330L</v>
-
-                          <v n="Value">"moveModulo"</v>
-
                           <v n="Value">"HOME"</v>
-
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -546,19 +540,11 @@
                         </o>
                         <o>
                           <v n="Id">2114174855L</v>
-
-                          <v n="Value">""languageSupport""</v>
-                        </o>
-                        <o>
-                          <v n="Id">3774423699L</v>
-                          <v n="Value">""moveModulo""</v>
-
                           <v n="Value">"'languageSupport'"</v>
                         </o>
                         <o>
                           <v n="Id">3774423699L</v>
                           <v n="Value">""eHomeDirect""</v>
-
                         </o>
                         <o>
                           <v n="Id">2496894244L</v>
@@ -570,24 +556,13 @@
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
-
                           <v n="Value">"123"</v>
-
                         </o>
                       </l>
                     </o>
                     <v n="VisualElementName">"Button"</v>
                     <v n="VisualElementTypeName">"VisuFbElemButton"</v>
                     <v n="VisualElementIsRectangle">true</v>
-
-                    <v n="VisualElementIdentifier">"GenElemInst_118"</v>
-                    <n n="VisualElementOfflinePaintCommands" />
-                    <n n="VisualElementFrameInformation" />
-                    <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                      <v>OnMouseClick</v>
-                      <a cet="STSnippetInputAction">
-                        <o>
-                          <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveModulo;
                     <v n="VisualElementIdentifier">"GenElemInst_459"</v>
                     <n n="VisualElementOfflinePaintCommands" />
                     <n n="VisualElementFrameInformation" />
@@ -596,12 +571,10 @@
                       <a cet="STSnippetInputAction">
                         <o>
                           <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eHome;
-
 GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                       </a>
                     </d>
-
                     <v n="VisualElementIdentification">{5b6573eb-0a66-4ba4-bdfd-6de5439e8125}</v>
                     <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
                     <a n="LMGuids" et="Guid" />
@@ -7199,8 +7172,8 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                           <v n="Value">false</v>
                         </o>
                         <o>
-                          <v n="Id">397264524L</v>
-                          <v n="Value">"MAIN.hmiPneumaticAxisSelection"</v>
+                          <v n="Id">2477733581L</v>
+                          <v n="Value">""</v>
                         </o>
                         <o>
                           <v n="Id">1782330054L</v>
@@ -8110,7 +8083,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">2114174855L</v>
-                      <v n="Value">"'languageSupport'"</v>
+                      <v n="Value">""languageSupport""</v>
                     </o>
                     <o>
                       <v n="Id">3774423699L</v>
@@ -8524,6 +8497,193 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">117</v>
+                <l n="UserManagementAccessRights" t="ArrayList" />
+              </o>
+              <o>
+                <a n="ConfiguredComplexInputs" et="ComplexInput" />
+                <l n="Elements" t="ArrayList" />
+                <n n="VisualElementDescription" />
+                <o n="VisualElemMemberList" t="VisualElemMemberList">
+                  <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
+                    <o>
+                      <v n="Id">571893170L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">2340015797L</v>
+                      <v n="Value">"HCENTER"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2565699834L</v>
+                      <v n="Value">"VCENTER"</v>
+                    </o>
+                    <o>
+                      <v n="Id">4134387352L</v>
+                      <v n="Value">"NONE"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1603690730L</v>
+                      <v n="Value">"Arial"</v>
+                    </o>
+                    <o>
+                      <v n="Id">4253639993L</v>
+                      <v n="Value" t="Int16">12</v>
+                    </o>
+                    <o>
+                      <v n="Id">2729990903L</v>
+                      <v n="Value">0U</v>
+                    </o>
+                    <o>
+                      <v n="Id">1213979116L</v>
+                      <v n="Value">0U</v>
+                    </o>
+                    <o>
+                      <v n="Id">3488306084L</v>
+                      <v n="Value">4278190080U</v>
+                    </o>
+                    <o>
+                      <v n="Id">1647042231L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">2812299069L</v>
+                      <v n="Value">4294967295U</v>
+                    </o>
+                    <o>
+                      <v n="Id">494569607L</v>
+                      <v n="Value">4278190080U</v>
+                    </o>
+                    <o>
+                      <v n="Id">1649127785L</v>
+                      <v n="Value">427</v>
+                    </o>
+                    <o>
+                      <v n="Id">357335551L</v>
+                      <v n="Value">183</v>
+                    </o>
+                    <o>
+                      <v n="Id">2422045748L</v>
+                      <v n="Value">150</v>
+                    </o>
+                    <o>
+                      <v n="Id">2134141914L</v>
+                      <v n="Value">30</v>
+                    </o>
+                    <o>
+                      <v n="Id">1651471674L</v>
+                      <v n="Value">true</v>
+                    </o>
+                    <o>
+                      <v n="Id">2341735680L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-2830136</v>
+                          <v n="CanonicalName">"Element-Control-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">438423234L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-2830136</v>
+                          <v n="CanonicalName">"Element-Alarm-Fill-Color"</v>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">3729828405L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleFont">
+                        <o>
+                          <v n="FontStyle">0</v>
+                          <v n="AdditionalFontStyle" t="UInt16">0</v>
+                          <v n="ExplicitColor">-16777216</v>
+                          <v n="CanonicalName">"Font-Standard"</v>
+                          <v n="FontName">"Arial"</v>
+                          <v n="FontSize">12</v>
+                          <v n="ScriptIdentification">0</v>
+                          <v n="DoubleFontSize" t="Double">0</v>
+                          <o n="NamedColor" t="NamedStyleColor">
+                            <v n="Color">-16777216</v>
+                            <v n="CanonicalName">"Element-Button-FontColor"</v>
+                          </o>
+                        </o>
+                      </l>
+                    </o>
+                    <o>
+                      <v n="Id">550940142L</v>
+                      <v n="Value">502</v>
+                    </o>
+                    <o>
+                      <v n="Id">1473355128L</v>
+                      <v n="Value">198</v>
+                    </o>
+                    <o>
+                      <v n="Id">493260384L</v>
+                      <v n="Value">4294967295U</v>
+                    </o>
+                    <o>
+                      <v n="Id">135947015L</v>
+                      <v n="Value">4278190080U</v>
+                    </o>
+                    <o>
+                      <v n="Id">2678395525L</v>
+                      <v n="Value">1U</v>
+                    </o>
+                    <o>
+                      <v n="Id">2478807622L</v>
+                      <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">390574330L</v>
+                      <v n="Value">"moveModulo"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2597686782L</v>
+                      <v n="Value">false</v>
+                    </o>
+                    <o>
+                      <v n="Id">2114174855L</v>
+                      <v n="Value">""languageSupport""</v>
+                    </o>
+                    <o>
+                      <v n="Id">3774423699L</v>
+                      <v n="Value">""moveModulo""</v>
+                    </o>
+                    <o>
+                      <v n="Id">2496894244L</v>
+                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stStatus.bGeared"</v>
+                    </o>
+                    <o>
+                      <v n="Id">3719097617L</v>
+                      <v n="Value">0</v>
+                    </o>
+                    <o>
+                      <v n="Id">823443203L</v>
+                      <v n="Value">"114"</v>
+                    </o>
+                  </l>
+                </o>
+                <v n="VisualElementName">"Button"</v>
+                <v n="VisualElementTypeName">"VisuFbElemButton"</v>
+                <v n="VisualElementIsRectangle">true</v>
+                <v n="VisualElementIdentifier">"GenElemInst_118"</v>
+                <n n="VisualElementOfflinePaintCommands" />
+                <n n="VisualElementFrameInformation" />
+                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
+                  <v>OnMouseClick</v>
+                  <a cet="STSnippetInputAction">
+                    <o>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveModulo;
+GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
+                    </o>
+                  </a>
+                </d>
+                <v n="VisualElementIdentification">{f930bc69-355d-439d-aac1-56d166e006d4}</v>
+                <v n="VisualElementOwningObjectGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
+                <a n="LMGuids" et="Guid" />
+                <d n="SubElements" t="Hashtable" />
+                <v n="VisualElementId">119</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
               <o>
@@ -21023,11 +21183,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
             </o>
             <v n="DialogDut">{922df0df-545b-4a6e-ab04-d027f2e1dfa1}</v>
           </o>
-<<<<<<< HEAD
-          <v n="LastUsedIdForIdentifier">466</v>
-=======
           <v n="LastUsedIdForIdentifier">459</v>
->>>>>>> origin/master
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
