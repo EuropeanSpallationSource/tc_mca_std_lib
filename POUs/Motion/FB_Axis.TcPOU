@@ -139,6 +139,7 @@ fbGearInMultiMaster(Slave := stAxisStruct.Axis,
     Master2 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
     Master3 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
     Master4 := GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
+fbGearInMultiMaster.Enable:= FALSE;
 bBusy:= bBusy OR fbGearInMultiMaster.Busy;
 
 fbGearOut(Slave := stAxisStruct.Axis);
@@ -282,6 +283,8 @@ CASE stAxisStruct.stControl.eCommand OF
 
     E_MotionFunctions.eGearInMultiMaster:
         bCommandAbortedEdge := fbGearInMultiMaster.CommandAborted;
+        fbGearInMultiMaster.Options.AdvancedSlaveDynamics:=TRUE;
+        fbGearInMultiMaster.Options.SyncMode:=E_GEARINMULTIMASTERSYNCMODE.POSSYNC2;
 
         IF stAxisStruct.stControl.bExecute AND NOT stAxisStruct.Axis.Status.Coupled THEN
             //Latch master references
@@ -736,7 +739,9 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="2594" Count="0" />
       <LineId Id="2516" Count="0" />
       <LineId Id="1629" Count="0" />
-      <LineId Id="1632" Count="3" />
+      <LineId Id="1632" Count="2" />
+      <LineId Id="3818" Count="0" />
+      <LineId Id="1635" Count="0" />
       <LineId Id="1637" Count="0" />
       <LineId Id="1642" Count="0" />
       <LineId Id="3271" Count="0" />
@@ -824,7 +829,11 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="1941" Count="1" />
       <LineId Id="2651" Count="2" />
       <LineId Id="1945" Count="14" />
-      <LineId Id="1962" Count="11" />
+      <LineId Id="1962" Count="8" />
+      <LineId Id="3737" Count="0" />
+      <LineId Id="1971" Count="1" />
+      <LineId Id="3739" Count="0" />
+      <LineId Id="1973" Count="0" />
       <LineId Id="3148" Count="4" />
       <LineId Id="3146" Count="0" />
       <LineId Id="1974" Count="1" />
