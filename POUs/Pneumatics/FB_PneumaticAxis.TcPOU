@@ -133,15 +133,27 @@ IF fbTrigExtendManual.Q THEN
 END_IF
 
 //Starting the extraction movement
-IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartExtendManual) AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartExtendManual) THEN
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := TRUE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := TRUE;
+//If the command to retract is given while the cylinder is extracting
+    IF NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
+        IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartRetractManual) THEN//AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted AND stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStateChange THEN
+            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+            stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := TRUE;
+            stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
+            stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
+        stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartExtendManual := FALSE;
+        END_IF
+    END_IF
+
+
 END_IF
 //Check for errors while the cylinder is extending
 ErrorCheck();
 
 // Extraction of the cylinder finished, reset timer
-IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartExtendManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartExtendManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted THEN
         stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStateChange := TRUE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
@@ -159,9 +171,11 @@ IF fbTrigRetractManual.Q THEN
     stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartRetractManual := TRUE;
 END_IF
 
-IF  (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartRetractManual) AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted AND stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStateChange THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisFBVariables.bStartRetractManual) THEN
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := TRUE;
+
+
 END_IF
 //Check for errors while the cylinder is retracting
 ErrorCheck();
@@ -303,12 +317,22 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="219" Count="0" />
       <LineId Id="309" Count="0" />
       <LineId Id="53" Count="0" />
+      <LineId Id="389" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="384" Count="1" />
+      <LineId Id="382" Count="0" />
+      <LineId Id="386" Count="2" />
+      <LineId Id="383" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="378" Count="0" />
       <LineId Id="306" Count="0" />
       <LineId Id="375" Count="0" />
       <LineId Id="374" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="13" Count="1" />
-      <LineId Id="17" Count="1" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="248" Count="0" />
       <LineId Id="356" Count="0" />
       <LineId Id="21" Count="2" />
@@ -320,6 +344,8 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="236" Count="0" />
       <LineId Id="24" Count="1" />
       <LineId Id="253" Count="0" />
+      <LineId Id="390" Count="0" />
+      <LineId Id="397" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="376" Count="0" />
       <LineId Id="33" Count="1" />
