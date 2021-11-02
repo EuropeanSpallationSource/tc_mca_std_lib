@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
   <POU Name="FB_SlitPair" Id="{1223aca9-e4c9-4d31-9356-dca9871f7373}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPair
 VAR_INPUT
@@ -10,7 +10,7 @@ VAR_INPUT
     bEnable: BOOL; //Enable/disable the slit set
     bReset: BOOL; //Reset the slit set
     fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
-	bAutoHome: BOOL := FALSE;
+    bAutoHome: BOOL := FALSE;
 END_VAR
 VAR_OUTPUT
     bEnabled: BOOL := FALSE; //Enabled status of function
@@ -21,6 +21,7 @@ VAR
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.INIT; //statemachine index
 
 //Internal statuses for logic
+    bResetting: BOOL := FALSE; //TRUE if axis going through a reset
     bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
     bBladesHomed: BOOL:= FALSE; //TRUE if blade axes are calibrated
     bGapHomed: BOOL:= FALSE; //TRUE if virtual axes are calibrated
@@ -32,10 +33,9 @@ VAR
     iGapSizePosition AT %Q*: UDINT := 0;
     fGapCentrePosition: LREAL;
     iGapCentrePosition AT %Q*: UDINT := 0;
-    resetCounterTimeout: UINT :=0;	
-	mcHomeGapSize: MC_Home;
-	mcHomeGapCentre: MC_Home;
-	
+    resetCounterTimeout: UINT :=0;
+    mcHomeGapSize: MC_Home;
+    mcHomeGapCentre: MC_Home;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -136,19 +136,20 @@ CASE eSlitPairState OF
         IF bBladesUncoupled THEN
             eSlitPairState := E_SlitPairStates.CLEAR_GAP_CALIBRATION; //Back to homing, this ensures the setpoint position of the axis is updated.
         END_IF
-	
-	E_SlitPairStates.CLEAR_GAP_CALIBRATION:
-		mcHomeGapSize.Execute := TRUE;
-		mcHomeGapCentre.Execute := TRUE;
-		IF mcHomeGapSize.Done AND mcHomeGapCentre.Done THEN
-			eSlitPairState := E_SlitPairStates.HOME_GAP; //Back to homing, this ensures the setpoint position of the axis is updated.
-		END_IF
+
+    E_SlitPairStates.CLEAR_GAP_CALIBRATION:
+        mcHomeGapSize.Execute := TRUE;
+        mcHomeGapCentre.Execute := TRUE;
+        IF mcHomeGapSize.Done AND mcHomeGapCentre.Done THEN
+            eSlitPairState := E_SlitPairStates.HOME_GAP; //Back to homing, this ensures the setpoint position of the axis is updated.
+        END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
         resetCounterTimeout := 0;
         bError := TRUE;
         bEnabled := FALSE;
         IF bReset THEN
+            bResetting := TRUE;
             eSlitPairState := E_SlitPairStates.ERROR_GEAROUT;
         END_IF
 
@@ -172,6 +173,7 @@ CASE eSlitPairState OF
     E_SlitPairStates.ERROR_RESET_CHECK:
         IF resetCounterTimeout > 10 THEN
             eSlitPairState := E_SlitPairStates.ERROR;
+            bResetting := FALSE;
             RETURN;
         END_IF
         IF bAxisErrorsPresent THEN
@@ -179,8 +181,8 @@ CASE eSlitPairState OF
         ELSE
             eSlitPairState := E_SlitPairStates.INIT;
             bError := FALSE;
+            bResetting := FALSE;
         END_IF
-
 END_CASE
 bReset := FALSE;]]></ST>
     </Implementation>
@@ -196,6 +198,10 @@ GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
     <Action Name="actErrorHandling" Id="{2d890ec8-2bb8-4662-99bf-f20cfc75f93d}">
       <Implementation>
         <ST><![CDATA[//Error handling for slit functionality
+IF bResetting THEN //ignore setting in error state if FB going through a reset
+    RETURN;
+END_IF
+
 IF NOT bError AND bAxisErrorsPresent THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
@@ -414,7 +420,14 @@ END_IF]]></ST>
       <LineId Id="1860" Count="1" />
       <LineId Id="1702" Count="75" />
       <LineId Id="1862" Count="6" />
-      <LineId Id="1778" Count="38" />
+      <LineId Id="1778" Count="5" />
+      <LineId Id="1906" Count="0" />
+      <LineId Id="1784" Count="22" />
+      <LineId Id="1907" Count="0" />
+      <LineId Id="1807" Count="6" />
+      <LineId Id="1908" Count="0" />
+      <LineId Id="1814" Count="0" />
+      <LineId Id="1816" Count="0" />
       <LineId Id="396" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actClearSlitGearing">
@@ -426,6 +439,8 @@ END_IF]]></ST>
     </LineIds>
     <LineIds Name="FB_SlitPair.actErrorHandling">
       <LineId Id="99" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="133" Count="1" />
       <LineId Id="127" Count="0" />
       <LineId Id="129" Count="1" />
       <LineId Id="117" Count="1" />
