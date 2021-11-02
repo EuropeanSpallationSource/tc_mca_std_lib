@@ -10,6 +10,7 @@ VAR_INPUT
     bEnable: BOOL; //Enable/disable the slit set
     bReset: BOOL; //Reset the slit set
     fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
+	bAutoHome: BOOL := FALSE;
 END_VAR
 VAR_OUTPUT
     bEnabled: BOOL := FALSE; //Enabled status of function
@@ -27,13 +28,14 @@ VAR
     bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
     bFunctionInErrorState: BOOL := FALSE; //TRUE if function block is in one of the error related states
-
     fGapSizePosition: LREAL;
     iGapSizePosition AT %Q*: UDINT := 0;
     fGapCentrePosition: LREAL;
     iGapCentrePosition AT %Q*: UDINT := 0;
-
-    resetCounterTimeout: UINT :=0;
+    resetCounterTimeout: UINT :=0;	
+	mcHomeGapSize: MC_Home;
+	mcHomeGapCentre: MC_Home;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -53,6 +55,12 @@ actGapLimits(); //Set virtual axis limits to TRUE
 actVirtualAxisPositions(); //Virtual axis encoder position subroutine
 actRunMethods(); //Update statuses
 
+//Mc_Home FBs configured to clear homing signal
+mcHomeGapSize(Axis := astAxes[iGapSize].Axis, HomingMode:=MC_HomingMode.MC_ResetCalibration);
+mcHomeGapCentre(Axis:=astAxes[iGapCentre].Axis, HomingMode:=MC_HomingMode.MC_ResetCalibration);
+mcHomeGapSize.Execute := FALSE;
+mcHomeGapCentre.Execute := FALSE;
+
 CASE eSlitPairState OF
     E_SlitPairStates.INIT:
         IF bAxesEnabled AND bEnable THEN
@@ -68,11 +76,11 @@ CASE eSlitPairState OF
             eSlitPairState := E_SlitPairStates.CHECK_HOME_STATUS;
         END_IF
 
-    E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, otherwise home the blades
+    E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
         IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.HOME_GAP; //Skip to functioning
-        ELSE
-            eSlitPairState := E_SlitPairStates.HOME_BLADES; //Homing first
+        ELSIF bAutoHome THEN
+            eSlitPairState := E_SlitPairStates.HOME_BLADES; //If autohome enabled, home the blades
         END_IF
 
     E_SlitPairStates.HOME_BLADES: //Initiate homing of blade axes. Homing routine must be pre-configured by user
@@ -126,8 +134,15 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.CHECK_GEAROUT_COMPLETE: //Check gearing cleared
         IF bBladesUncoupled THEN
-            eSlitPairState := E_SlitPairStates.HOME_GAP; //Back to homing, this ensures the setpoint position of the axis is updated.
+            eSlitPairState := E_SlitPairStates.CLEAR_GAP_CALIBRATION; //Back to homing, this ensures the setpoint position of the axis is updated.
         END_IF
+	
+	E_SlitPairStates.CLEAR_GAP_CALIBRATION:
+		mcHomeGapSize.Execute := TRUE;
+		mcHomeGapCentre.Execute := TRUE;
+		IF mcHomeGapSize.Done AND mcHomeGapCentre.Done THEN
+			eSlitPairState := E_SlitPairStates.HOME_GAP; //Back to homing, this ensures the setpoint position of the axis is updated.
+		END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
         resetCounterTimeout := 0;
@@ -392,7 +407,14 @@ END_IF]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlitPair">
-      <LineId Id="1687" Count="129" />
+      <LineId Id="1687" Count="14" />
+      <LineId Id="1856" Count="0" />
+      <LineId Id="1855" Count="0" />
+      <LineId Id="1857" Count="1" />
+      <LineId Id="1860" Count="1" />
+      <LineId Id="1702" Count="75" />
+      <LineId Id="1862" Count="6" />
+      <LineId Id="1778" Count="38" />
       <LineId Id="396" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.actClearSlitGearing">
