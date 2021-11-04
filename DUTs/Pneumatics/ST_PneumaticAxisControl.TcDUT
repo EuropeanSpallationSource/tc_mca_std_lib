@@ -3,9 +3,11 @@
   <DUT Name="ST_PneumaticAxisControl" Id="{60247fff-ef28-4c35-9aa0-027d94fb1099}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
 STRUCT
-    bExtend: BOOL; //Variable to control solenoid valve
-    bRetract: BOOL; //Variable to control solenoid valve
-
+    bExtend: BOOL; //Variable to control solenoid valve from PLC
+    bRetract: BOOL; //Variable to control solenoid valve from PLC
+    bStartExtendManual: BOOL := FALSE; //Variable to control the solenoid valve with momentary push button
+    bStartRetractManual: BOOL := FALSE; //VAriable to control the solenoid valve with momentary push button
+    bReset: BOOL := FALSE; //Reset signal from EPICS
 END_STRUCT
 END_TYPE
  ]]></Declaration>
