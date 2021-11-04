@@ -5,9 +5,8 @@
 {attribute 'strict'}
 TYPE E_PneumaticMode :
 (   eSingleSolenoidControl := 0, //Single solenoid valve with spring return
-    eDoubleSolenoidControl := 1, //Double solenoid valve: not yet implemented
-    eReset := 2,
-    eError := 3
+    eReset := 1,
+    eError := 2
 ):= eSingleSolenoidControl;
 END_TYPE
 ]]></Declaration>
