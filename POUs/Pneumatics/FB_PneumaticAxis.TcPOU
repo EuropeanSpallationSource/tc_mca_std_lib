@@ -85,6 +85,7 @@ END_CASE
         <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bSolenoidActive := stPneumaticAxisStruct.stPneumaticAxisInputs.bSolenoidActive;
 
 //Check if Permit signal is ON
 IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
@@ -124,8 +125,8 @@ stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidContr
     <Action Name="Single_Solenoid" Id="{d7d61ab1-a144-43ab-8977-936c72509c4b}">
       <Implementation>
         <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in ms
- fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToExtend);
- fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToRetract);
+ fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend);
+ fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract);
 
 //Starting the timing of extraction movement
 fbTimerExtend();
@@ -289,6 +290,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
     <LineIds Name="FB_PneumaticAxis.Initialization">
       <LineId Id="33" Count="0" />
       <LineId Id="2" Count="1" />
+      <LineId Id="34" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="27" Count="2" />
