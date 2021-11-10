@@ -5,8 +5,7 @@
 STRUCT
     bLimitFwd AT %I*: BOOL; //Limit Switch Fwd input
     bLimitBwd AT %I*: BOOL; //Limit Switch Bwd input
-    bExtendValve AT %I*: BOOL; //Solenoid valve Extend Input (for single solenoid)
-    bRetractValve AT %I*: BOOL; //Solenoid valve Retract Input (for double solenoid)
+    bSolenoidActive AT %I*: BOOL; //Solenoid valve Extend Input (for single solenoid)
     bPSSPermit AT %I*: BOOL; //Input signal from PSS for the movement
     bInterlock AT %I*: BOOL; //Input interlock signal for the movement
     bPressureExtend AT %I*: BOOL; //Input signal of air pressure for cyclinder extraction

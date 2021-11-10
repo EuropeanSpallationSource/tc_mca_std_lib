@@ -7,7 +7,7 @@ STRUCT
     stPneumaticAxisOutputs: ST_PneumaticAxisOutputs;
     stPneumaticAxisControl: ST_PneumaticAxisControl;
     stPneumaticAxisStatus: ST_PneumaticAxisStatus;
-    stPneumaticAxisFBConfig: ST_PneumaticAxisFBConfig;
+    stPneumaticAxisConfig: ST_PneumaticAxisConfig;
     ePneumaticAxisMode: E_PneumaticMode;
     ePneumaticAxisErrors: E_PneumaticAxisErrors;
 END_STRUCT
