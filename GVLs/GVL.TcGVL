@@ -2,10 +2,16 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <GVL Name="GVL" Id="{913e21aa-a47e-444c-bfce-679b16c0434b}">
     <Declaration><![CDATA[VAR_GLOBAL
+
+
+    astPneumaticAxes: ARRAY [1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF ST_PneumaticAxisStruct; ////Global array of ST_PneumaticAxisStruct for holding axis parameters and controls
+
     //Global array of ST_AxisStruct for holding axis parameters and controls
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; (*~ (OPC: 1 : available for OPC-clients)
                                                             (OPC_PROP[0005]: 3 : OPC_PROP_RIGHTS, here read/write) *)
+
     iAxis: UINT; //Index for for loops while going through axes
+    iPneumaticAxis: UINT := 1; //Index for for loops while going through pneumatic axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
 END_VAR
