@@ -24,8 +24,8 @@ STRUCT
     bCoupledGear3: BOOL;
     bCoupledGear4: BOOL;
     fActPosition: LREAL; //Actual position value
-    nRawEncoder AT %I*: UINT; //Raw encoder counter value
-    nInternalCounter AT %I*: UINT; //Raw internal counter from drive
+    nEncoderRawCounter AT %I*: UINT; //Raw encoder counter value
+    nStepperDriveCounter AT %I*: UINT; //Raw internal counter from stepper drive
     fActVelocity: LREAL; //Actual velocity
     bError: BOOL; //Motion function block has produced error (NC drive not necessarily in error state)
     nErrorID: UDINT; //Last motion function block errorID or NC errorID
