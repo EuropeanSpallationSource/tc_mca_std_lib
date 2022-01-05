@@ -176,7 +176,7 @@ fbPower.Enable := stAxisStruct.stControl.bEnable;
 fbPower.Enable_Positive := (stAxisStruct.stStatus.bFwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bInterlockedFwd;
 fbPower.Enable_Negative := (stAxisStruct.stStatus.bBwEnabled OR bWaitForStoppingAfterLimitHit) AND NOT stAxisStruct.stStatus.bInterlockedBwd;
 fbPower.Override := stAxisStruct.stConfig.fOverride;
-stAxisStruct.stStatus.bEnabled := fbPower.Status;
+stAxisStruct.stStatus.bEnabled := NOT stAxisStruct.Axis.Status.Disabled;
 
 //Stop
 fbStop.Execute := stAxisStruct.stControl.bStop;
