@@ -470,11 +470,6 @@ ELSIF fbWriteParameter.Error THEN
 ELSIF fbReadParameter.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;
-    stAxisStruct.stError.fbReadParameterErrorId := fbReadParameter.ErrorID;
-
-ELSIF fbReadParameter.Error THEN
-    stAxisStruct.stStatus.bError := TRUE;
-    stAxisStruct.stStatus.nErrorId := fbReadParameter.ErrorID;
     stAxisStruct.stError.fbReadParameterErrorId:=fbReadParameter.ErrorID;
 
 ELSIF stAxisStruct.Axis.Status.Error THEN
@@ -823,10 +818,7 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="253" Count="11" />
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="14" />
-      <LineId Id="288" Count="120" />
-      <LineId Id="3902" Count="3" />
-      <LineId Id="3901" Count="0" />
-      <LineId Id="409" Count="44" />
+      <LineId Id="288" Count="165" />
       <LineId Id="3507" Count="5" />
       <LineId Id="454" Count="9" />
       <LineId Id="3513" Count="0" />
