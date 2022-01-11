@@ -4,7 +4,7 @@
     <Declaration><![CDATA[VAR_GLOBAL
 
 
-    astPneumaticAxes: ARRAY [1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF ST_PneumaticAxisStruct; ////Global array of ST_PneumaticAxisStruct for holding axis parameters and controls
+//    astPneumaticAxes: ARRAY [1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF ST_PneumaticAxisStruct; ////Global array of ST_PneumaticAxisStruct for holding axis parameters and controls
 
     //Global array of ST_AxisStruct for holding axis parameters and controls
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; (*~ (OPC: 1 : available for OPC-clients)
