@@ -150,6 +150,10 @@ fbWriteParameter(Axis := stAxisStruct.Axis);
 fbWriteParameter.Execute := FALSE;
 bBusy:= bBusy OR fbWriteParameter.Busy;
 
+fbReadParameter(Axis := stAxisStruct.Axis);
+fbReadParameter.Enable := FALSE;
+bBusy:= bBusy OR fbReadParameter.Busy;
+
 //Linking the limit swtiches and interlock signals
 stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stInputs.bLimitFwd;
 stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stInputs.bLimitBwd;
@@ -313,11 +317,12 @@ CASE stAxisStruct.stControl.eCommand OF
 		
     E_MotionFunctions.eReadParameter:
         fbReadParameter.Enable := stAxisStruct.stcontrol.bExecute;
+        fbReadParameter.ReadMode := E_READMODE.READMODE_ONCE;
         fbReadParameter.ParameterNumber := stAxisStruct.stConfig.eAxisParameters;
         stAxisStruct.stconfig.fReadAxisParameter := fbReadParameter.Value;
         bDoneEdge := fbReadParameter.Valid;
 
-		
+
 END_CASE
 
 //Busy from the motion function blocks
@@ -461,11 +466,6 @@ ELSIF fbGearOut.Error and stAxisStruct.Axis.Status.Coupled THEN
     stAxisStruct.stStatus.bError := TRUE;
     stAxisStruct.stStatus.nErrorId := fbGearOut.ErrorID;
     stAxisStruct.stError.nGearOutErrorId := fbGearOut.ErrorID;
-
-ELSIF fbWriteParameter.Error THEN
-    stAxisStruct.stStatus.bError := TRUE;
-    stAxisStruct.stStatus.nErrorId := fbWriteParameter.ErrorID;
-    stAxisStruct.stError.fbWriteParameterErrorId := fbWriteParameter.ErrorID;
 
 ELSIF fbReadParameter.Error THEN
     stAxisStruct.stStatus.bError := TRUE;
@@ -730,7 +730,9 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="1921" Count="0" />
       <LineId Id="1925" Count="1" />
       <LineId Id="2837" Count="0" />
-      <LineId Id="2835" Count="1" />
+      <LineId Id="2835" Count="0" />
+      <LineId Id="3974" Count="3" />
+      <LineId Id="2836" Count="0" />
       <LineId Id="2262" Count="2" />
       <LineId Id="3586" Count="0" />
       <LineId Id="3663" Count="0" />
@@ -813,12 +815,15 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="202" Count="1" />
       <LineId Id="246" Count="6" />
       <LineId Id="3900" Count="0" />
-      <LineId Id="3895" Count="4" />
+      <LineId Id="3895" Count="1" />
+      <LineId Id="3978" Count="0" />
+      <LineId Id="3897" Count="2" />
       <LineId Id="3894" Count="0" />
       <LineId Id="253" Count="11" />
       <LineId Id="2" Count="0" />
       <LineId Id="267" Count="14" />
-      <LineId Id="288" Count="165" />
+      <LineId Id="288" Count="115" />
+      <LineId Id="409" Count="44" />
       <LineId Id="3507" Count="5" />
       <LineId Id="454" Count="9" />
       <LineId Id="3513" Count="0" />
