@@ -314,7 +314,7 @@ CASE stAxisStruct.stControl.eCommand OF
         fbWriteParameter.ParameterNumber := stAxisStruct.stConfig.eAxisParameters;
         fbWriteParameter.Value := stAxisStruct.stConfig.fWriteAxisParameter;
         bDoneEdge := fbWriteParameter.Done;
-		
+
     E_MotionFunctions.eReadParameter:
         fbReadParameter.Enable := stAxisStruct.stcontrol.bExecute;
         fbReadParameter.ReadMode := E_READMODE.READMODE_ONCE;
