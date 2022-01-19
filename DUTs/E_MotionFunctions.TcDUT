@@ -14,7 +14,8 @@ TYPE E_MotionFunctions :
     eGearOut := 6, //Removes gearing set in the above command
     eGearInMultiMaster := 7, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
     eHome := 10, //Run the homing routine for the axis
-    eWriteParameter := 50 //Writes the set value to the set parameter once bExecute goes high
+    eWriteParameter := 50, //Writes the set value to the set parameter once bExecute goes high
+    eReadParameter := 60 //Reads a single Parameter
 ) := eJog; //Jog is the default behaviour of the axis.
 END_TYPE
 
