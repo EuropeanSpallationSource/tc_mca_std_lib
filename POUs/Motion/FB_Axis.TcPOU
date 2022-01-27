@@ -120,11 +120,11 @@ bBusy:= bBusy OR fbMoveAbsolute.Busy;
 
 fbMoveRelative(Axis := stAxisStruct.Axis);
 fbMoveRelative.Execute := FALSE;
-bBusy:= bBusy OR fbReset.Busy;
+bBusy:= bBusy OR fbMoveRelative.Busy;
 
 fbMoveVelocity(Axis := stAxisStruct.Axis);
 fbMoveVelocity.Execute := FALSE;
-bBusy:= bBusy OR fbMoveRelative.Busy;
+bBusy:= bBusy OR fbMoveVelocity.Busy;
 
 fbMoveModulo(Axis := stAxisStruct.Axis);
 fbMoveModulo.Execute := FALSE;
