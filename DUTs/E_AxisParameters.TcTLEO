@@ -70,8 +70,8 @@ TYPE E_AxisParameters :
     AxisEncoderScalingNumerator := 1056, //lreal IndexOffset= 16#0001_0023 - available in Tc3
     AxisEncoderScalingDenominator := 1057, //lreal IndexOffset= 16#0001_0024 - available in Tc3
     (* new since 7/2016 *)
-	AxisMaximumAcceleration := 1058, //lreal IndexOffset= 16#0000_00F1
-	AxisMaximumDeceleration := 1059, //lreal IndexOffset= 16#0000_00F2
+    AxisMaximumAcceleration := 1058, //lreal IndexOffset= 16#0000_00F1
+    AxisMaximumDeceleration := 1059, //lreal IndexOffset= 16#0000_00F2
     AxisVeloJumpFactor := 1060, //lreal IndexOffset= 16#0000_0106
     AxisToleranceBallAuxAxis := 1061, //lreal IndexOffset= 16#0000_0108
     AxisMaxPositionDeviationAuxAxis := 1062, //lreal IndexOffset= 16#0000_0109

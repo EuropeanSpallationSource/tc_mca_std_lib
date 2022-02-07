@@ -36,8 +36,8 @@ STRUCT
     fHomingVelToCam: LREAL; //Read only - AxisCalibrationVelocityForward
     fHomingVelFromCam: LREAL; //Read only - AxisCalibrationVelocityBackward
     fVeloMax: LREAL; //Read only - AxisMaxVelocity
-	fMaxAcc: LREAL; //Read only - AxisAccMax
-	fMaxDec: LREAL; //Read only - AxisDecMax
+    fMaxAcc: LREAL; //Read only - AxisMaximumAcceleration
+    fMaxDec: LREAL; //Read only - AxisMaxDeceleration
     fDefaultAcc: LREAL; //Read only - AxisDefaultAcceleration
     fDefaultDec: LREAL; //Read only - AxisDefaultDeceleration
     bEnMinSoftPosLimit: BOOL; //Read only

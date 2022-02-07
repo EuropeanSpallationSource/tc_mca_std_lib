@@ -59,6 +59,8 @@ VAR
     fbReadHomingVelToCam: MC_ReadParameter;
     fbReadHomingVelFromCam: MC_ReadParameter;
     fbReadAxisVeloMax: MC_ReadParameter;
+    fbReadAxisMaxAcc: MC_ReadParameter;
+    fbReadAxisMaxDec: MC_ReadParameter;
     fbReadAxisAcc: MC_ReadParameter;
     fbReadAxisDec: MC_ReadParameter;
     fbReadEnMinSoftPosLimit: MC_ReadParameter;
@@ -580,13 +582,13 @@ fbReadAxisVeloMax(Axis := stAxisStruct.Axis,
                         ParameterNumber := E_AxisParameters.AxisMaxVelocity,
                         Value=> stAxisStruct.stConfig.fVeloMax);
 //Max acceleration
-fbReadAxisAcc(Axis := stAxisStruct.Axis,
+fbReadAxisMaxAcc(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisMaximumAcceleration,
                         Value=> stAxisStruct.stConfig.fMaxAcc);
 //Max deceleration
-fbReadAxisDec(Axis := stAxisStruct.Axis,
+fbReadAxisMaxDec(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisMaximumDeceleration,
@@ -603,7 +605,7 @@ fbReadAxisDec(Axis := stAxisStruct.Axis,
                         ReadMode:= READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisDefaultDeceleration,
                         Value=> stAxisStruct.stConfig.fDefaultDec);
-						
+
 //Soft limits enabled
 fbReadEnMinSoftPosLimit(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
