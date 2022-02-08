@@ -3,9 +3,9 @@
   <DUT Name="ST_PneumaticAxisStatus" Id="{7869817a-a6d6-4657-92fd-c307a4cba7d6}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisStatus :
 STRUCT
-    bExtending: BOOL; //Extraction movement status
+    bExtending: BOOL; //Extending movement status
     bRetracting: BOOL; //Retraction movement status
-    bExtracted: BOOL; //Cylinder extracted status
+    bExtended: BOOL; //Cylinder extracted status
     bRetracted: BOOL; //Cylinder retracted status
     bSolenoidActive: BOOL; //Status input of valve solenoid
     sStatus: STRING; //Pneumatic cylinder current status
