@@ -1414,7 +1414,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToExtend"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1432,7 +1432,7 @@
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToExtend"</v>
+                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend"</v>
                       <v n="InputType">"Default"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
@@ -4565,7 +4565,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bExtracted"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended"</v>
                     </o>
                     <o>
                       <v n="Id">1357176423L</v>
@@ -6486,7 +6486,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToRetract"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6504,7 +6504,7 @@
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisFBConfig.nTimeToRetract"</v>
+                      <v n="InputBoxVariable">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract"</v>
                       <v n="InputType">"Default"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
@@ -7798,10 +7798,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>64f13c03-ce03-44cd-b1dc-cbd6d4b3cf65</v>
-                <v>FB_Exit</v>
-                <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
                 <v>FB_Reinit</v>
                 <v>d9ea5219-caff-4f0c-b8bb-39dea38201e8</v>
+                <v>FB_Exit</v>
+                <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{dec2867f-d69d-40b8-8779-69d7b309f007}</v>
