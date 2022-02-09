@@ -7,6 +7,7 @@ STRUCT
     bRetract: BOOL; //Variable to control solenoid valve from PLC
     bStartExtendManual: BOOL := FALSE; //Variable to control the solenoid valve with momentary push button
     bStartRetractManual: BOOL := FALSE; //VAriable to control the solenoid valve with momentary push button
+    bInterlock: BOOL; //Input interlock signal for the movement
     bReset: BOOL := FALSE; //Reset signal from EPICS
 END_STRUCT
 END_TYPE

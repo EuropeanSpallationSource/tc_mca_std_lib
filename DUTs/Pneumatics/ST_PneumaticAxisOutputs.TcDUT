@@ -6,6 +6,11 @@ STRUCT
     bLimitFwdOn AT %Q*: BOOL; //Limit Switch Fwd power output
     bLimitBwdOn AT %Q*: BOOL; //Limit Switch Bwd power output
     bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
+	bExtendedLight AT %Q*: BOOL; //Power output for In position + LED
+	bRetractedLight AT %Q*: BOOL; //Power output for In position + LED
+	bMovingLight AT %Q*: BOOL; //Power output for cylinder Moving LED
+	bNoPermitLight AT %Q*: BOOL; //Power output for No permit LED
+	bErrorLight AT %Q*: BOOL; //Power output for Error LED
     bPressureExtendOn AT %Q*: BOOL; //Power output for air pressure switch
     bPressureRetractOn AT %Q*: BOOL; //Power output for air pressure switch
     fAirPressureOn AT %Q*: REAL; //Power output for analog pressure sensor

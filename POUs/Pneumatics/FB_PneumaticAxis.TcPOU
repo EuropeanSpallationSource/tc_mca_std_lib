@@ -86,6 +86,26 @@ END_CASE
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bSolenoidActive := stPneumaticAxisStruct.stPneumaticAxisInputs.bSolenoidActive;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bErrorLight := stPneumaticAxisStruct.stPneumaticAxisStatus.bError;
+//Set No Permit LED to false
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bNoPermitLight := FALSE;
+
+//Power the outputs of the limit switches
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bLimitBwdOn := TRUE;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bLimitFwdOn := TRUE;
+
+//Assign LEDs to the limit switch statuses
+IF stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
+	stPneumaticAxisStruct.stPneumaticAxisOutputs.bExtendedLight := TRUE;
+	ELSE
+	stPneumaticAxisStruct.stPneumaticAxisOutputs.bExtendedLight := FALSE;	
+	END_IF
+	
+IF stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
+	stPneumaticAxisStruct.stPneumaticAxisOutputs.bRetractedLight := TRUE;
+	ELSE
+	stPneumaticAxisStruct.stPneumaticAxisOutputs.bRetractedLight := FALSE;	
+	END_IF
 
 //Check if Permit signal is ON
 IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
@@ -101,7 +121,7 @@ IF fbTrigRisingEdgePermit.Q THEN
 END_IF
 
 //Check if Interlock signal is ON
-IF stPneumaticAxisStruct.stPneumaticAxisInputs.bInterlock THEN
+IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
@@ -118,6 +138,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START
 stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
 stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bErrorLight := FALSE;
 
   ]]></ST>
       </Implementation>
@@ -127,6 +148,13 @@ stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidContr
         <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in ms
  fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend);
  fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract);
+ 
+ //Checking the condition for the Moving LED 
+IF stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting OR stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending THEN
+	stPneumaticAxisStruct.stPneumaticAxisOutputs.bMovingLight := TRUE;
+	ELSE
+		stPneumaticAxisStruct.stPneumaticAxisOutputs.bMovingLight := FALSE;
+	END_IF
 
 //Starting the timing of extraction movement
 fbTimerExtend();
@@ -215,7 +243,7 @@ END_IF
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
 
-IF stPneumaticAxisStruct.stPneumaticAxisInputs.bInterlock THEN
+IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
      stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eInterlockOn;
 END_IF
 
@@ -291,6 +319,11 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="33" Count="0" />
       <LineId Id="2" Count="1" />
       <LineId Id="34" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="15" />
+      <LineId Id="37" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="27" Count="2" />
@@ -312,12 +345,16 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="24" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="33" Count="0" />
+      <LineId Id="37" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_PneumaticAxis.Single_Solenoid">
       <LineId Id="48" Count="0" />
       <LineId Id="43" Count="1" />
+      <LineId Id="411" Count="0" />
+      <LineId Id="413" Count="4" />
+      <LineId Id="412" Count="0" />
       <LineId Id="308" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="369" Count="0" />
