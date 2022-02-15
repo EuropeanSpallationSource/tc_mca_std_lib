@@ -91,10 +91,6 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
 //Set No Permit LED to false
 
 
-//Power the outputs of the limit switches
-stPneumaticAxisStruct.stPneumaticAxisOutputs.bLimitBwdOn := TRUE;
-stPneumaticAxisStruct.stPneumaticAxisOutputs.bLimitFwdOn := TRUE;
-
 //Check if Permit signal is ON
 IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
@@ -136,8 +132,8 @@ stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidContr
         <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in s
  fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend)*1000;
  fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract)*1000;
- 
- 
+
+
 //Starting the timing of extraction movement
 fbTimerExtend();
 fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
@@ -303,8 +299,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="34" Count="0" />
       <LineId Id="55" Count="1" />
       <LineId Id="36" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="38" Count="3" />
+      <LineId Id="41" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="27" Count="2" />
