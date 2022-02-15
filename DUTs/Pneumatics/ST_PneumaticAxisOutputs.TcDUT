@@ -3,8 +3,8 @@
   <DUT Name="ST_PneumaticAxisOutputs" Id="{51effe12-4bc0-43e3-b66e-2952d0306c78}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
 STRUCT
-    bLimitFwdOn AT %Q*: BOOL; //Limit Switch Fwd power output
-    bLimitBwdOn AT %Q*: BOOL; //Limit Switch Bwd power output
+    bEndSwitchFwdOn AT %Q*: BOOL; //End Switch Fwd power output
+    bEndSwitchBwdOn AT %Q*: BOOL; //End Switch Bwd power output
     bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
     bPressureExtendOn AT %Q*: BOOL; //Power output for air pressure switch
     bPressureRetractOn AT %Q*: BOOL; //Power output for air pressure switch

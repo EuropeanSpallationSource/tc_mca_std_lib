@@ -13,8 +13,6 @@ VAR
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
-    stPneumaticAxisFBConfig: INT;
-    bStartExtendManual: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -55,7 +53,7 @@ END_CASE
     </Implementation>
     <Action Name="ErrorCheck" Id="{8b3d850c-470a-444a-af07-097a9845aaa1}">
       <Implementation>
-        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bLimitBwd
+        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
     IF  fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
              stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
              stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
@@ -66,7 +64,7 @@ END_CASE
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
     END_IF
 
-//IF the command to retract has been given, but the cylinder hasn't moved from bLimitFwd
+//IF the command to retract has been given, but the cylinder hasn't moved from bEndSwitchFwd
         IF  fbTimerRetract.Q AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
             stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
@@ -83,12 +81,11 @@ END_CASE
     <Action Name="Initialization" Id="{484c2371-b110-4d54-b677-54e40f38dcea}">
       <Implementation>
         <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
-stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd;
-stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended := stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchBwd;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchFwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bSolenoidActive := stPneumaticAxisStruct.stPneumaticAxisInputs.bSolenoidActive;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bPSSPermitOK := stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock;
-//Set No Permit LED to false
 
 
 //Check if Permit signal is ON
@@ -129,7 +126,7 @@ stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidContr
     </Action>
     <Action Name="Single_Solenoid" Id="{d7d61ab1-a144-43ab-8977-936c72509c4b}">
       <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in s
+        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
  fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend)*1000;
  fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract)*1000;
 
@@ -298,7 +295,6 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
       <LineId Id="2" Count="1" />
       <LineId Id="34" Count="0" />
       <LineId Id="55" Count="1" />
-      <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="16" Count="0" />

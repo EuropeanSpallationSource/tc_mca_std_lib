@@ -585,7 +585,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"Limit switches simulation"</v>
+                      <v n="Value">"End switches simulation"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -628,7 +628,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"19"</v>
+                      <v n="Value">"1009"</v>
                     </o>
                   </l>
                 </o>
@@ -698,11 +698,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">417</v>
+                      <v n="Value">411</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">51</v>
+                      <v n="Value">50</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -714,7 +714,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"LimitBwd"</v>
+                      <v n="Value">"EndSwitchBwd"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -757,7 +757,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"919"</v>
+                      <v n="Value">"554"</v>
                     </o>
                   </l>
                 </o>
@@ -1008,7 +1008,7 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">497</v>
+                      <v n="Value">504</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
@@ -1024,7 +1024,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"LimitFwd"</v>
+                      <v n="Value">"EndSwitchFwd"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -1067,7 +1067,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"459"</v>
+                      <v n="Value">"1084"</v>
                     </o>
                   </l>
                 </o>
@@ -7187,11 +7187,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">463</v>
+                      <v n="Value">454</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">76</v>
+                      <v n="Value">77</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7243,7 +7243,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchBwd"</v>
                     </o>
                   </l>
                 </o>
@@ -7345,7 +7345,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchFwd"</v>
                     </o>
                   </l>
                 </o>
@@ -7798,10 +7798,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>64f13c03-ce03-44cd-b1dc-cbd6d4b3cf65</v>
-                <v>FB_Exit</v>
-                <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
                 <v>FB_Reinit</v>
                 <v>d9ea5219-caff-4f0c-b8bb-39dea38201e8</v>
+                <v>FB_Exit</v>
+                <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{dec2867f-d69d-40b8-8779-69d7b309f007}</v>
