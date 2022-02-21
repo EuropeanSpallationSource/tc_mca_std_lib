@@ -59,6 +59,8 @@ VAR
     fbReadHomingVelToCam: MC_ReadParameter;
     fbReadHomingVelFromCam: MC_ReadParameter;
     fbReadAxisVeloMax: MC_ReadParameter;
+    fbReadAxisMaxAcc: MC_ReadParameter;
+    fbReadAxisMaxDec: MC_ReadParameter;
     fbReadAxisAcc: MC_ReadParameter;
     fbReadAxisDec: MC_ReadParameter;
     fbReadEnMinSoftPosLimit: MC_ReadParameter;
@@ -579,17 +581,29 @@ fbReadAxisVeloMax(Axis := stAxisStruct.Axis,
                         ReadMode:= READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisMaxVelocity,
                         Value=> stAxisStruct.stConfig.fVeloMax);
-//Acceleration
+//Max acceleration
+fbReadAxisMaxAcc(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaximumAcceleration,
+                        Value=> stAxisStruct.stConfig.fMaxAcc);
+//Max deceleration
+fbReadAxisMaxDec(Axis := stAxisStruct.Axis,
+                        Enable:= TRUE,
+                        ReadMode:= READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisMaximumDeceleration,
+                        Value=> stAxisStruct.stConfig.fMaxDec);
+//Default acceleration
 fbReadAxisAcc(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisAccMax,
+                        ParameterNumber := E_AxisParameters.AxisDefaultAcceleration,
                         Value=> stAxisStruct.stConfig.fDefaultAcc);
-//Deceleration
+//Default deceleration
 fbReadAxisDec(Axis := stAxisStruct.Axis,
                         Enable:= TRUE,
                         ReadMode:= READMODE_CYCLIC,
-                        ParameterNumber := E_AxisParameters.AxisDecMax,
+                        ParameterNumber := E_AxisParameters.AxisDefaultDeceleration,
                         Value=> stAxisStruct.stConfig.fDefaultDec);
 
 //Soft limits enabled
@@ -850,13 +864,15 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="124" Count="0" />
       <LineId Id="69" Count="4" />
       <LineId Id="99" Count="0" />
+      <LineId Id="187" Count="10" />
+      <LineId Id="185" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="81" Count="3" />
       <LineId Id="100" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="86" Count="3" />
       <LineId Id="101" Count="0" />
-      <LineId Id="90" Count="0" />
+      <LineId Id="198" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="2" />
