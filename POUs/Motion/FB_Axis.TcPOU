@@ -73,7 +73,7 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
-    bInitialized: BOOL;
+    
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[bBusy := FALSE;
@@ -84,7 +84,7 @@ stAxisStruct.stStatus.bMovingBackward:= stAxisStruct.Axis.Status.NegativeDirecti
 
 actReadMcParameters();
 
-IF stAxisStruct.stConfig.bReadMcParametersValid AND NOT bInitialized THEN
+IF stAxisStruct.stConfig.bReadMcParametersValid AND NOT stAxisStruct.stStatus.bAxisInitialized THEN
     actInit();
 END_IF
 
@@ -538,7 +538,7 @@ stAxisStruct.stControl.fVelocity := stAxisStruct.stConfig.fVelocityDefaultFast;
 stAxisStruct.stControl.fJogVelocity := stAxisStruct.stConfig.fVelocityDefaultSlow;
 
 
-bInitialized := TRUE;]]></ST>
+stAxisStruct.stStatus.bAxisInitialized := TRUE;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
