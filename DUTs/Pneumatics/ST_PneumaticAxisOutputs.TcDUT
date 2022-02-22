@@ -9,8 +9,6 @@ STRUCT
     bPressureExtendOn AT %Q*: BOOL; //Power output for air pressure switch
     bPressureRetractOn AT %Q*: BOOL; //Power output for air pressure switch
     fAirPressureOn AT %Q*: REAL; //Power output for analog pressure sensor
-    bExtendManualOn AT %Q*: BOOL; //Power output for push button (extend)
-    bRetractManualOn AT %Q*: BOOL; //Power output for push button (retract)
 END_STRUCT
 END_TYPE
 ]]></Declaration>

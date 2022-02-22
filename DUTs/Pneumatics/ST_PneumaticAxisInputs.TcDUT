@@ -10,8 +10,8 @@ STRUCT
     bPressureExtend AT %I*: BOOL; //Input signal of air pressure for cyclinder extraction
     bPressureRetract AT %I*: BOOL; //Input signal of air pressure for cylinder retraction
     nAirPressureValve AT %I*: REAL; //Input signal of air pressure for pneumatic valve
-    bExtendManual AT %I*: BOOL; //Push button input to extend cylinder
-    bRetractManual AT %I*: BOOL; //Push button input to retract the cylinder
+    bOpenManual AT %I*: BOOL; //Push button input to extend cylinder
+    bCloseManual AT %I*: BOOL; //Push button input to retract the cylinder
 END_STRUCT
 END_TYPE
 ]]></Declaration>
