@@ -7,6 +7,8 @@ STRUCT
     bRetracting: BOOL; //Retraction movement status
     bExtended: BOOL; //Cylinder extracted status
     bRetracted: BOOL; //Cylinder retracted status
+    nTimeElapsedExtend: INT; //Elapsed time while extracting cylinder
+    nTimeElapsedRetract: INT; //Elapsed time while retracting cylinder
     bSolenoidActive: BOOL; //Status input of valve solenoid
     sStatus: STRING; //Pneumatic cylinder current status
     bInterlocked: BOOL; //Interlock siganl active

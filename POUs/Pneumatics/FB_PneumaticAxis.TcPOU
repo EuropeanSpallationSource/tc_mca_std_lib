@@ -13,7 +13,7 @@ VAR
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
-	bStartExtendManual: BOOL; //Variable to control the solenoid valve with momentary push button
+    bStartExtendManual: BOOL; //Variable to control the solenoid valve with momentary push button
     bStartRetractManual: BOOL; //VAriable to control the solenoid valve with momentary push button
 END_VAR
 ]]></Declaration>
