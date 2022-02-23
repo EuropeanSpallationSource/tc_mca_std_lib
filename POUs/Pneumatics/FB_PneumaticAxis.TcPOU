@@ -13,6 +13,8 @@ VAR
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
+	bStartExtendManual: BOOL; //Variable to control the solenoid valve with momentary push button
+    bStartRetractManual: BOOL; //VAriable to control the solenoid valve with momentary push button
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -139,21 +141,21 @@ fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
 fbTrigExtendManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bOpenManual);
 
 IF fbTrigExtendManual.Q THEN
-    stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual := TRUE;
+    bStartExtendManual := TRUE;
 END_IF
 
 //Starting the extraction movement
-IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual) THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR bStartExtendManual) THEN
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := TRUE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := TRUE;
 //If the command to retract is given while the cylinder is extracting
     IF NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
-        IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual) THEN
+        IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR bStartRetractManual) THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
             stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := TRUE;
             stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
             stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual := FALSE;
+        bStartExtendManual := FALSE;
         END_IF
     END_IF
 
@@ -163,11 +165,11 @@ END_IF
 ErrorCheck();
 
 // Extraction of the cylinder finished, reset timer
-IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR bStartExtendManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
         bStateChange := TRUE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual := FALSE;
+        bStartExtendManual := FALSE;
 END_IF
 
 
@@ -180,10 +182,10 @@ fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting);
 fbTrigRetractManual(clk:=stPneumaticAxisStruct.stPneumaticAxisInputs.bCloseManual);
 
 IF fbTrigRetractManual.Q THEN
-    stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual := TRUE;
+    bStartRetractManual := TRUE;
 END_IF
 
-IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual) THEN
+IF (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR bStartRetractManual) THEN
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := TRUE;
 
@@ -192,11 +194,11 @@ END_IF
 //Check for errors while the cylinder is retracting
 ErrorCheck();
 // Retraction of the cylinder finished, reset timer
-IF  (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
+IF  (stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR bStartRetractManual) AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
         bStateChange := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
         stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
-        stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual := FALSE;
+        bStartRetractManual := FALSE;
 END_IF
 
 
@@ -273,8 +275,8 @@ END_CASE
 stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-stPneumaticAxisStruct.stPneumaticAxisControl.bStartExtendManual := FALSE;
-stPneumaticAxisStruct.stPneumaticAxisControl.bStartRetractManual := FALSE;
+bStartExtendManual := FALSE;
+bStartRetractManual := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
 ]]></ST>
