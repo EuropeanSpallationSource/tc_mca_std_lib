@@ -235,6 +235,7 @@ CASE stAxisStruct.stControl.eCommand OF
         fbMoveVelocity.Acceleration := stAxisStruct.stControl.fAcceleration;
         fbMoveVelocity.Deceleration := stAxisStruct.stControl.fDeceleration;
         fbMoveVelocity.Direction := SEL(stAxisStruct.stControl.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
+        bDoneEdge := fbMoveVelocity.InVelocity;
         bCommandAbortedEdge := fbMoveVelocity.CommandAborted;
 
     E_MotionFunctions.eMoveModulo:
@@ -801,6 +802,7 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="2772" Count="0" />
       <LineId Id="2777" Count="2" />
       <LineId Id="2771" Count="0" />
+      <LineId Id="4055" Count="0" />
       <LineId Id="1941" Count="1" />
       <LineId Id="2651" Count="2" />
       <LineId Id="1945" Count="14" />
