@@ -75,7 +75,7 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
-    
+
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[bBusy := FALSE;
