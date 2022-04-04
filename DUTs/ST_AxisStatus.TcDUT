@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisStatus :
 STRUCT
     //Outputs & Status
-	bAxisInitialized: BOOL := FALSE; //True when all parameters from actReadMcParameters are valid
+    bAxisInitialized: BOOL := FALSE; //True when all parameters from actReadMcParameters are valid
     bEnabled: BOOL; //Axis drive enabled
     bCommandAborted: BOOL; //Command aborted output of the eCommand function blocks
     bBusy: BOOL; //Axis busy (eCommand function block is active)
