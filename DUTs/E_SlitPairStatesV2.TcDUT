@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+  <DUT Name="E_SlitPairStatesV2" Id="{6665fbaf-b520-47d5-8ce7-9872d8af20f7}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_SlitPairStatesV2 :
+(
+	INIT := 0,
+    ENABLE_REAL_GENERATORS,
+    DISABLE_REAL_GENERATORS,
+    ENABLE_VIRTUAL_GENERATORS,
+    DISABLE_VIRTUAL_GENERATORS,
+    WAIT_FOR_VIRTUAL_MOVE_DONE,
+    WAIT_FOR_REAL_MOVE_DONE,
+    ERROR_INIT,
+    OPERATIONAL,
+    WAIT_FOR_HOMED
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
