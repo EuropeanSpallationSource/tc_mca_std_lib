@@ -252,27 +252,6 @@ GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
 GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actVirtualAxisPositions" Id="{84408ed0-12a9-4a20-9ee2-393320dd5a43}">
-      <Implementation>
-        <ST><![CDATA[(*Calculate virtual axis positions and convert to UDINT.
-Conversion to UDINT is prohibited if it would exceed UDINT max value of 4,294,967,295.
-If this is not done, it can cause overflow when connected to the encoder input and hard-crash the PLC which will only recover with a power cycle.
-To preserve decimal position data of the LREAL (i.e. anything <1mm) it is necessary to scale the value before converting to UDINT.
-This can be reversed with the correct scaling at the NC encoder level.
-*)
-fGapSizePosition := GVL.astAxes[iBladePositive].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition;
-fGapCentrePosition := (GVL.astAxes[iBladePositive].stStatus.fActPosition + GVL.astAxes[iBladeNegative].stStatus.fActPosition) / 2;
-
-IF bBladesHomed THEN
-    IF ABS(fGapSizePosition) < 100000 THEN
-        iGapSizePosition := LREAL_TO_UDINT(fGapSizePosition*fEncoderScaling);
-    END_IF
-    IF ABS(fGapCentrePosition) < 100000 THEN
-        iGapCentrePosition := LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
-    END_IF
-END_IF]]></ST>
-      </Implementation>
-    </Action>
     <Method Name="checkAllAxesEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
       <Declaration><![CDATA[(*Method to check if all axes (real and virtual) are enabled.
 Only returns TRUE if BOTH blades are homed*)
@@ -462,17 +441,6 @@ END_IF]]></ST>
     </LineIds>
     <LineIds Name="FB_SlitPair.actSetupSlitGearing">
       <LineId Id="2" Count="10" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actVirtualAxisPositions">
-      <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="2" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="4" Count="6" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair.checkAllAxesEnabled">
