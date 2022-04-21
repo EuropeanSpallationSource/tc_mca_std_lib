@@ -13,6 +13,7 @@ STRUCT
     fHomeFinishDistance: LREAL := 0; //Distrance that the axis should move back into the working zone after homing is finished
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
+    tPermitTimeout: Time := T#2s;
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters

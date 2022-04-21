@@ -5,6 +5,7 @@
 FUNCTION_BLOCK FB_Axis
 VAR
     sVersion: STRING := '1.0.4';
+	bPermitReq: INT;
 END_VAR
 
 VAR CONSTANT
@@ -13,6 +14,7 @@ VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     //By default 0 as represents no existing gearing
     nNO_GEARING: UINT := 0;
+    nTIMEOUT_ERR: UDINT := 1;
 END_VAR
 
 VAR_IN_OUT
@@ -51,6 +53,16 @@ VAR
     fbDoneRiseEdge: R_TRIG;
     fbWriteParameter: MC_WriteParameter;
     fbReadParameter: MC_ReadParameter;
+
+// helper variables to rembember that execute has been delayed due to waiting for a permit signal
+    bWaitMoveAbsolute: BOOL;
+    bWaitMoveRelative: BOOL;
+    bWaitMoveVelocity: BOOL;
+    bWaitMoveModulo: BOOL;
+    bWaitJog: BOOL;
+    bWaitHome: BOOL;
+    fbTonPermitAck: TON;
+
 
     // Used in/for actReadMcParameters
     bReadValid: BOOL := FALSE;
@@ -202,13 +214,20 @@ END_IF
 //Motion Functions
 CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eMoveAbsolute:
-        fbMoveAbsolute.Execute := stAxisStruct.stControl.bExecute;
+// Activate Permit Request and remember bExecute 
+        IF NOT(stAxisStruct.stControl.bPermitReq) THEN
+            stAxisStruct.stControl.bPermitReq := stAxisStruct.stControl.bExecute;
+            bWaitMoveAbsolute := stAxisStruct.stControl.bExecute;
+        END_IF
+
+        fbMoveAbsolute.Execute := stAxisStruct.stStatus.bPermitAck AND bWaitMoveAbsolute;
         fbMoveAbsolute.Position := stAxisStruct.stControl.fPosition;
         fbMoveAbsolute.Velocity := ABS(stAxisStruct.stControl.fVelocity);
         fbMoveAbsolute.Acceleration := stAxisStruct.stControl.fAcceleration;
         fbMoveAbsolute.Deceleration := stAxisStruct.stControl.fDeceleration;
         bDoneEdge := fbMoveAbsolute.Done;
         bCommandAbortedEdge := fbMoveAbsolute.CommandAborted;
+
 
     E_MotionFunctions.eMoveRelative:
         fbMoveRelative.Execute := stAxisStruct.stControl.bExecute;
@@ -530,7 +549,20 @@ ELSE
 END_IF
 
 //Reset bExecute
-stAxisStruct.stControl.bExecute := FALSE;]]></ST>
+stAxisStruct.stControl.bExecute := FALSE;
+
+//Guarantee that Permit Request is active for a moving axis 
+IF stAxisStruct.Axis.Status.Moving THEN
+   stAxisStruct.stControl.bPermitReq := TRUE;
+END_IF
+
+//Timeout control Permit Ack Signal
+fbTonPermitAck(IN:= stAxisStruct.stStatus.bPermitAck, PT:= stAxisStruct.stConfig.tPermitTimeout);
+IF fbTonPermitAck.Q AND NOT stAxisStruct.stStatus.bPermitAck THEN
+	stAxisStruct.stError.nPermitErrorID := nTIMEOUT_ERR;
+	stAxisStruct.stStatus.nErrorID := nTIMEOUT_ERR;
+	stAxisStruct.stStatus.bError := TRUE;
+END_IF]]></ST>
     </Implementation>
     <Action Name="actInit" Id="{fbff7981-0a80-47f4-875f-ec24f3c93b13}">
       <Implementation>
@@ -695,7 +727,8 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       </Implementation>
     </Action>
     <LineIds Name="FB_Axis">
-      <LineId Id="3492" Count="1" />
+      <LineId Id="3492" Count="0" />
+      <LineId Id="4158" Count="0" />
       <LineId Id="3489" Count="0" />
       <LineId Id="3737" Count="2" />
       <LineId Id="3481" Count="0" />
@@ -781,9 +814,16 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="2364" Count="0" />
       <LineId Id="2344" Count="0" />
       <LineId Id="2311" Count="0" />
-      <LineId Id="2329" Count="1" />
+      <LineId Id="2329" Count="0" />
+      <LineId Id="4166" Count="0" />
+      <LineId Id="4153" Count="2" />
+      <LineId Id="4152" Count="0" />
+      <LineId Id="4165" Count="0" />
+      <LineId Id="2330" Count="0" />
       <LineId Id="2888" Count="0" />
-      <LineId Id="2331" Count="5" />
+      <LineId Id="2331" Count="4" />
+      <LineId Id="4148" Count="0" />
+      <LineId Id="2336" Count="0" />
       <LineId Id="2934" Count="0" />
       <LineId Id="2992" Count="0" />
       <LineId Id="3204" Count="0" />
@@ -843,6 +883,15 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
       <LineId Id="3507" Count="5" />
       <LineId Id="454" Count="9" />
       <LineId Id="3513" Count="0" />
+      <LineId Id="4164" Count="0" />
+      <LineId Id="4161" Count="2" />
+      <LineId Id="4160" Count="0" />
+      <LineId Id="4168" Count="0" />
+      <LineId Id="4167" Count="0" />
+      <LineId Id="4171" Count="2" />
+      <LineId Id="4176" Count="0" />
+      <LineId Id="4174" Count="0" />
+      <LineId Id="4169" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.actInit">
       <LineId Id="6" Count="0" />

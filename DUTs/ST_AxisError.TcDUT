@@ -21,6 +21,8 @@ STRUCT
     fbReadParameterErrorId : UDINT;
 //Error from the NC
     nNCErrorID : UDINT;
+//Error because of missing Permit(brake, airpads,...)
+    nPermitErrorID : UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
