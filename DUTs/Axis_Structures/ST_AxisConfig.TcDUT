@@ -28,6 +28,7 @@ STRUCT
     bEnableTemperatureDisable: BOOL := FALSE; //Enable axis disabling due to high temperature
     fMaxTemperature: LREAL := 0.0; //Maximum temperature allowed before disabling
     fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
+    tPermitTimeout: Time := T#2s;
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations

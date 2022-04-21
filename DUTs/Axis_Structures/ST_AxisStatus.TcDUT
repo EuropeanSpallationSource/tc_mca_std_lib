@@ -33,6 +33,7 @@ STRUCT
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter value from the stepper drive
     fActVelocity: LREAL; //Current Velocity of the Axis
+    bPermitAck: BOOL; //Requested Permit has been granted; Can be used for example to indicate that a brake is open or that airpads are on
     bError: BOOL; //True if the axis is in an NC Error Stop state from Axis_Status
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
 END_STRUCT

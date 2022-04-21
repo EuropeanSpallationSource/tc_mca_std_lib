@@ -67,6 +67,17 @@ VAR
     bWaitForStopAfterLimitHit: BOOL := FALSE;
     fbRemovePowerTimer: TOF;
 
+
+    // helper variables to rembember that execute has been delayed due to waiting for a permit signal
+    bPermitReq: INT;
+    bWaitMoveAbsolute: BOOL;
+    bWaitMoveRelative: BOOL;
+    bWaitMoveVelocity: BOOL;
+    bWaitMoveModulo: BOOL;
+    bWaitJog: BOOL;
+    bWaitHome: BOOL;
+    fbTonPermitAck: TON;
+
     //Dedicated NC parameter read FBs
     fbReadAxisVeloManSlow: MC_ReadParameter;
     fbReadAxisVeloManFast: MC_ReadParameter;
@@ -109,6 +120,7 @@ VAR CONSTANT
     nNO_GEARING: UINT := 0;
     nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
+    nTIMEOUT_ERR: UDINT := 1;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -126,6 +138,20 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 _stAxis.stControl.bExecute := FALSE;
+
+//Guarantee that Permit Request is active for a moving axis
+IF stAxisStruct.Axis.Status.Moving THEN
+    stAxisStruct.stControl.bPermitReq := TRUE;
+END_IF
+
+//Timeout control Permit Ack Signal
+fbTonPermitAck(IN:= stAxisStruct.stStatus.bPermitAck, PT:= stAxisStruct.stConfig.tPermitTimeout);
+IF fbTonPermitAck.Q AND NOT stAxisStruct.stStatus.bPermitAck THEN
+    stAxisStruct.stError.nPermitErrorID := nTIMEOUT_ERR;
+    stAxisStruct.stStatus.nErrorID := nTIMEOUT_ERR;
+    stAxisStruct.stStatus.bError := TRUE;
+END_IF
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -554,7 +580,12 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
-    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
+    // Activate Permit Request and remember bExecute
+    IF NOT(_stAxis.stControl.bPermitReq) THEN
+        _stAxis.stControl.bPermitReq := _stAxis.stControl.bExecute;
+        bWaitMoveAbsolute := _stAxis.stControl.bExecute;
+    END_IF
+    fbMoveAbsolute.Execute := _stAxis.stStatus.bPermitAck AND bWaitMoveAbsolute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
     END_IF
