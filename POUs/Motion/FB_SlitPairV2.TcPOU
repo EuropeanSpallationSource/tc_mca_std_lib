@@ -49,6 +49,9 @@ VAR
 
     internalReset: BOOL;
     homingReset: BOOL:= FALSE;
+    //Two resets required due to homing functionality
+    resetInProgress_check1: BOOL:= FALSE;
+    resetInProgress_check2: BOOL:= FALSE;
 
     //stupid internal MCPOWER blocks because Beckhoff won't let you enable a setpoint generator on a limit....
     mcPower_positiveAxis: MC_POWER;
@@ -106,7 +109,7 @@ END_IF
 //State machine
 IF Enable THEN
     CASE istate OF  //HOMING LOOP ISSUE
-        E_SlitPairStatesV2.INIT:
+        E_SlitPairStatesV2.INIT:            
             //If real axes are calibrated, then home the virtual axes, else go Operatioanl
             IF GVL.astAxes[ID_positiveAxis].stStatus.bHomed AND GVL.astAxes[ID_negativeAxis].stStatus.bHomed THEN
                 GVL.astAxes[ID_gapSizeAxis].stControl.eCommand:= E_MotionFunctions.eHome;
@@ -126,6 +129,7 @@ IF Enable THEN
             //IF NOT IN HOMING STATE
 
         E_SlitPairStatesV2.OPERATIONAL:
+            resetInProgress_check1 := FALSE;
             //Detect whether real or virtual axes are moving
             IF GVL.astAxes[ID_gapSizeAxis].stStatus.bMoving OR GVL.astAxes[ID_gapCentreAxis].stStatus.bMoving THEN
                 iState:=E_SlitPairStatesV2.ENABLE_REAL_GENERATORS;
@@ -188,16 +192,23 @@ IF Enable THEN
 
         E_SlitPairStatesV2.ERROR_INIT:
             IF homingReset THEN
-                internalReset:= TRUE;
+                Reset:= TRUE;
+                resetInProgress_check1:= TRUE;
+                resetInProgress_check2:= TRUE;
                 homingReset:= FALSE;
             END_IF
-            IF internalReset THEN
+            IF internalReset OR Reset OR resetInProgress_check2 THEN
                 GVL.astAxes[ID_positiveAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_negativeAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_gapSizeAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_gapCentreAxis].stControl.bReset := TRUE;
-                iState:= E_SlitPairStatesV2.INIT;
+                IF NOT(resetInProgress_check1) THEN
+                    resetInProgress_check2 := FALSE;
+                END_IF                
             END_IF
+            IF NOT(GVL.astAxes[ID_positiveAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_negativeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapSizeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapCentreAxis].stStatus.bError) THEN
+                iState:= E_SlitPairStatesV2.INIT;
+            END_IF 
 
         E_SlitPairStatesV2.HOMING_INIT:
             (*GVL.astAxes[ID_positiveAxis].stControl.eCommand:= E_MotionFunctions.eHome;
@@ -391,6 +402,7 @@ END_IF]]></ST>
       <LineId Id="380" Count="0" />
       <LineId Id="252" Count="0" />
       <LineId Id="234" Count="0" />
+      <LineId Id="462" Count="0" />
       <LineId Id="379" Count="0" />
       <LineId Id="236" Count="4" />
       <LineId Id="235" Count="0" />
@@ -419,11 +431,16 @@ END_IF]]></ST>
       <LineId Id="214" Count="0" />
       <LineId Id="209" Count="3" />
       <LineId Id="222" Count="1" />
-      <LineId Id="392" Count="2" />
+      <LineId Id="392" Count="1" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="394" Count="0" />
       <LineId Id="391" Count="0" />
       <LineId Id="224" Count="1" />
-      <LineId Id="227" Count="3" />
+      <LineId Id="227" Count="2" />
+      <LineId Id="463" Count="2" />
       <LineId Id="226" Count="0" />
+      <LineId Id="457" Count="2" />
       <LineId Id="213" Count="0" />
       <LineId Id="315" Count="0" />
       <LineId Id="318" Count="2" />
