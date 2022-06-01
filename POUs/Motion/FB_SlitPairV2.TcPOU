@@ -109,7 +109,7 @@ END_IF
 //State machine
 IF Enable THEN
     CASE istate OF  //HOMING LOOP ISSUE
-        E_SlitPairStatesV2.INIT:            
+        E_SlitPairStatesV2.INIT:
             //If real axes are calibrated, then home the virtual axes, else go Operatioanl
             IF GVL.astAxes[ID_positiveAxis].stStatus.bHomed AND GVL.astAxes[ID_negativeAxis].stStatus.bHomed THEN
                 GVL.astAxes[ID_gapSizeAxis].stControl.eCommand:= E_MotionFunctions.eHome;
@@ -204,11 +204,11 @@ IF Enable THEN
                 GVL.astAxes[ID_gapCentreAxis].stControl.bReset := TRUE;
                 IF NOT(resetInProgress_check1) THEN
                     resetInProgress_check2 := FALSE;
-                END_IF                
+                END_IF
             END_IF
             IF NOT(GVL.astAxes[ID_positiveAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_negativeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapSizeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapCentreAxis].stStatus.bError) THEN
                 iState:= E_SlitPairStatesV2.INIT;
-            END_IF 
+            END_IF
 
         E_SlitPairStatesV2.HOMING_INIT:
             (*GVL.astAxes[ID_positiveAxis].stControl.eCommand:= E_MotionFunctions.eHome;
