@@ -222,7 +222,7 @@ CASE stAxisStruct.stControl.eCommand OF
     E_MotionFunctions.eJog:
         fbJog.JogForward := stAxisStruct.stControl.bJogFwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
         fbJog.JogBackwards := stAxisStruct.stControl.bJogBwd AND NOT (stAxisStruct.stControl.bExecute OR stAxisStruct.stStatus.bError);
-        fbJog.Mode := 0;
+        fbJog.Mode := 2;
         fbJog.Velocity := stAxisStruct.stControl.fJogVelocity;
         fbJog.Acceleration := stAxisStruct.stControl.fAcceleration;
         fbJog.Deceleration := stAxisStruct.stControl.fDeceleration;
