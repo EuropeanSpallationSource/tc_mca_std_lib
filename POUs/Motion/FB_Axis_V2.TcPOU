@@ -1,0 +1,426 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_Axis_V2" Id="{ade71f2f-2325-4792-8103-f7cd9c07d44a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Axis_V2 IMPLEMENTS I_Axis
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+    _stAxis : REFERENCE TO ST_AxisStruct; // Local property pointer for axis structure
+    
+    fbPower : MC_Power;
+    mcStatusPower : ST_McStatus;
+    
+    fbStop : MC_Stop;
+    mcStatusStop : ST_McStatus;
+    
+    fbHalt : MC_Halt;
+    mcStatusHalt : ST_McStatus;
+    
+    fbReset : MC_Reset;
+    mcStatusReset : ST_McStatus;
+    
+    fbMoveAbsolute: MC_MoveAbsolute;
+    mcStatusMoveAbsolute : ST_McStatus;
+    
+    fbMoveRelative : MC_MoveRelative;   
+    mcStatusMoveRelative : ST_McStatus;
+    
+    bWaitForStopAfterLimitHit : BOOL := FALSE;
+    fbRemovePowerTimer: TOF;
+    
+    
+    fbDoneRTrig : R_TRIG;
+    fbErrorRTrig : R_TRIG;
+    fbCommandAbortedRTrig : R_TRIG;
+    fbExecuteRTrig : R_TRIG;
+    
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="mControl_LimitHitTimer" Id="{51e73611-510a-4261-9221-982b675bdd5e}">
+      <Declaration><![CDATA[METHOD mControl_LimitHitTimer : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Timer for keeping power on after limit switch hit, needed for homing routines - if power is lost routines are aborted
+fbRemovePowerTimer(IN := _stAxis.stInputs.bLimitFwd AND _stAxis.stInputs.bLimitBwd, PT := T#100MS);
+
+//WIP need to add and change this to home method
+(*
+IF fbHome.bBusy AND (fbRemovePowerTimer.Q OR _stAxis.Axis.NcToPlc.AxisState=5) THEN //5=PHASE_ACCNEG
+    bWaitForStopAfterLimitHit := TRUE;
+ELSE
+    bWaitForStopAfterLimitHit := FALSE;
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}">
+      <Declaration><![CDATA[METHOD mControl_Power : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//WIP this linking seems odd
+_stAxis.stStatus.bFwEnabled := _stAxis.stInputs.bLimitFwd;
+_stAxis.stStatus.bBwEnabled := _stAxis.stInputs.bLimitBwd;
+_stAxis.stStatus.bInterlockedFwd := _stAxis.stControl.bInterlockFwd;
+_stAxis.stStatus.bInterlockedBwd := _stAxis.stControl.bInterlockBwd;
+
+fbPower.Enable:= _stAxis.stControl.bEnable;
+fbPower.Enable_Negative:= (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
+fbPower.Enable_Positive:= (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
+fbPower.Override:= _stAxis.stConfig.fOverride;
+
+fbPower(Axis:= _stAxis.Axis);
+
+_stAxis.stStatus.bEnabled:= _stAxis.Axis.Status.Operational; //WIP Might not be good to use, needs to be investigated]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Reset" Id="{bcd741a0-b2e8-4adb-8b7b-ce0d7f34f81a}">
+      <Declaration><![CDATA[METHOD mControl_Reset : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbHalt.Deceleration:= _stAxis.stControl.fDeceleration;
+fbHalt.Execute:= _stAxis.stControl.bStop;
+
+fbHalt(Axis:= _stAxis.Axis);
+
+mControl_Reset.Busy:= fbHalt.Busy;
+mControl_Reset.Done:= fbHalt.Done;
+mControl_Reset.Error:= fbHalt.Error;
+mControl_Reset.ErrorID:= fbHalt.ErrorID;
+mControl_Reset.Active:= fbHalt.Active;
+mControl_Reset.CommandAborted:= fbHalt.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_Halt" Id="{957bd44f-6ec5-4ad2-9776-ed5c1512fc84}">
+      <Declaration><![CDATA[METHOD mMove_Halt : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbHalt.Deceleration:= _stAxis.stControl.fDeceleration;
+fbHalt.Execute:= _stAxis.stControl.bStop;
+
+fbHalt(Axis:= _stAxis.Axis);
+
+mMove_Halt.Busy:= fbHalt.Busy;
+mMove_Halt.Done:= fbHalt.Done;
+mMove_Halt.Error:= fbHalt.Error;
+mMove_Halt.ErrorID:= fbHalt.ErrorID;
+mMove_Halt.Active:= fbHalt.Active;
+mMove_Halt.CommandAborted:= fbHalt.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_MoveAbsolute" Id="{94fbfcee-90b0-443e-b823-ddd0452362cf}">
+      <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
+    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
+END_IF
+
+    fbMoveAbsolute.Position := _stAxis.stControl.fPosition;
+    fbMoveAbsolute.Velocity := ABS(_stAxis.stControl.fVelocity);
+    fbMoveAbsolute.Acceleration := _stAxis.stControl.fAcceleration;
+    fbMoveAbsolute.Deceleration := _stAxis.stControl.fDeceleration;
+
+    fbMoveAbsolute(Axis:= _stAxis.Axis);
+    
+    mMove_MoveAbsolute.Active:= fbMoveAbsolute.Active;
+    mMove_MoveAbsolute.Done:= fbMoveAbsolute.Done;
+    mMove_MoveAbsolute.Busy:= fbMoveAbsolute.Busy;
+    mMove_MoveAbsolute.Error:= fbMoveAbsolute.Error;
+    mMove_MoveAbsolute.ErrorID:= fbMoveAbsolute.ErrorID;
+    mMove_MoveAbsolute.CommandAborted:= fbMoveAbsolute.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_MoveRelative" Id="{692be8b9-a119-45e2-bc1d-c48204cf288c}">
+      <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
+    fbMoveRelative.Execute := _stAxis.stControl.bExecute;
+END_IF
+
+    fbMoveRelative.Distance := _stAxis.stControl.fPosition;
+    fbMoveRelative.Velocity := ABS(_stAxis.stControl.fVelocity);
+    fbMoveRelative.Acceleration := _stAxis.stControl.fAcceleration;
+    fbMoveRelative.Deceleration := _stAxis.stControl.fDeceleration;
+
+    fbMoveRelative(Axis:= _stAxis.Axis);
+    
+    mMove_MoveRelative.Active:= fbMoveRelative.Active;
+    mMove_MoveRelative.Done:= fbMoveRelative.Done;
+    mMove_MoveRelative.Busy:= fbMoveRelative.Busy;
+    mMove_MoveRelative.Error:= fbMoveRelative.Error;
+    mMove_MoveRelative.ErrorID:= fbMoveRelative.ErrorID;
+    mMove_MoveRelative.CommandAborted:= fbMoveRelative.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_Stop" Id="{a3229fc2-dc64-4fe5-81ae-939492dc7b8a}">
+      <Declaration><![CDATA[METHOD mMove_Stop : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbStop.Deceleration:= _stAxis.stControl.fDeceleration;
+fbStop.Execute:= _stAxis.stControl.bStop;
+
+fbStop(Axis:= _stAxis.Axis);
+
+mMove_Stop.Busy:= fbStop.Busy;
+mMove_Stop.Done:= fbStop.Done;
+mMove_Stop.Error:= fbStop.Error;
+mMove_Stop.ErrorID:= fbStop.ErrorID;
+mMove_Stop.Active:= fbStop.Active;
+mMove_Stop.CommandAborted:= fbStop.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_AxisStatus" Id="{9429fa18-dacb-4b5a-8f14-87d9e5dbf769}">
+      <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_stAxis.Axis.ReadStatus();
+_stAxis.stStatus.fActPosition := _stAxis.Axis.NcToPlc.ActPos;
+_stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
+_stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_Busy" Id="{bae99503-f19d-4494-896c-e198acb33cca}">
+      <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mStatus_Busy:= mcStatusHalt.Busy OR mcStatusStop.Busy OR mcStatusReset.Busy OR mcStatusPower.Busy OR mcStatusMoveAbsolute.Busy OR mcStatusMoveRelative.Busy;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_Done" Id="{3060c82c-a96b-4ab1-b92b-f665040420fc}">
+      <Declaration><![CDATA[METHOD mStatus_Done : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mStatus_Done:= mcStatusHalt.Done OR mcStatusStop.Done OR mcStatusReset.Done OR mcStatusPower.Done OR mcStatusMoveAbsolute.Done OR mcStatusMoveRelative.Done;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_Error" Id="{06ec1500-a5f4-48da-bec8-3b5342d73e7d}">
+      <Declaration><![CDATA[METHOD mStatus_Error : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mStatus_Error:= mcStatusHalt.Error OR mcStatusStop.Error OR mcStatusReset.Error OR mcStatusPower.Error OR mcStatusMoveAbsolute.Error OR mcStatusMoveRelative.Error;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{0f9d0da9-4c05-41a7-9d5e-d5541fa7ecc6}">
+      <Declaration><![CDATA[METHOD Run : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mStatus_AxisStatus();
+mControl_LimitHitTimer();
+mControl_Power();
+
+mcStatusHalt := mMove_Halt();
+mcStatusStop := mMove_Stop();
+mcStatusReset := mControl_Reset();
+
+mcStatusMoveAbsolute := mMove_MoveAbsolute();
+mcStatusMoveRelative := mMove_MoveRelative();
+//no JOG
+//moveVelocity
+//moveModulo
+//gearIn
+//gearOut
+//gearInMultiMaster
+//home
+//writeParam
+//readParam
+
+
+
+
+
+
+
+//WIP how to make these methods?
+fbExecuteRTrig(CLK:= _stAxis.stControl.bExecute);
+IF fbExecuteRTrig.Q THEN
+    _stAxis.stStatus.bDone:= FALSE;
+    _stAxis.stStatus.bError:= FALSE;
+    _stAxis.stStatus.bCommandAborted:= FALSE;
+END_IF
+
+
+fbDoneRTrig(CLK:= mStatus_Done());
+IF fbDoneRTrig.Q THEN
+    _stAxis.stStatus.bDone := TRUE;
+END_IF
+
+
+fbErrorRTrig(CLK:= mStatus_Error());
+IF fbErrorRTrig.Q THEN
+    _stAxis.stStatus.bError := TRUE;
+END_IF
+
+_stAxis.stStatus.bBusy := mStatus_Busy();
+//DoneStatus
+//ErrorStatus
+//CmdAbortedStatus
+//AxisStatuses = position/homed/velocity/etc
+
+_stAxis.stControl.bExecute := FALSE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="stAxis" Id="{967c7c62-771d-4aab-90d5-0b2eb60c3a9a}">
+      <Declaration><![CDATA[PROPERTY stAxis : REFERENCE TO ST_AxisStruct
+]]></Declaration>
+      <Get Name="Get" Id="{b74d1b4a-a6d4-4cc3-a467-e54c502bb2be}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stAxis REF= _stAxis;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1b904411-b50d-45e5-b5eb-d71a4cd732f6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_stAxis REF= stAxis;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_Axis_V2">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_LimitHitTimer">
+      <LineId Id="6" Count="1" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_Power">
+      <LineId Id="18" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="5" Count="3" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_Reset">
+      <LineId Id="7" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mMove_Halt">
+      <LineId Id="6" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mMove_MoveAbsolute">
+      <LineId Id="17" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="20" Count="4" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="25" Count="6" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mMove_MoveRelative">
+      <LineId Id="17" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="20" Count="4" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="25" Count="6" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mMove_Stop">
+      <LineId Id="6" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="4" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_AxisStatus">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_Busy">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_Done">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_Error">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.Run">
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="9" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="58" Count="4" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.stAxis.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.stAxis.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
