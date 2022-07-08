@@ -27,6 +27,9 @@ VAR
     fbMoveRelative : MC_MoveRelative;   
     mcStatusMoveRelative : ST_McStatus;
     
+    fbMoveVelocty : MC_MoveVelocity;
+    mcStatusMoveVelocity : ST_McStatus;
+    
     bWaitForStopAfterLimitHit : BOOL := FALSE;
     fbRemovePowerTimer: TOF;
     
@@ -41,7 +44,10 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="mControl_LimitHitTimer" Id="{51e73611-510a-4261-9221-982b675bdd5e}">
+    <Folder Name="Control Methods" Id="{3b682814-2204-47bf-b34b-22f553c02eb5}" />
+    <Folder Name="Move Methods" Id="{8d11b711-3bcb-4652-94a2-500d372b162a}" />
+    <Folder Name="Status Methods" Id="{707fd0b2-cc74-45e4-8048-859a2a8b8922}" />
+    <Method Name="mControl_LimitHitTimer" Id="{51e73611-510a-4261-9221-982b675bdd5e}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_LimitHitTimer : BOOL
 VAR_INPUT
 END_VAR
@@ -60,7 +66,7 @@ END_IF
 *)]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}">
+    <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_Power : BOOL
 VAR_INPUT
 END_VAR
@@ -82,33 +88,35 @@ fbPower(Axis:= _stAxis.Axis);
 _stAxis.stStatus.bEnabled:= _stAxis.Axis.Status.Operational; //WIP Might not be good to use, needs to be investigated]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mControl_Reset" Id="{bcd741a0-b2e8-4adb-8b7b-ce0d7f34f81a}">
+    <Method Name="mControl_Reset" Id="{bcd741a0-b2e8-4adb-8b7b-ce0d7f34f81a}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_Reset : ST_McStatus
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbHalt.Deceleration:= _stAxis.stControl.fDeceleration;
-fbHalt.Execute:= _stAxis.stControl.bStop;
+        <ST><![CDATA[fbReset.Execute:= _stAxis.stControl.bReset;
 
-fbHalt(Axis:= _stAxis.Axis);
+fbReset(Axis:= _stAxis.Axis);
+IF fbReset.Done THEN
+    _stAxis.stStatus.bError:= FALSE;
+END_IF
 
-mControl_Reset.Busy:= fbHalt.Busy;
-mControl_Reset.Done:= fbHalt.Done;
-mControl_Reset.Error:= fbHalt.Error;
-mControl_Reset.ErrorID:= fbHalt.ErrorID;
-mControl_Reset.Active:= fbHalt.Active;
-mControl_Reset.CommandAborted:= fbHalt.CommandAborted;]]></ST>
+mControl_Reset.Busy:= fbReset.Busy;
+mControl_Reset.Done:= fbReset.Done;
+mControl_Reset.Error:= fbReset.Error;
+mControl_Reset.ErrorID:= fbReset.ErrorID;
+mControl_Reset.Active:= FALSE;
+mControl_Reset.CommandAborted:= FALSE;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMove_Halt" Id="{957bd44f-6ec5-4ad2-9776-ed5c1512fc84}">
+    <Method Name="mMove_Halt" Id="{957bd44f-6ec5-4ad2-9776-ed5c1512fc84}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_Halt : ST_McStatus
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[fbHalt.Deceleration:= _stAxis.stControl.fDeceleration;
-fbHalt.Execute:= _stAxis.stControl.bStop;
+fbHalt.Execute:= _stAxis.stControl.bHalt;
 
 fbHalt(Axis:= _stAxis.Axis);
 
@@ -120,7 +128,7 @@ mMove_Halt.Active:= fbHalt.Active;
 mMove_Halt.CommandAborted:= fbHalt.CommandAborted;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMove_MoveAbsolute" Id="{94fbfcee-90b0-443e-b823-ddd0452362cf}">
+    <Method Name="mMove_MoveAbsolute" Id="{94fbfcee-90b0-443e-b823-ddd0452362cf}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 VAR_INPUT
 END_VAR
@@ -145,7 +153,7 @@ END_IF
     mMove_MoveAbsolute.CommandAborted:= fbMoveAbsolute.CommandAborted;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMove_MoveRelative" Id="{692be8b9-a119-45e2-bc1d-c48204cf288c}">
+    <Method Name="mMove_MoveRelative" Id="{692be8b9-a119-45e2-bc1d-c48204cf288c}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 VAR_INPUT
 END_VAR
@@ -170,7 +178,31 @@ END_IF
     mMove_MoveRelative.CommandAborted:= fbMoveRelative.CommandAborted;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMove_Stop" Id="{a3229fc2-dc64-4fe5-81ae-939492dc7b8a}">
+    <Method Name="mMove_MoveVelocity" Id="{db34b1dc-c06f-4355-a454-8e49d2e0a70d}" FolderPath="Move Methods\">
+      <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
+    fbMoveVelocty.Execute := _stAxis.stControl.bExecute;
+END_IF
+
+    fbMoveVelocty.Velocity := ABS(_stAxis.stControl.fVelocity);
+    fbMoveVelocty.Acceleration := _stAxis.stControl.fAcceleration;
+    fbMoveVelocty.Deceleration := _stAxis.stControl.fDeceleration;
+
+    fbMoveVelocty(Axis:= _stAxis.Axis);
+    
+    mMove_MoveVelocity.Active:= fbMoveVelocty.Active;
+    mMove_MoveVelocity.Done:= fbMoveVelocty.InVelocity;
+    mMove_MoveVelocity.Busy:= fbMoveVelocty.Busy;
+    mMove_MoveVelocity.Error:= fbMoveVelocty.Error;
+    mMove_MoveVelocity.ErrorID:= fbMoveVelocty.ErrorID;
+    mMove_MoveVelocity.CommandAborted:= fbMoveVelocty.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_Stop" Id="{a3229fc2-dc64-4fe5-81ae-939492dc7b8a}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_Stop : ST_McStatus
 VAR_INPUT
 END_VAR
@@ -189,7 +221,7 @@ mMove_Stop.Active:= fbStop.Active;
 mMove_Stop.CommandAborted:= fbStop.CommandAborted;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mStatus_AxisStatus" Id="{9429fa18-dacb-4b5a-8f14-87d9e5dbf769}">
+    <Method Name="mStatus_AxisStatus" Id="{9429fa18-dacb-4b5a-8f14-87d9e5dbf769}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
 VAR_INPUT
 END_VAR
@@ -201,36 +233,96 @@ _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mStatus_Busy" Id="{bae99503-f19d-4494-896c-e198acb33cca}">
+    <Method Name="mStatus_Busy" Id="{bae99503-f19d-4494-896c-e198acb33cca}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_Busy:= mcStatusHalt.Busy OR mcStatusStop.Busy OR mcStatusReset.Busy OR mcStatusPower.Busy OR mcStatusMoveAbsolute.Busy OR mcStatusMoveRelative.Busy;]]></ST>
+        <ST><![CDATA[mStatus_Busy:= mcStatusHalt.Busy OR mcStatusStop.Busy OR mcStatusReset.Busy OR mcStatusPower.Busy OR mcStatusMoveAbsolute.Busy OR mcStatusMoveRelative.Busy OR mcStatusMoveVelocity.Busy;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mStatus_Done" Id="{3060c82c-a96b-4ab1-b92b-f665040420fc}">
+    <Method Name="mStatus_CommandAborted" Id="{e2ed38b3-0e3f-47b0-a6af-93fb78d0742a}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_CommandAborted : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mStatus_CommandAborted:= mcStatusHalt.CommandAborted OR mcStatusStop.CommandAborted OR mcStatusReset.CommandAborted OR mcStatusPower.CommandAborted OR mcStatusMoveAbsolute.CommandAborted OR mcStatusMoveRelative.CommandAborted OR mcStatusMoveVelocity.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_CommandAbortedRisingEdge" Id="{47ef1edf-fdf1-4dec-ad20-cd0ec8a69b8e}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_CommandAbortedRisingEdge : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//fbDoneRTrig(CLK:= mStatus_Done());
+fbCommandAbortedRTrig(CLK:= mStatus_CommandAborted());
+IF fbCommandAbortedRTrig.Q THEN
+    _stAxis.stStatus.bCommandAborted := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_Done" Id="{3060c82c-a96b-4ab1-b92b-f665040420fc}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Done : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_Done:= mcStatusHalt.Done OR mcStatusStop.Done OR mcStatusReset.Done OR mcStatusPower.Done OR mcStatusMoveAbsolute.Done OR mcStatusMoveRelative.Done;]]></ST>
+        <ST><![CDATA[mStatus_Done:= mcStatusHalt.Done OR mcStatusStop.Done OR mcStatusReset.Done OR mcStatusPower.Done OR mcStatusMoveAbsolute.Done OR mcStatusMoveRelative.Done OR mcStatusMoveVelocity.Done;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mStatus_Error" Id="{06ec1500-a5f4-48da-bec8-3b5342d73e7d}">
+    <Method Name="mStatus_DoneRisingEdge" Id="{cb97c724-0ad0-44f2-b46a-ccf7e150b1f3}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_DoneRisingEdge : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//fbDoneRTrig(CLK:= mStatus_Done());
+fbDoneRTrig(CLK:= mStatus_Done());
+IF fbDoneRTrig.Q THEN
+    _stAxis.stStatus.bDone := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_Error" Id="{06ec1500-a5f4-48da-bec8-3b5342d73e7d}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Error : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_Error:= mcStatusHalt.Error OR mcStatusStop.Error OR mcStatusReset.Error OR mcStatusPower.Error OR mcStatusMoveAbsolute.Error OR mcStatusMoveRelative.Error;]]></ST>
+        <ST><![CDATA[mStatus_Error:= mcStatusHalt.Error OR mcStatusStop.Error OR mcStatusReset.Error OR mcStatusPower.Error OR mcStatusMoveAbsolute.Error OR mcStatusMoveRelative.Error OR mcStatusMoveVelocity.Error;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_ErrorRisingEdge" Id="{fc0bde21-2989-4be1-b9e6-d0804b3b0fd9}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_ErrorRisingEdge : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbErrorRTrig(CLK:= mStatus_Error());
+IF fbErrorRTrig.Q THEN
+    _stAxis.stStatus.bError := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_NewCommand" Id="{6ed1ba41-9399-4e86-b361-f208438f212a}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_NewCommand : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbExecuteRTrig(CLK:= _stAxis.stControl.bExecute OR _stAxis.stControl.bStop OR _stAxis.stControl.bHalt);
+IF fbExecuteRTrig.Q THEN
+    _stAxis.stStatus.bDone:= FALSE;
+    _stAxis.stStatus.bError:= FALSE;
+    _stAxis.stStatus.bCommandAborted:= FALSE;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="Run" Id="{0f9d0da9-4c05-41a7-9d5e-d5541fa7ecc6}">
-      <Declaration><![CDATA[METHOD Run : BOOL
-]]></Declaration>
+      <Declaration><![CDATA[METHOD Run : BOOL]]></Declaration>
       <Implementation>
         <ST><![CDATA[mStatus_AxisStatus();
 mControl_LimitHitTimer();
@@ -242,7 +334,7 @@ mcStatusReset := mControl_Reset();
 
 mcStatusMoveAbsolute := mMove_MoveAbsolute();
 mcStatusMoveRelative := mMove_MoveRelative();
-//no JOG
+mcStatusMoveVelocity := mMove_MoveVelocity();
 //moveVelocity
 //moveModulo
 //gearIn
@@ -252,36 +344,13 @@ mcStatusMoveRelative := mMove_MoveRelative();
 //writeParam
 //readParam
 
-
-
-
-
-
-
-//WIP how to make these methods?
-fbExecuteRTrig(CLK:= _stAxis.stControl.bExecute);
-IF fbExecuteRTrig.Q THEN
-    _stAxis.stStatus.bDone:= FALSE;
-    _stAxis.stStatus.bError:= FALSE;
-    _stAxis.stStatus.bCommandAborted:= FALSE;
-END_IF
-
-
-fbDoneRTrig(CLK:= mStatus_Done());
-IF fbDoneRTrig.Q THEN
-    _stAxis.stStatus.bDone := TRUE;
-END_IF
-
-
-fbErrorRTrig(CLK:= mStatus_Error());
-IF fbErrorRTrig.Q THEN
-    _stAxis.stStatus.bError := TRUE;
-END_IF
+mStatus_NewCommand();
+mStatus_DoneRisingEdge();
+mStatus_ErrorRisingEdge();
+mStatus_CommandAbortedRisingEdge();
 
 _stAxis.stStatus.bBusy := mStatus_Busy();
-//DoneStatus
-//ErrorStatus
-//CmdAbortedStatus
+
 //AxisStatuses = position/homed/velocity/etc
 
 _stAxis.stControl.bExecute := FALSE;
@@ -331,7 +400,9 @@ END_VAR
       <LineId Id="11" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_Reset">
-      <LineId Id="7" Count="9" />
+      <LineId Id="8" Count="2" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="11" Count="5" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mMove_Halt">
@@ -358,6 +429,14 @@ END_VAR
       <LineId Id="12" Count="0" />
       <LineId Id="25" Count="6" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.mMove_MoveVelocity">
+      <LineId Id="17" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="21" Count="3" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="25" Count="6" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mMove_Stop">
       <LineId Id="6" Count="1" />
       <LineId Id="9" Count="0" />
@@ -374,10 +453,33 @@ END_VAR
     <LineIds Name="FB_Axis_V2.mStatus_Busy">
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_CommandAborted">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_CommandAbortedRisingEdge">
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_Done">
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_DoneRisingEdge">
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_Error">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_ErrorRisingEdge">
+      <LineId Id="6" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_NewCommand">
+      <LineId Id="6" Count="4" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.Run">
@@ -390,26 +492,13 @@ END_VAR
       <LineId Id="13" Count="1" />
       <LineId Id="12" Count="0" />
       <LineId Id="15" Count="9" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="58" Count="4" />
       <LineId Id="42" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="51" Count="1" />
       <LineId Id="50" Count="0" />
       <LineId Id="48" Count="0" />
       <LineId Id="40" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="53" Count="2" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="56" Count="1" />
-      <LineId Id="39" Count="0" />
       <LineId Id="38" Count="0" />
+      <LineId Id="64" Count="0" />
       <LineId Id="35" Count="0" />
-      <LineId Id="27" Count="1" />
       <LineId Id="30" Count="1" />
       <LineId Id="33" Count="0" />
       <LineId Id="32" Count="0" />
