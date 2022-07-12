@@ -50,6 +50,9 @@ VAR
     
     internalReset : BOOL;
     homingReset : BOOL:= FALSE;
+	    //Two resets required due to homing functionality
+    resetInProgress_check1: BOOL:= FALSE;
+    resetInProgress_check2: BOOL:= FALSE;
     
     //stupid internal MCPOWER blocks because Beckhoff won't let you enable a setpoint generator on a limit....
     mcPower_positiveAxis : MC_POWER;
@@ -97,7 +100,7 @@ internalReset := Reset OR GVL.astAxes[ID_positiveAxis].stControl.bReset OR GVL.a
 
 
 //If real axis is homing, change state
-IF Enable AND (GVL.astAxes[ID_positiveAxis].Axis.Status.Homing OR GVL.astAxes[ID_negativeAxis].Axis.Status.Homing) THEN
+IF Enable AND (GVL.astAxes[ID_positiveAxis].Axis.Status.HomingBusy OR GVL.astAxes[ID_negativeAxis].Axis.Status.HomingBusy) THEN
     iState:= E_SlitPairStatesV2.HOMING_WAIT;
 END_IF
 
@@ -135,7 +138,7 @@ IF Enable THEN
 			mcReset_gapSizeAxis(Axis:=GVL.astAxes[ID_gapSizeAxis].Axis, Execute:=FALSE);
 			mcReset_gapCentreAxis(Axis:=GVL.astAxes[ID_gapCentreAxis].Axis, Execute:=FALSE);
             IF GVL.astAxes[ID_positiveAxis].stStatus.bHomed AND GVL.astAxes[ID_negativeAxis].stStatus.bHomed 
-               AND NOT GVL.astAxes[ID_gapSizeAxis].stStatus.bHomed OR NOT GVL.astAxes[ID_gapCentreAxis].stStatus.bHomed THEN
+               AND (NOT GVL.astAxes[ID_gapSizeAxis].stStatus.bHomed OR NOT GVL.astAxes[ID_gapCentreAxis].stStatus.bHomed) THEN
 			   GVL.astAxes[ID_gapSizeAxis].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
                GVL.astAxes[ID_gapCentreAxis].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
                GVL.astAxes[ID_gapSizeAxis].stConfig.fHomePosition:= fGapSize;
@@ -157,6 +160,7 @@ IF Enable THEN
             //IF NOT IN HOMING STATE
        
         E_SlitPairStatesV2.OPERATIONAL:
+		    resetInProgress_check1 := FALSE;
             //Detect whether real or virtual axes are moving
             IF GVL.astAxes[ID_gapSizeAxis].stStatus.bMoving OR GVL.astAxes[ID_gapCentreAxis].stStatus.bMoving THEN
                 iState:=E_SlitPairStatesV2.ENABLE_REAL_GENERATORS;
@@ -239,21 +243,28 @@ IF Enable THEN
 			
             IF homingReset THEN
                 internalReset:= TRUE;
+				resetInProgress_check1:= TRUE;
+                resetInProgress_check2:= TRUE;
                 homingReset:= FALSE;
             END_IF
-            IF internalReset THEN
+			IF internalReset OR Reset OR resetInProgress_check2 THEN
 				mcReset_gapSizeAxis(Axis:=GVL.astAxes[ID_gapSizeAxis].Axis, Execute:=TRUE);
 				mcReset_gapCentreAxis(Axis:=GVL.astAxes[ID_gapCentreAxis].Axis, Execute:=TRUE);
                 GVL.astAxes[ID_positiveAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_negativeAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_gapSizeAxis].stControl.bReset := TRUE;
                 GVL.astAxes[ID_gapCentreAxis].stControl.bReset := TRUE;
-                iState:= E_SlitPairStatesV2.INIT;
+                IF NOT(resetInProgress_check1) THEN
+                    resetInProgress_check2 := FALSE;
+             	END_IF
 			END_IF
+			 IF NOT(GVL.astAxes[ID_positiveAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_negativeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapSizeAxis].stStatus.bError) AND NOT(GVL.astAxes[ID_gapCentreAxis].stStatus.bError) THEN
+                iState:= E_SlitPairStatesV2.INIT;
+            END_IF
                    
         E_SlitPairStatesV2.HOMING_WAIT:
             homingReset:= TRUE;
-            IF NOT GVL.astAxes[ID_positiveAxis].Axis.Status.Homing AND NOT GVL.astAxes[ID_negativeAxis].Axis.Status.Homing THEN
+            IF NOT GVL.astAxes[ID_positiveAxis].Axis.Status.Homed AND NOT GVL.astAxes[ID_negativeAxis].Axis.Status.Homed THEN
                 iState:= E_SlitPairStatesV2.INIT;                
             END_IF
 	END_CASE
@@ -451,6 +462,7 @@ fGapCentre := (GVL.astAxes[ID_positiveAxis].stStatus.fActPosition + GVL.astAxes[
       <LineId Id="380" Count="0" />
       <LineId Id="252" Count="0" />
       <LineId Id="234" Count="0" />
+      <LineId Id="845" Count="0" />
       <LineId Id="379" Count="0" />
       <LineId Id="236" Count="4" />
       <LineId Id="235" Count="0" />
@@ -487,13 +499,17 @@ fGapCentre := (GVL.astAxes[ID_positiveAxis].stStatus.fActPosition + GVL.astAxes[
       <LineId Id="774" Count="2" />
       <LineId Id="773" Count="0" />
       <LineId Id="777" Count="1" />
-      <LineId Id="392" Count="2" />
+      <LineId Id="392" Count="1" />
+      <LineId Id="840" Count="1" />
+      <LineId Id="394" Count="0" />
       <LineId Id="391" Count="0" />
-      <LineId Id="224" Count="0" />
-      <LineId Id="586" Count="1" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="227" Count="3" />
-      <LineId Id="226" Count="0" />
+      <LineId Id="847" Count="0" />
+      <LineId Id="854" Count="1" />
+      <LineId Id="848" Count="5" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="859" Count="0" />
+      <LineId Id="857" Count="1" />
+      <LineId Id="856" Count="0" />
       <LineId Id="213" Count="0" />
       <LineId Id="751" Count="0" />
       <LineId Id="332" Count="0" />
