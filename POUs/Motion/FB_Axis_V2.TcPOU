@@ -9,6 +9,9 @@ END_VAR
 VAR
     _stAxis : REFERENCE TO ST_AxisStruct; // Local property pointer for axis structure
     
+    mcStatus : ARRAY[1..mcSTATUS_ARRAY_SIZE] OF POINTER TO ST_McStatus;
+    
+    
     fbPower : MC_Power;
     mcStatusPower : ST_McStatus;
     
@@ -27,11 +30,14 @@ VAR
     fbMoveRelative : MC_MoveRelative;   
     mcStatusMoveRelative : ST_McStatus;
     
-    fbMoveVelocty : MC_MoveVelocity;
+    fbMoveVelocity : MC_MoveVelocity;
     mcStatusMoveVelocity : ST_McStatus;
     
     fbMoveModulo : MC_MoveModulo;
     mcStatusMoveModulo : ST_McStatus;    
+    
+    fbHome : FB_Homing;
+    mcStatusHome : ST_McStatus;
     
     fbGearIn : MC_GearIn;
     mcStatusGearIn : ST_McStatus;
@@ -42,6 +48,12 @@ VAR
     fbGearOut : MC_GearOut;
     mcStatusGearOut : ST_McStatus;
     nSlaveAxesIndex: UINT;
+    nAxisIndex : UINT;
+    
+    fbGearInMultiMaster : MC_GearInMultiMaster;
+    mcStatusGearInMultiMaster : ST_McStatus;
+    nMultiMastersAxesIndex: UINT;
+    nMULTI_MASTER_MAX_AXES: UINT := 4;
     
     bWaitForStopAfterLimitHit : BOOL := FALSE;
     fbRemovePowerTimer: TOF;
@@ -72,7 +84,9 @@ VAR
     fbExecuteRTrig : R_TRIG;
     
 END_VAR
-]]></Declaration>
+VAR CONSTANT 
+    mcSTATUS_ARRAY_SIZE : UINT := 12;
+END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
@@ -80,6 +94,29 @@ END_VAR
     <Folder Name="Move Methods" Id="{8d11b711-3bcb-4652-94a2-500d372b162a}" />
     <Folder Name="Parameter Methods" Id="{f4f4664c-7df7-46e3-971d-7b879f0f84c5}" />
     <Folder Name="Status Methods" Id="{707fd0b2-cc74-45e4-8048-859a2a8b8922}" />
+    <Method Name="FB_init" Id="{808671fa-47ac-4f24-b6aa-db77de23bff7}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Copy address locations for statuses to an array to allow for easier checking of statuses
+mcStatus[1] := ADR(mcStatusPower);
+mcStatus[2] := ADR(mcStatusStop);
+mcStatus[3] := ADR(mcStatusHalt);
+mcStatus[4] := ADR(mcStatusReset);
+mcStatus[5] := ADR(mcStatusMoveAbsolute);
+mcStatus[6] := ADR(mcStatusMoveRelative);
+mcStatus[7] := ADR(mcStatusMoveVelocity);
+mcStatus[8] := ADR(mcStatusMoveModulo);
+mcStatus[9] := ADR(mcStatusHome);
+mcStatus[10] := ADR(mcStatusGearIn);
+mcStatus[11] := ADR(mcStatusGearInMultiMaster);
+mcStatus[12] := ADR(mcStatusGearOut);]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mControl_GearIn" Id="{2e912967-ff49-4a61-986a-feb90802d147}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_GearIn : ST_McStatus
 VAR_INPUT
@@ -99,18 +136,72 @@ END_IF
     END_IF
         
     //Confirm slaves have no gearing before attempting to gear in
-     IF fbGearIn.InGear AND (GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] = nNO_GEARING) THEN
+     IF fbGearIn.InGear AND (GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] = nNO_GEARING) AND _stAxis.stControl.eCommand = E_MotionFunctions.eGearIn THEN
         GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
     END_IF
 
     fbGearIn(Slave:= _stAxis.Axis, Master:= GVL.astAxes[stMasterAxis.nIndex].Axis);
     
-    mControl_GearIn.Active:= fbMoveAbsolute.Active;
-    mControl_GearIn.Done:= fbMoveAbsolute.Done;
-    mControl_GearIn.Busy:= fbMoveAbsolute.Busy;
-    mControl_GearIn.Error:= fbMoveAbsolute.Error;
-    mControl_GearIn.ErrorID:= fbMoveAbsolute.ErrorID;
-    mControl_GearIn.CommandAborted:= fbMoveAbsolute.CommandAborted;]]></ST>
+    mControl_GearIn.Active:= fbGearIn.Active;
+    mControl_GearIn.Done:= fbGearIn.InGear;
+    mControl_GearIn.Busy:= fbGearIn.Busy;
+    mControl_GearIn.Error:= fbGearIn.Error;
+    mControl_GearIn.ErrorID:= fbGearIn.ErrorID;
+    mControl_GearIn.CommandAborted:= fbGearIn.CommandAborted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_GearInMultiMaster" Id="{84e0c1c6-290e-43dc-a4d7-42efdf8dec13}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_GearInMultiMaster : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbGearInMultiMaster.Options.AdvancedSlaveDynamics:= TRUE;
+fbGearInMultiMaster.Options.SyncMode:= E_GearInMultiMasterSyncMode.POSSYNC2;
+IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearInMultiMaster THEN
+    fbGearInMultiMaster.Enable := _stAxis.stControl.bExecute;
+END_IF
+
+
+IF _stAxis.stControl.eCommand= E_MotionFunctions.eGearInMultiMaster AND _stAxis.stControl.bExecute AND NOT _stAxis.Axis.Status.Coupled THEN
+    //Latch master references
+        FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+            IF _stAxis.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex > 0 AND _stAxis.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex <= GVL_APP.nAXIS_NUM THEN
+                _stAxis.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].nIndex := _stAxis.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].nIndex;
+            END_IF
+        END_FOR
+    //Latch gear ratios
+        FOR nMultiMastersAxesIndex := 1 TO nMULTI_MASTER_MAX_AXES DO
+            _stAxis.stConfig.astMultiMasterAxisLatched[nMultiMastersAxesIndex].fRatio := _stAxis.stConfig.astMultiMasterAxis[nMultiMastersAxesIndex].fRatio;
+        END_FOR        
+    //Transfer gear ratios to FB
+        fbGearInMultiMaster.GearRatio1 := _stAxis.stConfig.astMultiMasterAxisLatched[1].fRatio;
+        fbGearInMultiMaster.GearRatio2 := _stAxis.stConfig.astMultiMasterAxisLatched[2].fRatio;
+        fbGearInMultiMaster.GearRatio3 := _stAxis.stConfig.astMultiMasterAxisLatched[3].fRatio;
+        fbGearInMultiMaster.GearRatio4 := _stAxis.stConfig.astMultiMasterAxisLatched[4].fRatio;
+        fbGearInMultiMaster.Enable := TRUE;
+END_IF
+
+fbGearInMultiMaster(Slave := _stAxis.Axis,
+    Master1 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex].Axis,
+    Master2 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
+    Master3 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
+    Master4 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
+
+IF fbGearInMultiMaster.InGear THEN
+    mStatus_MultiGearing();
+END_IF
+    
+IF fbGearInMultiMaster.Error THEN
+    fbGearInMultiMaster.Enable := FALSE;
+END_IF
+
+mControl_GearInMultiMaster.Active:= fbGearInMultiMaster.Active;
+mControl_GearInMultiMaster.Done:= fbGearInMultiMaster.InGear;
+mControl_GearInMultiMaster.Busy:= fbGearInMultiMaster.Busy;
+mControl_GearInMultiMaster.Error:= fbGearInMultiMaster.Error;
+mControl_GearInMultiMaster.ErrorID:= fbGearInMultiMaster.ErrorID;
+mControl_GearInMultiMaster.CommandAborted:= fbGearInMultiMaster.CommandAborted;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_GearOut" Id="{e17b3c6b-453e-4e45-8575-7c153f6ee550}" FolderPath="Control Methods\">
@@ -125,20 +216,42 @@ END_IF
 
     fbGearOut(Slave:= _stAxis.Axis);
     
+    //Clear ratios from single and multi master gearing
     IF fbGearOut.Done THEN
         //Clear slave ratio from master axis slave array
+        mStatus_MultiGearing();
         GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         FOR nSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
             GVL.astAxes[nSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
         END_FOR
     END_IF
     
-    mControl_GearOut.Active:= fbMoveAbsolute.Active;
-    mControl_GearOut.Done:= fbMoveAbsolute.Done;
-    mControl_GearOut.Busy:= fbMoveAbsolute.Busy;
-    mControl_GearOut.Error:= fbMoveAbsolute.Error;
-    mControl_GearOut.ErrorID:= fbMoveAbsolute.ErrorID;
-    mControl_GearOut.CommandAborted:= fbMoveAbsolute.CommandAborted;]]></ST>
+    mControl_GearOut.Done:= fbGearOut.Done;
+    mControl_GearOut.Busy:= fbGearOut.Busy;
+    mControl_GearOut.Error:= fbGearOut.Error;
+    mControl_GearOut.ErrorID:= fbGearOut.ErrorID;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Home" Id="{1c89166c-d22b-4ec1-832b-29e319ac35a4}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_Home : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome THEN
+    fbHome.bExecute := _stAxis.stControl.bExecute;
+END_IF
+
+
+fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
+fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
+fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
+fbHome(Axis:= _stAxis.Axis, bLimitBwd:= _stAxis.stInputs.bLimitBwd, bLimitFwd:= _stAxis.stInputs.bLimitFwd, bHomeSensor:= _stAxis.stInputs.bHomeSensor);
+
+mControl_Home.Busy := fbHome.bBusy;
+mControl_Home.CommandAborted := fbHome.bCommandAborted;
+mControl_Home.Done := fbHome.bDone;
+mControl_Home.Error := fbHome.bError;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_LimitHitTimer" Id="{51e73611-510a-4261-9221-982b675bdd5e}" FolderPath="Control Methods\">
@@ -151,35 +264,59 @@ END_VAR
 fbRemovePowerTimer(IN := _stAxis.stInputs.bLimitFwd AND _stAxis.stInputs.bLimitBwd, PT := T#100MS);
 
 //WIP need to add and change this to home method
-(*
-IF fbHome.bBusy AND (fbRemovePowerTimer.Q OR _stAxis.Axis.NcToPlc.AxisState=5) THEN //5=PHASE_ACCNEG
+
+IF mcStatusHome.Busy AND (fbRemovePowerTimer.Q OR _stAxis.Axis.NcToPlc.AxisState=5) THEN //5=PHASE_ACCNEG
     bWaitForStopAfterLimitHit := TRUE;
 ELSE
     bWaitForStopAfterLimitHit := FALSE;
 END_IF
-*)]]></ST>
+]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_Power : BOOL
+    <Method Name="mControl_LimitLinking" Id="{d3fbcc91-ae49-44cf-abe1-cb74f523eb68}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_LimitLinking : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//WIP this linking seems odd
-_stAxis.stStatus.bFwEnabled := _stAxis.stInputs.bLimitFwd;
+_stAxis.stStatus.bFwEnabled := _stAxis.stInputs.bLimitFwd;    //Moved to linking code. Should not say enabled if not enabled
 _stAxis.stStatus.bBwEnabled := _stAxis.stInputs.bLimitBwd;
 _stAxis.stStatus.bInterlockedFwd := _stAxis.stControl.bInterlockFwd;
 _stAxis.stStatus.bInterlockedBwd := _stAxis.stControl.bInterlockBwd;
 
-fbPower.Enable:= _stAxis.stControl.bEnable;
+//Multimaster limit linking
+FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
+    IF (_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
+        _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);        
+    END_IF
+END_FOR
+
+//Single axis limit linking
+FOR nAxisIndex :=1 TO GVL_APP.nAXIS_NUM DO
+    IF (_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] <> 0) THEN
+        _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled); 
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbPower.Enable:= _stAxis.stControl.bEnable;
 fbPower.Enable_Negative:= (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
 fbPower.Enable_Positive:= (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
 fbPower.Override:= _stAxis.stConfig.fOverride;
 
 fbPower(Axis:= _stAxis.Axis);
 
-_stAxis.stStatus.bEnabled:= _stAxis.Axis.Status.Operational; //WIP Might not be good to use, needs to be investigated]]></ST>
+//Don't want other status bits
+mControl_Power.Error := fbPower.Error;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_Reset" Id="{bcd741a0-b2e8-4adb-8b7b-ce0d7f34f81a}" FolderPath="Control Methods\">
@@ -304,21 +441,21 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
-    fbMoveVelocty.Execute := _stAxis.stControl.bExecute;
+    fbMoveVelocity.Execute := _stAxis.stControl.bExecute;
 END_IF
+    fbMoveVelocity.Direction := SEL(_stAxis.stControl.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
+    fbMoveVelocity.Velocity := ABS(_stAxis.stControl.fVelocity);
+    fbMoveVelocity.Acceleration := _stAxis.stControl.fAcceleration;
+    fbMoveVelocity.Deceleration := _stAxis.stControl.fDeceleration;
 
-    fbMoveVelocty.Velocity := ABS(_stAxis.stControl.fVelocity);
-    fbMoveVelocty.Acceleration := _stAxis.stControl.fAcceleration;
-    fbMoveVelocty.Deceleration := _stAxis.stControl.fDeceleration;
-
-    fbMoveVelocty(Axis:= _stAxis.Axis);
+    fbMoveVelocity(Axis:= _stAxis.Axis);
     
-    mMove_MoveVelocity.Active:= fbMoveVelocty.Active;
-    mMove_MoveVelocity.Done:= fbMoveVelocty.InVelocity;
-    mMove_MoveVelocity.Busy:= fbMoveVelocty.Busy;
-    mMove_MoveVelocity.Error:= fbMoveVelocty.Error;
-    mMove_MoveVelocity.ErrorID:= fbMoveVelocty.ErrorID;
-    mMove_MoveVelocity.CommandAborted:= fbMoveVelocty.CommandAborted;]]></ST>
+    mMove_MoveVelocity.Active:= fbMoveVelocity.Active;
+    mMove_MoveVelocity.Done:= fbMoveVelocity.InVelocity;
+    mMove_MoveVelocity.Busy:= fbMoveVelocity.Busy;
+    mMove_MoveVelocity.Error:= fbMoveVelocity.Error;
+    mMove_MoveVelocity.ErrorID:= fbMoveVelocity.ErrorID;
+    mMove_MoveVelocity.CommandAborted:= fbMoveVelocity.CommandAborted;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mMove_Stop" Id="{a3229fc2-dc64-4fe5-81ae-939492dc7b8a}" FolderPath="Move Methods\">
@@ -535,25 +672,39 @@ _stAxis.stStatus.bHomed := _stAxis.Axis.Status.Homed;
 _stAxis.stStatus.bMoving := _stAxis.Axis.Status.Moving; //WIP we want to change this
 _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
-_stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;]]></ST>
+_stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
+
+_stAxis.stStatus.bEnabled:= NOT(_stAxis.Axis.Status.Disabled OR _stAxis.Axis.Status.ErrorStop); //WIP Might not be good to use, needs to be investigated]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_Busy" Id="{bae99503-f19d-4494-896c-e198acb33cca}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
 VAR_INPUT
 END_VAR
-]]></Declaration>
+VAR
+    i : UINT;
+    tmpBusy : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_Busy:= mcStatusHalt.Busy OR mcStatusStop.Busy OR mcStatusReset.Busy OR mcStatusPower.Busy OR mcStatusMoveAbsolute.Busy OR mcStatusMoveRelative.Busy OR mcStatusMoveVelocity.Busy OR mcStatusMoveModulo.Busy OR mcStatusGearIn.Busy OR mcStatusGearOut.Busy;]]></ST>
+        <ST><![CDATA[FOR i:=1 TO mcSTATUS_ARRAY_SIZE DO
+    tmpBusy:= mcStatus[i]^.Busy OR tmpBusy;
+END_FOR
+mStatus_Busy:= tmpBusy;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_CommandAborted" Id="{e2ed38b3-0e3f-47b0-a6af-93fb78d0742a}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_CommandAborted : BOOL
 VAR_INPUT
 END_VAR
-]]></Declaration>
+VAR
+    i : UINT;
+    tmpCmdAborted : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_CommandAborted:= mcStatusHalt.CommandAborted OR mcStatusStop.CommandAborted OR mcStatusReset.CommandAborted OR mcStatusPower.CommandAborted OR mcStatusMoveAbsolute.CommandAborted OR mcStatusMoveRelative.CommandAborted OR mcStatusMoveVelocity.CommandAborted OR mcStatusMoveModulo.CommandAborted OR mcStatusGearIn.CommandAborted OR mcStatusGearOut.CommandAborted;]]></ST>
+        <ST><![CDATA[FOR i:=1 TO mcSTATUS_ARRAY_SIZE DO
+    tmpCmdAborted:= mcStatus[i]^.CommandAborted OR tmpCmdAborted;
+END_FOR
+mStatus_CommandAborted:= tmpCmdAborted;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_CommandAbortedRisingEdge" Id="{47ef1edf-fdf1-4dec-ad20-cd0ec8a69b8e}" FolderPath="Status Methods\">
@@ -573,9 +724,15 @@ END_IF]]></ST>
       <Declaration><![CDATA[METHOD mStatus_Done : BOOL
 VAR_INPUT
 END_VAR
-]]></Declaration>
+VAR
+    i : UINT;
+    tmpDone : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mStatus_Done:= mcStatusHalt.Done OR mcStatusStop.Done OR mcStatusReset.Done OR mcStatusPower.Done OR mcStatusMoveAbsolute.Done OR mcStatusMoveRelative.Done OR mcStatusMoveVelocity.Done OR mcStatusMoveModulo.Done OR mcStatusGearIn.Done OR mcStatusGearOut.Done;]]></ST>
+        <ST><![CDATA[FOR i:=1 TO mcSTATUS_ARRAY_SIZE DO
+    tmpDone:= mcStatus[i]^.Done OR tmpDone;
+END_FOR
+mStatus_Done:= tmpDone;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_DoneRisingEdge" Id="{cb97c724-0ad0-44f2-b46a-ccf7e150b1f3}" FolderPath="Status Methods\">
@@ -595,10 +752,18 @@ END_IF]]></ST>
       <Declaration><![CDATA[METHOD mStatus_Error : BOOL
 VAR_INPUT
 END_VAR
-]]></Declaration>
+VAR
+    i : UINT;
+    tmpError : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//WIP not handling error IDs at the moment. Will need to modify this to pass data to the error struct too
-mStatus_Error:= mcStatusHalt.Error OR mcStatusStop.Error OR mcStatusReset.Error OR mcStatusPower.Error OR mcStatusMoveAbsolute.Error OR mcStatusMoveRelative.Error OR mcStatusMoveVelocity.Error OR mcStatusMoveModulo.Error OR mcStatusGearIn.Error OR mcStatusGearOut.Error;]]></ST>
+        <ST><![CDATA[FOR i:=1 TO mcSTATUS_ARRAY_SIZE DO
+    tmpError:= mcStatus[i]^.Error OR tmpError;
+END_FOR
+mStatus_Error:= tmpError;
+
+//WIP not handling error IDs at the moment. Will need to modify this to pass data to the error struct too
+//mStatus_Error:= mcStatusHalt.Error OR mcStatusStop.Error OR mcStatusReset.Error OR mcStatusPower.Error OR mcStatusMoveAbsolute.Error OR mcStatusMoveRelative.Error OR mcStatusMoveVelocity.Error OR mcStatusMoveModulo.Error OR mcStatusGearIn.Error OR mcStatusGearOut.Error;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_ErrorRisingEdge" Id="{fc0bde21-2989-4be1-b9e6-d0804b3b0fd9}" FolderPath="Status Methods\">
@@ -609,7 +774,44 @@ END_VAR
       <Implementation>
         <ST><![CDATA[fbErrorRTrig(CLK:= mStatus_Error());
 IF fbErrorRTrig.Q THEN
-    _stAxis.stStatus.bError := TRUE;
+    _stAxis.stStatus.bError := TRUE; //WIP SOME CODE HERE TO UPDATE THE stERROR struct values
+END_IF
+
+_stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_MultiGearing" Id="{fa93e914-182a-42d5-a8d7-635a159cd60b}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_MultiGearing : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio1 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
+    GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := _stAxis.Axis.PlcToNc.GearRatio1;
+    _stAxis.stStatus.bCoupledGear1 := TRUE;
+ELSE
+    _stAxis.stStatus.bCoupledGear1 := FALSE;
+END_IF
+
+IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio2 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex <> 0 THEN
+    GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := _stAxis.Axis.PlcToNc.GearRatio2;
+    _stAxis.stStatus.bCoupledGear2 := TRUE;
+ELSE
+    _stAxis.stStatus.bCoupledGear2 := FALSE;
+END_IF
+
+IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio3 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex <> 0 THEN
+    GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := _stAxis.Axis.PlcToNc.GearRatio3;
+    _stAxis.stStatus.bCoupledGear3 := TRUE;
+ELSE
+    _stAxis.stStatus.bCoupledGear3 := FALSE;
+END_IF
+
+IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio4 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex <> 0 THEN
+    GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := _stAxis.Axis.PlcToNc.GearRatio4;
+    _stAxis.stStatus.bCoupledGear4 := TRUE;
+ELSE
+    _stAxis.stStatus.bCoupledGear4 := FALSE;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -635,7 +837,8 @@ mParameters_ReadNc();
 mParameters_Init();
 
 mControl_LimitHitTimer();
-mControl_Power();
+mControl_LimitLinking();
+mcStatusPower := mControl_Power();
 
 mcStatusHalt := mMove_Halt();
 mcStatusStop := mMove_Stop();
@@ -647,50 +850,11 @@ mcStatusMoveModulo := mMove_MoveModulo();
 mcStatusMoveVelocity := mMove_MoveVelocity();
 
 mcStatusGearIn := mControl_GearIn();
+mcStatusGearInMultiMaster := mControl_GearInMultiMaster();
 mcStatusGearOut := mControl_GearOut();
 
-//Limit linking
-(*
-FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
-    IF (stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
-        stAxisStruct.stStatus.bFwEnabled := stAxisStruct.stStatus.bFwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
-        stAxisStruct.stStatus.bBwEnabled := stAxisStruct.stStatus.bBwEnabled AND SEL(stAxisStruct.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
-    END_IF
-END_FOR
-*)
+mcStatusHome := mControl_Home();
 
-(*Additional multimaster logic
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio1 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[1].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio1;
-    stAxisStruct.stStatus.bCoupledGear1 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear1 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio2 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[2].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio2;
-    stAxisStruct.stStatus.bCoupledGear2 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear2 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio3 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[3].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio3;
-    stAxisStruct.stStatus.bCoupledGear3 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear3 := FALSE;
-END_IF
-
-IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 0 AND stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex <> 0 THEN
-    GVL.astAxes[stAxisStruct.stConfig.astMultiMasterAxisLatched[4].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := stAxisStruct.Axis.PlcToNc.GearRatio4;
-    stAxisStruct.stStatus.bCoupledGear4 := TRUE;
-ELSE
-    stAxisStruct.stStatus.bCoupledGear4 := FALSE;
-END_IF
-*)
-//gearInMultiMaster
-//home
 //writeParam
 //readParam
 
@@ -701,7 +865,7 @@ mStatus_CommandAbortedRisingEdge();
 
 _stAxis.stStatus.bBusy := mStatus_Busy();
 
-//AxisStatuses = position/homed/velocity/etc
+//Need ERROR IDs
 
 _stAxis.stControl.bExecute := FALSE;
 
@@ -731,6 +895,11 @@ END_VAR
     <LineIds Name="FB_Axis_V2">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.FB_init">
+      <LineId Id="20" Count="0" />
+      <LineId Id="7" Count="2" />
+      <LineId Id="11" Count="8" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_GearIn">
       <LineId Id="6" Count="3" />
       <LineId Id="22" Count="0" />
@@ -744,14 +913,52 @@ END_VAR
       <LineId Id="14" Count="7" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_GearInMultiMaster">
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="4" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="27" Count="4" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="39" Count="4" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="44" Count="5" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_GearOut">
       <LineId Id="6" Count="2" />
       <LineId Id="22" Count="1" />
       <LineId Id="30" Count="0" />
-      <LineId Id="32" Count="5" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="34" Count="3" />
       <LineId Id="31" Count="0" />
-      <LineId Id="24" Count="5" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_Home">
+      <LineId Id="6" Count="1" />
       <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="9" Count="3" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="2" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_LimitHitTimer">
       <LineId Id="6" Count="1" />
@@ -761,15 +968,27 @@ END_VAR
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis_V2.mControl_LimitLinking">
+      <LineId Id="6" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="11" Count="5" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_Power">
-      <LineId Id="18" Count="0" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="13" Count="1" />
       <LineId Id="5" Count="3" />
       <LineId Id="10" Count="0" />
       <LineId Id="9" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mControl_Reset">
       <LineId Id="8" Count="2" />
@@ -843,12 +1062,16 @@ END_VAR
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="7" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_Busy">
-      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_CommandAborted">
-      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_CommandAbortedRisingEdge">
       <LineId Id="6" Count="0" />
@@ -857,7 +1080,9 @@ END_VAR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_Done">
-      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_DoneRisingEdge">
       <LineId Id="6" Count="0" />
@@ -866,11 +1091,19 @@ END_VAR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_Error">
+      <LineId Id="15" Count="2" />
+      <LineId Id="13" Count="1" />
       <LineId Id="9" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_ErrorRisingEdge">
       <LineId Id="6" Count="2" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_V2.mStatus_MultiGearing">
+      <LineId Id="6" Count="25" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis_V2.mStatus_NewCommand">
@@ -883,6 +1116,7 @@ END_VAR
       <LineId Id="69" Count="0" />
       <LineId Id="65" Count="0" />
       <LineId Id="8" Count="0" />
+      <LineId Id="114" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="9" Count="0" />
@@ -894,17 +1128,9 @@ END_VAR
       <LineId Id="16" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="71" Count="0" />
-      <LineId Id="73" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="76" Count="4" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="86" Count="26" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="113" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="118" Count="0" />
       <LineId Id="21" Count="3" />
       <LineId Id="42" Count="0" />
       <LineId Id="50" Count="0" />
