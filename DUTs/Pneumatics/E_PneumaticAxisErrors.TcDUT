@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <DUT Name="E_PneumaticAxisErrors" Id="{e2fbdacd-f77d-473b-86e3-9440b104e267}">
-    <Declaration><![CDATA[{attribute 'qualified_only'}
+    <Declaration><![CDATA[
+{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticAxisErrors :
 (
@@ -18,3 +19,4 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
+
