@@ -6,8 +6,8 @@ VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
 VAR_OUTPUT
-    anErrorID: ARRAY [1..nMaxAlarms] OF INT;
-    asErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
+    aErrorID: ARRAY [1..nMaxAlarms] OF INT;
+    aErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
     nEcMasterFramesLost: UDINT;
     nCPULoad: UDINT;
     fCycleExecTime_ms: REAL;
@@ -40,31 +40,31 @@ VAR
     nTemp1 AT %I*: INT;
     nTemp2 AT %I*: INT;
     nEcMasterDevState AT %I*: UINT;
-    astAlarmList: ARRAY [1..nMaxAlarms] OF ST_Alarm := [
-                    (*[1]*)(eStatusLED:=E_LedFunction.eFast, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=1 ,sErrorMsg:='The DC OK Status from PS or DC-DC converter 24V-1 is OFF.'),
-                    (*[2]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=2 ,sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.'),
-                    (*[3]*)(eStatusLED:=E_LedFunction.eFast, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=4 ,sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.'),
-                    (*[4]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=8 ,sErrorMsg:='Output 1 on LOCC box 1 tripped'),
-                    (*[5]*)(eStatusLED:=E_LedFunction.eSlow, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=9 ,sErrorMsg:='Output 2 on LOCC box 1 tripped'),
-                    (*[6]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=10 ,sErrorMsg:='Output 1 on LOCC box 2 tripped'),
-                    (*[7]*)(eStatusLED:=E_LedFunction.eSlow, eWarningLED:=E_LedFunction.eUndefined, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=11 ,sErrorMsg:='Output 2 on LOCC box 2 tripped'),
-                    (*[8]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=12 ,sErrorMsg:='Output 1 on LOCC box 3 tripped'),
-                    (*[9]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=13 ,sErrorMsg:='Output 2 on LOCC box 3 tripped'),
-                    (*[10]*)(eStatusLED:=E_LedFunction.eSlow, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=14 ,sErrorMsg:='LOCC box 4 or single DC breaker 1 tripped'),
-                    (*[11]*)(eStatusLED:=E_LedFunction.eSlow, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=15 ,sErrorMsg:='LOCC box 5 or single DC breaker 2 tripped'),
-                    (*[12]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=21 ,sErrorMsg:='Speed of Fan 1 below a critical limit'),
-                    (*[13]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=22 ,sErrorMsg:='Speed of Fan 2 below a critical limit'),
-                    (*[14]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=23 ,sErrorMsg:='Temperature 1 too high' ),
-                    (*[15]*)(eStatusLED:=E_LedFunction.eUndefined, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=24 ,sErrorMsg:='Temperature 2 too high'),
-                    (*[16]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSteady, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=30 ,sErrorMsg:='Safety relay 1 triggered'),
-                    (*[17]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSlow, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=101 ,sErrorMsg:='EtherCAT Master is not ok'),
-                    (*[18]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSlow, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=102 ,sErrorMsg:='At least one EtherCAT slave is not in OP state'),
-                    (*[19]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSlow, eEmergencyLED:=E_LedFunction.eSteady, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=103 ,sErrorMsg:='At least one EtherCAT slave link is faulted'),
-                    (*[20]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSlow, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=104 ,sErrorMsg:='Overflow in PLC cycle time'),
-                    (*[21]*)(eStatusLED:=E_LedFunction.eSteady, eWarningLED:=E_LedFunction.eSlow, eEmergencyLED:=E_LedFunction.eUndefined, eAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=105 ,sErrorMsg:='CPU Load High')];
+    aAlarmList: ARRAY [1..nMaxAlarms] OF ST_Alarm := [
+                    (*[1]*)(nStatusLED:=E_LedFunction.eFast, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=1 ,sErrorMsg:='The DC OK Status from PS or DC-DC converter 24V-1 is OFF.'),
+                    (*[2]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=2 ,sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.'),
+                    (*[3]*)(nStatusLED:=E_LedFunction.eFast, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=4 ,sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.'),
+                    (*[4]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=8 ,sErrorMsg:='Output 1 on LOCC box 1 tripped'),
+                    (*[5]*)(nStatusLED:=E_LedFunction.eSlow, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=9 ,sErrorMsg:='Output 2 on LOCC box 1 tripped'),
+                    (*[6]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=10 ,sErrorMsg:='Output 1 on LOCC box 2 tripped'),
+                    (*[7]*)(nStatusLED:=E_LedFunction.eSlow, nWarningLED:=E_LedFunction.eUndefined, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=11 ,sErrorMsg:='Output 2 on LOCC box 2 tripped'),
+                    (*[8]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=12 ,sErrorMsg:='Output 1 on LOCC box 3 tripped'),
+                    (*[9]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=13 ,sErrorMsg:='Output 2 on LOCC box 3 tripped'),
+                    (*[10]*)(nStatusLED:=E_LedFunction.eSlow, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=14 ,sErrorMsg:='LOCC box 4 or single DC breaker 1 tripped'),
+                    (*[11]*)(nStatusLED:=E_LedFunction.eSlow, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=15 ,sErrorMsg:='LOCC box 5 or single DC breaker 2 tripped'),
+                    (*[12]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=21 ,sErrorMsg:='Speed of Fan 1 below a critical limit'),
+                    (*[13]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=22 ,sErrorMsg:='Speed of Fan 2 below a critical limit'),
+                    (*[14]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=23 ,sErrorMsg:='Temperature 1 too high' ),
+                    (*[15]*)(nStatusLED:=E_LedFunction.eUndefined, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=24 ,sErrorMsg:='Temperature 2 too high'),
+                    (*[16]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSteady, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=30 ,sErrorMsg:='Safety relay 1 triggered'),
+                    (*[17]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSlow, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=101 ,sErrorMsg:='EtherCAT Master is not ok'),
+                    (*[18]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSlow, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=102 ,sErrorMsg:='At least one EtherCAT slave is not in OP state'),
+                    (*[19]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSlow, nEmergencyLED:=E_LedFunction.eSteady, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=103 ,sErrorMsg:='At least one EtherCAT slave link is faulted'),
+                    (*[20]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSlow, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=104 ,sErrorMsg:='Overflow in PLC cycle time'),
+                    (*[21]*)(nStatusLED:=E_LedFunction.eSteady, nWarningLED:=E_LedFunction.eSlow, nEmergencyLED:=E_LedFunction.eUndefined, nAcknowledgeLED:=E_LedFunction.eUndefined, nErrorID:=105 ,sErrorMsg:='CPU Load High')];
 
-    anTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
-    asTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
+    aTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
+    aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
     nLEDAlarmID: INT;
     sLEDAlarmMsg: STRING;
     nAlarmCnt: INT;
@@ -78,7 +78,7 @@ VAR
     //Cpu Monitor
     fbMonitorCPU: TC_CpuUsage;
     fbUpdateCPULoadTON: TON;
-    nMaxCPULoad: USINT := 85;
+    fMaxCPULoad: USINT := 85;
     //Ehtercat master device state
     bEcLinkError: BOOL;
     bEcIOlocked: BOOL;
@@ -96,13 +96,17 @@ VAR
     //Ehtercat slave device state
     fbUpdateEcSlaveStateTON: TON;
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
-    astSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
+    stSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
     nActualEcSlaves: INT := 0;
-    iAlarm: INT;
+    i: INT;
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
 
+    nAcknowledgeLED: E_LedFunction;
+    nStatusLED: E_LedFunction;
+    nWarningLED: E_LedFunction;
+    nEmergencyLED: E_LedFunction;
     fbFastBlinkOn: TON;
     fbFastBlinkOff: TON;
     bFastBlink: BOOL;
@@ -123,75 +127,75 @@ actMonitorEtherCAT();
     </Implementation>
     <Action Name="actMonitorAlarms" Id="{a6718a6d-0d11-4e42-a872-e8dfd89a550b}">
       <Implementation>
-        <ST><![CDATA[astAlarmList[1].bAlarmSet := NOT b24VDC1_OK;
-astAlarmList[1].bAlarmReset:= TRUE;
-astAlarmList[2].bAlarmSet := b24VDC2_OK;
-astAlarmList[2].bAlarmReset:= TRUE;
-astAlarmList[3].bAlarmSet := NOT b48VDC1_OK;
-astAlarmList[3].bAlarmReset:= TRUE;
-astAlarmList[4].bAlarmSet := bFuse1_OK;
-astAlarmList[4].bAlarmReset:= TRUE;
-astAlarmList[5].bAlarmSet :=  bFuse2_OK;
-astAlarmList[5].bAlarmReset:= TRUE;
-astAlarmList[6].bAlarmSet := bFuse3_OK;
-astAlarmList[6].bAlarmReset:= TRUE;
-astAlarmList[7].bAlarmSet := bFuse4_OK;
-astAlarmList[7].bAlarmReset:= TRUE;
-astAlarmList[8].bAlarmSet := bFuse5_OK;
-astAlarmList[8].bAlarmReset:= TRUE;
-astAlarmList[9].bAlarmSet := bFuse6_OK;
-astAlarmList[9].bAlarmReset:= TRUE;
-astAlarmList[10].bAlarmSet := bFuse7_OK;
-astAlarmList[10].bAlarmReset:= TRUE;
-astAlarmList[11].bAlarmSet := bFuse8_OK;
-astAlarmList[11].bAlarmReset:= TRUE;
-astAlarmList[12].bAlarmSet := NOT bFan1_OK;
-astAlarmList[12].bAlarmReset:= TRUE;
-astAlarmList[13].bAlarmSet := NOT bFan2_OK;
-astAlarmList[13].bAlarmReset:= TRUE;
-astAlarmList[14].bAlarmSet := nTemp1 > nMaxTemp;
-astAlarmList[14].bAlarmReset:= TRUE;
-astAlarmList[15].bAlarmSet := nTemp2 > nMaxTemp;
-astAlarmList[15].bAlarmReset:= TRUE;
-astAlarmList[16].bAlarmSet := NOT bSafety_OK;
-astAlarmList[16].bAlarmReset:= TRUE;
-astAlarmList[17].bAlarmSet := bEcMasterNotOK;
-astAlarmList[17].bAlarmReset:= TRUE;
-astAlarmList[18].bAlarmSet := bSlaveStateNotOP;
-astAlarmList[18].bAlarmReset:= TRUE;
-astAlarmList[19].bAlarmSet := bSlaveLinkNotOK;
-astAlarmList[19].bAlarmReset:= TRUE;
-astAlarmList[20].bAlarmSet := bCycleTimeExceeded;
-astAlarmList[20].bAlarmReset:= TRUE;
-astAlarmList[21].bAlarmSet := bCPUOverloaded;
-astAlarmList[21].bAlarmReset:= TRUE;
+        <ST><![CDATA[aAlarmList[1].bAlarmSet := NOT b24VDC1_OK;
+aAlarmList[1].bAlarmReset:= TRUE;
+aAlarmList[2].bAlarmSet := b24VDC2_OK;
+aAlarmList[2].bAlarmReset:= TRUE;
+aAlarmList[3].bAlarmSet := NOT b48VDC1_OK;
+aAlarmList[3].bAlarmReset:= TRUE;
+aAlarmList[4].bAlarmSet := bFuse1_OK;
+aAlarmList[4].bAlarmReset:= TRUE;
+aAlarmList[5].bAlarmSet :=  bFuse2_OK;
+aAlarmList[5].bAlarmReset:= TRUE;
+aAlarmList[6].bAlarmSet := bFuse3_OK;
+aAlarmList[6].bAlarmReset:= TRUE;
+aAlarmList[7].bAlarmSet := bFuse4_OK;
+aAlarmList[7].bAlarmReset:= TRUE;
+aAlarmList[8].bAlarmSet := bFuse5_OK;
+aAlarmList[8].bAlarmReset:= TRUE;
+aAlarmList[9].bAlarmSet := bFuse6_OK;
+aAlarmList[9].bAlarmReset:= TRUE;
+aAlarmList[10].bAlarmSet := bFuse7_OK;
+aAlarmList[10].bAlarmReset:= TRUE;
+aAlarmList[11].bAlarmSet := bFuse8_OK;
+aAlarmList[11].bAlarmReset:= TRUE;
+aAlarmList[12].bAlarmSet := NOT bFan1_OK;
+aAlarmList[12].bAlarmReset:= TRUE;
+aAlarmList[13].bAlarmSet := NOT bFan2_OK;
+aAlarmList[13].bAlarmReset:= TRUE;
+aAlarmList[14].bAlarmSet := nTemp1 > nMaxTemp;
+aAlarmList[14].bAlarmReset:= TRUE;
+aAlarmList[15].bAlarmSet := nTemp2 > nMaxTemp;
+aAlarmList[15].bAlarmReset:= TRUE;
+aAlarmList[16].bAlarmSet := NOT bSafety_OK;
+aAlarmList[16].bAlarmReset:= TRUE;
+aAlarmList[17].bAlarmSet := bEcMasterNotOK;
+aAlarmList[17].bAlarmReset:= TRUE;
+aAlarmList[18].bAlarmSet := bSlaveStateNotOP;
+aAlarmList[18].bAlarmReset:= TRUE;
+aAlarmList[19].bAlarmSet := bSlaveLinkNotOK;
+aAlarmList[19].bAlarmReset:= TRUE;
+aAlarmList[20].bAlarmSet := bCycleTimeExceeded;
+aAlarmList[20].bAlarmReset:= TRUE;
+aAlarmList[21].bAlarmSet := bCPUOverloaded;
+aAlarmList[21].bAlarmReset:= TRUE;
 
-FOR iAlarm:=1 TO nMaxAlarms DO
-    mAlarm(stAlarmData:= astAlarmList[iAlarm]);
-    IF iAlarm = 1 THEN
+FOR i:=1 TO nMaxAlarms DO
+    mAlarm(stAlarmData:= aAlarmList[i]);
+    IF i = 1 THEN
         nAlarmCnt := 0;
         nAlarmBitNumber := 0;
-        MEMSET(ADR(anTempErrorID), 0, SIZEOF(anTempErrorID));
-        MEMSET(ADR(asTempErrorMsg), 0, SIZEOF(asTempErrorMsg));
-    ELSIF iAlarm = nMaxAlarms THEN
-        anErrorID := anTempErrorID;
-        asErrorMsg := asTempErrorMsg;
+        MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
+        MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
+    ELSIF i = nMaxAlarms THEN
+        aErrorID := aTempErrorID;
+        aErrorMsg := aTempErrorMsg;
         nAlarmGrpBitNumber := nAlarmBitNumber;
     END_IF
 
-    IF astAlarmList[iAlarm].bAlarmActive THEN
+    IF aAlarmList[i].bAlarmActive THEN
         nAlarmCnt := nAlarmCnt + 1;
-        anTempErrorID[nAlarmCnt] := astAlarmList[iAlarm].nErrorID;
-        asTempErrorMsg[nAlarmCnt] := astAlarmList[iAlarm].sErrorMsg;
-        IF nLEDAlarmID = 0 OR (nWarningLED = E_LedFunction.eUndefined AND nEmergencyLED = E_LedFunction.eUndefined AND astAlarmList[iAlarm].eWarningLED > E_LedFunction.eUndefined) OR (nEmergencyLED = E_LedFunction.eUndefined AND astAlarmList[iAlarm].eEmergencyLED > E_LedFunction.eUndefined) THEN
-            nLEDAlarmID := iAlarm;
-            sLEDAlarmMsg := astAlarmList[iAlarm].sErrorMsg;
-            nEmergencyLED := astAlarmList[iAlarm].eEmergencyLED;
-            nWarningLED := astAlarmList[iAlarm].eWarningLED;
-            nStatusLED := astAlarmList[iAlarm].eStatusLED;
-            nAcknowledgeLED := astAlarmList[iAlarm].eAcknowledgeLED;
+        aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
+        aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
+        IF nLEDAlarmID = 0 OR (nWarningLED = E_LedFunction.eUndefined AND nEmergencyLED = E_LedFunction.eUndefined AND aAlarmList[i].nWarningLED > E_LedFunction.eUndefined) OR (nEmergencyLED = E_LedFunction.eUndefined AND aAlarmList[i].nEmergencyLED > E_LedFunction.eUndefined) THEN
+            nLEDAlarmID := i;
+            sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
+            nEmergencyLED := aAlarmList[i].nEmergencyLED;
+            nWarningLED := aAlarmList[i].nWarningLED;
+            nStatusLED := aAlarmList[i].nStatusLED;
+            nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
         END_IF
-        CASE astAlarmList[iAlarm].nErrorID OF
+        CASE aAlarmList[i].nErrorID OF
             1,4:
             nAlarmBitNumber.0 := TRUE;
             9,12,13:
@@ -213,8 +217,8 @@ FOR iAlarm:=1 TO nMaxAlarms DO
             30:
             nAlarmBitNumber.9 := TRUE;
         END_CASE
-    ELSIF NOT astAlarmList[iAlarm].bAlarmActive THEN
-        IF nLEDAlarmID = iAlarm THEN
+    ELSIF NOT aAlarmList[i].bAlarmActive THEN
+        IF nLEDAlarmID = i THEN
             nLEDAlarmID := 0;
             sLEDAlarmMsg := '';
             nEmergencyLED := 0;
@@ -255,7 +259,7 @@ bAcknowledgeLED := (nAcknowledgeLED = E_LedFunction.eSteady) OR (nAcknowledgeLED
 fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
 fbMonitorCPU(START:=fbUpdateCPULoadTON.q, TMOUT:= T#5S);
 
-bCPUOverloaded := fbMonitorCPU.USAGE > nMaxCPULoad;
+bCPUOverloaded := fbMonitorCPU.USAGE > fMaxCPULoad;
 nCPULoad := fbMonitorCPU.USAGE;
 
 fCycleExecTime_ms := UDINT_TO_REAL(_TaskInfo[fbGetCurTaskIndex.index].LastExecTime) / 10000;
@@ -273,18 +277,18 @@ nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Check ethercat slave device state
 fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q , PT:=T#100MS , Q=> , ET=> );
-fbGetEcSlaveStates(sNetId:= nEcMasterNetId, pStateBuf := ADR(astSlaveState), cbBufLen:=SIZEOF(astSlaveState), bExecute:=fbUpdateEcSlaveStateTON.q);
+fbGetEcSlaveStates(sNetId:= nEcMasterNetId, pStateBuf := ADR(stSlaveState), cbBufLen:=SIZEOF(stSlaveState), bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=UINT_TO_INT(fbGetEcSlaveStates.nSlaves);
 
-FOR iAlarm:=0 TO nActualEcSlaves-1 DO
-    IF iAlarm = 0 THEN
+FOR i:=0 TO nActualEcSlaves-1 DO
+    IF i = 0 THEN
         bSlaveStateNotOP := FALSE;
         bSlaveLinkNotOK := FALSE;
     END_IF
-    IF astSlaveState[iAlarm].deviceState <> EC_DEVICE_STATE_OP THEN
+    IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
         bSlaveStateNotOP := TRUE;
     END_IF
-    IF astSlaveState[iAlarm].linkState <> EC_LINK_STATE_OK THEN
+    IF stSlaveState[i].linkState <> EC_LINK_STATE_OK THEN
         bSlaveLinkNotOK := TRUE;
     END_IF
 END_FOR
