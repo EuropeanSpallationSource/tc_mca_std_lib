@@ -8,9 +8,8 @@ STRUCT
     Active : BOOL;
     CommandAborted : BOOL;
     Error : BOOL;
-    ErrorID : UDINT;    
+    ErrorID : UDINT;
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>
