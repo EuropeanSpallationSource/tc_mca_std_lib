@@ -42,6 +42,9 @@ VAR
 
     fbWriteParameter : MC_WriteParameter;
     mcStatusWriteParameter : ST_McStatus;
+    
+    fbSelectControlLoop : MC_SelectControlLoop;
+    mcStatusSelectControlLoop : ST_McStatus;
 
     fbGearIn : MC_GearIn;
     mcStatusGearIn : ST_McStatus;
@@ -90,7 +93,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    mcSTATUS_ARRAY_SIZE : UINT := 14;
+    mcSTATUS_ARRAY_SIZE : UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR]]></Declaration>
     <Implementation>
@@ -129,7 +132,8 @@ mcStatus[10] := ADR(mcStatusGearIn);
 mcStatus[11] := ADR(mcStatusGearInMultiMaster);
 mcStatus[12] := ADR(mcStatusGearOut);
 mcStatus[13] := ADR(mcStatusReadParameter);
-mcStatus[14] := ADR(mcStatusWriteParameter);]]></ST>
+mcStatus[14] := ADR(mcStatusWriteParameter);
+mcStatus[15] := ADR(mcStatusSelectControlLoop);]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_GearIn" Id="{2e912967-ff49-4a61-986a-feb90802d147}" FolderPath="Control Methods\">
@@ -353,6 +357,38 @@ mControl_Reset.CommandAborted:= FALSE;
 
 IF fbReset.Error THEN
     _stAxis.stError.nResetErrorID := fbReset.ErrorID; //Set the error
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_SelectControlLoop" Id="{619ee7ef-9a71-48ae-960a-b37765875611}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_SelectControlLoop : ST_McStatus]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eSelectControlLoop THEN
+    fbSelectControlLoop.Execute := _stAxis.stControl.bExecute;
+END_IF
+fbSelectControlLoop.SelectType:= E_SelectControlLoopType.SelectControlLoopType_Standard;
+fbSelectControlLoop.EncoderIndex := _stAxis.stConfig.iSelectControlLoopIndex;
+
+fbSelectControlLoop(Axis:= _stAxis.Axis);
+//we could array this
+IF fbSelectControlLoop.Done THEN
+    CASE _stAxis.stConfig.iSelectControlLoopIndex OF
+        0:
+            _stAxis.Axis REF= _stAxis.Ctrl_1_Axis;
+        1:
+            _stAxis.Axis REF= _stAxis.Ctrl_2_Axis;
+        2:
+            _stAxis.Axis REF= _stAxis.Ctrl_3_Axis;
+	END_CASE
+END_IF
+
+mControl_SelectControlLoop.Busy := fbSelectControlLoop.Busy;
+mControl_SelectControlLoop.Done := fbSelectControlLoop.Done;
+mControl_SelectControlLoop.Error := fbSelectControlLoop.Error;
+mControl_SelectControlLoop.ErrorID := fbSelectControlLoop.ErrorID;
+
+IF fbSelectControlLoop.Error THEN
+    _stAxis.stError.nSelectControlLoopErrorID := fbSelectControlLoop.ErrorID;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -687,7 +723,7 @@ mParameters_ReadParameter.Error:= fbReadParameter.Error;
 mParameters_ReadParameter.ErrorID:= fbReadParameter.ErrorID;
 
 IF fbReadParameter.Error THEN
-    _stAxis.stError.fbReadParameterErrorId:= fbReadParameter.ErrorID;
+    _stAxis.stError.nReadParameterErrorId:= fbReadParameter.ErrorID;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -708,7 +744,7 @@ mParameters_WriteParameter.Error:= fbWriteParameter.Error;
 mParameters_WriteParameter.ErrorID:= fbWriteParameter.ErrorID;
 
 IF fbWriteParameter.Error THEN
-    _stAxis.stError.fbWriteParameterErrorId:= fbWriteParameter.ErrorID;
+    _stAxis.stError.nWriteParameterErrorId:= fbWriteParameter.ErrorID;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -723,6 +759,8 @@ IF _stAxis.Axis.Status.OpMode.Modulo THEN
 ELSE
     _stAxis.stStatus.fActPosition := _stAxis.Axis.NcToPlc.ActPos;
 END_IF
+
+_stAxis.stStatus.iActiveControlLoopIndex := _stAxis.Axis.NcToPlc.ActiveControlLoopIndex;
 
 _stAxis.stStatus.bGeared := _stAxis.Axis.Status.Coupled;
 _stAxis.stStatus.bHomed := _stAxis.Axis.Status.Homed;
@@ -880,6 +918,7 @@ mcStatusWriteParameter := mParameters_WriteParameter();
 
 mControl_LimitHitTimer();
 mControl_LimitLinking();
+mControl_SelectControlLoop();
 mcStatusPower := mControl_Power();
 
 mcStatusHalt := mMove_Halt();
@@ -935,6 +974,7 @@ END_VAR
       <LineId Id="7" Count="2" />
       <LineId Id="11" Count="8" />
       <LineId Id="26" Count="1" />
+      <LineId Id="33" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.mControl_GearIn">
       <LineId Id="6" Count="3" />
@@ -1054,6 +1094,27 @@ END_VAR
       <LineId Id="33" Count="1" />
       <LineId Id="32" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Axis.mControl_SelectControlLoop">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="4" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="1" />
+    </LineIds>
     <LineIds Name="FB_Axis.mMove_Halt">
       <LineId Id="6" Count="1" />
       <LineId Id="9" Count="0" />
@@ -1144,17 +1205,15 @@ END_VAR
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.mParameters_WriteParameter">
-      <LineId Id="6" Count="2" />
-      <LineId Id="10" Count="4" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="19" Count="3" />
+      <LineId Id="23" Count="14" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.mStatus_AxisStatus">
       <LineId Id="6" Count="0" />
       <LineId Id="14" Count="3" />
       <LineId Id="13" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="18" Count="1" />
       <LineId Id="5" Count="0" />
@@ -1215,6 +1274,7 @@ END_VAR
       <LineId Id="65" Count="0" />
       <LineId Id="8" Count="0" />
       <LineId Id="114" Count="0" />
+      <LineId Id="123" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="9" Count="0" />

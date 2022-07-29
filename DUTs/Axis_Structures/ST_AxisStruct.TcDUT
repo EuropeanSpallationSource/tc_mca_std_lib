@@ -9,7 +9,11 @@ STRUCT
     stError: ST_AxisError;
     stInputs: ST_AxisInputs;
     //The NC axis link to the hardware that is controlling
-    Axis: AXIS_REF; (*~ (OPC: 0 : unavailable for OPC-clients) *)
+    
+    Ctrl_1_Axis : AXIS_REF;
+    Ctrl_2_Axis : AXIS_REF;
+    Ctrl_3_Axis : AXIS_REF;
+    Axis : REFERENCE TO AXIS_REF REF= Ctrl_1_Axis; (*~ (OPC: 0 : unavailable for OPC-clients) *)
 END_STRUCT
 END_TYPE
 ]]></Declaration>

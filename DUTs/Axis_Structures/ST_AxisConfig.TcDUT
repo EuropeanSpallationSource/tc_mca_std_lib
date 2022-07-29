@@ -48,6 +48,7 @@ STRUCT
     fMaxPosLagValue: LREAL; //Read only
     bEnTargetPositionMonitoring: BOOL; //Read only
     fTargetPositionWindow: LREAL; //Read only
+    iSelectControlLoopIndex: UINT :=0;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

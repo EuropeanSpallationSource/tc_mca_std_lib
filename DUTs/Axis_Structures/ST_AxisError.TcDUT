@@ -17,8 +17,9 @@ STRUCT
     nGearInErrorID : UDINT;
     nGearInMultiMasterErrorID : UDINT;
     nGearOutErrorID : UDINT;
-    fbWriteParameterErrorId : UDINT;
-    fbReadParameterErrorId : UDINT;
+    nWriteParameterErrorId : UDINT;
+    nReadParameterErrorId : UDINT;
+    nSelectControlLoopErrorID : UDINT;
 //Error from the NC
     nNCErrorID : UDINT;
 END_STRUCT
