@@ -153,6 +153,7 @@ IF fbGearIn.InGear AND (GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRat
 END_IF
 
 fbGearIn(Slave:= _stAxis.Axis, Master:= GVL.astAxes[stMasterAxis.nIndex].Axis);
+fbGearIn.Execute:= FALSE;
 
 mControl_GearIn.Active:= fbGearIn.Active;
 mControl_GearIn.Done:= fbGearIn.InGear;
@@ -199,6 +200,7 @@ fbGearInMultiMaster(Slave := _stAxis.Axis,
     Master2 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
     Master3 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
     Master4 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
+fbGearInMultiMaster.Enable:= FALSE;
 
 IF fbGearInMultiMaster.InGear THEN
     mStatus_MultiGearing();
@@ -228,6 +230,7 @@ END_IF]]></ST>
 END_IF
 
 fbGearOut(Slave:= _stAxis.Axis);
+fbGearOut.Execute:= FALSE;
 
 //Clear ratios from single and multi master gearing
 IF fbGearOut.Done THEN
@@ -261,6 +264,7 @@ fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
 fbHome(Axis:= _stAxis.Axis, bLimitBwd:= _stAxis.stInputs.bLimitBwd, bLimitFwd:= _stAxis.stInputs.bLimitFwd, bHomeSensor:= _stAxis.stInputs.bHomeSensor);
+fbHome.bExecute:= FALSE;
 
 mControl_Home.Busy := fbHome.bBusy;
 mControl_Home.CommandAborted := fbHome.bCommandAborted;
@@ -389,6 +393,7 @@ fbMoveAbsolute.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveAbsolute.Deceleration := _stAxis.stControl.fDeceleration;
 
 fbMoveAbsolute(Axis:= _stAxis.Axis);
+fbMoveAbsolute.Execute:= FALSE;
 
 mMove_MoveAbsolute.Active:= fbMoveAbsolute.Active;
 mMove_MoveAbsolute.Done:= fbMoveAbsolute.Done;
@@ -415,6 +420,7 @@ fbMoveModulo.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveModulo.Deceleration := _stAxis.stControl.fDeceleration;
 
 fbMoveModulo(Axis:= _stAxis.Axis);
+fbMoveModulo.Execute:= FALSE;
 
 mMove_MoveModulo.Active:= fbMoveModulo.Active;
 mMove_MoveModulo.Done:= fbMoveModulo.Done;
@@ -441,6 +447,7 @@ fbMoveRelative.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveRelative.Deceleration := _stAxis.stControl.fDeceleration;
 
 fbMoveRelative(Axis:= _stAxis.Axis);
+fbMoveRelative.Execute:= FALSE;
 
 mMove_MoveRelative.Active:= fbMoveRelative.Active;
 mMove_MoveRelative.Done:= fbMoveRelative.Done;
@@ -468,6 +475,7 @@ fbMoveVelocity.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveVelocity.Deceleration := _stAxis.stControl.fDeceleration;
 
 fbMoveVelocity(Axis:= _stAxis.Axis);
+fbMoveVelocity.Execute:= FALSE;
 
 mMove_MoveVelocity.Active:= fbMoveVelocity.Active;
 mMove_MoveVelocity.Done:= fbMoveVelocity.InVelocity;
@@ -679,6 +687,7 @@ fbReadParameter.ReadMode := E_READMODE.READMODE_ONCE;
 fbReadParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
 
 fbReadParameter(Axis:= _stAxis.Axis);
+fbReadParameter.Enable:= FALSE;
 
 _stAxis.stconfig.fReadAxisParameter := fbReadParameter.Value;
 mParameters_ReadParameter.Busy:= fbReadParameter.Busy;
@@ -701,7 +710,7 @@ END_IF
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
 fbWriteParameter(Axis:= _stAxis.Axis);
-
+fbWriteParameter.Execute:= FALSE;
 mParameters_WriteParameter.Busy:= fbWriteParameter.Busy;
 mParameters_WriteParameter.Done:= fbWriteParameter.Done;
 mParameters_WriteParameter.Error:= fbWriteParameter.Error;
@@ -901,7 +910,9 @@ mStatus_NewCommand();
 mStatus_Done();
 mStatus_Error();
 mStatus_CommandAborted();
-_stAxis.stStatus.bBusy := mStatus_Busy();]]></ST>
+_stAxis.stStatus.bBusy := mStatus_Busy();
+
+EndOfCycle();]]></ST>
       </Implementation>
     </Method>
     <Property Name="stAxis" Id="{967c7c62-771d-4aab-90d5-0b2eb60c3a9a}">
@@ -946,7 +957,9 @@ END_VAR
       <LineId Id="28" Count="0" />
       <LineId Id="30" Count="2" />
       <LineId Id="29" Count="0" />
-      <LineId Id="14" Count="7" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="16" Count="5" />
       <LineId Id="5" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="39" Count="1" />
@@ -969,6 +982,7 @@ END_VAR
       <LineId Id="16" Count="0" />
       <LineId Id="39" Count="4" />
       <LineId Id="38" Count="0" />
+      <LineId Id="71" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="59" Count="1" />
@@ -985,6 +999,7 @@ END_VAR
     <LineIds Name="FB_Axis.mControl_GearOut">
       <LineId Id="6" Count="2" />
       <LineId Id="22" Count="1" />
+      <LineId Id="51" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="32" Count="1" />
@@ -1003,6 +1018,7 @@ END_VAR
       <LineId Id="15" Count="0" />
       <LineId Id="9" Count="3" />
       <LineId Id="17" Count="0" />
+      <LineId Id="28" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="20" Count="2" />
@@ -1071,12 +1087,15 @@ END_VAR
       <LineId Id="20" Count="4" />
       <LineId Id="16" Count="0" />
       <LineId Id="12" Count="0" />
+      <LineId Id="46" Count="0" />
       <LineId Id="25" Count="6" />
       <LineId Id="43" Count="2" />
       <LineId Id="35" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.mMove_MoveModulo">
-      <LineId Id="6" Count="15" />
+      <LineId Id="6" Count="10" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="17" Count="4" />
       <LineId Id="5" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="28" Count="1" />
@@ -1088,7 +1107,9 @@ END_VAR
       <LineId Id="20" Count="4" />
       <LineId Id="16" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="25" Count="6" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="26" Count="5" />
       <LineId Id="39" Count="0" />
       <LineId Id="44" Count="1" />
       <LineId Id="42" Count="0" />
@@ -1101,7 +1122,9 @@ END_VAR
       <LineId Id="21" Count="3" />
       <LineId Id="16" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="25" Count="6" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="26" Count="5" />
       <LineId Id="35" Count="0" />
       <LineId Id="40" Count="1" />
       <LineId Id="39" Count="0" />
@@ -1134,6 +1157,7 @@ END_VAR
       <LineId Id="11" Count="2" />
       <LineId Id="22" Count="0" />
       <LineId Id="21" Count="0" />
+      <LineId Id="29" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="16" Count="2" />
@@ -1236,6 +1260,8 @@ END_VAR
       <LineId Id="40" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="35" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="123" Count="0" />
     </LineIds>
     <LineIds Name="FB_Axis.stAxis.Get">
       <LineId Id="2" Count="0" />
