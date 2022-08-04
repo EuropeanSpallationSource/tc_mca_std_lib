@@ -18,7 +18,7 @@ VAR
     fGapSize: LREAL;
     fGapCentre: LREAL;
     bAllHalted: BOOL := FALSE;
-	bInternalResetHome: BOOL :=FALSE;
+    bInternalResetHome: BOOL :=FALSE;
 
     fbSetpointGenEnablePositiveAxis: MC_ExtSetPointGenEnable;
     fbSetpointGenEnableNegativeAxis: MC_ExtSetPointGenEnable;
@@ -49,7 +49,7 @@ VAR
 
     bInternalReset: BOOL;
     bHomingReset: BOOL := FALSE;
-	
+
     //Two resets required due to homing functionality
     bResetInProgressCheck1: BOOL := FALSE;
     bResetInProgressCheck2: BOOL := FALSE;
@@ -62,13 +62,13 @@ VAR
 
     //internal MC_Reset, needed because the current reset in FB_Axis works only when there is an error. This should change once the reset functionality changes
     fbInternalResetTrig: R_TRIG;
-	fbInternalResetHome: R_TRIG;
+    fbInternalResetHome: R_TRIG;
     fbResetPositiveAxis: MC_RESET;
     fbResetNegativeAxis: MC_RESET;
     fbResetGapSizeAxis: MC_RESET;
     fbResetGapCentreAxis: MC_RESET;
-	fbResetHomedGap: MC_Home;
-	fbResetHomedCentre: MC_Home;
+    fbResetHomedGap: MC_Home;
+    fbResetHomedCentre: MC_Home;
 
 END_VAR
 ]]></Declaration>
@@ -79,11 +79,12 @@ Encoder type set to Universal
 Encoder mask set to 0xFFFFFFFF
 Encoder scaling set to match FB
 Link nDataIn1 of encoder to FB encoders
-Position lag monitoring can be left on
+Position lag monitoring can be left on*
 Dynamics of virtual axes must be configured considering coupled mechanicals (e.g. don't set velocities your real axes can't achieve)
 *)
-actVirtualAxisPositions();
 
+//Position of virtual axes
+actVirtualAxisPositions();
 //Limit logic
 actVirtualAxisLimits();
 //Enable Logic - Virtual axes automatically enable when real axes are enabled
@@ -99,7 +100,7 @@ actCalculateSetpointDirections();
 
 //Error state handling - only handle errors that disable motion
 IF bEnable AND (GVL.astAxes[nIdPositiveAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdNegativeAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdGapSizeAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdGapCentreAxis].Axis.Status.ErrorStop) THEN
-    eState:= E_SlitPairStatesV2.eErrorInit;
+    eState := E_SlitPairStatesV2.eErrorInit;
 END_IF
 
 //Propagate real axis error to virtual
@@ -120,7 +121,7 @@ bInternalReset := bReset OR GVL.astAxes[nIdPositiveAxis].stControl.bReset OR GVL
 
 //If real axis is homing, change state
 IF bEnable AND (GVL.astAxes[nIdPositiveAxis].Axis.Status.HomingBusy OR GVL.astAxes[nIdNegativeAxis].Axis.Status.HomingBusy) THEN
-    eState:= E_SlitPairStatesV2.eHomingWait;
+    eState := E_SlitPairStatesV2.eHomingWait;
 END_IF
 
 //Link all halt buttons in motors
@@ -130,19 +131,19 @@ IF GVL.astAxes[nIdPositiveAxis].stControl.bHalt OR GVL.astAxes[nIdNegativeAxis].
 END_IF
 
 //Propagate homing status
-fbResetHomedGap(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis, HomingMode := MC_ResetCalibration);
-fbResetHomedCentre(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis, HomingMode := MC_ResetCalibration);
-fbInternalResetHome(CLK := bInternalResetHome);
+fbResetHomedGap(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis, HomingMode:= MC_ResetCalibration);
+fbResetHomedCentre(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis, HomingMode:= MC_ResetCalibration);
+fbInternalResetHome(CLK:= bInternalResetHome);
 IF NOT GVL.astAxes[nIdPositiveAxis].stStatus.bHomed OR NOT GVL.astAxes[nIdNegativeAxis].stStatus.bHomed THEN
     bInternalResetHome := TRUE;
     IF fbInternalResetHome.Q THEN
-	    fbResetHomedGap.Execute := TRUE;
+        fbResetHomedGap.Execute := TRUE;
         fbResetHomedCentre.Execute := TRUE;
-		bInternalResetHome := FALSE;
-	ELSE
-		fbResetHomedGap.Execute := FALSE;
+        bInternalResetHome := FALSE;
+    ELSE
+        fbResetHomedGap.Execute := FALSE;
         fbResetHomedCentre.Execute := FALSE;
-	END_IF
+    END_IF
 END_IF
 
 //State machine
@@ -155,23 +156,23 @@ IF bEnable THEN
             fbResetGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis, Execute:=FALSE);
             fbResetGapCentreAxis(Axis:=GVL.astAxes[nIdGapCentreAxis].Axis, Execute:=FALSE);
             IF GVL.astAxes[nIdPositiveAxis].stStatus.bHomed AND GVL.astAxes[nIdNegativeAxis].stStatus.bHomed THEN
-               GVL.astAxes[nIdGapSizeAxis].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
-               GVL.astAxes[nIdGapCentreAxis].stConfig.eHomeSeq:= E_HomingRoutines.eHomeDirect;
-               GVL.astAxes[nIdGapSizeAxis].stConfig.fHomePosition:= fGapSize;
-               GVL.astAxes[nIdGapCentreAxis].stConfig.fHomePosition:= fGapCentre;
-                eState:=E_SlitPairStatesV2.eWaitForHomed;
+               GVL.astAxes[nIdGapSizeAxis].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+               GVL.astAxes[nIdGapCentreAxis].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+               GVL.astAxes[nIdGapSizeAxis].stConfig.fHomePosition := fGapSize;
+               GVL.astAxes[nIdGapCentreAxis].stConfig.fHomePosition := fGapCentre;
+                eState := E_SlitPairStatesV2.eWaitForHomed;
             ELSE
-                eState:=E_SlitPairStatesV2.eOperational;
+                eState := E_SlitPairStatesV2.eOperational;
             END_IF
 
         E_SlitPairStatesV2.eWaitForHomed:
             //Wait for virtual axis homing to complete/
-            GVL.astAxes[nIdGapSizeAxis].stControl.eCommand:= E_MotionFunctions.eHome;
-            GVL.astAxes[nIdGapSizeAxis].stControl.bExecute:= TRUE;
-            GVL.astAxes[nIdGapCentreAxis].stControl.eCommand:= E_MotionFunctions.eHome;
-            GVL.astAxes[nIdGapCentreAxis].stControl.bExecute:= TRUE;
+            GVL.astAxes[nIdGapSizeAxis].stControl.eCommand := E_MotionFunctions.eHome;
+            GVL.astAxes[nIdGapSizeAxis].stControl.bExecute := TRUE;
+            GVL.astAxes[nIdGapCentreAxis].stControl.eCommand := E_MotionFunctions.eHome;
+            GVL.astAxes[nIdGapCentreAxis].stControl.bExecute := TRUE;
             IF GVL.astAxes[nIdGapSizeAxis].stStatus.bHomed AND GVL.astAxes[nIdGapCentreAxis].stStatus.bHomed THEN
-                eState:=E_SlitPairStatesV2.eOperational;
+                eState := E_SlitPairStatesV2.eOperational;
             END_IF
             //IF NOT IN HOMING STATE
 
@@ -179,72 +180,72 @@ IF bEnable THEN
             bResetInProgressCheck1 := FALSE;
             //Detect whether real or virtual axes are moving
             IF GVL.astAxes[nIdGapSizeAxis].stStatus.bMoving OR GVL.astAxes[nIdGapCentreAxis].stStatus.bMoving THEN
-                eState:=E_SlitPairStatesV2.eEnableRealGenerators;
+                eState := E_SlitPairStatesV2.eEnableRealGenerators;
             END_IF
             IF GVL.astAxes[nIdPositiveAxis].stStatus.bMoving OR GVL.astAxes[nIdNegativeAxis].stStatus.bMoving THEN
-                eState:=E_SlitPairStatesV2.eEnableVirtualGenerators;
+                eState := E_SlitPairStatesV2.eEnableVirtualGenerators;
             END_IF
 
         E_SlitPairStatesV2.eEnableRealGenerators:
             //Hold MC_Power on until generators have enabled
             fbPowerPositiveAxis(Axis:=GVL.astAxes[nIdPositiveAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             fbPowerNegativeAxis(Axis:=GVL.astAxes[nIdNegativeAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
-            fbSetpointGenEnablePositiveAxis.Execute:=TRUE;
-            fbSetpointGenEnableNegativeAxis.Execute:=TRUE;
-            eState:=E_SlitPairStatesV2.eCheckRealAxisGeneratorsEnabled;
+            fbSetpointGenEnablePositiveAxis.Execute := TRUE;
+            fbSetpointGenEnableNegativeAxis.Execute := TRUE;
+            eState := E_SlitPairStatesV2.eCheckRealAxisGeneratorsEnabled;
 
         E_SlitPairStatesV2.eCheckRealAxisGeneratorsEnabled:
             //Hold MC_Power on until generators have enabled
             fbPowerPositiveAxis(Axis:=GVL.astAxes[nIdPositiveAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             fbPowerNegativeAxis(Axis:=GVL.astAxes[nIdNegativeAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             IF fbSetpointGenEnablePositiveAxis.Enabled AND fbSetpointGenEnableNegativeAxis.Enabled THEN
-                eState:= E_SlitPairStatesV2.eWaitForVirtualMoveDone;
+                eState := E_SlitPairStatesV2.eWaitForVirtualMoveDone;
             END_IF
 
         E_SlitPairStatesV2.eWaitForVirtualMoveDone:
             IF NOT(GVL.astAxes[nIdGapSizeAxis].stStatus.bMoving OR GVL.astAxes[nIdGapCentreAxis].stStatus.bMoving) THEN
-                eState:=E_SlitPairStatesV2.eDisableRealGenerators;
+                eState := E_SlitPairStatesV2.eDisableRealGenerators;
             END_IF
 
         E_SlitPairStatesV2.eDisableRealGenerators:
-            fbSetpointGenDisablePositiveAxis.Execute:=TRUE;
-            fbSetpointGenDisableNegativeAxis.Execute:=TRUE;
-            eState:=E_SlitPairStatesV2.eOperational;
+            fbSetpointGenDisablePositiveAxis.Execute := TRUE;
+            fbSetpointGenDisableNegativeAxis.Execute := TRUE;
+            eState := E_SlitPairStatesV2.eOperational;
 
         E_SlitPairStatesV2.eEnableVirtualGenerators:
             //Hold MC_Power on until generators have enabled
             fbPowerGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             fbPowerGapCentreAxis(Axis:=GVL.astAxes[nIdGapCentreAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
-            fbSetpointGenEnableGapSizeAxis.Execute :=TRUE;
-            fbSetpointGenEnableGapCentreAxis.Execute:=TRUE;
-            eState:=E_SlitPairStatesV2.eCheckVirtualAxisGeneratorsEnabled;
+            fbSetpointGenEnableGapSizeAxis.Execute := TRUE;
+            fbSetpointGenEnableGapCentreAxis.Execute := TRUE;
+            eState := E_SlitPairStatesV2.eCheckVirtualAxisGeneratorsEnabled;
 
         E_SlitPairStatesV2.eCheckVirtualAxisGeneratorsEnabled:
             //Hold MC_Power on until generators have enabled
             fbPowerGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             fbPowerGapCentreAxis(Axis:=GVL.astAxes[nIdGapCentreAxis].Axis, Enable:=TRUE, Enable_Positive:=TRUE,Enable_Negative:=TRUE);
             IF fbSetpointGenEnableGapSizeAxis.Enabled AND fbSetpointGenEnableGapCentreAxis.Enabled THEN
-                eState:= E_SlitPairStatesV2.eWaitForRealMoveDone;
+                eState := E_SlitPairStatesV2.eWaitForRealMoveDone;
             END_IF
 
         E_SlitPairStatesV2.eWaitForRealMoveDone:
             IF NOT(GVL.astAxes[1].stStatus.bMoving OR GVL.astAxes[2].stStatus.bMoving) THEN
-                eState:=E_SlitPairStatesV2.eDisableVirtualGenerators;
+                eState := E_SlitPairStatesV2.eDisableVirtualGenerators;
             END_IF
 
         E_SlitPairStatesV2.eDisableVirtualGenerators:
-            fbSetpointGenDisableGapSizeAxis.Execute :=TRUE;
-            fbSetpointGenDisableGapCentreAxis.Execute:=TRUE;
-            eState:=E_SlitPairStatesV2.eOperational;
+            fbSetpointGenDisableGapSizeAxis.Execute := TRUE;
+            fbSetpointGenDisableGapCentreAxis.Execute := TRUE;
+            eState := E_SlitPairStatesV2.eOperational;
 
         E_SlitPairStatesV2.eErrorInit:
             actHaltAllAxes();
 
             IF bHomingReset THEN
-                bInternalReset:= TRUE;
-                bResetInProgressCheck1:= TRUE;
-                bResetInProgressCheck2:= TRUE;
-                bHomingReset:= FALSE;
+                bInternalReset := TRUE;
+                bResetInProgressCheck1 := TRUE;
+                bResetInProgressCheck2 := TRUE;
+                bHomingReset := FALSE;
             END_IF
             IF bInternalReset OR bReset OR bResetInProgressCheck2 THEN
                 fbResetPositiveAxis(Axis:=GVL.astAxes[nIdPositiveAxis].Axis, Execute:=TRUE);
@@ -261,15 +262,15 @@ IF bEnable THEN
             END_IF
 
             IF NOT(GVL.astAxes[nIdPositiveAxis].stStatus.bError) AND NOT(GVL.astAxes[nIdNegativeAxis].stStatus.bError) AND NOT(GVL.astAxes[nIdGapSizeAxis].stStatus.bError) AND NOT(GVL.astAxes[nIdGapCentreAxis].stStatus.bError) THEN
-                eState:= E_SlitPairStatesV2.eInit;
+                eState := E_SlitPairStatesV2.eInit;
             END_IF
 
         E_SlitPairStatesV2.eHomingWait:
-            bHomingReset:= TRUE;
-			fbResetHomedGap.Execute := FALSE;
-   			fbResetHomedCentre.Execute := FALSE;
+            bHomingReset := TRUE;
+            fbResetHomedGap.Execute := FALSE;
+            fbResetHomedCentre.Execute := FALSE;
             IF NOT GVL.astAxes[nIdPositiveAxis].Axis.Status.Homed AND NOT GVL.astAxes[nIdNegativeAxis].Axis.Status.Homed THEN
-                eState:= E_SlitPairStatesV2.eInit;
+                eState := E_SlitPairStatesV2.eInit;
             END_IF
     END_CASE
 END_IF
@@ -281,38 +282,38 @@ MC_ExtSetPointGenFeed(Axis:= GVL.astAxes[nIdNegativeAxis].Axis, Position:= fPosS
 MC_ExtSetPointGenFeed(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis, Position:= fPosSetpointGapSizeAxis, Velocity:= fVeloSetpointGapSizeAxis, Acceleration:= 0, Direction:= nDirectionGapSizeAxis);
 MC_ExtSetPointGenFeed(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis, Position:= fPosSetpointGapCentreAxis, Velocity:= fVeloSetpointGapCentreAxis, Acceleration:= 0, Direction:= nDirectionGapCentreAxis);
 
-bReset:= FALSE;
+bReset := FALSE;
 ]]></ST>
     </Implementation>
     <Action Name="actCalculateSetpointDirections" Id="{7783e346-7fab-40d5-bab7-fe46a8c2f785}">
       <Implementation>
-        <ST><![CDATA[IF fVeloSetpointPositiveAxis >0 THEN
+        <ST><![CDATA[IF fVeloSetpointPositiveAxis > 0 THEN
     nDirectionPositiveAxis := 1; //moving forward
-ELSIF fVeloSetpointPositiveAxis <0 THEN
+ELSIF fVeloSetpointPositiveAxis < 0 THEN
     nDirectionPositiveAxis := -1; //moving backward
 ELSE
     nDirectionPositiveAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointNegativeAxis >0 THEN
+IF fVeloSetpointNegativeAxis > 0 THEN
     nDirectionNegativeAxis := 1; //moving forward
-ELSIF fVeloSetpointNegativeAxis <0 THEN
+ELSIF fVeloSetpointNegativeAxis < 0 THEN
     nDirectionNegativeAxis := -1; //moving backward
 ELSE
     nDirectionNegativeAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointGapSizeAxis >0 THEN
+IF fVeloSetpointGapSizeAxis > 0 THEN
     nDirectionGapSizeAxis := 1; //moving forward
-ELSIF fVeloSetpointGapSizeAxis <0 THEN
+ELSIF fVeloSetpointGapSizeAxis < 0 THEN
     nDirectionGapSizeAxis := -1; //moving backward
 ELSE
     nDirectionGapSizeAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointGapCentreAxis >0 THEN
+IF fVeloSetpointGapCentreAxis > 0 THEN
     nDirectionGapCentreAxis := 1; //moving forward
-ELSIF fVeloSetpointGapCentreAxis <0 THEN
+ELSIF fVeloSetpointGapCentreAxis < 0 THEN
     nDirectionGapCentreAxis := -1; //moving backward
 ELSE
     nDirectionGapCentreAxis := 0; //stationary
@@ -337,30 +338,30 @@ fVeloSetpointGapCentreAxis := GVL.astAxes[nIdPositiveAxis].Axis.NcToPlc.SetVelo 
     </Action>
     <Action Name="actGeneratorEnableDisable" Id="{d59f6d39-50eb-4cb0-8d9d-b62df150c5a5}">
       <Implementation>
-        <ST><![CDATA[fbSetpointGenEnablePositiveAxis(Axis:= GVL.astAxes[nIdPositiveAxis].Axis);
-fbSetpointGenEnablePositiveAxis.Execute:= FALSE;
+        <ST><![CDATA[fbSetpointGenEnablePositiveAxis(Axis:=GVL.astAxes[nIdPositiveAxis].Axis);
+fbSetpointGenEnablePositiveAxis.Execute := FALSE;
 
-fbSetpointGenEnableNegativeAxis(Axis:= GVL.astAxes[nIdNegativeAxis].Axis);
-fbSetpointGenEnableNegativeAxis.Execute:= FALSE;
+fbSetpointGenEnableNegativeAxis(Axis:=GVL.astAxes[nIdNegativeAxis].Axis);
+fbSetpointGenEnableNegativeAxis.Execute := FALSE;
 
-fbSetpointGenEnableGapSizeAxis(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis);
-fbSetpointGenEnableGapSizeAxis.Execute:= FALSE;
+fbSetpointGenEnableGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis);
+fbSetpointGenEnableGapSizeAxis.Execute := FALSE;
 
-fbSetpointGenEnableGapCentreAxis(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis);
-fbSetpointGenEnableGapCentreAxis.Execute:= FALSE;
+fbSetpointGenEnableGapCentreAxis(Axis:=GVL.astAxes[nIdGapCentreAxis].Axis);
+fbSetpointGenEnableGapCentreAxis.Execute := FALSE;
 
 
-fbSetpointGenDisablePositiveAxis(Axis:= GVL.astAxes[nIdPositiveAxis].Axis);
-fbSetpointGenDisablePositiveAxis.Execute:= FALSE;
+fbSetpointGenDisablePositiveAxis(Axis:=GVL.astAxes[nIdPositiveAxis].Axis);
+fbSetpointGenDisablePositiveAxis.Execute := FALSE;
 
-fbSetpointGenDisableNegativeAxis(Axis:= GVL.astAxes[nIdNegativeAxis].Axis);
-fbSetpointGenDisableNegativeAxis.Execute:= FALSE;
+fbSetpointGenDisableNegativeAxis(Axis:=GVL.astAxes[nIdNegativeAxis].Axis);
+fbSetpointGenDisableNegativeAxis.Execute := FALSE;
+s
+fbSetpointGenDisableGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis);
+fbSetpointGenDisableGapSizeAxis.Execute := FALSE;
 
-fbSetpointGenDisableGapSizeAxis(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis);
-fbSetpointGenDisableGapSizeAxis.Execute:= FALSE;
-
-fbSetpointGenDisableGapCentreAxis(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis);
-fbSetpointGenDisableGapCentreAxis.Execute:= FALSE;]]></ST>
+fbSetpointGenDisableGapCentreAxis(Axis:=GVL.astAxes[nIdGapCentreAxis].Axis);
+fbSetpointGenDisableGapCentreAxis.Execute := FALSE;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHaltAllAxes" Id="{f2afb93d-4a80-499a-b8ec-4e673220e7ad}">
@@ -390,11 +391,11 @@ GVL.astAxes[nIdGapCentreAxis].stControl.bEnable := GVL.astAxes[nIdPositiveAxis].
     </Action>
     <Action Name="actVirtualAxisLimits" Id="{436d835a-8846-47e9-922d-a1df63469a25}">
       <Implementation>
-        <ST><![CDATA[GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitFwd:= GVL.astAxes[nIdPositiveAxis].stStatus.bFwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bBwEnabled;
-GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitBwd:= GVL.astAxes[nIdPositiveAxis].stStatus.bBwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bFwEnabled;
+        <ST><![CDATA[GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitFwd := GVL.astAxes[nIdPositiveAxis].stStatus.bFwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bBwEnabled;
+GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitBwd := GVL.astAxes[nIdPositiveAxis].stStatus.bBwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bFwEnabled;
 
-GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitFwd:= GVL.astAxes[nIdPositiveAxis].stStatus.bFwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bFwEnabled;
-GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitBwd:= GVL.astAxes[nIdPositiveAxis].stStatus.bBwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bBwEnabled;]]></ST>
+GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitFwd := GVL.astAxes[nIdPositiveAxis].stStatus.bFwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bFwEnabled;
+GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitBwd := GVL.astAxes[nIdPositiveAxis].stStatus.bBwEnabled AND GVL.astAxes[nIdNegativeAxis].stStatus.bBwEnabled;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actVirtualAxisPositions" Id="{4ef557a2-3171-4a03-98ba-14f2cd3ef5ec}">
@@ -406,7 +407,7 @@ To preserve decimal position data of the LREAL (i.e. anything <1mm) it is necess
 This can be reversed with the correct scaling at the NC encoder level.
 *)
 fGapSize := GVL.astAxes[nIdPositiveAxis].stStatus.fActPosition - GVL.astAxes[nIdNegativeAxis].stStatus.fActPosition;
-fGapCentre := (GVL.astAxes[nIdPositiveAxis].stStatus.fActPosition + GVL.astAxes[nIdNegativeAxis].stStatus.fActPosition) / 2;
+fGapCentre := (GVL.astAxes[nIdPositiveAxis].stStatus.fActPosition + GVL.astAxes[nIdNegativeAxis].stStatus.fActPosition)/2;
 
 
     IF ABS(fGapSize) < 100000 THEN
@@ -418,7 +419,11 @@ fGapCentre := (GVL.astAxes[nIdPositiveAxis].stStatus.fActPosition + GVL.astAxes[
       </Implementation>
     </Action>
     <LineIds Name="FB_SlitPairV2">
-      <LineId Id="16749" Count="208" />
+      <LineId Id="16749" Count="8" />
+      <LineId Id="16959" Count="0" />
+      <LineId Id="16958" Count="0" />
+      <LineId Id="16758" Count="0" />
+      <LineId Id="16760" Count="197" />
       <LineId Id="939" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPairV2.actCalculateSetpointDirections">
