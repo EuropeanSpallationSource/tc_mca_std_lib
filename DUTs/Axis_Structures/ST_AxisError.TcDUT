@@ -4,21 +4,21 @@
     <Declaration><![CDATA[TYPE ST_AxisError:
 STRUCT
 //PLCopen function block errors
-    nPowerErrorID : UDINT;
-    nMoveAbsoluteErrorID : UDINT;
-    nMoveRelativeErrorID : UDINT;
-    nMoveVelocityErrorID : UDINT;
-    nMoveModuloErrorID : UDINT;
-    nJogErrorID : UDINT;
-    nHomeErrorID : UDINT;
-    nHaltErrorID : UDINT;
-    nResetErrorID : UDINT;
-    nStopErrorID : UDINT;
-    nGearInErrorID : UDINT;
-    nGearInMultiMasterErrorID : UDINT;
-    nGearOutErrorID : UDINT;
-    fbWriteParameterErrorId : UDINT;
-    fbReadParameterErrorId : UDINT;
+    nPowerErrorID: UDINT;
+    nMoveAbsoluteErrorID: UDINT;
+    nMoveRelativeErrorID: UDINT;
+    nMoveVelocityErrorID: UDINT;
+    nMoveModuloErrorID: UDINT;
+    nJogErrorID: UDINT;
+    nHomeErrorID: UDINT;
+    nHaltErrorID: UDINT;
+    nResetErrorID: UDINT;
+    nStopErrorID: UDINT;
+    nGearInErrorID: UDINT;
+    nGearInMultiMasterErrorID: UDINT;
+    nGearOutErrorID: UDINT;
+    fbWriteParameterErrorId: UDINT;
+    fbReadParameterErrorId: UDINT;
 //Error from the NC
     nNCErrorID : UDINT;
 END_STRUCT

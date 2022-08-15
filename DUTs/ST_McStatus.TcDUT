@@ -3,12 +3,12 @@
   <DUT Name="ST_McStatus" Id="{e1a9cbb3-6daf-48a9-bd68-c3f3e82f5a41}">
     <Declaration><![CDATA[TYPE ST_McStatus :
 STRUCT
-    Done : BOOL;
-    Busy : BOOL;
-    Active : BOOL;
-    CommandAborted : BOOL;
-    Error : BOOL;
-    ErrorID : UDINT;
+    Done: BOOL;
+    Busy: BOOL;
+    Active: BOOL;
+    CommandAborted: BOOL;
+    Error: BOOL;
+    ErrorID: UDINT;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>
