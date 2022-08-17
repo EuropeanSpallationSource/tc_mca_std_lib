@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlitPairV2" Id="{ff4013b1-472a-4f42-a6c8-2711712ac06d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPairV2
 VAR_INPUT
@@ -133,18 +133,17 @@ END_IF
 //Propagate homing status
 fbResetHomedGap(Axis:= GVL.astAxes[nIdGapSizeAxis].Axis, HomingMode:= MC_ResetCalibration);
 fbResetHomedCentre(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis, HomingMode:= MC_ResetCalibration);
-fbInternalResetHome(CLK:= bInternalResetHome);
+fbInternalResetHome(CLK:= fbResetHomedCentre.Done OR fbResetHomedGap.Done );
 IF NOT GVL.astAxes[nIdPositiveAxis].stStatus.bHomed OR NOT GVL.astAxes[nIdNegativeAxis].stStatus.bHomed THEN
-    bInternalResetHome := TRUE;
-    IF fbInternalResetHome.Q THEN
         fbResetHomedGap.Execute := TRUE;
         fbResetHomedCentre.Execute := TRUE;
-        bInternalResetHome := FALSE;
-    ELSE
+END_IF
+
+IF fbInternalResetHome.Q THEN 
         fbResetHomedGap.Execute := FALSE;
         fbResetHomedCentre.Execute := FALSE;
-    END_IF
 END_IF
+
 
 //State machine
 IF bEnable THEN
@@ -267,9 +266,7 @@ IF bEnable THEN
 
         E_SlitPairStatesV2.eHomingWait:
             bHomingReset := TRUE;
-            fbResetHomedGap.Execute := FALSE;
-            fbResetHomedCentre.Execute := FALSE;
-            IF NOT GVL.astAxes[nIdPositiveAxis].Axis.Status.Homed AND NOT GVL.astAxes[nIdNegativeAxis].Axis.Status.Homed THEN
+            IF NOT GVL.astAxes[nIdPositiveAxis].Axis.Status.Homed OR NOT GVL.astAxes[nIdNegativeAxis].Axis.Status.Homed THEN
                 eState := E_SlitPairStatesV2.eInit;
             END_IF
     END_CASE
@@ -356,7 +353,7 @@ fbSetpointGenDisablePositiveAxis.Execute := FALSE;
 
 fbSetpointGenDisableNegativeAxis(Axis:=GVL.astAxes[nIdNegativeAxis].Axis);
 fbSetpointGenDisableNegativeAxis.Execute := FALSE;
-s
+
 fbSetpointGenDisableGapSizeAxis(Axis:=GVL.astAxes[nIdGapSizeAxis].Axis);
 fbSetpointGenDisableGapSizeAxis.Execute := FALSE;
 
@@ -423,7 +420,12 @@ fGapCentre := (GVL.astAxes[nIdPositiveAxis].stStatus.fActPosition + GVL.astAxes[
       <LineId Id="16959" Count="0" />
       <LineId Id="16958" Count="0" />
       <LineId Id="16758" Count="0" />
-      <LineId Id="16760" Count="197" />
+      <LineId Id="16760" Count="50" />
+      <LineId Id="16813" Count="0" />
+      <LineId Id="17032" Count="1" />
+      <LineId Id="16814" Count="1" />
+      <LineId Id="16817" Count="124" />
+      <LineId Id="16944" Count="13" />
       <LineId Id="939" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPairV2.actCalculateSetpointDirections">
