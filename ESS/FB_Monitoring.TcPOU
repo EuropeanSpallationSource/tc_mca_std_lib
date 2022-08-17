@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Monitoring" Id="{dc4431e2-7ed3-4317-a6e3-038e11ac0910}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Monitoring
+    <Declaration><![CDATA[
+FUNCTION_BLOCK FB_Monitoring
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -118,16 +119,19 @@ VAR CONSTANT
     nMaxAlarms: INT := 50;
     nMaxECSlaves: INT := 255;
     nMaxTemp: INT := 10000;
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
     <Implementation>
-      <ST><![CDATA[actMonitorAlarms();
+      <ST><![CDATA[
+actMonitorAlarms();
 actMonitorCPU();
 actMonitorEtherCAT();
 ]]></ST>
     </Implementation>
     <Action Name="actMonitorAlarms" Id="{a6718a6d-0d11-4e42-a872-e8dfd89a550b}">
       <Implementation>
-        <ST><![CDATA[aAlarmList[1].bAlarmSet := NOT b24VDC1_OK;
+        <ST><![CDATA[
+aAlarmList[1].bAlarmSet := NOT b24VDC1_OK;
 aAlarmList[1].bAlarmReset:= TRUE;
 aAlarmList[2].bAlarmSet := b24VDC2_OK;
 aAlarmList[2].bAlarmReset:= TRUE;
@@ -255,7 +259,8 @@ bAcknowledgeLED := (nAcknowledgeLED = E_LedFunction.eSteady) OR (nAcknowledgeLED
     </Action>
     <Action Name="actMonitorCPU" Id="{50fd1f1e-d31a-4c60-ab54-9bd200182c11}">
       <Implementation>
-        <ST><![CDATA[//Cpu Monitor
+        <ST><![CDATA[
+//Cpu Monitor
 fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
 fbMonitorCPU(START:=fbUpdateCPULoadTON.q, TMOUT:= T#5S);
 
@@ -263,12 +268,14 @@ bCPUOverloaded := fbMonitorCPU.USAGE > fMaxCPULoad;
 nCPULoad := fbMonitorCPU.USAGE;
 
 fCycleExecTime_ms := UDINT_TO_REAL(_TaskInfo[fbGetCurTaskIndex.index].LastExecTime) / 10000;
-bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;]]></ST>
+bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actMonitorEtherCAT" Id="{393a7135-5760-4419-90d0-1b5894704c98}">
       <Implementation>
-        <ST><![CDATA[//Read frames
+        <ST><![CDATA[
+//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q , PT:=T#1000MS , Q=> , ET=> );
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
 
@@ -308,16 +315,20 @@ bEcSlaveSafeOP := nEcMasterDevState.10;
 bEcSlaveError := nEcMasterDevState.11;
 bEcDCnotInSync := nEcMasterDevState.12;
 
-bEcMasterNotOK := nEcMasterDevState > 0;]]></ST>
+bEcMasterNotOK := nEcMasterDevState > 0;
+]]></ST>
       </Implementation>
     </Action>
     <Method Name="mAlarm" Id="{90084986-c6d4-4ab8-8e9d-f1097d507950}">
-      <Declaration><![CDATA[METHOD mAlarm : BOOL
+      <Declaration><![CDATA[
+METHOD mAlarm : BOOL
 VAR_IN_OUT
     stAlarmData: ST_Alarm;
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
+        <ST><![CDATA[
+IF stAlarmData.bAlarmSet THEN
     stAlarmData.bAlarmActive := TRUE;
 ELSIF stAlarmData.bAlarmReset THEN
     stAlarmData.bAlarmActive := FALSE;
@@ -325,114 +336,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_Monitoring">
-      <LineId Id="1543" Count="2" />
-      <LineId Id="115" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Monitoring.actMonitorAlarms">
-      <LineId Id="243" Count="0" />
-      <LineId Id="302" Count="0" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="301" Count="0" />
-      <LineId Id="256" Count="0" />
-      <LineId Id="300" Count="0" />
-      <LineId Id="258" Count="0" />
-      <LineId Id="299" Count="0" />
-      <LineId Id="260" Count="0" />
-      <LineId Id="298" Count="0" />
-      <LineId Id="262" Count="2" />
-      <LineId Id="249" Count="0" />
-      <LineId Id="266" Count="0" />
-      <LineId Id="265" Count="0" />
-      <LineId Id="268" Count="0" />
-      <LineId Id="267" Count="0" />
-      <LineId Id="270" Count="0" />
-      <LineId Id="269" Count="0" />
-      <LineId Id="272" Count="0" />
-      <LineId Id="271" Count="0" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="273" Count="0" />
-      <LineId Id="276" Count="0" />
-      <LineId Id="275" Count="0" />
-      <LineId Id="278" Count="0" />
-      <LineId Id="277" Count="0" />
-      <LineId Id="280" Count="0" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="282" Count="0" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="284" Count="1" />
-      <LineId Id="287" Count="1" />
-      <LineId Id="290" Count="1" />
-      <LineId Id="293" Count="1" />
-      <LineId Id="296" Count="1" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="166" Count="1" />
-      <LineId Id="76" Count="0" />
-      <LineId Id="165" Count="0" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="125" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="151" Count="2" />
-      <LineId Id="93" Count="0" />
-      <LineId Id="126" Count="3" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="175" Count="0" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="176" Count="0" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="183" Count="1" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="185" Count="2" />
-      <LineId Id="191" Count="0" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="192" Count="0" />
-      <LineId Id="189" Count="0" />
-      <LineId Id="193" Count="3" />
-      <LineId Id="190" Count="0" />
-      <LineId Id="303" Count="1" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="96" Count="0" />
-      <LineId Id="99" Count="2" />
-      <LineId Id="134" Count="2" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="144" Count="2" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="4" Count="0" />
-      <LineId Id="64" Count="2" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="169" Count="5" />
-      <LineId Id="168" Count="0" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Monitoring.actMonitorCPU">
-      <LineId Id="2" Count="7" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Monitoring.actMonitorEtherCAT">
-      <LineId Id="2" Count="39" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Monitoring.mAlarm">
-      <LineId Id="21" Count="4" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
+

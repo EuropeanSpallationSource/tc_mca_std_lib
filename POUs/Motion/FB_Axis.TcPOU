@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
-    <Declaration><![CDATA[//Function block to run a virtual drive with Nc
+    <Declaration><![CDATA[
+//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis
 VAR
     sVersion: STRING := '1.0.4';
@@ -76,9 +77,11 @@ VAR
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
 
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
     <Implementation>
-      <ST><![CDATA[bBusy := FALSE;
+      <ST><![CDATA[
+bBusy := FALSE;
 
 stAxisStruct.Axis.ReadStatus();
 stAxisStruct.stStatus.bMovingForward:= stAxisStruct.Axis.Status.PositiveDirection;
@@ -530,23 +533,27 @@ ELSE
 END_IF
 
 //Reset bExecute
-stAxisStruct.stControl.bExecute := FALSE;]]></ST>
+stAxisStruct.stControl.bExecute := FALSE;
+]]></ST>
     </Implementation>
     <Action Name="actInit" Id="{fbff7981-0a80-47f4-875f-ec24f3c93b13}">
       <Implementation>
-        <ST><![CDATA[//Initialize default values from NC
+        <ST><![CDATA[
+//Initialize default values from NC
 stAxisStruct.stControl.fAcceleration := stAxisStruct.stConfig.fDefaultAcc;
 stAxisStruct.stControl.fDeceleration := stAxisStruct.stConfig.fDefaultDec;
 stAxisStruct.stControl.fVelocity := stAxisStruct.stConfig.fVelocityDefaultFast;
 stAxisStruct.stControl.fJogVelocity := stAxisStruct.stConfig.fVelocityDefaultSlow;
 
 
-stAxisStruct.stStatus.bAxisInitialized := TRUE;]]></ST>
+stAxisStruct.stStatus.bAxisInitialized := TRUE;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actReadMcParameters" Id="{d4e03f47-8f47-4e3a-8328-dc15b235a081}">
       <Implementation>
-        <ST><![CDATA[(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
+        <ST><![CDATA[
+(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
 Intended TO be executed once every PLC cycle
 Another FB is used TO trasnfer default axis parameters TO the stAxisStruct so
 bReadValid is used TO halt that trasnfer UNTIL the parameters have been
@@ -691,223 +698,10 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
     fbReadEnPositionLagMonitoring.Error OR
     fbReadAxisMaxPosLagValue.Error OR
     fbReadEnTargetPositionMonitoring.Error OR
-    fbReadTargetPositionWindow.Error;]]></ST>
+    fbReadTargetPositionWindow.Error;
+]]></ST>
       </Implementation>
     </Action>
-    <LineIds Name="FB_Axis">
-      <LineId Id="3492" Count="1" />
-      <LineId Id="3489" Count="0" />
-      <LineId Id="3737" Count="2" />
-      <LineId Id="3481" Count="0" />
-      <LineId Id="3660" Count="0" />
-      <LineId Id="3659" Count="0" />
-      <LineId Id="3661" Count="1" />
-      <LineId Id="2203" Count="0" />
-      <LineId Id="2189" Count="0" />
-      <LineId Id="2377" Count="2" />
-      <LineId Id="2190" Count="0" />
-      <LineId Id="2380" Count="0" />
-      <LineId Id="2193" Count="0" />
-      <LineId Id="2381" Count="0" />
-      <LineId Id="2194" Count="1" />
-      <LineId Id="2383" Count="0" />
-      <LineId Id="2197" Count="0" />
-      <LineId Id="2384" Count="0" />
-      <LineId Id="2198" Count="0" />
-      <LineId Id="2385" Count="0" />
-      <LineId Id="2199" Count="0" />
-      <LineId Id="2437" Count="0" />
-      <LineId Id="2200" Count="0" />
-      <LineId Id="2438" Count="0" />
-      <LineId Id="2573" Count="0" />
-      <LineId Id="2493" Count="0" />
-      <LineId Id="2201" Count="0" />
-      <LineId Id="2446" Count="0" />
-      <LineId Id="3201" Count="0" />
-      <LineId Id="3135" Count="0" />
-      <LineId Id="3125" Count="9" />
-      <LineId Id="2998" Count="0" />
-      <LineId Id="1627" Count="1" />
-      <LineId Id="2515" Count="0" />
-      <LineId Id="2595" Count="0" />
-      <LineId Id="2591" Count="0" />
-      <LineId Id="2586" Count="2" />
-      <LineId Id="2585" Count="0" />
-      <LineId Id="2594" Count="0" />
-      <LineId Id="2516" Count="0" />
-      <LineId Id="1629" Count="0" />
-      <LineId Id="1632" Count="2" />
-      <LineId Id="3818" Count="0" />
-      <LineId Id="1635" Count="0" />
-      <LineId Id="1637" Count="0" />
-      <LineId Id="1642" Count="0" />
-      <LineId Id="3271" Count="0" />
-      <LineId Id="1921" Count="0" />
-      <LineId Id="1925" Count="1" />
-      <LineId Id="2837" Count="0" />
-      <LineId Id="2835" Count="0" />
-      <LineId Id="3974" Count="3" />
-      <LineId Id="2836" Count="0" />
-      <LineId Id="2262" Count="2" />
-      <LineId Id="3586" Count="0" />
-      <LineId Id="3663" Count="0" />
-      <LineId Id="2274" Count="0" />
-      <LineId Id="2273" Count="0" />
-      <LineId Id="2276" Count="3" />
-      <LineId Id="2281" Count="0" />
-      <LineId Id="2290" Count="1" />
-      <LineId Id="2294" Count="4" />
-      <LineId Id="2303" Count="0" />
-      <LineId Id="2310" Count="0" />
-      <LineId Id="2343" Count="0" />
-      <LineId Id="2504" Count="0" />
-      <LineId Id="2575" Count="0" />
-      <LineId Id="2497" Count="0" />
-      <LineId Id="2506" Count="0" />
-      <LineId Id="2570" Count="1" />
-      <LineId Id="2574" Count="0" />
-      <LineId Id="2572" Count="0" />
-      <LineId Id="2569" Count="0" />
-      <LineId Id="2577" Count="0" />
-      <LineId Id="2583" Count="0" />
-      <LineId Id="2576" Count="0" />
-      <LineId Id="2361" Count="1" />
-      <LineId Id="2498" Count="0" />
-      <LineId Id="2582" Count="0" />
-      <LineId Id="2511" Count="0" />
-      <LineId Id="2584" Count="0" />
-      <LineId Id="2513" Count="0" />
-      <LineId Id="2444" Count="0" />
-      <LineId Id="2364" Count="0" />
-      <LineId Id="2344" Count="0" />
-      <LineId Id="2311" Count="0" />
-      <LineId Id="2329" Count="1" />
-      <LineId Id="2888" Count="0" />
-      <LineId Id="2331" Count="5" />
-      <LineId Id="2934" Count="0" />
-      <LineId Id="2992" Count="0" />
-      <LineId Id="3204" Count="0" />
-      <LineId Id="3213" Count="1" />
-      <LineId Id="3205" Count="2" />
-      <LineId Id="3203" Count="0" />
-      <LineId Id="2994" Count="1" />
-      <LineId Id="2339" Count="0" />
-      <LineId Id="2309" Count="0" />
-      <LineId Id="2216" Count="0" />
-      <LineId Id="1733" Count="0" />
-      <LineId Id="3268" Count="0" />
-      <LineId Id="1936" Count="1" />
-      <LineId Id="2770" Count="0" />
-      <LineId Id="2769" Count="0" />
-      <LineId Id="2772" Count="0" />
-      <LineId Id="2777" Count="2" />
-      <LineId Id="2771" Count="0" />
-      <LineId Id="4055" Count="0" />
-      <LineId Id="1941" Count="1" />
-      <LineId Id="2651" Count="2" />
-      <LineId Id="1945" Count="14" />
-      <LineId Id="1962" Count="8" />
-      <LineId Id="3819" Count="0" />
-      <LineId Id="1971" Count="1" />
-      <LineId Id="3820" Count="0" />
-      <LineId Id="1973" Count="0" />
-      <LineId Id="3148" Count="4" />
-      <LineId Id="3146" Count="0" />
-      <LineId Id="1974" Count="1" />
-      <LineId Id="1979" Count="3" />
-      <LineId Id="2501" Count="0" />
-      <LineId Id="1992" Count="0" />
-      <LineId Id="2502" Count="0" />
-      <LineId Id="1993" Count="1" />
-      <LineId Id="2980" Count="1" />
-      <LineId Id="2989" Count="2" />
-      <LineId Id="2987" Count="1" />
-      <LineId Id="2982" Count="0" />
-      <LineId Id="2984" Count="2" />
-      <LineId Id="2983" Count="0" />
-      <LineId Id="1995" Count="6" />
-      <LineId Id="2272" Count="0" />
-      <LineId Id="1934" Count="0" />
-      <LineId Id="202" Count="1" />
-      <LineId Id="246" Count="6" />
-      <LineId Id="3900" Count="0" />
-      <LineId Id="3895" Count="1" />
-      <LineId Id="3978" Count="0" />
-      <LineId Id="3897" Count="2" />
-      <LineId Id="3894" Count="0" />
-      <LineId Id="253" Count="11" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="267" Count="14" />
-      <LineId Id="288" Count="115" />
-      <LineId Id="409" Count="44" />
-      <LineId Id="3507" Count="5" />
-      <LineId Id="454" Count="9" />
-      <LineId Id="3513" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Axis.actInit">
-      <LineId Id="6" Count="0" />
-      <LineId Id="1" Count="2" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="4" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Axis.actReadMcParameters">
-      <LineId Id="160" Count="2" />
-      <LineId Id="165" Count="1" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="59" Count="3" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="63" Count="4" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="119" Count="4" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="125" Count="4" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="69" Count="4" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="187" Count="10" />
-      <LineId Id="185" Count="0" />
-      <LineId Id="76" Count="0" />
-      <LineId Id="81" Count="3" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="86" Count="3" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="18" Count="2" />
-      <LineId Id="8" Count="1" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="21" Count="2" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="24" Count="2" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="28" Count="10" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="40" Count="10" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="138" Count="1" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="144" Count="3" />
-      <LineId Id="149" Count="3" />
-      <LineId Id="154" Count="2" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="167" Count="0" />
-      <LineId Id="169" Count="14" />
-      <LineId Id="168" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
+
