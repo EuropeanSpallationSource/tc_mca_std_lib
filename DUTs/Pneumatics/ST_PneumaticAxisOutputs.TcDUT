@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <DUT Name="ST_PneumaticAxisOutputs" Id="{51effe12-4bc0-43e3-b66e-2952d0306c78}">
-    <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
+    <Declaration><![CDATA[
+TYPE ST_PneumaticAxisOutputs :
 STRUCT
     bLimitFwdOn AT %Q*: BOOL; //Limit Switch Fwd power output
     bLimitBwdOn AT %Q*: BOOL; //Limit Switch Bwd power output
@@ -16,3 +17,4 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
+

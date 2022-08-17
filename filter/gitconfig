@@ -1,0 +1,5 @@
+[filter "ignoreNetId"]
+	clean = sed -b -f filter/ignoreTargetNetId.sed
+[filter "cleanCode"]
+	clean = sed -b -f filter/cleanCode.sed
+

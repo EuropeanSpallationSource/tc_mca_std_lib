@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <DUT Name="E_HomeSwitchTypeClass" Id="{efe4c9b6-f0fb-4dcd-aeb8-a35b3f20f344}">
-    <Declaration><![CDATA[TYPE E_HomeSwitchTypeClass:
+    <Declaration><![CDATA[
+TYPE E_HomeSwitchTypeClass:
 (
     eNoSwitch := 0, //no physical switch for homing present
     eHomeSwitchPresent := 1, //dedicated homing switch present
@@ -12,3 +13,4 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
+
