@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <TextList Name="languageSupport" Id="{5d3fdc2f-5bea-44d3-8108-bdef8127e821}">
     <XmlArchive>
       <Data>
@@ -399,6 +399,13 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"bLocalMode"</v>
+              <v n="TextDefault">"Local Mode"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -424,3 +431,4 @@
     </XmlArchive>
   </TextList>
 </TcPlcObject>
+

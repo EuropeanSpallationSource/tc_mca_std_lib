@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <Visu Name="MainVisu" Id="{98c8ae72-e756-4d11-b6a5-5914882e2424}">
     <XmlArchive>
       <Data>
@@ -9033,11 +9033,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eJog;
-GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= FALSE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -9047,10 +9046,11 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eJog;
+GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -9233,11 +9233,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bJogBwd:= TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eJog;
-GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= FALSE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -9247,10 +9246,11 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= FALSE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eJog;
+GVL.astAxes[Main.hmiAxisSelection].stControl.bJogFwd:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -20728,15 +20728,23 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">390574330L</v>
-                          <v n="Value">"   LocalMode"</v>
+                          <v n="Value">"  bLocalMode"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
                           <v n="Value">false</v>
                         </o>
                         <o>
+                          <v n="Id">2114174855L</v>
+                          <v n="Value">"'languageSupport'"</v>
+                        </o>
+                        <o>
+                          <v n="Id">3774423699L</v>
+                          <v n="Value">"bLocalMode"</v>
+                        </o>
+                        <o>
                           <v n="Id">823443203L</v>
-                          <v n="Value">"947"</v>
+                          <v n="Value">"972"</v>
                         </o>
                       </l>
                     </o>
@@ -21224,8 +21232,8 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v>30701c7d-977e-49b5-bb21-a0cecf1ead9e</v>
                 <v>ContainsPoint</v>
                 <v>64d72d51-c7db-4404-bae2-6d221f8a4519</v>
-                <v>HasInputAccess</v>
-                <v>4fd74a45-ea1a-4196-9703-ba786a24fb65</v>
+                <v>SetStaticState</v>
+                <v>f70ff323-614c-45b7-a312-0594be5bd320</v>
                 <v>HasInputAccessIntern</v>
                 <v>af8ccc95-fff9-4fe4-9416-a0dfb29be3e1</v>
                 <v>GetTooltip</v>
@@ -21244,8 +21252,6 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v>3e518730-123c-436c-b9fa-f2a4d7b1bedd</v>
                 <v>SetClientData</v>
                 <v>79534304-3f33-4434-8fe5-447c29f883f2</v>
-                <v>HasVisibilityAccessIntern</v>
-                <v>d1f92235-4ac0-4e45-9519-7b09eda8f71b</v>
                 <v>GetInstance</v>
                 <v>bab24c33-7699-42b2-aecb-eae4d06946ba</v>
                 <v>GetClientData</v>
@@ -21262,12 +21268,14 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v>92c953f5-cb0d-4f1b-9ad0-6f00f1be0217</v>
                 <v>Initialize</v>
                 <v>6b50d36a-e27e-4aa8-8e09-34acfbfdddbe</v>
-                <v>Destruct</v>
-                <v>278b4e73-b2b6-4e4e-a29e-df9f9243725f</v>
-                <v>SetStaticState</v>
-                <v>f70ff323-614c-45b7-a312-0594be5bd320</v>
+                <v>HasInputAccess</v>
+                <v>4fd74a45-ea1a-4196-9703-ba786a24fb65</v>
+                <v>HasVisibilityAccessIntern</v>
+                <v>d1f92235-4ac0-4e45-9519-7b09eda8f71b</v>
                 <v>GetSurroundingRect</v>
                 <v>7361ce2b-ad02-452c-a585-935c78b9613e</v>
+                <v>ElementInfo</v>
+                <v>864206f7-8f61-45ac-a91b-23cae6e958d8</v>
                 <v>GetResult</v>
                 <v>8317aaba-0bb5-48f9-8b2e-9d0b5c9c65a8</v>
                 <v>GetLocalUsergroup</v>
@@ -21290,8 +21298,8 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <v>a5ca5f52-0a7a-4bed-a5a1-8439dd60c0c5</v>
                 <v>HandleInput</v>
                 <v>3b347ea6-12e3-4e3a-9b73-ab3ec97ee6b1</v>
-                <v>ElementInfo</v>
-                <v>864206f7-8f61-45ac-a91b-23cae6e958d8</v>
+                <v>Destruct</v>
+                <v>278b4e73-b2b6-4e4e-a29e-df9f9243725f</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{98c8ae72-e756-4d11-b6a5-5914882e2424}</v>
@@ -21437,7 +21445,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
         <Type n="Hashtable">System.Collections.Hashtable</Type>
         <Type n="HotkeyConfiguration">{6b108d46-58af-4e41-a3f4-174d8f160cc4}</Type>
         <Type n="InputBoxInputAction">{e8e7e747-f76f-4dee-ab1c-b9637e41ac26}</Type>
-        <Type n="InputBoxInputAction[]">_3S.CoDeSys.VisualElem.InputBoxInputAction[], VisualElem.plugin, Version=3.5.13.31, Culture=neutral, PublicKeyToken=null</Type>
+        <Type n="InputBoxInputAction[]">_3S.CoDeSys.VisualElem.InputBoxInputAction[], VisualElem.plugin, Version=3.5.13.32, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="Int16">System.Int16</Type>
         <Type n="Int32">System.Int32</Type>
         <Type n="Int64">System.Int64</Type>
@@ -21445,12 +21453,12 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
         <Type n="NamedStyleFont">{9e842eb2-1463-4af2-b605-4fbb17044f94}</Type>
         <Type n="String">System.String</Type>
         <Type n="STSnippetInputAction">{6302d3fe-6ea5-4c42-819a-a9734a133b3d}</Type>
-        <Type n="STSnippetInputAction[]">_3S.CoDeSys.VisualElem.STSnippetInputAction[], VisualElem.plugin, Version=3.5.13.31, Culture=neutral, PublicKeyToken=null</Type>
+        <Type n="STSnippetInputAction[]">_3S.CoDeSys.VisualElem.STSnippetInputAction[], VisualElem.plugin, Version=3.5.13.32, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="TextDocument">{f3878285-8e4f-490b-bb1b-9acbb7eb04db}</Type>
         <Type n="TextLine">{a5de0b0b-1cb5-4913-ac21-9d70293ec00d}</Type>
         <Type n="TextListEnumerationInfo">{dac349f5-1aa4-42ed-9997-bd76e930a734}</Type>
         <Type n="ToggleVarInputAction">{9dcc475d-e53e-4dd3-abd9-995bf52d466f}</Type>
-        <Type n="ToggleVarInputAction[]">_3S.CoDeSys.VisualElem.ToggleVarInputAction[], VisualElem.plugin, Version=3.5.13.31, Culture=neutral, PublicKeyToken=null</Type>
+        <Type n="ToggleVarInputAction[]">_3S.CoDeSys.VisualElem.ToggleVarInputAction[], VisualElem.plugin, Version=3.5.13.32, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="UInt16">System.UInt16</Type>
         <Type n="UInt32">System.UInt32</Type>
         <Type n="UserdefType">{8499b87a-2b75-4c62-8657-e4aa9316c18b}</Type>
@@ -21467,3 +21475,4 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
     </XmlArchive>
   </Visu>
 </TcPlcObject>
+

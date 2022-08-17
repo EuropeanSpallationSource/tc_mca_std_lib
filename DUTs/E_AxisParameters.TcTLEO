@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <EnumerationTextList Name="E_AxisParameters" Id="{9199cc42-106a-4663-aaa5-d49855d9aa9f}">
-    <Declaration><![CDATA[{attribute 'qualified_only'}
+    <Declaration><![CDATA[
+{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_AxisParameters :
 (
@@ -701,3 +702,4 @@ END_TYPE
     </XmlArchive>
   </EnumerationTextList>
 </TcPlcObject>
+
