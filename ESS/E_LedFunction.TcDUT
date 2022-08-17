@@ -10,7 +10,7 @@ TYPE E_LedFunction :
     eSteady := 1,
     eSlow := 2,
     eFast := 3
-) := eUndefined;
+);
 END_TYPE
 ]]></Declaration>
   </DUT>

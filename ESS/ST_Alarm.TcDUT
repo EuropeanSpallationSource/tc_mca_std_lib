@@ -6,10 +6,10 @@ TYPE ST_Alarm :
 STRUCT
     bAlarmSet: BOOL;
     bAlarmReset: BOOL;
-    eStatusLED: E_LedFunction;
-    eWarningLED: E_LedFunction;
-    eEmergencyLED: E_LedFunction;
-    eAcknowledgeLED: E_LedFunction;
+    nStatusLED: E_LedFunction;
+    nWarningLED: E_LedFunction;
+    nEmergencyLED: E_LedFunction;
+    nAcknowledgeLED: E_LedFunction;
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
