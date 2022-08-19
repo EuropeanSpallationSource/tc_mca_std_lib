@@ -102,7 +102,7 @@ actCalculateSetpointDirections();
 
 //Error state handling - only handle errors that disable motion
 IF bEnable AND (GVL.astAxes[nIdPositiveAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdNegativeAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdGapSizeAxis].Axis.Status.ErrorStop OR GVL.astAxes[nIdGapCentreAxis].Axis.Status.ErrorStop) THEN
-    eState := E_SlitPairStatesV2.eErrorInit;
+    eState := E_SlitPairStatesV2.eError;
 END_IF
 
 //Propagate real axis error to virtual
@@ -123,7 +123,7 @@ bInternalReset := bReset OR GVL.astAxes[nIdPositiveAxis].stControl.bReset OR GVL
 
 //If real axis is homing, change state
 IF bEnable AND (GVL.astAxes[nIdPositiveAxis].Axis.Status.HomingBusy OR GVL.astAxes[nIdNegativeAxis].Axis.Status.HomingBusy) THEN
-    eState := E_SlitPairStatesV2.eHomingWait;
+    eState := E_SlitPairStatesV2.eWaitForRealHomed;
 END_IF
 
 //Link all halt buttons in motors
@@ -161,12 +161,12 @@ IF bEnable THEN
                GVL.astAxes[nIdGapCentreAxis].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
                GVL.astAxes[nIdGapSizeAxis].stConfig.fHomePosition := fGapSize;
                GVL.astAxes[nIdGapCentreAxis].stConfig.fHomePosition := fGapCentre;
-                eState := E_SlitPairStatesV2.eWaitForHomed;
+                eState := E_SlitPairStatesV2.eWaitForVirtaulHomed;
             ELSE
                 eState := E_SlitPairStatesV2.eOperational;
             END_IF
 
-        E_SlitPairStatesV2.eWaitForHomed:
+        E_SlitPairStatesV2.eWaitForVirtaulHomed:
             //Wait for virtual axis homing to complete/
             GVL.astAxes[nIdGapSizeAxis].stControl.eCommand := E_MotionFunctions.eHome;
             GVL.astAxes[nIdGapSizeAxis].stControl.bExecute := TRUE;
@@ -239,7 +239,7 @@ IF bEnable THEN
             fbSetpointGenDisableGapCentreAxis.Execute := TRUE;
             eState := E_SlitPairStatesV2.eOperational;
 
-        E_SlitPairStatesV2.eErrorInit:
+        E_SlitPairStatesV2.eError:
             actHaltAllAxes();
 
             IF bHomingReset THEN
@@ -266,7 +266,7 @@ IF bEnable THEN
                 eState := E_SlitPairStatesV2.eInit;
             END_IF
 
-        E_SlitPairStatesV2.eHomingWait:
+        E_SlitPairStatesV2.eWaitForRealHomed:
             bHomingReset := TRUE;
             IF NOT GVL.astAxes[nIdPositiveAxis].Axis.Status.Homed OR NOT GVL.astAxes[nIdNegativeAxis].Axis.Status.Homed THEN
                 eState := E_SlitPairStatesV2.eInit;

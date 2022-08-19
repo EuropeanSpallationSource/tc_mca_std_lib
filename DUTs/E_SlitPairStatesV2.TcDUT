@@ -13,10 +13,10 @@ TYPE E_SlitPairStatesV2 :
     eDisableVirtualGenerators,
     eWaitForVirtualMoveDone,
     eWaitForRealMoveDone,
-    eErrorInit,
+    eError,
     eOperational,
-    eWaitForHomed,
-    eHomingWait,
+    eWaitForVirtaulHomed,
+    eWaitForRealHomed,
     eCheckRealAxisGeneratorsEnabled,
     eCheckVirtualAxisGeneratorsEnabled
 );
