@@ -74,8 +74,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-(*SETUP INSTRUCTIONS
+      <ST><![CDATA[(*SETUP INSTRUCTIONS
 Virtual axes:
 Encoder type set to Universal
 Encoder mask set to 0xFFFFFFFF
@@ -161,12 +160,12 @@ IF bEnable THEN
                GVL.astAxes[nIdGapCentreAxis].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
                GVL.astAxes[nIdGapSizeAxis].stConfig.fHomePosition := fGapSize;
                GVL.astAxes[nIdGapCentreAxis].stConfig.fHomePosition := fGapCentre;
-                eState := E_SlitPairStatesV2.eWaitForVirtaulHomed;
+                eState := E_SlitPairStatesV2.eWaitForVirtualHomed;
             ELSE
                 eState := E_SlitPairStatesV2.eOperational;
             END_IF
 
-        E_SlitPairStatesV2.eWaitForVirtaulHomed:
+        E_SlitPairStatesV2.eWaitForVirtualHomed:
             //Wait for virtual axis homing to complete/
             GVL.astAxes[nIdGapSizeAxis].stControl.eCommand := E_MotionFunctions.eHome;
             GVL.astAxes[nIdGapSizeAxis].stControl.bExecute := TRUE;
