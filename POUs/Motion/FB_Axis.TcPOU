@@ -3,7 +3,7 @@
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[
 //Function block to run a virtual drive with Nc
-FUNCTION_BLOCK FB_Axis
+FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
 VAR
     _stAxis: REFERENCE TO ST_AxisStruct; // Local property pointer for axis structure
     astMcStatus: ARRAY[1..nMCSTATUS_ARRAY_SIZE] OF POINTER TO ST_McStatus; //Array of all MC status signals defined in FB_init
@@ -312,7 +312,6 @@ FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
         _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR]]></ST>
-
       </Implementation>
     </Method>
     <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
@@ -928,4 +927,3 @@ END_VAR]]></Declaration>
     </Property>
   </POU>
 </TcPlcObject>
-
