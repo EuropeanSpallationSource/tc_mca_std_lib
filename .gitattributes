@@ -11,8 +11,23 @@
 
 # Tc files must be CRLF
 *.plcproj      text eol=crlf
-*.Tc*          text eol=crlf
-*.tsproj       text eol=crlf
+*.Tc*          text eol=crlf filter=cleanCode
+*.tsproj       text eol=crlf filter=ignoreNetId
 *.txt          text eol=crlf
 *.xml          text eol=crlf
 *.xti          text eol=crlf
+
+
+# Configure the following in TwinCAT:
+# TOOLS -> Options -> TwinCAT -> PLC Environment -> Write Options -> Separate LineIDS : True
+# To activate the filter, run
+#git config filter.ignoreNetId.clean 'sed -b -f filter/ignoreTargetNetId.sed'
+#git config filter.cleanCode.clean   'sed -b -f filter/cleanCode.sed'
+
+# the check if the filter is there by running
+# cat ../../../../.git/modules/solution/tc_project_app/tc_pils/tc_pils_generic/config
+
+#[filter "ignoreNetId"]
+#        clean = sed -f filter/ignoreTargetNetId.sed
+#[filter "cleanCode"]
+#        clean = sed -f filter/cleanCode.sed

@@ -1,11 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_Axis" Id="{ade71f2f-2325-4792-8103-f7cd9c07d44a}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Axis IMPLEMENTS I_Axis
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
+  <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
+    <Declaration><![CDATA[
+//Function block to run a virtual drive with Nc
+FUNCTION_BLOCK FB_Axis
 VAR
     _stAxis: REFERENCE TO ST_AxisStruct; // Local property pointer for axis structure
     astMcStatus: ARRAY[1..nMCSTATUS_ARRAY_SIZE] OF POINTER TO ST_McStatus; //Array of all MC status signals defined in FB_init
@@ -314,6 +312,7 @@ FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
         _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR]]></ST>
+
       </Implementation>
     </Method>
     <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
@@ -530,7 +529,8 @@ END_IF
     <Method Name="mParameters_ReadNc" Id="{9109a49b-b1d7-4831-96dd-467dfdbafc8b}" FolderPath="Parameter Methods\">
       <Declaration><![CDATA[METHOD mParameters_ReadNc : BOOL]]></Declaration>
       <Implementation>
-        <ST><![CDATA[(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
+        <ST><![CDATA[
+(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
 Intended TO be executed once every PLC cycle
 Another FB is used TO trasnfer default axis parameters TO the stAxisStruct so
 bReadValid is used TO halt that trasnfer UNTIL the parameters have been
@@ -675,7 +675,8 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
     fbReadEnPositionLagMonitoring.Error OR
     fbReadAxisMaxPosLagValue.Error OR
     fbReadEnTargetPositionMonitoring.Error OR
-    fbReadTargetPositionWindow.Error;]]></ST>
+    fbReadTargetPositionWindow.Error;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mParameters_ReadParameter" Id="{9ba530fc-a89c-4fce-9b38-6ddc045d04c9}" FolderPath="Parameter Methods\">
@@ -927,3 +928,4 @@ END_VAR]]></Declaration>
     </Property>
   </POU>
 </TcPlcObject>
+
