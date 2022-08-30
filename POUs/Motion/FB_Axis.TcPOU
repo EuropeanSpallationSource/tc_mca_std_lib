@@ -862,11 +862,22 @@ IF fbExecuteRTrig.Q THEN
     _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandAborted := FALSE;
 
-    //On a new command, clear the errorIDs
-    FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        //If there's an error present propagate
-        _stAxis.stStatus.nErrorID := 0;
-    END_FOR
+    //On a new motion command, clear the errorID
+    CASE _stAxis.stControl.eCommand OF
+            E_MotionFunctions.eMoveAbsolute,
+            E_MotionFunctions.eMoveRelative,
+            E_MotionFunctions.eJog,
+            E_MotionFunctions.eMoveVelocity,
+            E_MotionFunctions.eMoveModulo,
+            E_MotionFunctions.eGearIn,
+            E_MotionFunctions.eGearOut,
+            E_MotionFunctions.eGearInMultiMaster,
+            E_MotionFunctions.eHome :
+                _stAxis.stStatus.nErrorID := 0;
+            E_MotionFunctions.eWriteParameter,
+            E_MotionFunctions.eReadParameter :
+            // Nothing
+    END_CASE
 END_IF]]></ST>
       </Implementation>
     </Method>
