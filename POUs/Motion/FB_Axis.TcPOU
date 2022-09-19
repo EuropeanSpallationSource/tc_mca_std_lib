@@ -83,6 +83,9 @@ VAR
     fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
     fbExecuteRTrig: R_TRIG;
+    fbStopFinishedRiseEdge: R_TRIG;
+    fbHaltFinishedRiseEdge: R_TRIG;
+    fbResetFinishedRiseEdge: R_TRIG;
 
 END_VAR
 VAR CONSTANT
@@ -102,9 +105,9 @@ END_VAR]]></Declaration>
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stAxis.stControl.bExecute := FALSE;
-_stAxis.stControl.bReset := FALSE;
-_stAxis.stControl.bHalt := FALSE;
-_stAxis.stControl.bStop := FALSE;]]></ST>
+//_stAxis.stControl.bReset := FALSE;
+//_stAxis.stControl.bHalt := FALSE;
+//_stAxis.stControl.bStop := FALSE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="FB_init" Id="{808671fa-47ac-4f24-b6aa-db77de23bff7}">
@@ -357,6 +360,11 @@ mControl_Reset.CommandAborted := FALSE;
 
 IF fbReset.Error THEN
     _stAxis.stError.nResetErrorID := fbReset.ErrorID; //Set the error
+END_IF
+
+fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
+IF fbResetFinishedRiseEdge.Q THEN
+    _stAxis.stControl.bReset := FALSE;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -377,6 +385,12 @@ mMove_Halt.CommandAborted := fbHalt.CommandAborted;
 
 IF fbHalt.Error THEN
     _stAxis.stError.nHaltErrorID := fbHalt.ErrorID; //Set the error
+END_IF
+
+//Execution of fbHalt ended
+fbHaltFinishedRiseEdge(CLK:=fbHalt.Done OR fbHalt.Error OR fbHalt.CommandAborted);
+IF fbHaltFinishedRiseEdge.Q THEN
+    _stAxis.stControl.bHalt := FALSE;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -506,6 +520,12 @@ mMove_Stop.CommandAborted := fbStop.CommandAborted;
 
 IF fbStop.Error THEN
     _stAxis.stError.nStopErrorID := fbStop.ErrorID; //Set the error
+END_IF
+
+//Execution of fbStop ended
+fbStopFinishedRiseEdge(CLK:=fbStop.Done OR fbStop.Error OR fbStop.CommandAborted);
+IF fbStopFinishedRiseEdge.Q THEN
+    _stAxis.stControl.bStop := FALSE;
 END_IF]]></ST>
       </Implementation>
     </Method>
