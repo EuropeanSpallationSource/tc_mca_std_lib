@@ -230,7 +230,7 @@ IF bEnable THEN
             END_IF
 
         E_SlitPairStatesV2.eWaitForRealMoveDone:
-            IF NOT(GVL.astAxes[1].stStatus.bMoving OR GVL.astAxes[2].stStatus.bMoving) THEN
+            IF NOT(GVL.astAxes[nIdPositiveAxis].stStatus.bMoving OR GVL.astAxes[nIdNegativeAxis].stStatus.bMoving) THEN
                 eState := E_SlitPairStatesV2.eDisableVirtualGenerators;
             END_IF
 
