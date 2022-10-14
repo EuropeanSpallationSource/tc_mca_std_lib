@@ -6,7 +6,7 @@ TYPE ST_AxisPersistent :
 STRUCT
     //Settings for restoring positions on power off
     fPositionAtShutdown: LREAL; //The position that the axis was at when CPU shut down
-    fBiasAtShutdown: LREAL; //Encoder position BIAS value when CPU shut down
+    fEncoderBiasAtShutdown: LREAL; //Encoder position BIAS value when CPU shut down
     bMovingAtShutdown: BOOL; //True if the axis was moving at shutdown, False otherwise
 END_STRUCT
 END_TYPE
