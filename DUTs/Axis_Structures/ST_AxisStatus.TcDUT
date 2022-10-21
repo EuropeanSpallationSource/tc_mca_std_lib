@@ -16,7 +16,7 @@ STRUCT
     bMoving: BOOL; //Moving state from the NC
     bMovingForward: BOOL; //Moving forward indicator from NC
     bMovingBackward: BOOL; //Moving backward indicator from NC
-	bInTargetPosition: BOOL; //In target position bit from AxisStatus()
+    bInTargetPosition: BOOL; //In target position bit from AxisStatus()
     bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
     bInterlockedFwd: BOOL; //Axis interlocked in the postive direction
