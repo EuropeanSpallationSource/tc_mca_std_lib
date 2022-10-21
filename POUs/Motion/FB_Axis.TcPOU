@@ -991,7 +991,6 @@ IF fbExecuteRTrig.Q THEN
     CASE _stAxis.stControl.eCommand OF
             E_MotionFunctions.eMoveAbsolute,
             E_MotionFunctions.eMoveRelative,
-            E_MotionFunctions.eJog,
             E_MotionFunctions.eMoveVelocity,
             E_MotionFunctions.eMoveModulo,
             E_MotionFunctions.eGearIn,
