@@ -145,45 +145,6 @@ astMcStatus[14] := ADR(stMcStatusWriteParameter);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mControl_GearIn" Id="{2e912967-ff49-4a61-986a-feb90802d147}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_GearIn : ST_McStatus
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearIn THEN
-    fbGearIn.Execute := _stAxis.stControl.bExecute;
-END_IF
-
-fbGearIn.RatioNumerator := stMasterAxis.fRatio;
-fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
-
-IF NOT fbGearIn.InGear THEN
-    stMasterAxis.nIndex := _stAxis.stConfig.stMasterAxis.nIndex;
-    stMasterAxis.fRatio := _stAxis.stConfig.stMasterAxis.fRatio;
-END_IF
-
-//Confirm slaves have no gearing before attempting to gear in
-IF fbGearIn.InGear AND (GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] = nNO_GEARING) AND _stAxis.stControl.eCommand = E_MotionFunctions.eGearIn THEN
-    GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
-END_IF
-
-fbGearIn(Slave := _stAxis.Axis, Master := GVL.astAxes[stMasterAxis.nIndex].Axis);
-fbGearIn.Execute := FALSE;
-
-mControl_GearIn.Active := fbGearIn.Active;
-mControl_GearIn.Done := fbGearIn.InGear;
-mControl_GearIn.Busy := fbGearIn.Busy;
-mControl_GearIn.Error := fbGearIn.Error;
-mControl_GearIn.ErrorID := fbGearIn.ErrorID;
-mControl_GearIn.CommandAborted := fbGearIn.CommandAborted;
-
-IF fbGearIn.Error THEN
-    _stAxis.stError.nGearInErrorID := fbGearIn.ErrorID; //Set the error
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mControl_GearInMultiMaster" Id="{84e0c1c6-290e-43dc-a4d7-42efdf8dec13}" FolderPath="Control Methods\">
       <Declaration><![CDATA[
 METHOD mControl_GearInMultiMaster : ST_McStatus
