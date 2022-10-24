@@ -840,6 +840,7 @@ _stAxis.stStatus.bMoving := _stAxis.Axis.Status.Moving;
 _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
+_stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled OR _stAxis.Axis.Status.ErrorStop);
 ]]></ST>
       </Implementation>
