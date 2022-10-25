@@ -6,9 +6,8 @@ TYPE ST_PneumaticAxisControl :
 STRUCT
     bExtend: BOOL; //Variable to control solenoid valve from PLC
     bRetract: BOOL; //Variable to control solenoid valve from PLC
-    bStartExtendManual: BOOL := FALSE; //Variable to control the solenoid valve with momentary push button
-    bStartRetractManual: BOOL := FALSE; //VAriable to control the solenoid valve with momentary push button
-    bReset: BOOL := FALSE; //Reset signal from EPICS
+    bInterlock: BOOL; //Input interlock signal for the movement
+    bReset: BOOL; //Reset signal from EPICS
 END_STRUCT
 END_TYPE
 

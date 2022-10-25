@@ -585,7 +585,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"Limit switches simulation"</v>
+                      <v n="Value">"End switches simulation"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -628,7 +628,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"19"</v>
+                      <v n="Value">"1009"</v>
                     </o>
                   </l>
                 </o>
@@ -698,11 +698,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">417</v>
+                      <v n="Value">411</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">51</v>
+                      <v n="Value">50</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -714,7 +714,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"LimitBwd"</v>
+                      <v n="Value">"EndSwitchBwd"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -757,7 +757,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"919"</v>
+                      <v n="Value">"554"</v>
                     </o>
                   </l>
                 </o>
@@ -1008,7 +1008,7 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">497</v>
+                      <v n="Value">504</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
@@ -1024,7 +1024,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"LimitFwd"</v>
+                      <v n="Value">"EndSwitchFwd"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -1067,7 +1067,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"459"</v>
+                      <v n="Value">"1084"</v>
                     </o>
                   </l>
                 </o>
@@ -1523,7 +1523,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"nTimeToExtend(ms)"</v>
+                      <v n="Value">"nTimeToExtend(s)"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -1566,7 +1566,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"787"</v>
+                      <v n="Value">"992"</v>
                     </o>
                   </l>
                 </o>
@@ -1652,7 +1652,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"nTimeToRetract(ms)"</v>
+                      <v n="Value">"nTimeToRetract(s)"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -1695,7 +1695,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"444"</v>
+                      <v n="Value">"995"</v>
                     </o>
                   </l>
                 </o>
@@ -3340,7 +3340,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bExtendManual"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bOpenManual"</v>
                     </o>
                   </l>
                 </o>
@@ -3410,7 +3410,7 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">557</v>
+                      <v n="Value">592</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
@@ -3418,7 +3418,7 @@
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">150</v>
+                      <v n="Value">84</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
@@ -5596,7 +5596,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bRetractManual"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bCloseManual"</v>
                     </o>
                   </l>
                 </o>
@@ -7098,7 +7098,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"Elapsed time"</v>
+                      <v n="Value">"Elapsed time (ms)"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -7141,7 +7141,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"313"</v>
+                      <v n="Value">"87"</v>
                     </o>
                   </l>
                 </o>
@@ -7187,11 +7187,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">463</v>
+                      <v n="Value">454</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">76</v>
+                      <v n="Value">77</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7243,7 +7243,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitBwd"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchBwd"</v>
                     </o>
                   </l>
                 </o>
@@ -7345,7 +7345,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bLimitFwd"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchFwd"</v>
                     </o>
                   </l>
                 </o>
@@ -7549,7 +7549,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisInputs.bInterlock"</v>
+                      <v n="Value">"MAIN.afbPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock"</v>
                     </o>
                   </l>
                 </o>

@@ -8,8 +8,12 @@ STRUCT
     bRetracting: BOOL; //Retraction movement status
     bExtended: BOOL; //Cylinder extracted status
     bRetracted: BOOL; //Cylinder retracted status
+    nTimeElapsedExtend: INT; //Elapsed time while extracting cylinder
+    nTimeElapsedRetract: INT; //Elapsed time while retracting cylinder
     bSolenoidActive: BOOL; //Status input of valve solenoid
     sStatus: STRING; //Pneumatic cylinder current status
+    bInterlocked: BOOL; //Interlock siganl active
+    bPSSPermitOK: BOOL; //Status of the PSS permit signal
     bError: BOOL; //Pneumatic axis is in Error state
 END_STRUCT
 END_TYPE

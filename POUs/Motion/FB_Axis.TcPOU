@@ -111,9 +111,6 @@ METHOD EndOfCycle : BOOL
       <Implementation>
         <ST><![CDATA[
 _stAxis.stControl.bExecute := FALSE;
-//_stAxis.stControl.bReset := FALSE;
-//_stAxis.stControl.bHalt := FALSE;
-//_stAxis.stControl.bStop := FALSE;
 ]]></ST>
       </Implementation>
     </Method>
@@ -137,50 +134,10 @@ astMcStatus[6] := ADR(stMcStatusMoveRelative);
 astMcStatus[7] := ADR(stMcStatusMoveVelocity);
 astMcStatus[8] := ADR(stMcStatusMoveModulo);
 astMcStatus[9] := ADR(stMcStatusHome);
-astMcStatus[10] := ADR(stMcStatusGearIn);
-astMcStatus[11] := ADR(stMcStatusGearInMultiMaster);
-astMcStatus[12] := ADR(stMcStatusGearOut);
-astMcStatus[13] := ADR(stMcStatusReadParameter);
-astMcStatus[14] := ADR(stMcStatusWriteParameter);
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mControl_GearIn" Id="{2e912967-ff49-4a61-986a-feb90802d147}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_GearIn : ST_McStatus
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearIn THEN
-    fbGearIn.Execute := _stAxis.stControl.bExecute;
-END_IF
-
-fbGearIn.RatioNumerator := stMasterAxis.fRatio;
-fbGearIn.RatioDenominator := nRATIO_DENOMINATOR_DEFAULT;
-
-IF NOT fbGearIn.InGear THEN
-    stMasterAxis.nIndex := _stAxis.stConfig.stMasterAxis.nIndex;
-    stMasterAxis.fRatio := _stAxis.stConfig.stMasterAxis.fRatio;
-END_IF
-
-//Confirm slaves have no gearing before attempting to gear in
-IF fbGearIn.InGear AND (GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] = nNO_GEARING) AND _stAxis.stControl.eCommand = E_MotionFunctions.eGearIn THEN
-    GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := stMasterAxis.fRatio;
-END_IF
-
-fbGearIn(Slave := _stAxis.Axis, Master := GVL.astAxes[stMasterAxis.nIndex].Axis);
-fbGearIn.Execute := FALSE;
-
-mControl_GearIn.Active := fbGearIn.Active;
-mControl_GearIn.Done := fbGearIn.InGear;
-mControl_GearIn.Busy := fbGearIn.Busy;
-mControl_GearIn.Error := fbGearIn.Error;
-mControl_GearIn.ErrorID := fbGearIn.ErrorID;
-mControl_GearIn.CommandAborted := fbGearIn.CommandAborted;
-
-IF fbGearIn.Error THEN
-    _stAxis.stError.nGearInErrorID := fbGearIn.ErrorID; //Set the error
-END_IF
+astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
+astMcStatus[11] := ADR(stMcStatusGearOut);
+astMcStatus[12] := ADR(stMcStatusReadParameter);
+astMcStatus[13] := ADR(stMcStatusWriteParameter);
 ]]></ST>
       </Implementation>
     </Method>
@@ -260,7 +217,6 @@ fbGearOut.Execute := FALSE;
 IF fbGearOut.Done THEN
     //Clear slave ratio from master axis slave array
     mStatus_MultiGearing();
-    GVL.astAxes[stMasterAxis.nIndex].stConfig.afSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
     FOR nSlaveAxesIndex := 1 TO GVL_APP.nAXIS_NUM DO
         GVL.astAxes[nSlaveAxesIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := nNO_GEARING;
     END_FOR
@@ -338,14 +294,6 @@ FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
     IF (_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
         _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
         _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
-    END_IF
-END_FOR
-
-//Single axis limit linking
-FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
-    IF (_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] <> 0) THEN
-        _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
-        _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR
 ]]></ST>
@@ -840,6 +788,7 @@ _stAxis.stStatus.bMoving := _stAxis.Axis.Status.Moving;
 _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
+_stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled OR _stAxis.Axis.Status.ErrorStop);
 ]]></ST>
       </Implementation>
@@ -993,9 +942,8 @@ IF fbExecuteRTrig.Q THEN
             E_MotionFunctions.eMoveRelative,
             E_MotionFunctions.eMoveVelocity,
             E_MotionFunctions.eMoveModulo,
-            E_MotionFunctions.eGearIn,
-            E_MotionFunctions.eGearOut,
             E_MotionFunctions.eGearInMultiMaster,
+            E_MotionFunctions.eGearOut,
             E_MotionFunctions.eHome :
                 _stAxis.stStatus.nErrorID := 0;
             E_MotionFunctions.eWriteParameter,
@@ -1031,7 +979,6 @@ stMcStatusMoveRelative := mMove_MoveRelative();
 stMcStatusMoveModulo := mMove_MoveModulo();
 stMcStatusMoveVelocity := mMove_MoveVelocity();
 
-stMcStatusGearIn := mControl_GearIn();
 stMcStatusGearInMultiMaster := mControl_GearInMultiMaster();
 stMcStatusGearOut := mControl_GearOut();
 
@@ -1076,3 +1023,4 @@ _stAxis REF= stAxis;
     </Property>
   </POU>
 </TcPlcObject>
+

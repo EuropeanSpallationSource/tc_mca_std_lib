@@ -10,9 +10,8 @@ TYPE E_MotionFunctions :
     eMoveRelative := 1,
     eMoveVelocity := 2, //Continous moving at a set velocity once bExecute goes high
     eMoveModulo := 3, //Move for 360 deg rotation, see Beckhoff docs
-    eGearIn := 4, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
+    eGearInMultiMaster := 4, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
     eGearOut := 5, //Removes gearing set in the above command
-    eGearInMultiMaster := 6, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
     eHome := 10, //Run the homing routine for the axis
     eWriteParameter := 50, //Writes the set value to the set parameter once bExecute goes high
     eReadParameter := 60 //Reads a single Parameter
@@ -22,3 +21,4 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
+
