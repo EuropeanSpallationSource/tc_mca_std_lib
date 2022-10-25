@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_PneumaticAxis" Id="{0ba43c5d-0b1b-4802-81a2-a56c90343a83}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_PneumaticAxis
+    <Declaration><![CDATA[
+FUNCTION_BLOCK FB_PneumaticAxis
 
 VAR_IN_OUT
     stPneumaticAxisStruct: ST_PneumaticAxisStruct;
@@ -18,7 +19,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[Initialization();
+      <ST><![CDATA[
+Initialization();
 
 CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
 
@@ -55,7 +57,8 @@ END_CASE
     </Implementation>
     <Action Name="ErrorCheck" Id="{8b3d850c-470a-444a-af07-097a9845aaa1}">
       <Implementation>
-        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
+        <ST><![CDATA[
+//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
     IF  fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
              stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
              stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
@@ -77,12 +80,14 @@ END_CASE
             stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
         END_IF
-    ]]></ST>
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="Initialization" Id="{484c2371-b110-4d54-b677-54e40f38dcea}">
       <Implementation>
-        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
+        <ST><![CDATA[
+//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchBwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchFwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bSolenoidActive := stPneumaticAxisStruct.stPneumaticAxisInputs.bSolenoidActive;
@@ -109,12 +114,14 @@ IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 
-//Check for errors in Air pressure (to be implemented)]]></ST>
+//Check for errors in Air pressure (to be implemented)
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="Reset" Id="{2dda1b42-e462-445a-870e-db34c0266d90}">
       <Implementation>
-        <ST><![CDATA[//Reset all the error messages
+        <ST><![CDATA[
+//Reset all the error messages
 //Set the operating mode to Single Solenoid Control
 
 stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
@@ -123,12 +130,14 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
 stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 
 
-  ]]></ST>
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="Single_Solenoid" Id="{d7d61ab1-a144-43ab-8977-936c72509c4b}">
       <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
+        <ST><![CDATA[
+//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
  fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend)*1000;
  fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract)*1000;
 
@@ -211,12 +220,14 @@ END_IF
 
 
 
- ]]></ST>
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="Single_Solenoid_Error" Id="{f8576b29-f01d-47be-8f5e-a9ddd919db93}">
       <Implementation>
-        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
+        <ST><![CDATA[
+IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
 
@@ -284,3 +295,4 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
     </Action>
   </POU>
 </TcPlcObject>
+
