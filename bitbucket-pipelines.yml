@@ -1,0 +1,12 @@
+image: python:3.7.3
+options:
+  max-time: 1
+pipelines:
+  default:
+     - step:
+          script:
+            - git submodule update --init
+            - python twincat_version_manager.py
+            - python check_fix_white_space.py
+            - ./check_no_lineids.sh
+            - ./check_no_CDATA_with_code.sh

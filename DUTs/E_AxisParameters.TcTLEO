@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <EnumerationTextList Name="E_AxisParameters" Id="{9199cc42-106a-4663-aaa5-d49855d9aa9f}">
-    <Declaration><![CDATA[{attribute 'qualified_only'}
+    <Declaration><![CDATA[
+{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_AxisParameters :
 (
@@ -24,8 +25,6 @@ TYPE E_AxisParameters :
     AxisId := 1000, //lreal IndexOffset= 16#0000_0001
     AxisManualVelocitySlow := 1001, //lreal IndexOffset= 16#0000_0008
     AxisManualVelocityFast := 1002, //lreal IndexOffset= 16#0000_0009
-    AxisAccMax := 1004, //lreal IndexOffset= 16#0000_0101
-    AxisDecMax := 1005, //lreal IndexOffset= 16#0000_0102
     AxisRapidTraverseVelocity := 1009, //lreal IndexOffset= 16#0000_000A
     AxisVelocityToCam := 1012, //lreal IndexOffset= 16#0000_0006
     AxisVelocityFromCam := 1013, //lreal IndexOffset= 16#0000_0007
@@ -72,6 +71,8 @@ TYPE E_AxisParameters :
     AxisEncoderScalingNumerator := 1056, //lreal IndexOffset= 16#0001_0023 - available in Tc3
     AxisEncoderScalingDenominator := 1057, //lreal IndexOffset= 16#0001_0024 - available in Tc3
     (* new since 7/2016 *)
+    AxisMaximumAcceleration := 1058, //lreal IndexOffset= 16#0000_00F1
+    AxisMaximumDeceleration := 1059, //lreal IndexOffset= 16#0000_00F2
     AxisVeloJumpFactor := 1060, //lreal IndexOffset= 16#0000_0106
     AxisToleranceBallAuxAxis := 1061, //lreal IndexOffset= 16#0000_0108
     AxisMaxPositionDeviationAuxAxis := 1062, //lreal IndexOffset= 16#0000_0109
@@ -217,16 +218,6 @@ END_TYPE
             <o>
               <v n="TextID">"AxisManualVelocityFast"</v>
               <v n="TextDefault">"1002"</v>
-              <l n="LanguageTexts" t="ArrayList" />
-            </o>
-            <o>
-              <v n="TextID">"AxisAccMax"</v>
-              <v n="TextDefault">"1004"</v>
-              <l n="LanguageTexts" t="ArrayList" />
-            </o>
-            <o>
-              <v n="TextID">"AxisDecMax"</v>
-              <v n="TextDefault">"1005"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -427,6 +418,16 @@ END_TYPE
             <o>
               <v n="TextID">"AxisEncoderScalingDenominator"</v>
               <v n="TextDefault">"1057"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"AxisMaximumAcceleration"</v>
+              <v n="TextDefault">"1058"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"AxisMaximumDeceleration"</v>
+              <v n="TextDefault">"1059"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -701,3 +702,4 @@ END_TYPE
     </XmlArchive>
   </EnumerationTextList>
 </TcPlcObject>
+
