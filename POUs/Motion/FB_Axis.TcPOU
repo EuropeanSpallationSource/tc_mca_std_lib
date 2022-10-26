@@ -91,7 +91,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 14;
+    nMCSTATUS_ARRAY_SIZE: UINT := 13;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -1023,4 +1023,3 @@ _stAxis REF= stAxis;
     </Property>
   </POU>
 </TcPlcObject>
-
