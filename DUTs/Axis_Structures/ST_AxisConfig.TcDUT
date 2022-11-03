@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_AxisConfig" Id="{e00fe310-8ff8-452a-800a-823efa83b1a3}">
-    <Declaration><![CDATA[
-(*These are axis parameters that are set up during commissioning and
+    <Declaration><![CDATA[(*These are axis parameters that are set up during commissioning and
 in theory don't neeed to be change as part of daily moving of axes.
 For instance they may be changed due to poor parameter selection
 or change of instrument configuration.*)
@@ -50,4 +49,3 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
-

@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_PneumaticAxisInputs" Id="{5a1ac5ea-cd16-4906-91a9-c21e5f2fe40f}">
-    <Declaration><![CDATA[
-TYPE ST_PneumaticAxisInputs :
+    <Declaration><![CDATA[TYPE ST_PneumaticAxisInputs :
 STRUCT
     bEndSwitchFwd AT %I*: BOOL; //End Switch Fwd input
     bEndSwitchBwd AT %I*: BOOL; //End Switch Bwd input
@@ -18,4 +17,3 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
-

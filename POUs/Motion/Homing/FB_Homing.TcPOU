@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Homing" Id="{427b1d22-ef01-4bbb-ab89-ec8be67f3887}" SpecialFunc="None">
-    <Declaration><![CDATA[
-FUNCTION_BLOCK FB_Homing
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
 VAR_IN_OUT
     Axis: Axis_Ref;
 END_VAR
@@ -402,4 +401,3 @@ fbStepAbsoluteSwitchDetection(
     </Action>
   </POU>
 </TcPlcObject>
-

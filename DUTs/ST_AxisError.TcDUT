@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_AxisError" Id="{b605e536-99a4-4241-8b01-b55c227dfd1d}">
-    <Declaration><![CDATA[
-TYPE ST_AxisError:
+    <Declaration><![CDATA[TYPE ST_AxisError:
 STRUCT
 //PLCopen function block errors
     nPowerErrorID : UDINT;
@@ -27,4 +26,3 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
-
