@@ -254,6 +254,7 @@ mControl_Home.Busy := fbHome.bBusy;
 mControl_Home.CommandAborted := fbHome.bCommandAborted;
 mControl_Home.Done := fbHome.bDone;
 mControl_Home.Error := fbHome.bError;
+mControl_Home.ErrorID := fbHome.nErrorId;
 
 IF fbHome.bError THEN
     _stAxis.stError.nHomeErrorID := fbHome.nErrorID; //Set the error
@@ -872,7 +873,6 @@ IF _stAxis.Axis.Status.ErrorStop THEN
     _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
     _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
 ELSIF fbErrorRTrig.Q THEN
-     IF NOT _stAxis.Axis.Status.ErrorStop THEN
         //For each mcStatus
         FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
             //If there's an error present propagate
@@ -880,7 +880,6 @@ ELSIF fbErrorRTrig.Q THEN
                 _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
             END_IF
         END_FOR
-    END_IF
 END_IF
 ]]></ST>
       </Implementation>
