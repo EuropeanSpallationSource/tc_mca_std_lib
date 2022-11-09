@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
-    <Declaration><![CDATA[
-//Function block to run a virtual drive with Nc
+    <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
 VAR
     _stAxis: REFERENCE TO ST_AxisStruct; // Local property pointer for axis structure
@@ -105,8 +104,7 @@ END_VAR
     <Folder Name="Parameter Methods" Id="{f4f4664c-7df7-46e3-971d-7b879f0f84c5}" />
     <Folder Name="Status Methods" Id="{707fd0b2-cc74-45e4-8048-859a2a8b8922}" />
     <Method Name="EndOfCycle" Id="{ec7450e3-0247-42cc-a688-40c28c0fac7f}">
-      <Declaration><![CDATA[
-METHOD EndOfCycle : BOOL
+      <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -115,8 +113,7 @@ _stAxis.stControl.bExecute := FALSE;
       </Implementation>
     </Method>
     <Method Name="FB_init" Id="{808671fa-47ac-4f24-b6aa-db77de23bff7}">
-      <Declaration><![CDATA[
-METHOD FB_init : BOOL
+      <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
     bInitRetains: BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
     bInCopyCode: BOOL; // if TRUE, the instance afterwards gets moved into the copy code (online change)
@@ -142,8 +139,7 @@ astMcStatus[13] := ADR(stMcStatusWriteParameter);
       </Implementation>
     </Method>
     <Method Name="mControl_GearInMultiMaster" Id="{84e0c1c6-290e-43dc-a4d7-42efdf8dec13}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_GearInMultiMaster : ST_McStatus
+      <Declaration><![CDATA[METHOD mControl_GearInMultiMaster : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -201,8 +197,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_GearOut" Id="{e17b3c6b-453e-4e45-8575-7c153f6ee550}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_GearOut : ST_McStatus
+      <Declaration><![CDATA[METHOD mControl_GearOut : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -234,8 +229,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_Home" Id="{1c89166c-d22b-4ec1-832b-29e319ac35a4}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_Home : ST_McStatus
+      <Declaration><![CDATA[METHOD mControl_Home : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -263,8 +257,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_LimitHitTimer" Id="{51e73611-510a-4261-9221-982b675bdd5e}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_LimitHitTimer : BOOL
+      <Declaration><![CDATA[METHOD mControl_LimitHitTimer : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -280,8 +273,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_LimitLinking" Id="{d3fbcc91-ae49-44cf-abe1-cb74f523eb68}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_LimitLinking : BOOL
+      <Declaration><![CDATA[METHOD mControl_LimitLinking : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -301,8 +293,7 @@ END_FOR
       </Implementation>
     </Method>
     <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_Power : ST_McStatus
+      <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -322,8 +313,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_Reset" Id="{bcd741a0-b2e8-4adb-8b7b-ce0d7f34f81a}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[
-METHOD mControl_Reset : ST_McStatus
+      <Declaration><![CDATA[METHOD mControl_Reset : ST_McStatus
 VAR
     i: UINT;
 END_VAR
@@ -360,8 +350,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_Halt" Id="{957bd44f-6ec5-4ad2-9776-ed5c1512fc84}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_Halt : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_Halt : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -390,8 +379,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_MoveAbsolute" Id="{94fbfcee-90b0-443e-b823-ddd0452362cf}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_MoveAbsolute : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -421,8 +409,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_MoveModulo" Id="{099b9ffd-2365-466c-9eb4-2775dca12695}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_MoveModulo : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_MoveModulo : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -452,8 +439,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_MoveRelative" Id="{692be8b9-a119-45e2-bc1d-c48204cf288c}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_MoveRelative : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -483,8 +469,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_MoveVelocity" Id="{db34b1dc-c06f-4355-a454-8e49d2e0a70d}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_MoveVelocity : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -514,8 +499,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mMove_Stop" Id="{a3229fc2-dc64-4fe5-81ae-939492dc7b8a}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[
-METHOD mMove_Stop : ST_McStatus
+      <Declaration><![CDATA[METHOD mMove_Stop : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -544,8 +528,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mParameters_Init" Id="{42695961-ffd5-4b10-8cbf-a9954b08d703}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[
-METHOD mParameters_Init : BOOL
+      <Declaration><![CDATA[METHOD mParameters_Init : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -563,8 +546,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mParameters_ReadNc" Id="{9109a49b-b1d7-4831-96dd-467dfdbafc8b}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[
-METHOD mParameters_ReadNc : BOOL
+      <Declaration><![CDATA[METHOD mParameters_ReadNc : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -718,8 +700,7 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
       </Implementation>
     </Method>
     <Method Name="mParameters_ReadParameter" Id="{9ba530fc-a89c-4fce-9b38-6ddc045d04c9}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[
-METHOD mParameters_ReadParameter : ST_McStatus
+      <Declaration><![CDATA[METHOD mParameters_ReadParameter : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -746,8 +727,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mParameters_WriteParameter" Id="{35a7c0ca-fdb5-465b-bd2a-42d607d9d72f}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[
-METHOD mParameters_WriteParameter : ST_McStatus
+      <Declaration><![CDATA[METHOD mParameters_WriteParameter : ST_McStatus
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -771,8 +751,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStatus_AxisStatus" Id="{9429fa18-dacb-4b5a-8f14-87d9e5dbf769}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_AxisStatus : BOOL
+      <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -795,8 +774,7 @@ _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled OR _stAxis.Axis.St
       </Implementation>
     </Method>
     <Method Name="mStatus_Busy" Id="{bae99503-f19d-4494-896c-e198acb33cca}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_Busy : BOOL
+      <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
 VAR
     i: UINT;
     tmpBusy: BOOL;
@@ -812,8 +790,7 @@ mStatus_Busy := tmpBusy;
       </Implementation>
     </Method>
     <Method Name="mStatus_CommandAborted" Id="{47ef1edf-fdf1-4dec-ad20-cd0ec8a69b8e}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_CommandAborted : BOOL
+      <Declaration><![CDATA[METHOD mStatus_CommandAborted : BOOL
 VAR
     i: UINT;
     tmpCmdAborted: BOOL;
@@ -833,8 +810,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStatus_Done" Id="{cb97c724-0ad0-44f2-b46a-ccf7e150b1f3}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_Done : BOOL
+      <Declaration><![CDATA[METHOD mStatus_Done : BOOL
 VAR
     i: UINT;
     tmpDone: BOOL;
@@ -854,8 +830,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStatus_Error" Id="{fc0bde21-2989-4be1-b9e6-d0804b3b0fd9}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_Error : BOOL
+      <Declaration><![CDATA[METHOD mStatus_Error : BOOL
 VAR
     i: UINT;
     tmpError: BOOL;
@@ -885,8 +860,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStatus_MultiGearing" Id="{fa93e914-182a-42d5-a8d7-635a159cd60b}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_MultiGearing : BOOL
+      <Declaration><![CDATA[METHOD mStatus_MultiGearing : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -921,8 +895,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStatus_NewCommand" Id="{6ed1ba41-9399-4e86-b361-f208438f212a}" FolderPath="Status Methods\">
-      <Declaration><![CDATA[
-METHOD mStatus_NewCommand : BOOL
+      <Declaration><![CDATA[METHOD mStatus_NewCommand : BOOL
 VAR
     i: UINT;
 END_VAR
@@ -954,8 +927,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="Run" Id="{0f9d0da9-4c05-41a7-9d5e-d5541fa7ecc6}">
-      <Declaration><![CDATA[
-METHOD Run : BOOL
+      <Declaration><![CDATA[METHOD Run : BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -994,28 +966,23 @@ EndOfCycle();
       </Implementation>
     </Method>
     <Property Name="stAxis" Id="{967c7c62-771d-4aab-90d5-0b2eb60c3a9a}">
-      <Declaration><![CDATA[
-PROPERTY stAxis : REFERENCE TO ST_AxisStruct
+      <Declaration><![CDATA[PROPERTY stAxis : REFERENCE TO ST_AxisStruct
 ]]></Declaration>
       <Get Name="Get" Id="{b74d1b4a-a6d4-4cc3-a467-e54c502bb2be}">
-        <Declaration><![CDATA[
-VAR
+        <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[
-stAxis REF= _stAxis;
+          <ST><![CDATA[stAxis REF= _stAxis;
 ]]></ST>
         </Implementation>
       </Get>
       <Set Name="Set" Id="{1b904411-b50d-45e5-b5eb-d71a4cd732f6}">
-        <Declaration><![CDATA[
-VAR
+        <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[
-_stAxis REF= stAxis;
+          <ST><![CDATA[_stAxis REF= stAxis;
 ]]></ST>
         </Implementation>
       </Set>
