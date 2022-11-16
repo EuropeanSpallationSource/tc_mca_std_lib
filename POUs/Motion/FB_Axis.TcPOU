@@ -81,6 +81,7 @@ VAR
     fbDoneRTrig: R_TRIG;
     fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
+    fbInVelocityRTrig: R_TRIG;
     fbExecuteRTrig: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
     fbHaltFinishedRiseEdge: R_TRIG;
@@ -470,7 +471,9 @@ END_IF
     </Method>
     <Method Name="mMove_MoveVelocity" Id="{db34b1dc-c06f-4355-a454-8e49d2e0a70d}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
-]]></Declaration>
+VAR
+	myb: bool;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
@@ -859,6 +862,30 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mStatus_InVelocity" Id="{cb2cb841-8a3f-432f-b52b-8fb0cc3fb6da}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_InVelocity : BOOL
+VAR
+    i: UINT;
+    tmpInVelocity: BOOL;
+    fbInVelocityFTrig: F_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+    tmpInVelocity := astMcStatus[i]^.InVelocity OR tmpInVelocity;
+END_FOR
+//fbInVelocityRTrig(CLK:= mStatus_InVelocity());
+fbInVelocityRTrig(CLK := tmpInVelocity);
+IF fbInVelocityRTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := TRUE;
+END_IF
+
+fbInVelocityFTrig(CLK := _stAxis.Axis.Status.ContinuousMotion);
+IF fbInVelocityFTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStatus_MultiGearing" Id="{fa93e914-182a-42d5-a8d7-635a159cd60b}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_MultiGearing : BOOL
 ]]></Declaration>
@@ -987,5 +1014,130 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
+    <LineIds Name="FB_Axis">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.EndOfCycle">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.FB_init">
+      <LineId Id="3" Count="14" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_GearInMultiMaster">
+      <LineId Id="3" Count="50" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_GearOut">
+      <LineId Id="3" Count="24" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_Home">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_LimitHitTimer">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_LimitLinking">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_Power">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mControl_Reset">
+      <LineId Id="3" Count="26" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_Halt">
+      <LineId Id="3" Count="21" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_MoveAbsolute">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_MoveModulo">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_MoveRelative">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_MoveVelocity">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mMove_Stop">
+      <LineId Id="3" Count="21" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mParameters_Init">
+      <LineId Id="3" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mParameters_ReadNc">
+      <LineId Id="3" Count="146" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mParameters_ReadParameter">
+      <LineId Id="3" Count="19" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mParameters_WriteParameter">
+      <LineId Id="3" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_AxisStatus">
+      <LineId Id="3" Count="15" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_Busy">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_CommandAborted">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_Done">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_Error">
+      <LineId Id="3" Count="18" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_InVelocity">
+      <LineId Id="8" Count="7" />
+      <LineId Id="22" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_MultiGearing">
+      <LineId Id="3" Count="27" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.mStatus_NewCommand">
+      <LineId Id="3" Count="21" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.Run">
+      <LineId Id="3" Count="31" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.stAxis.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis.stAxis.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
