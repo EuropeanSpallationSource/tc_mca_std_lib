@@ -82,6 +82,7 @@ VAR
     fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
     fbInVelocityRTrig: R_TRIG;
+    fbInVelocityFTrig: F_TRIG;
     fbExecuteRTrig: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
     fbHaltFinishedRiseEdge: R_TRIG;
@@ -865,7 +866,6 @@ END_IF
 VAR
     i: UINT;
     tmpInVelocity: BOOL;
-    fbInVelocityFTrig: F_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
