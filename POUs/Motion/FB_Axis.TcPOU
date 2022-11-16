@@ -983,6 +983,7 @@ stMcStatusHome := mControl_Home();
 mStatus_NewCommand();
 mStatus_Done();
 mStatus_Error();
+mStatus_InVelocity();
 mStatus_CommandAborted();
 _stAxis.stStatus.bBusy := mStatus_Busy();
 
