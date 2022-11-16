@@ -472,7 +472,7 @@ END_IF
     <Method Name="mMove_MoveVelocity" Id="{db34b1dc-c06f-4355-a454-8e49d2e0a70d}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
 VAR
-	myb: bool;
+    myb: bool;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[

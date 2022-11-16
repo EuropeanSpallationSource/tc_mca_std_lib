@@ -406,6 +406,13 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"bInVelocity"</v>
+              <v n="TextDefault">"Target Velocity reached"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -431,4 +438,3 @@
     </XmlArchive>
   </TextList>
 </TcPlcObject>
-
