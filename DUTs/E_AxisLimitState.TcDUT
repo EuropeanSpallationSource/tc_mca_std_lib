@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_AxisLimitState" Id="{c23c611d-4a08-4dfc-a77d-d81711bdbc3d}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_AxisLimitState :
+(
+	OnForwardLimit,
+    OnBackwardLimit,
+    NoLimit
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_SlitPairLimitState" Id="{167987c2-c9e3-4a24-8c9d-0970978d0c8e}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_SlitPairLimitState :
+(
+	PositiveOnForward_NegativeOnForward,
+    PositiveOnForward_NegativeOnNoLimit,
+    PositiveOnForward_NegativeOnBackward,
+    PositiveOnNoLimit_NegativeOnForward,
+    PositiveOnNoLimit_NegativeOnNoLimit,
+    PositiveOnNoLimit_NegativeOnBackward,
+    PositiveOnBackward_NegativeOnForward,
+    PositiveOnBackward_NegativeOnNoLimit,
+    PositiveOnBackward_NegativeOnBackward
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

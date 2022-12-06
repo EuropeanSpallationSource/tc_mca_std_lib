@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_SlitDirectionState" Id="{2c492700-0fa1-4ba3-a283-74181ce3f59a}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_SlitDirectionState :
+(
+	PositiveFwd_NegativeFwd,
+    PositiveFwd_NegativeBwd,
+    PositiveFwd_NegativeStationary,
+    PositiveBwd_NegativeFwd,
+    PositiveBwd_NegativeBwd,
+    PositiveBwd_NegativeStationary,
+    PositiveStationary_NegativeFwd,
+    PositiveStationary_NegativeBwd,
+    PositiveStationary_NegativeStationary
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
