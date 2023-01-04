@@ -17,7 +17,8 @@ TYPE E_SlitPairStates :
     eWaitForVirtualHomed,
     eWaitForRealHomed,
     eCheckRealAxisGeneratorsEnabled,
-    eCheckVirtualAxisGeneratorsEnabled
+    eCheckVirtualAxisGeneratorsEnabled,
+    eDisableGenerators
 );
 END_TYPE
 ]]></Declaration>

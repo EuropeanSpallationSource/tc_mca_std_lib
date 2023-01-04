@@ -70,6 +70,8 @@ VAR
     nDirectionNegativeAxis: DINT;
     nDirectionGapSizeAxis: DINT;
     nDirectionGapCentreAxis: DINT;
+    
+    VELOCITY_DIRECTION_THRESHOLD : LREAL := 0.05;
 
     ePositiveAxisState : E_AxisLimitState;
     eNegativeAxisState : E_AxisLimitState;
@@ -117,6 +119,10 @@ GVL.astAxes[nIdPositiveAxis].stInputs.bLimitFwd:= bPositiveAxis_FwdLimit;
 GVL.astAxes[nIdPositiveAxis].stInputs.bLimitBwd:= bPositiveAxis_BwdLimit;
 GVL.astAxes[nIdNegativeAxis].stInputs.bLimitFwd:= bNegativeAxis_FwdLimit;
 GVL.astAxes[nIdNegativeAxis].stInputs.bLimitBwd:= bNegativeAxis_BwdLimit;
+GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitFwd:= TRUE;
+GVL.astAxes[nIdGapSizeAxis].stInputs.bLimitBwd:= TRUE;
+GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitFwd:= TRUE;
+GVL.astAxes[nIdGapCentreAxis].stInputs.bLimitBwd:= TRUE;
 
 //Enable Logic - Virtual axes automatically enable when real axes are enabled
 actVirtualAxisEnable();
@@ -245,12 +251,14 @@ IF bEnable THEN
 
         E_SlitPairStates.eWaitForVirtualMoveDone:
             IF NOT(GVL.astAxes[nIdGapSizeAxis].stStatus.bMoving OR GVL.astAxes[nIdGapCentreAxis].stStatus.bMoving) THEN
-                eState := E_SlitPairStates.eDisableRealGenerators;
+                eState := E_SlitPairStates.eDisableGenerators;
             END_IF
 
-        E_SlitPairStates.eDisableRealGenerators:
+        E_SlitPairStates.eDisableGenerators:
             fbSetpointGenDisablePositiveAxis.Execute := TRUE;
             fbSetpointGenDisableNegativeAxis.Execute := TRUE;
+            fbSetpointGenDisableGapCentreAxis.Execute := TRUE;
+            fbSetpointGenDisableGapSizeAxis.Execute := TRUE;
             eState := E_SlitPairStates.eOperational;
 
         E_SlitPairStates.eEnableVirtualGenerators:
@@ -271,13 +279,8 @@ IF bEnable THEN
 
         E_SlitPairStates.eWaitForRealMoveDone:
             IF NOT(GVL.astAxes[nIdPositiveAxis].stStatus.bMoving OR GVL.astAxes[nIdNegativeAxis].stStatus.bMoving) THEN
-                eState := E_SlitPairStates.eDisableVirtualGenerators;
+                eState := E_SlitPairStates.eDisableGenerators;
             END_IF
-
-        E_SlitPairStates.eDisableVirtualGenerators:
-            fbSetpointGenDisableGapSizeAxis.Execute := TRUE;
-            fbSetpointGenDisableGapCentreAxis.Execute := TRUE;
-            eState := E_SlitPairStates.eOperational;
 
         E_SlitPairStates.eError:
             actHaltAllAxes();
@@ -328,33 +331,33 @@ bReset := FALSE;]]></ST>
     <Folder Name="Setpoint_Generator_Actions" Id="{8e494922-e7c2-4daa-80b3-ea89aa78df74}" />
     <Action Name="actCalculateSetpointDirections" Id="{5abf4283-d432-4b19-be96-a15b54858b40}" FolderPath="Setpoint_Generator_Actions\">
       <Implementation>
-        <ST><![CDATA[IF fVeloSetpointPositiveAxis > 0 THEN
+        <ST><![CDATA[IF fVeloSetpointPositiveAxis > VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionPositiveAxis := 1; //moving forward
-ELSIF fVeloSetpointPositiveAxis < 0 THEN
+ELSIF fVeloSetpointPositiveAxis < -VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionPositiveAxis := -1; //moving backward
 ELSE
     nDirectionPositiveAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointNegativeAxis > 0 THEN
+IF fVeloSetpointNegativeAxis > VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionNegativeAxis := 1; //moving forward
-ELSIF fVeloSetpointNegativeAxis < 0 THEN
+ELSIF fVeloSetpointNegativeAxis < -VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionNegativeAxis := -1; //moving backward
 ELSE
     nDirectionNegativeAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointGapSizeAxis > 0 THEN
+IF fVeloSetpointGapSizeAxis > VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionGapSizeAxis := 1; //moving forward
-ELSIF fVeloSetpointGapSizeAxis < 0 THEN
+ELSIF fVeloSetpointGapSizeAxis < -VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionGapSizeAxis := -1; //moving backward
 ELSE
     nDirectionGapSizeAxis := 0; //stationary
 END_IF
 
-IF fVeloSetpointGapCentreAxis > 0 THEN
+IF fVeloSetpointGapCentreAxis > VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionGapCentreAxis := 1; //moving forward
-ELSIF fVeloSetpointGapCentreAxis < 0 THEN
+ELSIF fVeloSetpointGapCentreAxis < -VELOCITY_DIRECTION_THRESHOLD THEN
     nDirectionGapCentreAxis := -1; //moving backward
 ELSE
     nDirectionGapCentreAxis := 0; //stationary
@@ -483,11 +486,21 @@ fbSetpointGenDisableGapCentreAxis.Execute := FALSE;
     </Action>
     <Action Name="actHaltAllAxes" Id="{b7970e1d-c1fa-487e-a0a7-5d7f0550df46}">
       <Implementation>
-        <ST><![CDATA[GVL.astAxes[nIdPositiveAxis].stControl.bHalt := TRUE;
-GVL.astAxes[nIdNegativeAxis].stControl.bHalt := TRUE;
-GVL.astAxes[nIdGapSizeAxis].stControl.bHalt := TRUE;
-GVL.astAxes[nIdGapCentreAxis].stControl.bHalt := TRUE;
+        <ST><![CDATA[
 bAllHalted := TRUE;
+
+IF NOT GVL.astAxes[nIdPositiveAxis].Axis.Status.ExtSetPointGenEnabled THEN
+    GVL.astAxes[nIdPositiveAxis].stControl.bHalt := TRUE;
+END_IF
+IF NOT GVL.astAxes[nIdNegativeAxis].Axis.Status.ExtSetPointGenEnabled THEN
+    GVL.astAxes[nIdNegativeAxis].stControl.bHalt := TRUE;
+END_IF
+IF NOT GVL.astAxes[nIdGapSizeAxis].Axis.Status.ExtSetPointGenEnabled THEN
+    GVL.astAxes[nIdGapSizeAxis].stControl.bHalt := TRUE;
+END_IF
+IF NOT GVL.astAxes[nIdGapSizeAxis].Axis.Status.ExtSetPointGenEnabled THEN
+    GVL.astAxes[nIdGapSizeAxis].stControl.bHalt := TRUE;
+END_IF
 
 //Reset Halts
 IF bAllHalted AND NOT GVL.astAxes[nIdPositiveAxis].stStatus.bMoving AND NOT GVL.astAxes[nIdNegativeAxis].stStatus.bMoving
@@ -666,12 +679,17 @@ GVL.astAxes[nIdGapSizeAxis].stConfig.fOverride:=50;]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="FB_SlitPair_ISIS">
-      <LineId Id="1461" Count="36" />
+      <LineId Id="1461" Count="18" />
+      <LineId Id="2162" Count="3" />
+      <LineId Id="1480" Count="17" />
       <LineId Id="1683" Count="1" />
       <LineId Id="1682" Count="0" />
       <LineId Id="1498" Count="36" />
       <LineId Id="2065" Count="0" />
-      <LineId Id="1535" Count="136" />
+      <LineId Id="1535" Count="72" />
+      <LineId Id="2167" Count="3" />
+      <LineId Id="1610" Count="21" />
+      <LineId Id="1637" Count="34" />
       <LineId Id="2066" Count="0" />
       <LineId Id="1672" Count="9" />
     </LineIds>
@@ -722,7 +740,17 @@ GVL.astAxes[nIdGapSizeAxis].stConfig.fOverride:=50;]]></ST>
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair_ISIS.actHaltAllAxes">
-      <LineId Id="3" Count="14" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="8" Count="9" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlitPair_ISIS.actLimitState">
