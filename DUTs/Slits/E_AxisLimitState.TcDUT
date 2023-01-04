@@ -5,11 +5,10 @@
 {attribute 'strict'}
 TYPE E_AxisLimitState :
 (
-	OnForwardLimit,
+    OnForwardLimit,
     OnBackwardLimit,
     NoLimit
 );
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

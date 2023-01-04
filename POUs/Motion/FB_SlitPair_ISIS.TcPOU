@@ -11,9 +11,9 @@ VAR_INPUT
     bEnable: BOOL; //Enable slit pair logic functionality
     bReset: BOOL; //Reset from error state
     fEncoderScaling: LREAL := 10000; //Virtual axis scaling denominator, default of 10000
-    
-    
-    
+
+
+
 END_VAR
 
 //Linkable objects
@@ -23,16 +23,16 @@ VAR
     bPositiveAxis_BwdLimit AT %I* : BOOL;
     bNegativeAxis_FwdLimit AT %I* : BOOL;
     bNegativeAxis_BwdLimit AT %I* : BOOL;
-    
+
     //Software encoders for virtual axes
     nGapSizeEncoder AT %Q*: UDINT := 0;
     nGapCentreEncoder AT %Q*: UDINT := 0;
 END_VAR
 
-VAR   
+VAR
     fGapSize: LREAL;
     fGapCentre: LREAL;
-    
+
     bAllHalted: BOOL := FALSE;
     bInternalResetHome: BOOL :=FALSE;
 
@@ -50,7 +50,7 @@ VAR
     fPosSetpointNegativeAxis: LREAL;
     fPosSetpointGapSizeAxis: LREAL;
     fPosSetpointGapCentreAxis: LREAL;
-    
+
     fPosSetpointPositiveAxis_Nominal: LREAL;
     fPosSetpointNegativeAxis_Nominal: LREAL;
     fPosSetpointGapSizeAxis_Nominal: LREAL;
@@ -65,16 +65,16 @@ VAR
     fVeloSetpointNegativeAxis_Nominal: LREAL;
     fVeloSetpointGapSizeAxis_Nominal: LREAL;
     fVeloSetpointGapCentreAxis_Nominal: LREAL;
-    
+
     nDirectionPositiveAxis: DINT;
     nDirectionNegativeAxis: DINT;
     nDirectionGapSizeAxis: DINT;
     nDirectionGapCentreAxis: DINT;
-    
+
     ePositiveAxisState : E_AxisLimitState;
     eNegativeAxisState : E_AxisLimitState;
     eAxisPairState : E_SlitPairLimitState;
-    
+
 
     eState: E_SlitPairStates := E_SlitPairStates.eInit;
 
@@ -238,12 +238,12 @@ IF bEnable THEN
             eState := E_SlitPairStates.eCheckRealAxisGeneratorsEnabled;
 
         E_SlitPairStates.eCheckRealAxisGeneratorsEnabled:
-            //Hold MC_Power on until generators have enabled           
+            //Hold MC_Power on until generators have enabled
             IF fbSetpointGenEnablePositiveAxis.Enabled AND fbSetpointGenEnableNegativeAxis.Enabled THEN
                 eState := E_SlitPairStates.eWaitForVirtualMoveDone;
             END_IF
 
-        E_SlitPairStates.eWaitForVirtualMoveDone:            
+        E_SlitPairStates.eWaitForVirtualMoveDone:
             IF NOT(GVL.astAxes[nIdGapSizeAxis].stStatus.bMoving OR GVL.astAxes[nIdGapCentreAxis].stStatus.bMoving) THEN
                 eState := E_SlitPairStates.eDisableRealGenerators;
             END_IF
@@ -387,58 +387,58 @@ fVeloSetpointGapCentreAxis_Nominal := GVL.astAxes[nIdPositiveAxis].Axis.NcToPlc.
 IF GVL.astAxes[nIdPositiveAxis].Axis.Status.ExtSetPointGenEnabled OR GVL.astAxes[nIdNegativeAxis].Axis.Status.ExtSetPointGenEnabled THEN
     //IF gap size getting bigger
     IF GVL.astAxes[nIdGapSizeAxis].Axis.Status.PositiveDirection THEN
-        CASE eAxisPairState OF            
-        E_SlitPairLimitState.PositiveOnForward_NegativeOnForward:   Setpoint_PositiveDisabled();            
-        E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();            
-        E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_PositiveDisabled();            
-        E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_Normal();            
-        E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_NegativeDisabled();            
-        E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_Normal();            
-        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_Normal();            
-        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_NegativeDisabled();            
+        CASE eAxisPairState OF
+        E_SlitPairLimitState.PositiveOnForward_NegativeOnForward:   Setpoint_PositiveDisabled();
+        E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();
+        E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_PositiveDisabled();
+        E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_Normal();
+        E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_NegativeDisabled();
+        E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_Normal();
+        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_Normal();
+        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_NegativeDisabled();
         E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();
         END_CASE
     //IF gap size getting smaller
     ELSIF GVL.astAxes[nIdGapSizeAxis].Axis.Status.NegativeDirection THEN
-        CASE eAxisPairState OF            
+        CASE eAxisPairState OF
         E_SlitPairLimitState.PositiveOnForward_NegativeOnForward:   Setpoint_NegativeDisabled();
         E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_Normal();
         E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_Normal();
-        E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();            
-        E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_PositiveDisabled();            
+        E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();
+        E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_PositiveDisabled();
         E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_PositiveDisabled();
-        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_NegativeDisabled();           
+        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_NegativeDisabled();
         E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_Normal();
-        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();                       
+        E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();
         END_CASE
     ELSE //Gap size axis is stationary
         //IF gap centre moving in positive direction
         IF GVL.astAxes[nIdGapCentreAxis].Axis.Status.PositiveDirection THEN
-            CASE eAxisPairState OF            
+            CASE eAxisPairState OF
             E_SlitPairLimitState.PositiveOnForward_NegativeOnForward:   Setpoint_AllDisabled();
-            E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();           
-            E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();           
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_Normal();            
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_Normal();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_Normal();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();                       
+            E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_Normal();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_Normal();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_Normal();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();
             END_CASE
         //IF gap centre moving in negative direction
         ELSIF GVL.astAxes[nIdGapCentreAxis].Axis.Status.NegativeDirection THEN
-            CASE eAxisPairState OF            
+            CASE eAxisPairState OF
             E_SlitPairLimitState.PositiveOnForward_NegativeOnForward:   Setpoint_Normal();
-            E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_Normal();            
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_Normal();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_AllDisabled();            
-            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();                       
+            E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit:   Setpoint_Normal();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnForward:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward: Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnForward:   Setpoint_Normal();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward:  Setpoint_AllDisabled();
+            E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit:   Setpoint_Normal();
             END_CASE
-		END_IF
+        END_IF
     END_IF
 END_IF
 
@@ -530,8 +530,8 @@ CASE ePositiveAxisState OF
             E_AxisLimitState.OnBackwardLimit:
                 eAxisPairState := E_SlitPairLimitState.PositiveOnForward_NegativeOnBackward;
             E_AxisLimitState.NoLimit:
-                eAxisPairState := E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit;            
-		END_CASE
+                eAxisPairState := E_SlitPairLimitState.PositiveOnForward_NegativeOnNoLimit;
+        END_CASE
     E_AxisLimitState.OnBackwardLimit:
         CASE eNegativeAxisState OF
             E_AxisLimitState.OnForwardLimit:
@@ -539,8 +539,8 @@ CASE ePositiveAxisState OF
             E_AxisLimitState.OnBackwardLimit:
                 eAxisPairState := E_SlitPairLimitState.PositiveOnBackward_NegativeOnBackward;
             E_AxisLimitState.NoLimit:
-                eAxisPairState := E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit;            
-		END_CASE
+                eAxisPairState := E_SlitPairLimitState.PositiveOnBackward_NegativeOnNoLimit;
+        END_CASE
     E_AxisLimitState.NoLimit:
         CASE eNegativeAxisState OF
             E_AxisLimitState.OnForwardLimit:
@@ -548,8 +548,8 @@ CASE ePositiveAxisState OF
             E_AxisLimitState.OnBackwardLimit:
                 eAxisPairState := E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnBackward;
             E_AxisLimitState.NoLimit:
-                eAxisPairState := E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit;            
-		END_CASE
+                eAxisPairState := E_SlitPairLimitState.PositiveOnNoLimit_NegativeOnNoLimit;
+        END_CASE
 END_CASE]]></ST>
       </Implementation>
     </Action>
@@ -613,7 +613,7 @@ END_IF
     <Action Name="Setpoint_AllDisabled" Id="{8d0131b7-d925-4748-8e58-1076d969b851}" FolderPath="Setpoint_Generator_Actions\">
       <Implementation>
         <ST><![CDATA[fPosSetpointPositiveAxis := fPosSetpointPositiveAxis;
-fPosSetpointNegativeAxis := fPosSetpointNegativeAxis;            
+fPosSetpointNegativeAxis := fPosSetpointNegativeAxis;
 fVeloSetpointPositiveAxis := 0;
 fVeloSetpointNegativeAxis := 0;
 
@@ -631,7 +631,7 @@ actHaltAllAxes();]]></ST>
 fPosSetpointNegativeAxis := fPosSetpointNegativeAxis;
 fVeloSetpointPositiveAxis := GVL.astAxes[nIdGapSizeAxis].Axis.NcToPlc.SetVelo;
 fVeloSetpointNegativeAxis := 0;
-            
+
 fbSetpointGenEnableGapCentreAxis.Execute:= TRUE;
 fbSetpointGenEnableGapCentreAxis(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis);
 fPosSetpointGapCentreAxis := fGapCentre;
@@ -656,7 +656,7 @@ GVL.astAxes[nIdGapSizeAxis].stConfig.fOverride:=100;]]></ST>
 fPosSetpointNegativeAxis := GVL.astAxes[nIdPositiveAxis].Axis.NcToPlc.ActPos - GVL.astAxes[nIdGapSizeAxis].Axis.NcToPlc.SetPos;
 fVeloSetpointPositiveAxis := 0;
 fVeloSetpointNegativeAxis := GVL.astAxes[nIdGapSizeAxis].Axis.NcToPlc.SetVelo;
-            
+
 fbSetpointGenEnableGapCentreAxis.Execute:= TRUE;
 fbSetpointGenEnableGapCentreAxis(Axis:= GVL.astAxes[nIdGapCentreAxis].Axis);
 fPosSetpointGapCentreAxis := fGapCentre;

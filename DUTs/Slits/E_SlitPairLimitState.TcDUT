@@ -5,7 +5,7 @@
 {attribute 'strict'}
 TYPE E_SlitPairLimitState :
 (
-	PositiveOnForward_NegativeOnForward,
+    PositiveOnForward_NegativeOnForward,
     PositiveOnForward_NegativeOnNoLimit,
     PositiveOnForward_NegativeOnBackward,
     PositiveOnNoLimit_NegativeOnForward,
