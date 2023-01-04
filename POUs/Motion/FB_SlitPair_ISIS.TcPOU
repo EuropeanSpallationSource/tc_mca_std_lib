@@ -70,7 +70,7 @@ VAR
     nDirectionNegativeAxis: DINT;
     nDirectionGapSizeAxis: DINT;
     nDirectionGapCentreAxis: DINT;
-    
+
     VELOCITY_DIRECTION_THRESHOLD : LREAL := 0.05;
 
     ePositiveAxisState : E_AxisLimitState;
