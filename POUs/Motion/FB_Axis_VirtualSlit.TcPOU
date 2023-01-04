@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_Axis_VirtualSlit" Id="{e31f5dba-ed6e-424e-a71c-5be6f81b1629}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Axis_VirtualSlit EXTENDS FB_Axis
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="mControl_LimitLinking" Id="{8a071033-216a-465d-8f56-bfe7ac105f0a}">
+      <Declaration><![CDATA[METHOD mControl_LimitLinking : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Remove linking of stInput Limits to bFwEnabled and bBwEnabled
+_stAxis.stStatus.bInterlockedFwd := _stAxis.stControl.bInterlockFwd;
+_stAxis.stStatus.bInterlockedBwd := _stAxis.stControl.bInterlockBwd;
+
+//Multimaster limit linking
+FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
+    IF (_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
+        _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
+    END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Power" Id="{d0c8540c-f48a-44ed-9cab-a42fb64b8fc2}">
+      <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Change fbPower Enable_Negative and Enable_Positive to monitor stInput limits rather than Bw/Fw Enabled
+fbPower.Enable := _stAxis.stControl.bEnable;
+fbPower.Enable_Negative := (_stAxis.stInputs.bLimitBwd OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
+fbPower.Enable_Positive := (_stAxis.stInputs.bLimitFwd OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
+fbPower.Override := _stAxis.stConfig.fOverride;
+
+fbPower(Axis := _stAxis.Axis);
+
+mControl_Power.Error := fbPower.Error;
+
+IF fbPower.Error THEN
+    _stAxis.stError.nPowerErrorID := fbPower.ErrorID; //Set the error
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Axis_VirtualSlit">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_VirtualSlit.mControl_LimitLinking">
+      <LineId Id="3" Count="0" />
+      <LineId Id="6" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Axis_VirtualSlit.mControl_Power">
+      <LineId Id="3" Count="1" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="7" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
