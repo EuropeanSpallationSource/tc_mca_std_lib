@@ -1,29 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <DUT Name="E_SlitPairStates" Id="{bd1cffbb-4918-4a16-817e-cea08bf2daf5}">
-    <Declaration><![CDATA[{attribute 'qualified_only'}
+  <DUT Name="E_SlitPairStatesV2" Id="{6665fbaf-b520-47d5-8ce7-9872d8af20f7}">
+    <Declaration><![CDATA[
+{attribute 'qualified_only'}
 {attribute 'strict'}
-TYPE E_SlitPairStates :
+TYPE E_SlitPairStatesV2 :
 (
-    INIT := 0,
-    INIT_CLEAR_GEARING,
-    INIT_GEAROUT_CHECK,
-    CHECK_HOME_STATUS,
-    HOME_BLADES,
-    CHECK_BLADE_HOME_COMPLETE,
-    HOME_GAP,
-    CHECK_GAP_HOME_COMPLETE,
-    GEARIN_SLITS,
-    CHECK_GEARIN_SLITS_COMPLETE,
-    SLITS_OPERATIONAL,
-    GEAROUT_BLADES,
-    CHECK_GEAROUT_COMPLETE,
-    CLEAR_GAP_CALIBRATION,
-    ERROR,
-    ERROR_GEAROUT,
-    ERROR_GEAROUT_CHECK,
-    ERROR_RESET_AXES,
-    ERROR_RESET_CHECK
+    eInit := 0,
+    eEnableRealGenerators,
+    eDisableRealGenerators,
+    eEnableVirtualGenerators,
+    eDisableVirtualGenerators,
+    eWaitForVirtualMoveDone,
+    eWaitForRealMoveDone,
+    eError,
+    eOperational,
+    eWaitForVirtualHomed,
+    eWaitForRealHomed,
+    eCheckRealAxisGeneratorsEnabled,
+    eCheckVirtualAxisGeneratorsEnabled
 );
 END_TYPE
 ]]></Declaration>
