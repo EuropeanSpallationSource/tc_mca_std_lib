@@ -81,6 +81,8 @@ VAR
     fbDoneRTrig: R_TRIG;
     fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
+    fbInVelocityRTrig: R_TRIG;
+    fbInVelocityFTrig: F_TRIG;
     fbExecuteRTrig: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
     fbHaltFinishedRiseEdge: R_TRIG;
@@ -486,7 +488,7 @@ fbMoveVelocity(Axis := _stAxis.Axis);
 fbMoveVelocity.Execute:= FALSE;
 
 mMove_MoveVelocity.Active := fbMoveVelocity.Active;
-mMove_MoveVelocity.Done := fbMoveVelocity.InVelocity;
+mMove_MoveVelocity.InVelocity := fbMoveVelocity.InVelocity;
 mMove_MoveVelocity.Busy := fbMoveVelocity.Busy;
 mMove_MoveVelocity.Error := fbMoveVelocity.Error;
 mMove_MoveVelocity.ErrorID := fbMoveVelocity.ErrorID;
@@ -859,6 +861,29 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mStatus_InVelocity" Id="{cb2cb841-8a3f-432f-b52b-8fb0cc3fb6da}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_InVelocity : BOOL
+VAR
+    i: UINT;
+    tmpInVelocity: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+    tmpInVelocity := astMcStatus[i]^.InVelocity OR tmpInVelocity;
+END_FOR
+//fbInVelocityRTrig(CLK:= mStatus_InVelocity());
+fbInVelocityRTrig(CLK := tmpInVelocity);
+IF fbInVelocityRTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := TRUE;
+END_IF
+
+fbInVelocityFTrig(CLK := _stAxis.Axis.Status.ContinuousMotion);
+IF fbInVelocityFTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStatus_MultiGearing" Id="{fa93e914-182a-42d5-a8d7-635a159cd60b}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_MultiGearing : BOOL
 ]]></Declaration>
@@ -958,6 +983,7 @@ stMcStatusHome := mControl_Home();
 mStatus_NewCommand();
 mStatus_Done();
 mStatus_Error();
+mStatus_InVelocity();
 mStatus_CommandAborted();
 _stAxis.stStatus.bBusy := mStatus_Busy();
 

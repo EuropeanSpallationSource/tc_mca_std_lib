@@ -11,6 +11,7 @@ STRUCT
     bDone: BOOL; //Last eCommand function block executed successfully;
     //bDone will also be set with the InGear and InVelocity outputs
     //When InVelocity is set, fbMoveVelocity is still acitve, which is reflected by the bBusy status
+    bInVelocity: BOOL; //MC_MoveVelocity has reached target velocity; will stay true until the movement stops
     bHomed: BOOL; //Axis homed
     bMoving: BOOL; //Moving state from the NC
     bMovingForward: BOOL; //Moving forward indicator from NC
