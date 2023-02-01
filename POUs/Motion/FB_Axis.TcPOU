@@ -881,7 +881,8 @@ END_IF
 fbInVelocityFTrig(CLK := _stAxis.Axis.Status.ContinuousMotion);
 IF fbInVelocityFTrig.Q THEN
     _stAxis.stStatus.bInVelocity := FALSE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStatus_MultiGearing" Id="{fa93e914-182a-42d5-a8d7-635a159cd60b}" FolderPath="Status Methods\">
