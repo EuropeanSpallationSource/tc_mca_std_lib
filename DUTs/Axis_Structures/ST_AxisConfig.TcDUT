@@ -19,6 +19,17 @@ STRUCT
     fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
     fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
 
+    //General Advanced Homing Configuration
+    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
+    tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
+    fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+    fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+
+    //Homing Configuration for Step Block
+    fDetectionVelocityLimit: LREAL; // Velocity that must be fallen below for the DetectionVelocityTime in order to detect driving against the fixed stop.
+    tDetectionVelocityTime: TIME; // Time for detecting the velocity undershoot when driving against the fixed stop.
+    fTorqueTolerance: LREAL; // Tolerance related to the TorqueLimit within which driving against the fixed stop is detected.
+
     //Multi master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
