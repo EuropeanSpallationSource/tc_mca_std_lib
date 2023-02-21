@@ -28,7 +28,7 @@ STRUCT
     //Homing Configuration for Step Block
     fDetectionVelocityLimit: LREAL; // Velocity that must be fallen below for the DetectionVelocityTime in order to detect driving against the fixed stop.
     tDetectionVelocityTime: TIME; // Time for detecting the velocity undershoot when driving against the fixed stop.
-    fTorqueTolerance: LREAL; // Tolerance related to the TorqueLimit within which driving against the fixed stop is detected.
+    fLagLimit: LREAL; // Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
 
     //Multi master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;

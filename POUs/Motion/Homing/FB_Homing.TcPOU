@@ -28,7 +28,7 @@ VAR
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulseDetection: MC_StepReferencePulseDetection;
-    fbStepBlockDetection: MC_StepBlockDetection;
+    fbStepBlockLagDetection: MC_StepBlockLagBasedDetection;
     fbHomeDirect: MC_HomeDirect;
     fbSetPos: MC_SetPosition;
     fbFinishHoming: MC_FinishHoming;
@@ -181,7 +181,7 @@ CASE eHomingState OF
             fbStepLimitSwitchDetection.Execute := FALSE;
             fbStepAbsoluteSwitchDetection.Execute := FALSE;
             fbStepReferencePulseDetection.Execute := FALSE;
-            fbStepBlockDetection.Execute := FALSE;
+            fbStepBlockLagDetection.Execute := FALSE;
             fbHomeDirect.Execute := FALSE;
             fbSetPos.Execute := FALSE;
             fbFinishHoming.Execute := FALSE;
@@ -313,7 +313,7 @@ END_CASE
 
 bViaLimitSwitch:=FALSE;
 
-fbStepBlockDetection(
+fbStepBlockLagDetection(
     Axis := Axis,
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
@@ -323,8 +323,8 @@ fbStepBlockDetection(
     DetectionVelocityTime := stConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
     TimeLimit :=  stConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
     DistanceLimit := stConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
-    TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-    TorqueTolerance := stConfig.fTorqueTolerance, //Tolerance related to the TorqueLimit within which driving against the fixed stop is detected.
+    TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+    LagLimit := stConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
     Options := stOptions3,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
