@@ -110,10 +110,8 @@ END_IF
 //Common function blocks used for all routines
 stOptions.DisableDriveAccess := stConfig.bDisableDriveAccess;
 
-//For StepBlockDetection
+//For StepBlockLagDetection
 stOptions3.DisableDriveAccess := stConfig.bDisableDriveAccess;
-//stOptions3.InstantLagReduction := FALSE;
-//stOptions3.TorquePolarityInverted := FALSE;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(

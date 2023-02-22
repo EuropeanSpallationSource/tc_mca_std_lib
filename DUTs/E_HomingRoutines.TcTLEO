@@ -37,8 +37,10 @@ TYPE E_HomingRoutines :
     //Home to EncRefPulse via bFwdLimit (using towardsCam speed), then reverse direction looking for falling edge on ref pulse (using fromCam speed)
     eHomeToEncPulse_viaFwdLimit := 24,
 
-    //3X: Home To Mechanical Block
+    //3X: Home To Mechanical Block (Lag based StepBlockDetection)
+    //Home towards a mechanical block in Bwd direction
     eHomeToBlock_Bwd := 30,
+    //Home towards a mechanical block in Fwd direction
     eHomeToBlock_Fwd := 31,
 
     //9X: Software
