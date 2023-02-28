@@ -15,6 +15,7 @@ STRUCT
     bJogBwd: BOOL;
     bInterlockFwd: BOOL := FALSE; //Bit for interlocking motors in the positive direction
     bInterlockBwd: BOOL := FALSE; //Bit for interlocking motors in the negative direction
+    bTemperatureDisable: Bool := FALSE; //Bit for disabling the axis when temperature too high
     eCommand: E_MotionFunctions;
     fVelocity: LREAL; //Velocity must be specified
     fJogVelocity: LREAL; //Jogging velocity

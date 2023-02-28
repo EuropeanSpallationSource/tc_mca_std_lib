@@ -27,6 +27,7 @@ STRUCT
     bCoupledGear3: BOOL;
     bCoupledGear4: BOOL;
     fActPosition: LREAL; //Actual position value
+    fActTemperature: LREAL; //Actual Temperature
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter from stepper drive
     fActVelocity: LREAL; //Actual velocity
