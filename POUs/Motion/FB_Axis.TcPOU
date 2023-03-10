@@ -103,11 +103,11 @@ bBusy:= bBusy OR fbReset.Busy;
 
 fbStop(Axis := stAxisStruct.Axis);
 fbStop.Execute := FALSE;
-bBusy:= bBusy OR fbStop.Busy;
+//bBusy:= bBusy OR fbStop.Busy; //Stop is not a motion function
 
 fbHalt(Axis := stAxisStruct.Axis);
 fbHalt.Execute := FALSE;
-bBusy:= bBusy OR fbHalt.Busy;
+//bBusy:= bBusy OR fbHalt.Busy; //Halt is not a motion function
 
 fbJog(Axis := stAxisStruct.Axis);
 bBusy:= bBusy OR fbJog.Busy;
@@ -704,4 +704,3 @@ stAxisStruct.stConfig.bReadMcParametersError:= fbReadAxisVeloManSlow.Error OR
     </Action>
   </POU>
 </TcPlcObject>
-
