@@ -243,7 +243,12 @@ END_IF
 fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
-fbHome(Axis := _stAxis.Axis, bLimitBwd := _stAxis.stInputs.bLimitBwd, bLimitFwd := _stAxis.stInputs.bLimitFwd, bHomeSensor := _stAxis.stInputs.bHomeSensor);
+fbHome(
+    Axis := _stAxis.Axis,
+    bLimitBwd := _stAxis.stInputs.bLimitBwd,
+    bLimitFwd := _stAxis.stInputs.bLimitFwd,
+    bHomeSensor := _stAxis.stInputs.bHomeSensor,
+    stConfig := _stAxis.stConfig);
 fbHome.bExecute := FALSE;
 
 mControl_Home.Busy := fbHome.bBusy;
