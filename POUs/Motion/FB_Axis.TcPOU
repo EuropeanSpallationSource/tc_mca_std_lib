@@ -31,9 +31,15 @@ VAR
     fbPower: MC_Power;
     fbStop: MC_Stop;
     fbHalt: MC_Halt;
+    stMcStatusHalt: ST_McStatus;
+
     fbJog: MC_Jog;
     fbMoveAbsolute: MC_MoveAbsolute;
+    stMcStatusMoveAbsolute: ST_McStatus;
+
     fbMoveVelocity: MC_MoveVelocity;
+    stMcStatusMoveVelocity: ST_McStatus;
+
     fbMoveRelative: MC_MoveRelative;
     fbMoveModulo: MC_MoveModulo;
     fbGearIn: MC_GearIn;
@@ -76,8 +82,6 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
-    bMoveAbsoluteDone: BOOL := FALSE;
-    bMoveAbsCommandAborted: BOOL := FALSE;
 
 END_VAR
 ]]></Declaration>
@@ -108,6 +112,12 @@ fbStop.Execute := FALSE;
 //bBusy:= bBusy OR fbStop.Busy; //Stop is not a motion function
 
 fbHalt(Axis := stAxisStruct.Axis);
+IF stAxisStruct.stControl.bExecute THEN
+    MEMSET(ADR(stMcStatusHalt), 0, SIZEOF(stMcStatusHalt));
+ELSE
+    stMcStatusHalt.Done := stMcStatusHalt.Done OR fbHalt.Done;
+    stMcStatusHalt.CommandAborted := stMcStatusHalt.CommandAborted OR fbHalt.CommandAborted;
+END_IF
 fbHalt.Execute := FALSE;
 //bBusy:= bBusy OR fbHalt.Busy; //Halt is not a motion function
 
@@ -122,16 +132,12 @@ fbHome.bExecute := FALSE;
 bBusy:= bBusy OR fbHome.bBusy;
 
 fbMoveAbsolute(Axis := stAxisStruct.Axis);
-
 IF stAxisStruct.stControl.bExecute THEN
-    bMoveAbsoluteDone := FALSE;
-    bMoveAbsCommandAborted := FALSE;
+    MEMSET(ADR(stMcStatusMoveAbsolute), 0, SIZEOF(stMcStatusMoveAbsolute));
 ELSE
-    bMoveAbsoluteDone := bMoveAbsoluteDone OR fbMoveAbsolute.Done;
-    bMoveAbsCommandAborted := bMoveAbsCommandAborted OR fbMoveAbsolute.CommandAborted;
+    stMcStatusMoveAbsolute.Done := stMcStatusMoveAbsolute.Done OR fbMoveAbsolute.Done;
+    stMcStatusMoveAbsolute.CommandAborted := stMcStatusMoveAbsolute.CommandAborted OR fbMoveAbsolute.CommandAborted;
 END_IF
-
-
 fbMoveAbsolute.Execute := FALSE;
 bBusy:= bBusy OR fbMoveAbsolute.Busy;
 
@@ -140,6 +146,12 @@ fbMoveRelative.Execute := FALSE;
 bBusy:= bBusy OR fbMoveRelative.Busy;
 
 fbMoveVelocity(Axis := stAxisStruct.Axis);
+IF stAxisStruct.stControl.bExecute THEN
+    MEMSET(ADR(stMcStatusMoveVelocity), 0, SIZEOF(stMcStatusMoveVelocity));
+ELSE
+    //stMcStatusMoveVelocity.Done := stMcStatusMoveVelocity.Done OR fbMoveAbsolute.Done;
+    stMcStatusMoveVelocity.CommandAborted := stMcStatusMoveVelocity.CommandAborted OR fbMoveVelocity.CommandAborted;
+END_IF
 fbMoveVelocity.Execute := FALSE;
 bBusy:= bBusy OR fbMoveVelocity.Busy;
 
@@ -364,8 +376,6 @@ fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
 IF fbExecuteRiseEdge.Q THEN
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
-    bMoveAbsoluteDone := bMoveAbsoluteDone OR fbMoveAbsolute.Done;
-    bMoveAbsCommandAborted := bMoveAbsCommandAborted OR fbMoveAbsolute.CommandAborted;
 END_IF
 fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
 IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN
@@ -547,8 +557,11 @@ ELSE
     stAxisStruct.stStatus.bCoupledGear4 := FALSE;
 END_IF
 
-stAxisStruct.stStatus.bMoveAbsoluteDone := bMoveAbsoluteDone;
-stAxisStruct.stStatus.bMoveAbsCommandAborted := bMoveAbsCommandAborted;
+stAxisStruct.stStatus.bMoveAbsoluteDone := stMcStatusMoveAbsolute.Done ;
+stAxisStruct.stStatus.bMoveAbsoluteCommandAborted := stMcStatusMoveAbsolute.CommandAborted;
+stAxisStruct.stStatus.bMoveVelocityCommandAborted := stMcStatusMoveVelocity.CommandAborted;
+stAxisStruct.stStatus.bHaltDone := stMcStatusHalt.Done ;
+stAxisStruct.stStatus.bHaltCommandAborted := stMcStatusHalt.CommandAborted;
 
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;
