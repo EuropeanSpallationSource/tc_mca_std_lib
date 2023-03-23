@@ -76,6 +76,8 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
+    bMoveAbsoluteDone: BOOL := FALSE;
+    bMoveAbsCommandAborted: BOOL := FALSE;
 
 END_VAR
 ]]></Declaration>
@@ -120,6 +122,16 @@ fbHome.bExecute := FALSE;
 bBusy:= bBusy OR fbHome.bBusy;
 
 fbMoveAbsolute(Axis := stAxisStruct.Axis);
+
+IF stAxisStruct.stControl.bExecute THEN
+    bMoveAbsoluteDone := FALSE;
+    bMoveAbsCommandAborted := FALSE;
+ELSE
+    bMoveAbsoluteDone := bMoveAbsoluteDone OR fbMoveAbsolute.Done;
+    bMoveAbsCommandAborted := bMoveAbsCommandAborted OR fbMoveAbsolute.CommandAborted;
+END_IF
+
+
 fbMoveAbsolute.Execute := FALSE;
 bBusy:= bBusy OR fbMoveAbsolute.Busy;
 
@@ -352,12 +364,15 @@ fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
 IF fbExecuteRiseEdge.Q THEN
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
+    bMoveAbsoluteDone := bMoveAbsoluteDone OR fbMoveAbsolute.Done;
+    bMoveAbsCommandAborted := bMoveAbsCommandAborted OR fbMoveAbsolute.CommandAborted;
 END_IF
 fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
 IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN
     stAxisStruct.stStatus.bDone := FALSE;
     stAxisStruct.stStatus.bCommandAborted := FALSE;
 END_IF
+
 
 //Execution of fbReset ended
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
@@ -531,6 +546,9 @@ IF stAxisStruct.Axis.Status.Coupled AND stAxisStruct.Axis.PlcToNc.GearRatio4 <> 
 ELSE
     stAxisStruct.stStatus.bCoupledGear4 := FALSE;
 END_IF
+
+stAxisStruct.stStatus.bMoveAbsoluteDone := bMoveAbsoluteDone;
+stAxisStruct.stStatus.bMoveAbsCommandAborted := bMoveAbsCommandAborted;
 
 //Reset bExecute
 stAxisStruct.stControl.bExecute := FALSE;
