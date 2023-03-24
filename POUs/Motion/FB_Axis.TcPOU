@@ -76,6 +76,8 @@ VAR
     bDoneEdge: BOOL; // helper variable for the detection of a rising edge of the done output of any motion FBs
     bCommandAbortedEdge: BOOL; // helper variable for the detection of a rising edge of the commandAborted output of any motion FBs
     bBusy: BOOL; // helper variable for a logical OR of the busy output of all motion FBs
+    bDone : BOOL := FALSE;
+    bCommandAborted : BOOL := FALSE;
 
 END_VAR
 ]]></Declaration>
@@ -103,11 +105,11 @@ bBusy:= bBusy OR fbReset.Busy;
 
 fbStop(Axis := stAxisStruct.Axis);
 fbStop.Execute := FALSE;
-//bBusy:= bBusy OR fbStop.Busy; //Stop is not a motion function
+bBusy:= bBusy OR fbStop.Busy;
 
 fbHalt(Axis := stAxisStruct.Axis);
 fbHalt.Execute := FALSE;
-//bBusy:= bBusy OR fbHalt.Busy; //Halt is not a motion function
+bBusy:= bBusy OR fbHalt.Busy;
 
 fbJog(Axis := stAxisStruct.Axis);
 bBusy:= bBusy OR fbJog.Busy;
@@ -331,9 +333,6 @@ CASE stAxisStruct.stControl.eCommand OF
 
 END_CASE
 
-//Busy from the motion function blocks
-stAxisStruct.stStatus.bBusy := bBusy;
-
 //CommandAborted from the eCommand function blocks
 fbCommandAbortedRiseEdge(CLK:= bCommandAbortedEdge);
 IF fbCommandAbortedRiseEdge.Q THEN
@@ -343,20 +342,20 @@ END_IF
 //Done from the eCommand function blocks
 fbDoneRiseEdge(CLK:= bDoneEdge);
 IF fbDoneRiseEdge.Q THEN
-    stAxisStruct.stStatus.bDone := TRUE;
-    stAxisStruct.stStatus.bCommandAborted:=FALSE;
+    bDone := TRUE;
+    bCommandAborted:=FALSE;
 END_IF
 
 //Reset Done and CommandAborted with any new eCommand (Execute or Jog)
 fbExecuteRiseEdge(CLK:=stAxisStruct.stControl.bExecute);
 IF fbExecuteRiseEdge.Q THEN
-    stAxisStruct.stStatus.bDone := FALSE;
-    stAxisStruct.stStatus.bCommandAborted := FALSE;
+    bDone := FALSE;
+    bCommandAborted := FALSE;
 END_IF
 fbJogRiseEdge(CLK:=stAxisStruct.stControl.bJogBwd OR stAxisStruct.stControl.bJogFwd);
 IF fbJogRiseEdge.Q AND (stAxisStruct.stControl.eCommand = E_MotionFunctions.eJog) THEN
-    stAxisStruct.stStatus.bDone := FALSE;
-    stAxisStruct.stStatus.bCommandAborted := FALSE;
+    bDone := FALSE;
+    bCommandAborted := FALSE;
 END_IF
 
 //Execution of fbReset ended
@@ -484,6 +483,32 @@ ELSIF stAxisStruct.Axis.Status.Error THEN
     stAxisStruct.stError.nNCErrorId := stAxisStruct.Axis.Status.ErrorID;
 
 END_IF;
+
+// The grand final: Put bits into stAxisStruct.stStatus
+// Make sure that max one of Busy, CommandAborted, Done, Error is TRUE
+
+IF stAxisStruct.stStatus.bError THEN
+    stAxisStruct.stStatus.bBusy := FALSE;
+    stAxisStruct.stStatus.bCommandAborted:=FALSE;
+    stAxisStruct.stStatus.bDone := FALSE;
+ELSIF bBusy THEN
+    stAxisStruct.stStatus.bBusy := TRUE;
+    stAxisStruct.stStatus.bCommandAborted:=FALSE;
+    stAxisStruct.stStatus.bDone := FALSE;
+ELSIF bCommandAborted THEN
+    stAxisStruct.stStatus.bBusy := FALSE;
+    stAxisStruct.stStatus.bCommandAborted:=TRUE;
+    stAxisStruct.stStatus.bDone := FALSE;
+ELSIF bDone THEN
+    stAxisStruct.stStatus.bBusy := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
+    stAxisStruct.stStatus.bDone := TRUE;
+ELSE
+    stAxisStruct.stStatus.bBusy := FALSE;
+    stAxisStruct.stStatus.bCommandAborted := FALSE;
+    stAxisStruct.stStatus.bDone := FALSE;
+END_IF
+
 
 //Actual Velocity
 stAxisStruct.stStatus.fActVelocity := stAxisStruct.Axis.NcToPlc.ActVelo;
