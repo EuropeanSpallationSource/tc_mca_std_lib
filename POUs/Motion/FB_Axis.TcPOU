@@ -24,7 +24,6 @@ VAR
     stMcStatusMoveAbsolute: ST_McStatus;
 
     fbMoveRelative: MC_MoveRelative;
-    fbMoveRelative2: MC_MoveRelative;
     stMcStatusMoveRelative: ST_McStatus;
 
     fbMoveVelocity: MC_MoveVelocity;
@@ -90,6 +89,8 @@ VAR
     fbResetFinishedRiseEdge: R_TRIG;
     fbAbsMovDyn1RiseEdge: R_TRIG;
     fbAbsMovDyn2RiseEdge: R_TRIG;
+    fbModMovDyn1RiseEdge: R_TRIG;
+    fbModMovDyn2RiseEdge: R_TRIG;
 
 END_VAR
 VAR CONSTANT
@@ -410,6 +411,10 @@ fbMoveAbsolute2.Deceleration := _stAxis.stControl.fDeceleration;
 fbMoveAbsolute(Axis := _stAxis.Axis);
 fbMoveAbsolute2(Axis := _stAxis.Axis);
 
+//Reset Execute bits
+fbMoveAbsolute.Execute := FALSE;
+fbMoveAbsolute2.Execute := FALSE;
+
 
 // STATUS bits
 mMove_MoveAbsolute.Active := fbMoveAbsolute.Active OR fbMoveAbsolute2.Active;
@@ -424,10 +429,6 @@ fbAbsMovDyn2RiseEdge(CLK:= fbMoveAbsolute2.Busy AND fbMoveAbsolute.CommandAborte
 mMove_MoveAbsolute.CommandAborted := (fbMoveAbsolute.CommandAborted AND NOT fbAbsMovDyn2RiseEdge.Q)
                                     OR (fbMoveAbsolute2.CommandAborted AND NOT fbAbsMovDyn1RiseEdge.Q);
 
-//Reset Execute bits
-fbMoveAbsolute.Execute := FALSE;
-fbMoveAbsolute2.Execute := FALSE;
-
 // Error IDs
 IF fbMoveAbsolute.Error THEN
     _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute.ErrorID; //Set the error
@@ -440,84 +441,18 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMove_MoveAbsolute_Blend" Id="{331ba351-d5bd-4254-857f-6cec5ea15d7a}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[METHOD mMove_MoveAbsolute_Blend : ST_McStatus
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
-    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
-    IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
-        fbMoveAbsolute2.Execute := TRUE;
-    END_IF
-END_IF
-
-fbMoveAbsolute.Options.EnableBlendingPosition := TRUE;
-fbMoveAbsolute.Options.BlendingPosition := _stAxis.stControl.fPosition;
-fbMoveAbsolute.Options.StartVelocity := _stAxis.stControl.fPosition;
-fbMoveAbsolute.Options.EndVelocity := ABS(_stAxis.stControl.fVelocity);
-//fbMoveAbsolute.Options. :=
-//fbMoveAbsolute.Options.StartVelocity :=
-
-fbMoveAbsolute.Position := _stAxis.stControl.fPosition;
-fbMoveAbsolute.Velocity := ABS(_stAxis.stControl.fVelocity);
-fbMoveAbsolute.Acceleration := _stAxis.stControl.fAcceleration;
-fbMoveAbsolute.Deceleration := _stAxis.stControl.fDeceleration;
-
-fbMoveAbsolute2.Position := _stAxis.stControl.fPosition;
-fbMoveAbsolute2.Velocity := ABS(_stAxis.stControl.fVelocity);
-fbMoveAbsolute2.Acceleration := _stAxis.stControl.fAcceleration;
-fbMoveAbsolute2.Deceleration := _stAxis.stControl.fDeceleration;
-
-fbMoveAbsolute(Axis := _stAxis.Axis);
-fbMoveAbsolute2(Axis := _stAxis.Axis);
-
-
-//IF NOT fbMoveAbsolute2.Busy THEN
-mMove_MoveAbsolute_Blend.Active := fbMoveAbsolute.Active OR fbMoveAbsolute2.Active;
-mMove_MoveAbsolute_Blend.Done := fbMoveAbsolute.Done OR fbMoveAbsolute2.Done;
-mMove_MoveAbsolute_Blend.Busy := fbMoveAbsolute.Busy OR fbMoveAbsolute2.Busy;
-mMove_MoveAbsolute_Blend.Error := fbMoveAbsolute.Error OR fbMoveAbsolute2.Error;
-//mMove_MoveAbsolute.ErrorID := fbMoveAbsolute.ErrorID;
-
-mMove_MoveAbsolute_Blend.CommandAborted := (fbMoveAbsolute.CommandAborted AND NOT fbMoveAbsolute2.Execute)
-                                    OR (fbMoveAbsolute2.CommandAborted AND NOT fbMoveAbsolute.Execute);
-(*
-ELSE
-    mMove_MoveAbsolute.Active := fbMoveAbsolute2.Active;
-    mMove_MoveAbsolute.Done := fbMoveAbsolute2.Done;
-    mMove_MoveAbsolute.Busy := fbMoveAbsolute2.Busy;
-    mMove_MoveAbsolute.Error := fbMoveAbsolute2.Error;
-    mMove_MoveAbsolute.ErrorID := fbMoveAbsolute2.ErrorID;
-    mMove_MoveAbsolute.CommandAborted := fbMoveAbsolute2.CommandAborted AND NOT fbMoveAbsolute.Busy;
-END_IF
-*)
-
-fbMoveAbsolute.Execute := FALSE;
-fbMoveAbsolute2.Execute := FALSE;
-
-IF fbMoveAbsolute.Error THEN
-    _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute.ErrorID; //Set the error
-    mMove_MoveAbsolute_Blend.ErrorID := fbMoveAbsolute.ErrorID;
-END_IF
-IF fbMoveAbsolute2.Error THEN
-    _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute2.ErrorID; //Set the error
-    mMove_MoveAbsolute_Blend.ErrorID := fbMoveAbsolute2.ErrorID;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mMove_MoveModulo" Id="{099b9ffd-2365-466c-9eb4-2775dca12695}" FolderPath="Move Methods\">
       <Declaration><![CDATA[METHOD mMove_MoveModulo : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveModulo THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveModulo THEN
     fbMoveModulo.Execute := _stAxis.stControl.bExecute;
     IF fbMoveModulo.Execute AND fbMoveModulo.Busy THEN
         fbMoveModulo2.Execute := TRUE;
     END_IF
 END_IF
 
+// Parameters
 fbMoveModulo.Position := _stAxis.stControl.fPosition;
 fbMoveModulo.Velocity := ABS(_stAxis.stControl.fVelocity);
 fbMoveModulo.Acceleration := _stAxis.stControl.fAcceleration;
@@ -528,33 +463,33 @@ fbMoveModulo2.Velocity := ABS(_stAxis.stControl.fVelocity);
 fbMoveModulo2.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveModulo2.Deceleration := _stAxis.stControl.fDeceleration;
 
+// Call both move absolute FB
 fbMoveModulo(Axis := _stAxis.Axis);
 fbMoveModulo.Execute := FALSE;
 fbMoveModulo2(Axis := _stAxis.Axis);
 fbMoveModulo2.Execute := FALSE;
 
-IF NOT fbMoveModulo2.Busy THEN
-    mMove_MoveModulo.Active := fbMoveModulo.Active;
-    mMove_MoveModulo.Done := fbMoveModulo.Done;
-    mMove_MoveModulo.Busy := fbMoveModulo.Busy;
-    mMove_MoveModulo.Error := fbMoveModulo.Error;
-    mMove_MoveModulo.ErrorID := fbMoveModulo.ErrorID;
-    mMove_MoveModulo.CommandAborted := fbMoveModulo.CommandAborted;
-ELSE
-    mMove_MoveModulo.Active := fbMoveModulo2.Active;
-    mMove_MoveModulo.Done := fbMoveModulo2.Done;
-    mMove_MoveModulo.Busy := fbMoveModulo2.Busy;
-    mMove_MoveModulo.Error := fbMoveModulo2.Error;
-    mMove_MoveModulo.ErrorID := fbMoveModulo2.ErrorID;
-    mMove_MoveModulo.CommandAborted := fbMoveModulo2.CommandAborted;
-END_IF
+// Status bits
+mMove_MoveModulo.Active := fbMoveModulo.Active OR fbMoveModulo2.Active;
+mMove_MoveModulo.Done := fbMoveModulo.Done OR fbMoveModulo2.Done;
+mMove_MoveModulo.Busy := fbMoveModulo.Busy OR fbMoveModulo2.Busy;
+mMove_MoveModulo.Error := fbMoveModulo.Error OR fbMoveModulo2.Error;
 
+// Capture the CommandAborted for first scan if the other absolute move overtakes the current
+fbModMovDyn1RiseEdge(CLK:= fbMoveModulo.Busy AND fbMoveModulo2.CommandAborted, Q=>);
+fbModMovDyn2RiseEdge(CLK:= fbMoveModulo2.Busy AND fbMoveModulo.CommandAborted, Q=>);
+mMove_MoveModulo.CommandAborted := (fbMoveModulo.CommandAborted AND NOT fbModMovDyn2RiseEdge.Q)
+                                    OR (fbMoveModulo2.CommandAborted AND NOT fbModMovDyn1RiseEdge.Q);
+
+// Error IDs
 IF fbMoveModulo.Error THEN
     _stAxis.stError.nMoveModuloErrorID := fbMoveModulo.ErrorID; //Set the error
+    mMove_MoveModulo.ErrorID := fbMoveModulo.ErrorID;
 END_IF
 
 IF fbMoveModulo2.Error THEN
     _stAxis.stError.nMoveModuloErrorID := fbMoveModulo2.ErrorID; //Set the error
+    mMove_MoveModulo.ErrorID := fbMoveModulo2.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
@@ -566,9 +501,6 @@ END_IF
         <ST><![CDATA[
 IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
     fbMoveRelative.Execute := _stAxis.stControl.bExecute;
-    IF fbMoveRelative.Execute AND fbMoveRelative.Busy THEN
-        fbMoveRelative2.Execute := TRUE;
-    END_IF
 END_IF
 
 fbMoveRelative.Distance := _stAxis.stControl.fPosition;
@@ -576,37 +508,18 @@ fbMoveRelative.Velocity := ABS(_stAxis.stControl.fVelocity);
 fbMoveRelative.Acceleration := _stAxis.stControl.fAcceleration;
 fbMoveRelative.Deceleration := _stAxis.stControl.fDeceleration;
 
-fbMoveRelative2.Distance := _stAxis.stControl.fPosition;
-fbMoveRelative2.Velocity := ABS(_stAxis.stControl.fVelocity);
-fbMoveRelative2.Acceleration := _stAxis.stControl.fAcceleration;
-fbMoveRelative2.Deceleration := _stAxis.stControl.fDeceleration;
-
 fbMoveRelative(Axis := _stAxis.Axis);
 fbMoveRelative.Execute := FALSE;
-fbMoveRelative2(Axis := _stAxis.Axis);
-fbMoveRelative2.Execute := FALSE;
 
-IF NOT fbMoveRelative2.Busy THEN
-    mMove_MoveRelative.Active := fbMoveRelative.Active;
-    mMove_MoveRelative.Done := fbMoveRelative.Done;
-    mMove_MoveRelative.Busy := fbMoveRelative.Busy;
-    mMove_MoveRelative.Error := fbMoveRelative.Error;
-    mMove_MoveRelative.ErrorID := fbMoveRelative.ErrorID;
-    mMove_MoveRelative.CommandAborted := fbMoveRelative.CommandAborted;
-ELSE
-    mMove_MoveRelative.Active := fbMoveRelative2.Active;
-    mMove_MoveRelative.Done := fbMoveRelative2.Done;
-    mMove_MoveRelative.Busy := fbMoveRelative2.Busy;
-    mMove_MoveRelative.Error := fbMoveRelative2.Error;
-    mMove_MoveRelative.ErrorID := fbMoveRelative2.ErrorID;
-    mMove_MoveRelative.CommandAborted := fbMoveRelative2.CommandAborted;
-END_IF
+mMove_MoveRelative.Active := fbMoveRelative.Active;
+mMove_MoveRelative.Done := fbMoveRelative.Done;
+mMove_MoveRelative.Busy := fbMoveRelative.Busy;
+mMove_MoveRelative.Error := fbMoveRelative.Error;
+mMove_MoveRelative.ErrorID := fbMoveRelative.ErrorID;
+mMove_MoveRelative.CommandAborted := fbMoveRelative.CommandAborted;
 
 IF fbMoveRelative.Error THEN
     _stAxis.stError.nMoveRelativeErrorID := fbMoveRelative.ErrorID; //Set the error
-END_IF
-IF fbMoveRelative2.Error THEN
-    _stAxis.stError.nMoveRelativeErrorID := fbMoveRelative2.ErrorID; //Set the error
 END_IF
 ]]></ST>
       </Implementation>
