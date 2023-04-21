@@ -336,8 +336,6 @@ mControl_Reset.Busy := fbReset.Busy;
 mControl_Reset.Done := fbReset.Done;
 mControl_Reset.Error := fbReset.Error;
 mControl_Reset.ErrorID := fbReset.ErrorID;
-mControl_Reset.Active := FALSE;
-mControl_Reset.CommandAborted := FALSE;
 
 IF fbReset.Error THEN
     _stAxis.stError.nResetErrorID := fbReset.ErrorID; //Set the error
@@ -738,8 +736,10 @@ END_IF
 
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
+
 fbWriteParameter(Axis := _stAxis.Axis);
 fbWriteParameter.Execute := FALSE;
+
 mParameters_WriteParameter.Busy := fbWriteParameter.Busy;
 mParameters_WriteParameter.Done := fbWriteParameter.Done;
 mParameters_WriteParameter.Error := fbWriteParameter.Error;
@@ -927,10 +927,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-fbExecuteRTrig(CLK := _stAxis.stControl.bExecute OR _stAxis.stControl.bStop OR _stAxis.stControl.bHalt);
+fbExecuteRTrig(CLK := _stAxis.stControl.bExecute);
 IF fbExecuteRTrig.Q THEN
     _stAxis.stStatus.bDone := FALSE;
-    _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandAborted := FALSE;
 
     //On a new motion command, clear the errorID
