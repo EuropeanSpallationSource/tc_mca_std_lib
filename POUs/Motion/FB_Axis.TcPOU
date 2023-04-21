@@ -321,8 +321,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbReset.Execute := _stAxis.stControl.bReset;
+        <ST><![CDATA[fbReset.Execute := _stAxis.stControl.bReset;
 
 fbReset(Axis := _stAxis.Axis);
 IF fbReset.Done THEN
@@ -345,7 +344,7 @@ IF fbReset.Error THEN
 END_IF
 
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
-IF fbResetFinishedRiseEdge.Q THEN
+IF fbResetFinishedRiseEdge.Q OR fbReset.Done THEN
     _stAxis.stControl.bReset := FALSE;
 END_IF
 ]]></ST>
@@ -361,12 +360,12 @@ fbHalt.Execute := _stAxis.stControl.bHalt;
 
 fbHalt(Axis := _stAxis.Axis);
 
-mMove_Halt.Busy := fbHalt.Busy;
-mMove_Halt.Done := fbHalt.Done;
+//mMove_Halt.Busy := fbHalt.Busy;
+//mMove_Halt.Done := fbHalt.Done;
 mMove_Halt.Error := fbHalt.Error;
 mMove_Halt.ErrorID := fbHalt.ErrorID;
 mMove_Halt.Active := fbHalt.Active;
-mMove_Halt.CommandAborted := fbHalt.CommandAborted;
+//mMove_Halt.CommandAborted := fbHalt.CommandAborted;
 
 IF fbHalt.Error THEN
     _stAxis.stError.nHaltErrorID := fbHalt.ErrorID; //Set the error
