@@ -326,8 +326,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbReset.Execute := _stAxis.stControl.bReset;
+        <ST><![CDATA[fbReset.Execute := _stAxis.stControl.bReset;
 
 fbReset(Axis := _stAxis.Axis);
 IF fbReset.Done THEN
@@ -342,15 +341,13 @@ mControl_Reset.Busy := fbReset.Busy;
 mControl_Reset.Done := fbReset.Done;
 mControl_Reset.Error := fbReset.Error;
 mControl_Reset.ErrorID := fbReset.ErrorID;
-mControl_Reset.Active := FALSE;
-mControl_Reset.CommandAborted := FALSE;
 
 IF fbReset.Error THEN
     _stAxis.stError.nResetErrorID := fbReset.ErrorID; //Set the error
 END_IF
 
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
-IF fbResetFinishedRiseEdge.Q THEN
+IF fbResetFinishedRiseEdge.Q OR fbReset.Done THEN
     _stAxis.stControl.bReset := FALSE;
 END_IF
 ]]></ST>
@@ -379,7 +376,7 @@ END_IF
 
 //Execution of fbHalt ended
 fbHaltFinishedRiseEdge(CLK:=fbHalt.Done OR fbHalt.Error OR fbHalt.CommandAborted);
-IF fbHaltFinishedRiseEdge.Q THEN
+IF fbHaltFinishedRiseEdge.Q OR fbHalt.Done OR fbHalt.CommandAborted THEN
     _stAxis.stControl.bHalt := FALSE;
 END_IF
 ]]></ST>
@@ -744,8 +741,10 @@ END_IF
 
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
+
 fbWriteParameter(Axis := _stAxis.Axis);
 fbWriteParameter.Execute := FALSE;
+
 mParameters_WriteParameter.Busy := fbWriteParameter.Busy;
 mParameters_WriteParameter.Done := fbWriteParameter.Done;
 mParameters_WriteParameter.Error := fbWriteParameter.Error;
@@ -789,7 +788,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -805,7 +804,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -825,7 +824,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
@@ -933,10 +932,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-fbExecuteRTrig(CLK := _stAxis.stControl.bExecute OR _stAxis.stControl.bStop OR _stAxis.stControl.bHalt);
+fbExecuteRTrig(CLK := _stAxis.stControl.bExecute);
 IF fbExecuteRTrig.Q THEN
     _stAxis.stStatus.bDone := FALSE;
-    _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandAborted := FALSE;
 
     //On a new motion command, clear the errorID
