@@ -290,11 +290,11 @@ fbHomeDirect(
     Parameter := stHomingParameter,
     Execute := bDetectionFB_Execute,
     SetPosition := fHomePosition,
-    Done => bDetectionFB_Done,
-    Busy => bDetectionFB_Busy,
-    CommandAborted => bDetectionFB_CommandAborted,
-    Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID);
+    Done => bDone,
+    Busy => bBusy,
+    CommandAborted => bCommandAborted,
+    Error => bError,
+    ErrorID => nErrorID);
 ]]></ST>
       </Implementation>
     </Action>
