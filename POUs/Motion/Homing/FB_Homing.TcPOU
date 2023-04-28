@@ -216,6 +216,11 @@ CASE eHomingState OF
             bDetectionFB_Execute := FALSE;
             fRecordedPositionLatched := fRecordedPosition;
             IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                bBusy := fbHomeDirect.Busy;
+                bDone := fbHomeDirect.Done;
+                bCommandAborted := fbHomeDirect.CommandAborted;
+                bError := fbHomeDirect.Error;
+                nErrorId := fbHomeDirect.ErrorID;
                 eHomingState := eWaitForRequest;
             ELSE
                 eHomingState := eSetPos;
@@ -290,11 +295,11 @@ fbHomeDirect(
     Parameter := stHomingParameter,
     Execute := bDetectionFB_Execute,
     SetPosition := fHomePosition,
-    Done => bDone,
-    Busy => bBusy,
-    CommandAborted => bCommandAborted,
-    Error => bError,
-    ErrorID => nErrorID);
+    Done => bDetectionFB_Done,
+    Busy => bDetectionFB_Busy,
+    CommandAborted => bDetectionFB_CommandAborted,
+    Error => bDetectionFB_Error,
+    ErrorID => nDetectionFB_ErrorID);
 ]]></ST>
       </Implementation>
     </Action>
