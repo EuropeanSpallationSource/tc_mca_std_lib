@@ -6,6 +6,7 @@ STRUCT
     Done: BOOL;
     Busy: BOOL;
     Active: BOOL;
+    InVelocity: BOOL;
     CommandAborted: BOOL;
     Error: BOOL;
     ErrorID: UDINT;

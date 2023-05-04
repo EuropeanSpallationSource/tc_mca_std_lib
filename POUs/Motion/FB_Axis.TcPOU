@@ -83,6 +83,8 @@ VAR
     fbDoneRTrig: R_TRIG;
     fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
+    fbInVelocityRTrig: R_TRIG;
+    fbInVelocityFTrig: F_TRIG;
     fbExecuteRTrig: R_TRIG;
     fbStopFinishedRiseEdge: R_TRIG;
     fbHaltFinishedRiseEdge: R_TRIG;
@@ -247,7 +249,12 @@ END_IF
 fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
-fbHome(Axis := _stAxis.Axis, bLimitBwd := _stAxis.stInputs.bLimitBwd, bLimitFwd := _stAxis.stInputs.bLimitFwd, bHomeSensor := _stAxis.stInputs.bHomeSensor);
+fbHome(
+    Axis := _stAxis.Axis,
+    bLimitBwd := _stAxis.stInputs.bLimitBwd,
+    bLimitFwd := _stAxis.stInputs.bLimitFwd,
+    bHomeSensor := _stAxis.stInputs.bHomeSensor,
+    stConfig := _stAxis.stConfig);
 fbHome.bExecute := FALSE;
 
 mControl_Home.Busy := fbHome.bBusy;
@@ -325,8 +332,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbReset.Execute := _stAxis.stControl.bReset;
+        <ST><![CDATA[fbReset.Execute := _stAxis.stControl.bReset;
 
 fbReset(Axis := _stAxis.Axis);
 IF fbReset.Done THEN
@@ -341,15 +347,13 @@ mControl_Reset.Busy := fbReset.Busy;
 mControl_Reset.Done := fbReset.Done;
 mControl_Reset.Error := fbReset.Error;
 mControl_Reset.ErrorID := fbReset.ErrorID;
-mControl_Reset.Active := FALSE;
-mControl_Reset.CommandAborted := FALSE;
 
 IF fbReset.Error THEN
     _stAxis.stError.nResetErrorID := fbReset.ErrorID; //Set the error
 END_IF
 
 fbResetFinishedRiseEdge(CLK:=fbReset.Done OR fbReset.Error);
-IF fbResetFinishedRiseEdge.Q THEN
+IF fbResetFinishedRiseEdge.Q OR fbReset.Done THEN
     _stAxis.stControl.bReset := FALSE;
 END_IF
 ]]></ST>
@@ -378,7 +382,7 @@ END_IF
 
 //Execution of fbHalt ended
 fbHaltFinishedRiseEdge(CLK:=fbHalt.Done OR fbHalt.Error OR fbHalt.CommandAborted);
-IF fbHaltFinishedRiseEdge.Q THEN
+IF fbHaltFinishedRiseEdge.Q OR fbHalt.Done OR fbHalt.CommandAborted THEN
     _stAxis.stControl.bHalt := FALSE;
 END_IF
 ]]></ST>
@@ -542,7 +546,7 @@ fbMoveVelocity(Axis := _stAxis.Axis);
 fbMoveVelocity.Execute:= FALSE;
 
 mMove_MoveVelocity.Active := fbMoveVelocity.Active;
-mMove_MoveVelocity.Done := fbMoveVelocity.InVelocity;
+mMove_MoveVelocity.InVelocity := fbMoveVelocity.InVelocity;
 mMove_MoveVelocity.Busy := fbMoveVelocity.Busy;
 mMove_MoveVelocity.Error := fbMoveVelocity.Error;
 mMove_MoveVelocity.ErrorID := fbMoveVelocity.ErrorID;
@@ -793,8 +797,10 @@ END_IF
 
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
+
 fbWriteParameter(Axis := _stAxis.Axis);
 fbWriteParameter.Execute := FALSE;
+
 mParameters_WriteParameter.Busy := fbWriteParameter.Busy;
 mParameters_WriteParameter.Done := fbWriteParameter.Done;
 mParameters_WriteParameter.Error := fbWriteParameter.Error;
@@ -825,7 +831,7 @@ _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
-_stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled OR _stAxis.Axis.Status.ErrorStop);
+_stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 ]]></ST>
       </Implementation>
     </Method>
@@ -838,7 +844,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -854,7 +860,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -874,7 +880,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
@@ -911,6 +917,30 @@ ELSIF fbErrorRTrig.Q THEN
                 _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
             END_IF
         END_FOR
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatus_InVelocity" Id="{cb2cb841-8a3f-432f-b52b-8fb0cc3fb6da}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[METHOD mStatus_InVelocity : BOOL
+VAR
+    i: UINT;
+    tmpInVelocity: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+    tmpInVelocity := astMcStatus[i]^.InVelocity OR tmpInVelocity;
+END_FOR
+//fbInVelocityRTrig(CLK:= mStatus_InVelocity());
+fbInVelocityRTrig(CLK := tmpInVelocity);
+IF fbInVelocityRTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := TRUE;
+END_IF
+
+fbInVelocityFTrig(CLK := _stAxis.Axis.Status.ContinuousMotion);
+IF fbInVelocityFTrig.Q THEN
+    _stAxis.stStatus.bInVelocity := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
@@ -958,10 +988,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-fbExecuteRTrig(CLK := _stAxis.stControl.bExecute OR _stAxis.stControl.bStop OR _stAxis.stControl.bHalt);
+fbExecuteRTrig(CLK := _stAxis.stControl.bExecute);
 IF fbExecuteRTrig.Q THEN
     _stAxis.stStatus.bDone := FALSE;
-    _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandAborted := FALSE;
 
     //On a new motion command, clear the errorID
@@ -1014,6 +1043,7 @@ stMcStatusHome := mControl_Home();
 mStatus_NewCommand();
 mStatus_Done();
 mStatus_Error();
+mStatus_InVelocity();
 mStatus_CommandAborted();
 _stAxis.stStatus.bBusy := mStatus_Busy();
 

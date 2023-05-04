@@ -20,14 +20,7 @@
 
 # Configure the following in TwinCAT:
 # TOOLS -> Options -> TwinCAT -> PLC Environment -> Write Options -> Separate LineIDS : True
-# To activate the filter, run
-#git config filter.ignoreNetId.clean 'sed -b -f filter/ignoreTargetNetId.sed'
+# To activate the filter, copy the following line into a git bash,
+# remove the hash and run it:
 #git config filter.cleanCode.clean   'sed -b -f filter/cleanCode.sed'
 
-# the check if the filter is there by running
-# cat ../../../../.git/modules/solution/tc_project_app/tc_pils/tc_pils_generic/config
-
-#[filter "ignoreNetId"]
-#        clean = sed -f filter/ignoreTargetNetId.sed
-#[filter "cleanCode"]
-#        clean = sed -f filter/cleanCode.sed

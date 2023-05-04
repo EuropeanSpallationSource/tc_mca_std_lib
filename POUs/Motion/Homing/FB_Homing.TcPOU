@@ -13,6 +13,7 @@ VAR_INPUT
     eHomeSeq: E_HomingRoutines;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
+    stConfig: ST_AxisConfig;
 END_VAR
 VAR_OUTPUT
     bDone : BOOL;
@@ -27,6 +28,7 @@ VAR
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulseDetection: MC_StepReferencePulseDetection;
+    fbStepBlockLagDetection: MC_StepBlockLagBasedDetection;
     fbHomeDirect: MC_HomeDirect;
     fbSetPos: MC_SetPosition;
     fbFinishHoming: MC_FinishHoming;
@@ -42,6 +44,7 @@ VAR
     stDetectDirection: MC_Home_Direction;
     stHomingParameter: MC_HomingParameter;
     stOptions: ST_Home_Options4;
+    stOptions3: ST_Home_Options3;
     fbVelocityToCam: MC_ReadParameter;
     fVelocityToCam: LREAL;
     fbVelocityFromCam: MC_ReadParameter;
@@ -105,7 +108,10 @@ ELSIF fbVelocityFromCam.Error THEN
 END_IF
 
 //Common function blocks used for all routines
-stOptions.DisableDriveAccess:=TRUE;
+stOptions.DisableDriveAccess := stConfig.bDisableDriveAccess;
+
+//For StepBlockLagDetection
+stOptions3.DisableDriveAccess := stConfig.bDisableDriveAccess;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(
@@ -147,6 +153,10 @@ CASE eHomeSeq OF
     E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
         actHomeToEncPulse();
 
+    E_HomingRoutines.eHomeToBlock_Bwd,
+    E_HomingRoutines.eHomeToBlock_Fwd:
+        actHomeToBlock();
+
     E_HomingRoutines.eHomeDirect:
         actHomeDirect();
 END_CASE
@@ -169,6 +179,7 @@ CASE eHomingState OF
             fbStepLimitSwitchDetection.Execute := FALSE;
             fbStepAbsoluteSwitchDetection.Execute := FALSE;
             fbStepReferencePulseDetection.Execute := FALSE;
+            fbStepBlockLagDetection.Execute := FALSE;
             fbHomeDirect.Execute := FALSE;
             fbSetPos.Execute := FALSE;
             fbFinishHoming.Execute := FALSE;
@@ -205,6 +216,11 @@ CASE eHomingState OF
             bDetectionFB_Execute := FALSE;
             fRecordedPositionLatched := fRecordedPosition;
             IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                bBusy := fbHomeDirect.Busy;
+                bDone := fbHomeDirect.Done;
+                bCommandAborted := fbHomeDirect.CommandAborted;
+                bError := fbHomeDirect.Error;
+                nErrorId := fbHomeDirect.ErrorID;
                 eHomingState := eWaitForRequest;
             ELSE
                 eHomingState := eSetPos;
@@ -284,6 +300,41 @@ fbHomeDirect(
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
     ErrorID => nDetectionFB_ErrorID);
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actHomeToBlock" Id="{7f7639d4-e566-498f-a828-fad9ed0e5d95}">
+      <Implementation>
+        <ST><![CDATA[CASE eHomeSeq OF
+    E_HomingRoutines.eHomeToBlock_Bwd:
+        stDetectDirection:= mcNegativeDirection;
+        fbFinishHoming.Distance := fHomeFinishDistance;
+    E_HomingRoutines.eHomeToBlock_Fwd:
+        stDetectDirection:= mcPositiveDirection;
+        fbFinishHoming.Distance := -fHomeFinishDistance;
+END_CASE
+
+bViaLimitSwitch:=FALSE;
+
+fbStepBlockLagDetection(
+    Axis := Axis,
+    Execute := bDetectionFB_Execute,
+    Parameter := stHomingParameter,
+    Direction := stDetectDirection,
+    Velocity := fVelocityFromCam, //Maximum travel velocity (>0).
+    DetectionVelocityLimit := stConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
+    DetectionVelocityTime := stConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
+    TimeLimit :=  stConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
+    DistanceLimit := stConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+    TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+    LagLimit := stConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+    Options := stOptions3,
+    Done => bDetectionFB_Done,
+    Busy => bDetectionFB_Busy,
+    CommandAborted => bDetectionFB_CommandAborted,
+    Error => bDetectionFB_Error,
+    ErrorID => nDetectionFB_ErrorID,
+    RecordedPosition => fRecordedPosition);
 ]]></ST>
       </Implementation>
     </Action>

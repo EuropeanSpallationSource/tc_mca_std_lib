@@ -322,6 +322,20 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"eHomeToBlock_Bwd"</v>
+              <v n="TextDefault">"Home To Block Bwd Lag Based"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"eHomeToBlock_Fwd"</v>
+              <v n="TextDefault">"Home To Block Fwd Lag Based"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">"eHomeDirect"</v>
               <v n="TextDefault">"Home Direct"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -406,6 +420,13 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"bInVelocity"</v>
+              <v n="TextDefault">"Target Velocity reached"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -431,4 +452,3 @@
     </XmlArchive>
   </TextList>
 </TcPlcObject>
-
