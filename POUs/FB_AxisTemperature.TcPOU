@@ -9,26 +9,29 @@ VAR_INPUT
     nTempScalingFactor: INT := 10;
 END_VAR
 VAR_OUTPUT
-    fCurrentTemperature: LREAL;
+    fTemperatureValue: LREAL;
+    bError: BOOL;
 END_VAR
 VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[//Scale nTempPT100
-fCurrentTemperature := nTempPT100 / nTempScalingFactor;
+fTemperatureValue := nTempPT100 / nTempScalingFactor;
 
-IF fCurrentTemperature = 850.0  THEN //No temperature sensor connected
+IF fTemperatureValue = 850.0  THEN //No temperature sensor connected
     GVL.astAxes[nAxisID].stStatus.fActTemperature := 0;
     GVL.astAxes[nAxisID].stControl.bTemperatureDisable := FALSE;
+    bError := TRUE;
 ELSE
-    GVL.astAxes[nAxisID].stStatus.fActTemperature := fCurrentTemperature;
+    GVL.astAxes[nAxisID].stStatus.fActTemperature := fTemperatureValue;
+    bError := FALSE;
 END_IF
 
-IF fMaxTemperature = 0 OR fCurrentTemperature < fMaxTemperature THEN
+IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
     GVL.astAxes[nAxisID].stControl.bTemperatureDisable := FALSE;
-ELSIF fCurrentTemperature >= fMaxTemperature THEN
-    GVL.astAxes[nAxisID].stControl.bTemperatureDisable := FALSE;
+ELSIF fTemperatureValue >= fMaxTemperature THEN
+    GVL.astAxes[nAxisID].stControl.bTemperatureDisable := TRUE;
 END_IF
 ]]></ST>
     </Implementation>
