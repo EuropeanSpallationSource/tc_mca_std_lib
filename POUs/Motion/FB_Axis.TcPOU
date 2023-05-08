@@ -303,7 +303,7 @@ END_FOR
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.bTemperatureDisable THEN
+        <ST><![CDATA[IF _stAxis.stStatus.bHighTempAxisDisabled THEN
     fbPower.Enable := FALSE;
 ELSE
 fbPower.Enable := _stAxis.stControl.bEnable;

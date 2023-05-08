@@ -21,7 +21,7 @@ fTemperatureValue := nTempPT100 / nTempScalingFactor;
 
 IF fTemperatureValue = 850.0  THEN //No temperature sensor connected
     GVL.astAxes[nAxisID].stStatus.fActTemperature := 0;
-    GVL.astAxes[nAxisID].stControl.bTemperatureDisable := FALSE;
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
     bError := TRUE;
 ELSE
     GVL.astAxes[nAxisID].stStatus.fActTemperature := fTemperatureValue;
@@ -29,9 +29,9 @@ ELSE
 END_IF
 
 IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
-    GVL.astAxes[nAxisID].stControl.bTemperatureDisable := FALSE;
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
 ELSIF fTemperatureValue >= fMaxTemperature THEN
-    GVL.astAxes[nAxisID].stControl.bTemperatureDisable := TRUE;
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
 END_IF
 ]]></ST>
     </Implementation>
