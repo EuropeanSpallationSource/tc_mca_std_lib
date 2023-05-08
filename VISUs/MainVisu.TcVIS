@@ -9031,12 +9031,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
-GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=-ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
-GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bHalt:= TRUE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -9046,10 +9044,12 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bHalt:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
+GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=-ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
+GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -9232,12 +9232,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                  <v>OnMouseDown</v>
+                  <v>OnMouseUp</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
-GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
-GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bHalt:= TRUE;"</v>
                     </o>
                   </a>
                   <v>OnMouseClick</v>
@@ -9247,10 +9245,12 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
 "</v>
                     </o>
                   </a>
-                  <v>OnMouseUp</v>
+                  <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.bHalt:= TRUE;"</v>
+                      <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
+GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
+GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -17447,6 +17447,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v n="Value">""</v>
                     </o>
                     <o>
+                      <v n="Id">2114174855L</v>
+                      <v n="Value">"''"</v>
+                    </o>
+                    <o>
                       <v n="Id">823443203L</v>
                       <v n="Value">"951"</v>
                     </o>
@@ -19941,7 +19945,7 @@ GVL.astAxes[MAIN.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                             <a n="MessagesToSave" et="CompilerMessage" />
                             <v n="Name">"E_AxisParameters"</v>
                           </o>
-                          <v n="SignatureId">899</v>
+                          <v n="SignatureId">900</v>
                           <v n="ScopeId">-1</v>
                           <v n="Compiled">false</v>
                         </o>
@@ -20431,10 +20435,10 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>13be6eec-7fc2-4282-abbf-b24b2da58ba8</v>
-                <v>FB_Exit</v>
-                <v>95930a16-400d-44f0-9930-76888846236f</v>
                 <v>FB_Reinit</v>
                 <v>639e5dca-e06b-4c9e-8c1b-9a863c3c34f7</v>
+                <v>FB_Exit</v>
+                <v>95930a16-400d-44f0-9930-76888846236f</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{a9f37f15-844b-497f-805b-d8708d84591d}</v>
