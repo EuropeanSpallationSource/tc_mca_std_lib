@@ -18,7 +18,7 @@ VAR
     //Outputs
     bFan1 AT %Q*: BOOL := TRUE;
     bFan2 AT %Q*: BOOL := TRUE;
-    bDCSupplyLED AT %Q*: BOOL;
+    bDCSupplyLED AT %Q*: BOOL := TRUE;
     bAcknowledgeLED AT %Q*: BOOL;
     bStatusLED AT %Q*: BOOL;
     bWarningLED AT %Q*: BOOL;
@@ -338,4 +338,3 @@ END_IF
     </Method>
   </POU>
 </TcPlcObject>
-
