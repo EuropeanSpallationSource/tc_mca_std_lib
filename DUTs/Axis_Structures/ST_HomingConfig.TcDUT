@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_HomingConfig" Id="{3d76c549-a0ce-44cf-a676-89d7d365d0b2}">
+    <Declaration><![CDATA[TYPE ST_HomingConfig :
+STRUCT
+    //Hardware signals
+	eLimitSwitchSignalSource: E_SignalSource := SignalSource_Default;
+	eLimitSwitchSignalProbe: E_TouchProbe := PlcEvent;
+	eRefSwitchSignalSource: E_SignalSource := SignalSource_Default;
+	eRefSwitchSignalProbe: E_TouchProbe := PlcEvent;
+	bRefSwitchSignalLevel: BOOL; //Home Senosr signal
+	eEncPulseSignalSource: E_SignalSource := SignalSource_ZeroPulse;
+	eEncPulseSignalProbe: E_TouchProbe  := TouchProbe1;
+
+	//Hardware Signals
+    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    stLimitSwitchSignal: MC_Ref_Signal_Ref;
+    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    stRefSwitchSignal: MC_Ref_Signal_Ref;
+    stEncPulseSignal: MC_Ref_Signal_Ref;
+    //Homing parameters
+    stPreparationDirection: MC_Home_Direction;
+    stDetectDirection: MC_Home_Direction;
+    stHomingParameter: MC_HomingParameter;
+    stOptions: ST_Home_Options4;
+    stOptions3: ST_Home_Options3;
+    fbVelocityToCam: MC_ReadParameter;
+    fVelocityToCam: LREAL;
+    fbVelocityFromCam: MC_ReadParameter;
+    fVelocityFromCam: LREAL;
+	
+	//General Advanced Homing Configuration
+    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
+    tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
+    fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+    fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+
+    //Homing Configuration for Step Block
+    fDetectionVelocityLimit: LREAL; // Velocity that must be fallen below for the DetectionVelocityTime in order to detect driving against the fixed stop.
+    tDetectionVelocityTime: TIME; // Time for detecting the velocity undershoot when driving against the fixed stop.
+    fLagLimit: LREAL; // Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
