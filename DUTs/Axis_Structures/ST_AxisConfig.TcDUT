@@ -14,21 +14,13 @@ STRUCT
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
+	//Advanced homing parameters
+	stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
+	
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
     fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
     fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
-
-    //General Advanced Homing Configuration
-    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
-    tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
-    fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
-    fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-
-    //Homing Configuration for Step Block
-    fDetectionVelocityLimit: LREAL; // Velocity that must be fallen below for the DetectionVelocityTime in order to detect driving against the fixed stop.
-    tDetectionVelocityTime: TIME; // Time for detecting the velocity undershoot when driving against the fixed stop.
-    fLagLimit: LREAL; // Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
 
     //Multi master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
