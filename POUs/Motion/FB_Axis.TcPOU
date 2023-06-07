@@ -309,8 +309,12 @@ END_FOR
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[IF _stAxis.stStatus.bHighTempAxisDisabled THEN
+    fbPower.Enable := FALSE;
+ELSE
 fbPower.Enable := _stAxis.stControl.bEnable;
+END_IF
+
 fbPower.Enable_Negative := (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
 fbPower.Enable_Positive := (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
 fbPower.Override := _stAxis.stConfig.fOverride;
