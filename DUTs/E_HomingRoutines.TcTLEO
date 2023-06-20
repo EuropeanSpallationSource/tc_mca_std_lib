@@ -45,7 +45,7 @@ TYPE E_HomingRoutines :
 
     //9X: Software
     eHomeDirect := 90 //Set position directly to fHomePosition
-) := eNoHoming;
+) := eHomeDirect;
 END_TYPE
 ]]></Declaration>
     <XmlArchive>
