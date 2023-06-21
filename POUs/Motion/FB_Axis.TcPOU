@@ -240,7 +240,10 @@ END_IF
       <Declaration><![CDATA[METHOD mControl_Home : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[IF _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming THEN
+    _stAxis.stStatus.bHomed := TRUE;
+END_IF
+
 IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome THEN
     fbHome.bExecute := _stAxis.stControl.bExecute;
 END_IF
