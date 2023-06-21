@@ -5,7 +5,7 @@
     // Semantic version in machine-readable format.
     // Update it and commit it immediatly before setting a tag
     nVersionMajor: UINT := 2; // Major Version
-    nVersionMinor: UINT := 1; // Minor Version
+    nVersionMinor: UINT := 2; // Minor Version
     nVersionPatch: UINT := 0; // Patch level
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; //Array of ST_AxisStruct for holding axis parameters and controls
     astPneumaticAxes: ARRAY [1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF ST_PneumaticAxisStruct; //Array of ST_PneumaticAxisStruct for holding pneumatic axis parameters and controls
