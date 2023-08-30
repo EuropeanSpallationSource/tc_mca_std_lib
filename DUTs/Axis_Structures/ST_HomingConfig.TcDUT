@@ -4,15 +4,15 @@
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
-	eLimitSwitchSignalSource: E_SignalSource := SignalSource_Default;
-	eLimitSwitchSignalProbe: E_TouchProbe := PlcEvent;
-	eRefSwitchSignalSource: E_SignalSource := SignalSource_Default;
-	eRefSwitchSignalProbe: E_TouchProbe := PlcEvent;
-	bRefSwitchSignalLevel: BOOL; //Home Senosr signal
-	eEncPulseSignalSource: E_SignalSource := SignalSource_ZeroPulse;
-	eEncPulseSignalProbe: E_TouchProbe  := TouchProbe1;
+    eLimitSwitchSignalSource: E_SignalSource := SignalSource_Default;
+    eLimitSwitchSignalProbe: E_TouchProbe := PlcEvent;
+    eRefSwitchSignalSource: E_SignalSource := SignalSource_Default;
+    eRefSwitchSignalProbe: E_TouchProbe := PlcEvent;
+    bRefSwitchSignalLevel: BOOL; //Home Senosr signal
+    eEncPulseSignalSource: E_SignalSource := SignalSource_ZeroPulse;
+    eEncPulseSignalProbe: E_TouchProbe  := TouchProbe1;
 
-	//Hardware Signals
+    //Hardware Signals
     eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stLimitSwitchSignal: MC_Ref_Signal_Ref;
     eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
@@ -28,8 +28,8 @@ STRUCT
     fVelocityToCam: LREAL;
     fbVelocityFromCam: MC_ReadParameter;
     fVelocityFromCam: LREAL;
-	
-	//General Advanced Homing Configuration
+
+    //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
     tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
