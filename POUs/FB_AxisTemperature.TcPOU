@@ -39,12 +39,14 @@ CASE eTemperatureStates OF
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         bError := TRUE;
         sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is disconnected';
+        ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
 
     eWrongConnection:
         GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         bError := TRUE;
         sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is wrongly connected, check pin connection';
+        ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
 
     eRun:
         //Scale nTempPT100
