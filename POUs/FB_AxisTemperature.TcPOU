@@ -3,36 +3,74 @@
   <POU Name="FB_AxisTemperature" Id="{dc25bdc5-b5d1-4653-9dd0-c72d7f39ce24}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_AxisTemperature
 VAR_INPUT
-    nTempPT100 AT %I*: INT;
+    bFbEnable: BOOL := FALSE;
     nAxisID: UINT;
     fMaxTemperature: LREAL := 0;
     nTempScalingFactor: INT := 10;
 END_VAR
 VAR_OUTPUT
+    bFbEnabled: BOOL;
     fTemperatureValue: LREAL;
     bError: BOOL;
+    sErrorMessage: STRING := '';
 END_VAR
 VAR
+    eTemperatureStates: (eInit := 0, eDisconnected := 1, eWrongConnection := 2, eRun := 3, eFbDisabled := 4):=0;
+    nTempPT100 AT %I*: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//Scale nTempPT100
-fTemperatureValue := nTempPT100 / nTempScalingFactor;
+      <ST><![CDATA[bFbEnabled := bFbEnable;
 
-IF fTemperatureValue = 850.0  THEN //No temperature sensor connected
-    GVL.astAxes[nAxisID].stStatus.fActTemperature := 0;
-    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
-    bError := TRUE;
-ELSE
-    GVL.astAxes[nAxisID].stStatus.fActTemperature := fTemperatureValue;
-    bError := FALSE;
-END_IF
+CASE eTemperatureStates OF
+    eInit:
+        IF NOT bFbEnabled THEN
+            eTemperatureStates := eFbDisabled;
+        ELSIF fTemperatureValue >= 85.0  THEN
+            eTemperatureStates := eDisconnected;
+        ELSIF fTemperatureValue <= -200.0  THEN
+            eTemperatureStates := eWrongConnection;
+        ELSE
+            eTemperatureStates := eRun;
+        END_IF
 
-IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
-    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
-ELSIF fTemperatureValue >= fMaxTemperature THEN
-    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
-END_IF
+    eDisconnected:
+        GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
+        GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
+        bError := TRUE;
+        sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is disconnected';
+
+    eWrongConnection:
+        GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
+        GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
+        bError := TRUE;
+        sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is wrongly connected, check pin connection';
+
+    eRun:
+        //Scale nTempPT100
+        fTemperatureValue := nTempPT100 / nTempScalingFactor;
+
+        IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
+                GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
+        ELSIF fTemperatureValue >= fMaxTemperature THEN
+            GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
+        END_IF
+        bError := FALSE;
+        sErrorMessage := '';
+
+    eFbDisabled:
+        GVL.astAxes[nAxisID].stStatus.fActTemperature := 9999.0;
+        GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
+        bError := FALSE;
+        sErrorMessage := '';
+
+        IF NOT bFbEnabled THEN
+            eTemperatureStates := eFbDisabled;
+        ELSE
+            eTemperatureStates := eInit;
+        END_IF
+
+END_CASE
 ]]></ST>
     </Implementation>
   </POU>
