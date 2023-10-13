@@ -17,7 +17,7 @@ END_VAR
 VAR
     eTemperatureStates: (eInit := 0, eDisconnected := 1, eWrongConnection := 2, eRun := 3, eFbDisabled := 4):=0;
     nTempPT100 AT %I*: INT;
-	sErrorMessageAxis: STRING;
+    sErrorMessageAxis: STRING;
 END_VAR
 ]]></Declaration>
     <Implementation>
