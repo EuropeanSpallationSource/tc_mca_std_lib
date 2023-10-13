@@ -18,8 +18,8 @@ VAR
     eTemperatureStates: (eInit := 0, eError := 1, eRun := 2, eFbDisabled := 3):=0;
     nTempPT100 AT %I*: INT;
     sErrorMessageAxis: STRING;
-	fbErrorTrig: R_TRIG;
-	fbErrorTON: TON;
+    fbErrorTrig: R_TRIG;
+    fbErrorTON: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -37,43 +37,43 @@ CASE eTemperatureStates OF
         END_IF
 
     eError:
-	 	
-		GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
+
+        GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         fbErrorTrig(clk:=bError);
-		fbErrorTON(in:=bError, PT:=T#10S);
-		bError := TRUE;
-				
-		IF fbErrorTrig.Q THEN
-			IF fTemperatureValue >= 85.0 THEN
-				sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected');
-        		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-			ELSIF fTemperatureValue <= -200.0 THEN
-        		sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections');
-        		ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-			END_IF
-		END_IF
-		
-		//Reset bError to display Error message every 10 seconds if error is still there		
-		IF fbErrorTON.Q THEN
-				bError := FALSE;
-		END_IF
-		
-		eTemperatureStates := eInit;
+        fbErrorTON(in:=bError, PT:=T#10S);
+        bError := TRUE;
+
+        IF fbErrorTrig.Q THEN
+            IF fTemperatureValue >= 85.0 THEN
+                sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected');
+                ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            ELSIF fTemperatureValue <= -200.0 THEN
+                sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections');
+                ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            END_IF
+        END_IF
+
+        //Reset bError to display Error message every 10 seconds if error is still there
+        IF fbErrorTON.Q THEN
+                bError := FALSE;
+        END_IF
+
+        eTemperatureStates := eInit;
 
     eRun:
         bError := FALSE;
         sErrorMessage := '';
-		
-		//Scale nTempPT100
+
+        //Scale nTempPT100
         fTemperatureValue := nTempPT100 / nTempScalingFactor;
         IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
                 GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
         ELSIF fTemperatureValue >= fMaxTemperature THEN
             GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         END_IF
-        
-		eTemperatureStates := eInit;
+
+        eTemperatureStates := eInit;
 
     eFbDisabled:
         GVL.astAxes[nAxisID].stStatus.fActTemperature := 9999.0;

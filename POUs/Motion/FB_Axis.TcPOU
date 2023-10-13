@@ -312,8 +312,9 @@ END_FOR
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stStatus.bHighTempAxisDisabled THEN
+        <ST><![CDATA[IF _stAxis.stControl.bEnable AND _stAxis.stStatus.bHighTempAxisDisabled THEN
     _stAxis.stControl.bEnable:= FALSE;
+    ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := 'ERROR: Cannot enable axis. Axis temperature too hot');
 END_IF
 
 fbPower.Enable := _stAxis.stControl.bEnable;
