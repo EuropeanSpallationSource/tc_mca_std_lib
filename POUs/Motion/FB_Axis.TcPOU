@@ -313,10 +313,10 @@ END_FOR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stStatus.bHighTempAxisDisabled THEN
-    fbPower.Enable := FALSE;
-ELSE
-fbPower.Enable := _stAxis.stControl.bEnable;
+    _stAxis.stControl.bEnable:= FALSE;
 END_IF
+
+fbPower.Enable := _stAxis.stControl.bEnable;
 
 fbPower.Enable_Negative := (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
 fbPower.Enable_Positive := (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
