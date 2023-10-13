@@ -12,15 +12,17 @@ VAR_OUTPUT
     bFbEnabled: BOOL;
     fTemperatureValue: LREAL;
     bError: BOOL;
-    sErrorMessage: STRING := '';
+    sErrorMessage: STRING;
 END_VAR
 VAR
     eTemperatureStates: (eInit := 0, eDisconnected := 1, eWrongConnection := 2, eRun := 3, eFbDisabled := 4):=0;
     nTempPT100 AT %I*: INT;
+	sErrorMessageAxis: STRING;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[bFbEnabled := bFbEnable;
+sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis',INT_TO_STRING(nAxisID));
 
 CASE eTemperatureStates OF
     eInit:
@@ -38,15 +40,17 @@ CASE eTemperatureStates OF
         GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         bError := TRUE;
-        sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is disconnected';
+        sErrorMessage := CONCAT(sErrorMessageAxis,'is disconnected');
         ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-
+		eTemperatureStates := eInit;
+		
     eWrongConnection:
         GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         bError := TRUE;
-        sErrorMessage := 'ERROR: Temparture sensor of axis'+INT_TO_STRING(nAxisID)+'is wrongly connected, check pin connection';
+        sErrorMessage := CONCAT(sErrorMessageAxis,'is wrongly connected, check pin connection');
         ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+		eTemperatureStates := eInit;
 
     eRun:
         //Scale nTempPT100
@@ -59,6 +63,7 @@ CASE eTemperatureStates OF
         END_IF
         bError := FALSE;
         sErrorMessage := '';
+		eTemperatureStates := eInit;
 
     eFbDisabled:
         GVL.astAxes[nAxisID].stStatus.fActTemperature := 9999.0;
