@@ -839,6 +839,7 @@ _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
+_stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
 ]]></ST>
       </Implementation>
     </Method>
@@ -906,8 +907,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
     tmpError := astMcStatus[i]^.Error OR tmpError;
 END_FOR
 
@@ -916,6 +916,8 @@ fbErrorRTrig(CLK := tmpError);
 IF _stAxis.Axis.Status.ErrorStop THEN
     _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
     _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
+ELSIF _stAxis.Axis.Status.Error THEN
+    _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
 ELSIF fbErrorRTrig.Q THEN
         //For each mcStatus
         FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
