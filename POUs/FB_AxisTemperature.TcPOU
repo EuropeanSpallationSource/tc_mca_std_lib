@@ -25,6 +25,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[bFbEnabled := bFbEnable;
 sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis',INT_TO_STRING(nAxisID));
+fbErrorTrig(clk:=bError);
 
 CASE eTemperatureStates OF
     eInit:
@@ -40,7 +41,6 @@ CASE eTemperatureStates OF
 
         GVL.astAxes[nAxisID].stStatus.fActTemperature := nTempPT100;
         GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
-        fbErrorTrig(clk:=bError);
         fbErrorTON(in:=bError, PT:=T#10S);
         bError := TRUE;
 
@@ -56,7 +56,7 @@ CASE eTemperatureStates OF
 
         //Reset bError to display Error message every 10 seconds if error is still there
         IF fbErrorTON.Q THEN
-                bError := FALSE;
+            bError := FALSE;
         END_IF
 
         eTemperatureStates := eInit;
@@ -68,7 +68,7 @@ CASE eTemperatureStates OF
         //Scale nTempPT100
         fTemperatureValue := nTempPT100 / nTempScalingFactor;
         IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
-                GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
+            GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
         ELSIF fTemperatureValue >= fMaxTemperature THEN
             GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         END_IF

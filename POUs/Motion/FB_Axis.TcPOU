@@ -310,9 +310,13 @@ END_FOR
     </Method>
     <Method Name="mControl_Power" Id="{ec195198-7712-4dec-b0e8-f4b4550a3876}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
+VAR
+    fbTemperatureDisableTrig: R_TRIG;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.bEnable AND _stAxis.stStatus.bHighTempAxisDisabled THEN
+        <ST><![CDATA[fbTemperatureDisableTrig(clk:=_stAxis.stStatus.bHighTempAxisDisabled);
+IF _stAxis.stControl.bEnable AND fbTemperatureDisableTrig.Q THEN
     _stAxis.stControl.bEnable:= FALSE;
     ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := 'ERROR: Cannot enable axis. Axis temperature too hot');
 END_IF
