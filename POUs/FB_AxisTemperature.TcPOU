@@ -8,7 +8,7 @@ VAR_INPUT
     fMaxTemperature: LREAL := 0;
     nTempScalingFactor: INT := 10;
     bSimSensorActive: BOOL := FALSE;
-    nTempSimPT100: LREAL := 0.0;
+    fTempSimPT100: LREAL := 0.0;
 END_VAR
 VAR_OUTPUT
     bFbEnabled: BOOL;
@@ -19,11 +19,12 @@ END_VAR
 VAR
     eTemperatureStates: (eInit := 0, eError := 1, eRun := 2, eFbDisabled := 3):=0;
     nTempPT100 AT %I*: INT;
+    fTemperatureScaledValue: LREAL;
     sErrorMessageAxis: STRING;
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: LREAL := 85.0;
-    fMIN_TEMP_LIMIT: LREAL := -200.0;
+    fMAX_TEMP_LIMIT: LREAL := 850.0;
+    fMIN_TEMP_LIMIT: LREAL := -2000.0;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -33,7 +34,7 @@ fbErrorTrig(clk:=bError);
 
 CASE eTemperatureStates OF
     eInit:
-        fTemperatureValue := SEL(bSimSensorActive,(nTempPT100/nTempScalingFactor),nTempSimPT100);
+        fTemperatureValue := SEL(bSimSensorActive,nTempPT100,(fTempSimPT100*10.0));
         IF NOT bFbEnabled THEN
             eTemperatureStates := eFbDisabled;
         ELSIF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
@@ -69,10 +70,12 @@ CASE eTemperatureStates OF
     eRun:
         bError := FALSE;
         sErrorMessage := '';
+        fTemperatureScaledValue := nTempPT100/nTempScalingFactor;
+        GVL.astAxes[nAxisID].stStatus.fActTemperature := SEL(bSimSensorActive,fTemperatureScaledValue,fTempSimPT100);
 
-        IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
+        IF fMaxTemperature = 0 OR GVL.astAxes[nAxisID].stStatus.fActTemperature < fMaxTemperature THEN
             GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
-        ELSIF fTemperatureValue >= fMaxTemperature THEN
+        ELSIF GVL.astAxes[nAxisID].stStatus.fActTemperature >= fMaxTemperature THEN
             GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
         END_IF
 
