@@ -7,6 +7,8 @@ VAR_INPUT
     nAxisID: UINT;
     fMaxTemperature: LREAL := 0;
     nTempScalingFactor: INT := 10;
+    bSimSensorActive: BOOL := FALSE;
+    nTempSimPT100: LREAL := 0.0;
 END_VAR
 VAR_OUTPUT
     bFbEnabled: BOOL;
@@ -20,6 +22,8 @@ VAR
     sErrorMessageAxis: STRING;
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
+    fMAX_TEMP_LIMIT: LREAL := 85.0;
+    fMIN_TEMP_LIMIT: LREAL := -200.0;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -29,9 +33,10 @@ fbErrorTrig(clk:=bError);
 
 CASE eTemperatureStates OF
     eInit:
+        fTemperatureValue := SEL(bSimSensorActive,(nTempPT100/nTempScalingFactor),nTempSimPT100);
         IF NOT bFbEnabled THEN
             eTemperatureStates := eFbDisabled;
-        ELSIF fTemperatureValue >= 85.0 OR fTemperatureValue <= -200.0 THEN
+        ELSIF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
             eTemperatureStates := eError;
         ELSE
             eTemperatureStates := eRun;
@@ -45,10 +50,10 @@ CASE eTemperatureStates OF
         bError := TRUE;
 
         IF fbErrorTrig.Q THEN
-            IF fTemperatureValue >= 85.0 THEN
+            IF fTemperatureValue >= fMAX_TEMP_LIMIT THEN
                 sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected');
                 ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-            ELSIF fTemperatureValue <= -200.0 THEN
+            ELSIF fTemperatureValue <= fMIN_TEMP_LIMIT THEN
                 sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections');
                 ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
             END_IF
@@ -65,8 +70,6 @@ CASE eTemperatureStates OF
         bError := FALSE;
         sErrorMessage := '';
 
-        //Scale nTempPT100
-        fTemperatureValue := nTempPT100 / nTempScalingFactor;
         IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
             GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
         ELSIF fTemperatureValue >= fMaxTemperature THEN
