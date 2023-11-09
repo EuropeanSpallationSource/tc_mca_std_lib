@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_V20Slit" Id="{96cc3dff-2d48-44bb-aac4-147730d312ba}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_V20Slit
+VAR_IN_OUT
+    Axis1: AXIS_REF;     // Positive blade (in global co-ordinate system): Left/port (when travelling with the beam) Y+ OR Upper Z+
+    Axis2: AXIS_REF;    // Negative blade (in global co-ordinate system): Right/starboard (when travelling with the beam) Y- OR Lower Z-
+    CenterAxis: AXIS_REF;
+    GapAxis: AXIS_REF;
+    fbAxis1: FB_DriveVirtual;
+    fbAxis2: FB_DriveVirtual;
+    fbCenterAxis:FB_DriveVirtual;
+    fbGapAxis:FB_DriveVirtual;
+    stCenter:DUT_FB_DriveVirtualIF;
+    stGap:DUT_FB_DriveVirtualIF;
+END_VAR
+VAR_INPUT
+    bEnable: BOOL;
+    bReset: BOOL;
+    bCollisionAvoidanceOFF: BOOL;    // True = Slits are allowed to overlap and cannot collide
+    fMinGap: LREAL;    // units = mm
+    fSlowZone: LREAL;    // zone in between slit blades where velocity will be reduced, units = mm
+END_VAR
+VAR_OUTPUT
+    bError: BOOL;
+END_VAR
+VAR
+    fbSetPos1: MC_SetPosition;
+    fbSetPos2: MC_SetPosition;
+    fbGearInMultiMaster_1: MC_GearInMultiMaster;
+    fbGearInMultiMaster_2: MC_GearInMultiMaster;
+    fbGearOut1: MC_GearOut;
+    fbGearOut2: MC_GearOut;
+    EmptyAxis1: AXIS_REF; // Needed for master axis 3 in MC_GearInMultiMaster
+    EmptyAxis2: AXIS_REF; // Needed for master axis 4 in MC_GearInMultiMaster
+    fbPower1: MC_Power;
+    fbPower2: MC_Power;
+    fbCoupleToggleOn1: R_TRIG;
+    fbCoupleToggleOn2: R_TRIG;
+    fbToggleOn1: R_TRIG;
+    fbToggleOn2: R_TRIG;
+    fbInitTimer: TON;        // Timer to give axes/encoders time to initialise before enabling
+    nSlitState: INT := -2;
+    bReverseCalc: BOOL:=FALSE;
+    bEnableGearing: BOOL:=FALSE;
+    bDisableGearing: BOOL:=FALSE;
+    fSetposAxis1: LREAL;
+    fSetposAxis2: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(**********************************************************************************
+This function block must come after the FB_DriveVirtual instances of the slit axes.
+Otherwise the collision avoidance inhibit feed bits in FB_Power won't be set properly.
+It's not ideal to have two FB_Power blocks in the same project for the same axis but
+there isn't a better way.
+**********************************************************************************)
+
+// Center interface parameter transfer
+//fbCenterAxis.En:=fbCenterAxis.En;
+fbCenterAxis.bEnable:=stCenter.bEnable;
+fbCenterAxis.bReset:=stCenter.bReset;
+fbCenterAxis.bExecute:=stCenter.bExecute;
+fbCenterAxis.nCommand:=stCenter.nCommand;
+fbCenterAxis.nCmdData:=stCenter.nCmdData;
+fbCenterAxis.fVelocity:=stCenter.fVelocity;
+fbCenterAxis.fPosition:=stCenter.fPosition;
+fbCenterAxis.fAcceleration:=stCenter.fAcceleration;
+fbCenterAxis.fDeceleration:=stCenter.fDeceleration;
+fbCenterAxis.bJogFwd:=stCenter.bJogFwd;
+fbCenterAxis.bJogBwd:=stCenter.bJogBwd;
+//fbCenterAxis.bLimitFwd:=fbCenterAxis.bLimitFwd;
+//fbCenterAxis.bLimitFwd:=fbCenterAxis.bLimitFwd;
+fbCenterAxis.fOverride:=stCenter.fOverride;
+//fbCenterAxis.bHomeSensor:=stCenter.bHomeSensor;
+fbCenterAxis.fHomePosition:=stCenter.fHomePosition;
+fbCenterAxis.nHomeRevOffset:=stCenter.nHomeRevOffset;
+fbCenterAxis.MasterAxis:=stCenter.MasterAxis;
+
+stCenter.EnO:=fbCenterAxis.EnO;
+stCenter.bEnabled:=fbCenterAxis.bEnabled;
+//stCenter.bBusy:=fbCenterAxis.bBusy;
+stCenter.bBusy:=fbCenterAxis.status.HasJob OR fbAxis1.status.HasJob OR fbAxis2.status.HasJob;
+stCenter.bDone:=fbCenterAxis.bDone AND fbAxis1.status.HasBeenStopped AND fbAxis2.status.HasBeenStopped;
+stCenter.bError:=fbCenterAxis.bError;
+//stCenter.bHomed:=fbCenterAxis.bHomed;
+stCenter.bHomed:=TRUE;//Hardcoded for EPICS purposes
+stCenter.nErrorId:=fbCenterAxis.nErrorId;
+stCenter.nMotionAxisID:=fbCenterAxis.nMotionAxisID;
+stCenter.Status:=fbCenterAxis.Status;
+//stCenter.fActPosition:=fbCenterAxis.fActPosition;
+stCenter.fActPosition:=(Axis1.NcToPlc.ActPos+Axis2.NcToPlc.ActPos)/2;
+stCenter.fActVelocity:=fbCenterAxis.fActVelocity;
+stCenter.fActDiff:=fbCenterAxis.fActDiff;
+stCenter.sErrorMessage:=fbCenterAxis.sErrorMessage;
+stCenter.stAxisStatus:=fbCenterAxis.stAxisStatus;
+
+//Status struct for EPICS communication
+//These parameters are transferred as a whole struct, included here just in case something should be changed
+(*stCenter.stAxisStatus.bEnable:=bEnable;
+stCenter.stAxisStatus.bEnabled:=bEnabled;
+stCenter.stAxisStatus.bError:=bError;
+stCenter.stAxisStatus.bExecute:=bExecute;
+stCenter.stAxisStatus.bHomeSensor:=bHomeSensor;
+stCenter.stAxisStatus.bJogBwd:=bJogBwd;
+stCenter.stAxisStatus.bJogFwd:=bJogFwd;
+stCenter.stAxisStatus.bLimitBwd:=bLimitBwd;
+stCenter.stAxisStatus.bLimitFwd:=bLimitFwd;
+stCenter.stAxisStatus.bReset:=bReset;
+stCenter.stAxisStatus.fAcceleration:=fAcceleration;
+stCenter.stAxisStatus.fActDiff:=fActDiff;*)
+//stCenter.stAxisStatus.fActPosition:=fActPosition;
+stCenter.stAxisStatus.fActPosition:=(Axis1.NcToPlc.ActPos+Axis2.NcToPlc.ActPos)/2;
+(*stCenter.stAxisStatus.fActVelocity:=fActVelocity;
+stCenter.stAxisStatus.fDeceleration:=fDeceleration;
+stCenter.stAxisStatus.fOverride:=fOverride;
+stCenter.stAxisStatus.fPosition:=fPosition;
+stCenter.stAxisStatus.fVelocity:=fVelocity;
+stCenter.stAxisStatus.nCmdData:=nCmdData;
+stCenter.stAxisStatus.nCommand:=nCommand;
+stCenter.stAxisStatus.nErrorId:=nErrorId;*)
+stCenter.stAxisStatus.bBusy:=fbCenterAxis.status.HasJob OR fbAxis1.status.HasJob OR fbAxis2.status.HasJob;
+stCenter.stAxisStatus.bHomed:=TRUE;//Hardcoded for EPICS purposes
+
+//**********************************************************************************//
+
+// Gap interface parameter transfer
+//fbGapAxis.En:=stGap.EN;
+fbGapAxis.bEnable:=stGap.bEnable;
+fbGapAxis.bReset:=stGap.bReset;
+fbGapAxis.bExecute:=stGap.bExecute;
+fbGapAxis.nCommand:=stGap.nCommand;
+fbGapAxis.nCmdData:=stGap.nCmdData;
+fbGapAxis.fVelocity:=stGap.fVelocity;
+fbGapAxis.fPosition:=stGap.fPosition;
+fbGapAxis.fAcceleration:=stGap.fAcceleration;
+fbGapAxis.fDeceleration:=stGap.fDeceleration;
+fbGapAxis.bJogFwd:=stGap.bJogFwd;
+fbGapAxis.bJogBwd:=stGap.bJogBwd;
+//fbGapAxis.bLimitFwd:=stGap.bLimitFwd;
+//fbGapAxis.bLimitFwd:=stGap.bLimitFwd;
+fbGapAxis.fOverride:=stGap.fOverride;
+//fbGapAxis.bHomeSensor:=stGap.bHomeSensor;
+fbGapAxis.fHomePosition:=stGap.fHomePosition;
+fbGapAxis.nHomeRevOffset:=stGap.nHomeRevOffset;
+fbGapAxis.MasterAxis:=stGap.MasterAxis;
+
+stGap.EnO:=fbGapAxis.EnO;
+stGap.bEnabled:=fbGapAxis.bEnabled;
+//stGap.bBusy:=fbGapAxis.bBusy;
+stGap.bBusy:=fbGapAxis.status.HasJob OR fbAxis1.status.HasJob OR fbAxis2.status.HasJob;
+stGap.bDone:=fbGapAxis.bDone AND fbAxis1.status.HasBeenStopped AND fbAxis2.status.HasBeenStopped;
+stGap.bError:=fbGapAxis.bError;
+//stGap.bHomed:=fbGapAxis.bHomed;
+stGap.bHomed:=TRUE;//Hardcoded for EPICS purposes
+stGap.nErrorId:=fbGapAxis.nErrorId;
+stGap.nMotionAxisID:=fbGapAxis.nMotionAxisID;
+stGap.Status:=fbGapAxis.Status;
+//stGap.fActPosition:=fbGapAxis.fActPosition;
+stGap.fActPosition:=Axis1.NcToPlc.ActPos-Axis2.NcToPlc.ActPos;
+stGap.fActVelocity:=fbGapAxis.fActVelocity;
+stGap.fActDiff:=fbGapAxis.fActDiff;
+stGap.sErrorMessage:=fbGapAxis.sErrorMessage;
+stGap.stAxisStatus:=fbGapAxis.stAxisStatus;
+
+//Status struct for EPICS communication
+//These parameters are transferred as a whole struct, included here just in case something should be changed
+(*stGap.stAxisStatus.bEnable:=bEnable;
+stGap.stAxisStatus.bEnabled:=bEnabled;
+stGap.stAxisStatus.bError:=bError;
+stGap.stAxisStatus.bExecute:=bExecute;
+stGap.stAxisStatus.bHomeSensor:=bHomeSensor;
+stGap.stAxisStatus.bJogBwd:=bJogBwd;
+stGap.stAxisStatus.bJogFwd:=bJogFwd;
+stGap.stAxisStatus.bLimitBwd:=bLimitBwd;
+stGap.stAxisStatus.bLimitFwd:=bLimitFwd;
+stGap.stAxisStatus.bReset:=bReset;
+stGap.stAxisStatus.fAcceleration:=fAcceleration;
+stGap.stAxisStatus.fActDiff:=fActDiff;*)
+//stGap.stAxisStatus.fActPosition:=fActPosition;
+stGap.stAxisStatus.fActPosition:=Axis1.NcToPlc.ActPos-Axis2.NcToPlc.ActPos;
+(*stGap.stAxisStatus.fActVelocity:=fActVelocity;
+stGap.stAxisStatus.fDeceleration:=fDeceleration;
+stGap.stAxisStatus.fOverride:=fOverride;
+stGap.stAxisStatus.fPosition:=fPosition;
+stGap.stAxisStatus.fVelocity:=fVelocity;
+stGap.stAxisStatus.nCmdData:=nCmdData;
+stGap.stAxisStatus.nCommand:=nCommand;
+stGap.stAxisStatus.nErrorId:=nErrorId;*)
+stGap.stAxisStatus.bBusy:=fbGapAxis.status.HasJob OR fbAxis1.status.HasJob OR fbAxis2.status.HasJob;
+stGap.stAxisStatus.bHomed:=TRUE;//Hardcoded for EPICS purposes
+
+//**********************************************************************************//
+
+// Collision avoidance
+IF NOT bCollisionAvoidanceOFF THEN
+    IF Axis1.Nctoplc.SetPos <= (Axis2.NcToPlc.SetPos+fSlowZone) AND Axis1.Status.NegativeDirection THEN
+        IF Axis1.Nctoplc.SetPos <= Axis2.NcToPlc.SetPos THEN
+            fbAxis1.fOverride:=0;
+        ELSE
+            fbAxis1.fOverride:=ABS(Axis1.Nctoplc.SetPos-Axis2.NcToPlc.SetPos)/fSlowZone*100;
+        END_IF
+    ELSE
+        fbAxis1.fOverride:=100;
+    END_IF
+
+    IF Axis2.Nctoplc.SetPos >= (Axis1.NcToPlc.SetPos-fSlowZone) AND Axis2.Status.PositiveDirection THEN
+        IF Axis2.Nctoplc.SetPos >= Axis1.NcToPlc.SetPos THEN
+            fbAxis2.fOverride:=0;
+        ELSE
+            fbAxis2.fOverride:=ABS(Axis1.NcToPlc.SetPos-Axis2.Nctoplc.SetPos)/fSlowZone*100;
+        END_IF
+    ELSE
+        fbAxis2.fOverride:=100;
+    END_IF
+
+    IF Axis1.Nctoplc.SetPos <= (fMinGap+Axis2.NcToPlc.ActPos) THEN
+        fbPower1(
+        Axis:= Axis1,
+        Enable:= Axis1.PlcToNc.ControlDWord.0,
+        Enable_Positive:= Axis1.PlcToNc.ControlDWord.1,
+        Enable_Negative:= FALSE,
+        Override:= ,
+        BufferMode:= ,
+        Options:= ,
+        Status=> ,
+        Busy=> ,
+        Active=> ,
+        Error=> ,
+        ErrorID=> );
+    END_IF
+
+    IF Axis2.Nctoplc.SetPos >= (fMinGap+Axis1.NcToPlc.ActPos) THEN
+        fbPower2(
+        Axis:= Axis2,
+        Enable:= Axis2.PlcToNc.ControlDWord.0,
+        Enable_Positive:= FALSE,
+        Enable_Negative:= Axis2.PlcToNc.ControlDWord.2,
+        Override:= ,
+        BufferMode:= ,
+        Options:= ,
+        Status=> ,
+        Busy=> ,
+        Active=> ,
+        Error=> ,
+        ErrorID=> );
+    END_IF
+ELSE
+    fbAxis1.fOverride:=100;
+    fbAxis2.fOverride:=100;
+END_IF
+
+//**********************************************************************************//
+
+fbToggleOn1(CLK:= fbCenterAxis.bExecute);
+fbToggleOn2(CLK:= fbGapAxis.bExecute);
+
+IF bEnable AND (fbToggleOn1.Q OR fbToggleOn2.Q) THEN
+    nSlitState:=2;
+    bReverseCalc:=FALSE;
+    bDisableGearing:=FALSE;
+END_IF
+
+IF bEnable AND NOT bReset AND NOT fbAxis1.bReset AND NOT fbAxis2.bReset AND NOT stGap.bReset AND NOT stCenter.bReset THEN
+    CASE nSlitState OF
+        -2:
+            IF GapAxis.Status.Operational AND CenterAxis.Status.Operational THEN
+                stGap.bEnable:=TRUE;
+                stCenter.bEnable:=TRUE;
+                nSlitState:=nSlitState+1;
+            END_IF
+        -1:
+            fbInitTimer(IN:= TRUE, PT:= T#1S, Q=> , ET=> );
+            IF fbInitTimer.Q THEN
+                fbAxis1.bEnable:=TRUE;
+                fbAxis2.bEnable:=TRUE;
+                nSlitState:=nSlitState+1;
+            END_IF
+        0:
+            bReverseCalc:=TRUE;
+            bDisableGearing:=FALSE;
+            nSlitState:=nSlitState+1;
+        1:
+            IF fbSetPos1.Done AND fbSetPos2.Done THEN
+                bReverseCalc:=FALSE;
+                nSlitState:=nSlitState-1;
+            END_IF
+        2:
+            bEnableGearing:=TRUE;
+            nSlitState:=nSlitState+1;
+        3:
+            IF fbGearInMultiMaster_1.InGear AND fbGearInMultiMaster_2.InGear THEN
+                nSlitState:=nSlitState+1;
+            END_IF
+        4:
+            IF CenterAxis.Status.HasJob OR GapAxis.Status.HasJob THEN
+                nSlitState:=nSlitState+1;
+            END_IF
+        5:
+            IF CenterAxis.Status.InTargetPosition AND GapAxis.Status.InTargetPosition AND Axis1.Status.NotMoving AND Axis2.Status.NotMoving THEN
+                bEnableGearing:=FALSE;
+                nSlitState:=nSlitState+1;
+            END_IF
+        6:
+            bDisableGearing:=TRUE;
+            nSlitState:=nSlitState+1;
+        7:
+            bDisableGearing:=FALSE;
+            nSlitState:=0;
+    END_CASE
+ELSE
+    bEnableGearing:=FALSE;
+    bDisableGearing:=TRUE;
+    nSlitState:=-2;
+END_IF
+
+// Remove inaccuracies from floating point numbers - not required for logic of code
+fSetposAxis1:=LINT_TO_LREAL(LREAL_TO_LINT(Axis1.NcToPlc.SetPos*10000))/10000;
+fSetposAxis2:=LINT_TO_LREAL(LREAL_TO_LINT(Axis2.NcToPlc.SetPos*10000))/10000;
+
+fbSetPos1(
+    Axis:= CenterAxis,
+    Execute:= bReverseCalc,
+    Position:= (fSetposAxis1+fSetposAxis2)/2,
+    Mode:= ,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+
+fbSetPos2(
+    Axis:= GapAxis,
+    Execute:= bReverseCalc,
+    Position:= fSetposAxis1-fSetposAxis2,
+    Mode:= ,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+
+fbGearInMultiMaster_1(
+    Master1:= CenterAxis,
+    Master2:= GapAxis,
+    Master3:= EmptyAxis1,
+    Master4:= EmptyAxis2,
+    Slave:= Axis1,
+    Enable:= bEnableGearing,
+    GearRatio1:= 1,
+    GearRatio2:= 0.5,
+    GearRatio3:= ,
+    GearRatio4:= ,
+    Acceleration:= ,
+    Deceleration:= ,
+    Jerk:= ,
+    BufferMode:= ,
+    Options:= ,
+    InGear=> ,
+    Busy=> ,
+    Active=> ,
+    CommandAborted=> ,
+    Error=> ,
+    ErrorID=> );
+
+fbGearInMultiMaster_2(
+    Master1:= CenterAxis,
+    Master2:= GapAxis,
+    Master3:= EmptyAxis1,
+    Master4:= EmptyAxis2,
+    Slave:= Axis2,
+    Enable:= bEnableGearing,
+    GearRatio1:= 1,
+    GearRatio2:= -0.5,
+    GearRatio3:= ,
+    GearRatio4:= ,
+    Acceleration:= ,
+    Deceleration:= ,
+    Jerk:= ,
+    BufferMode:= ,
+    Options:= ,
+    InGear=> ,
+    Busy=> ,
+    Active=> ,
+    CommandAborted=> ,
+    Error=> ,
+    ErrorID=> );
+
+fbGearOut1(
+    Slave:= Axis1,
+    Execute:= bDisableGearing,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+
+fbGearOut2(
+    Slave:= Axis2,
+    Execute:= bDisableGearing,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
