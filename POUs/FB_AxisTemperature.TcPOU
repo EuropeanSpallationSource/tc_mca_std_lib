@@ -31,7 +31,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[bFbEnabled := bFbEnable;
-sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis',INT_TO_STRING(nAxisID));
+sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis',UINT_TO_STRING(nAxisID));
 fbErrorTrig(clk:=bError);
 
 CASE eTemperatureStates OF
