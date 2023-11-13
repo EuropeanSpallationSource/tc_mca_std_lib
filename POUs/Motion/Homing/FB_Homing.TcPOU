@@ -108,10 +108,10 @@ ELSIF fbVelocityFromCam.Error THEN
 END_IF
 
 //Common function blocks used for all routines
-stOptions.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
 
 //For StepBlockLagDetection
-stOptions3.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(
@@ -322,12 +322,12 @@ fbStepBlockLagDetection(
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
     Velocity := fVelocityFromCam, //Maximum travel velocity (>0).
-    DetectionVelocityLimit := stConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
-    DetectionVelocityTime := stConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
-    TimeLimit :=  stConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
-    DistanceLimit := stConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
-    TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-    LagLimit := stConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+    DetectionVelocityLimit := stConfig.stHomingConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
+    DetectionVelocityTime := stConfig.stHomingConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
+    TimeLimit :=  stConfig.stHomingConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
+    DistanceLimit := stConfig.stHomingConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+    TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+    LagLimit := stConfig.stHomingConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
     Options := stOptions3,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
@@ -403,7 +403,7 @@ fbStepLimitSwitchDetection(
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    LimitSwitchMode := eLimitSwitchMode,
+    LimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
     Velocity := fVelocityFromCam,
     Options := stOptions,
@@ -435,7 +435,7 @@ fbStepAbsoluteSwitchDetection(
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    SwitchMode := eRefSwitchMode,
+    SwitchMode := stConfig.stHomingConfig.eRefSwitchMode,
     ReferenceSignal := stRefSwitchSignal,
     Velocity := fVelocityFromCam,
     PositiveLimitSwitch := NOT(bLimitFwd),
