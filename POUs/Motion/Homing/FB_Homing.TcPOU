@@ -450,5 +450,29 @@ fbStepAbsoluteSwitchDetection(
 ]]></ST>
       </Implementation>
     </Action>
+    <LineIds Name="FB_Homing">
+      <LineId Id="3" Count="217" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Homing.actHomeDirect">
+      <LineId Id="2" Count="12" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Homing.actHomeToBlock">
+      <LineId Id="2" Count="29" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Homing.actHomeToEncPulse">
+      <LineId Id="2" Count="38" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Homing.actHomeToLimit">
+      <LineId Id="2" Count="28" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Homing.actHomeToRef">
+      <LineId Id="2" Count="28" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
