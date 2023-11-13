@@ -65,7 +65,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[           
+      <ST><![CDATA[
 //Hardware signals
 stLimitSwitchSignal.SignalSource := SignalSource_Default;
 stLimitSwitchSignal.TouchProbe := PlcEvent;
