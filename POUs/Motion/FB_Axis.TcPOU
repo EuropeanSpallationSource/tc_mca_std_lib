@@ -345,8 +345,23 @@ fbReset(Axis := _stAxis.Axis);
 IF fbReset.Done THEN
     _stAxis.stStatus.bError := FALSE;
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        //If there's an error present propagate
+        //Reset ST_Status error ID
         _stAxis.stStatus.nErrorID := 0;
+        //Reset St_AxisError error IDs
+        _stAxis.stError.nPowerErrorID := 0;
+        _stAxis.stError.nMoveAbsoluteErrorID := 0;
+        _stAxis.stError.nMoveRelativeErrorID := 0;
+        _stAxis.stError.nMoveVelocityErrorID := 0;
+        _stAxis.stError.nMoveModuloErrorID := 0;
+        _stAxis.stError.nHomeErrorID := 0;
+        _stAxis.stError.nHaltErrorID := 0;
+        _stAxis.stError.nResetErrorID := 0;
+        _stAxis.stError.nStopErrorID := 0;
+        _stAxis.stError.nGearInMultiMasterErrorID := 0;
+        _stAxis.stError.nGearOutErrorID := 0;
+        _stAxis.stError.nWriteParameterErrorId := 0;
+        _stAxis.stError.nReadParameterErrorId := 0;
+        _stAxis.stError.nNCErrorID := 0;
     END_FOR
 END_IF
 
@@ -788,7 +803,7 @@ mParameters_ReadParameter.Error := fbReadParameter.Error;
 mParameters_ReadParameter.ErrorID := fbReadParameter.ErrorID;
 
 IF fbReadParameter.Error THEN
-    _stAxis.stError.fbReadParameterErrorId := fbReadParameter.ErrorID;
+    _stAxis.stError.nReadParameterErrorId := fbReadParameter.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
@@ -814,7 +829,7 @@ mParameters_WriteParameter.Error := fbWriteParameter.Error;
 mParameters_WriteParameter.ErrorID := fbWriteParameter.ErrorID;
 
 IF fbWriteParameter.Error THEN
-    _stAxis.stError.fbWriteParameterErrorId := fbWriteParameter.ErrorID;
+    _stAxis.stError.nWriteParameterErrorId := fbWriteParameter.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
@@ -839,6 +854,7 @@ _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
+_stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
 ]]></ST>
       </Implementation>
     </Method>
@@ -906,8 +922,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
     tmpError := astMcStatus[i]^.Error OR tmpError;
 END_FOR
 
@@ -916,6 +931,8 @@ fbErrorRTrig(CLK := tmpError);
 IF _stAxis.Axis.Status.ErrorStop THEN
     _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
     _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
+ELSIF _stAxis.Axis.Status.Error THEN
+    _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
 ELSIF fbErrorRTrig.Q THEN
         //For each mcStatus
         FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
