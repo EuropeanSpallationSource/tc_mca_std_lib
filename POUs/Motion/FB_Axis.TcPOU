@@ -314,7 +314,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stConfig.bEnableTemperatureDisable THEN
+        <ST><![CDATA[IF _stAxis.stConfig.bHighTempDisablingActive THEN
     IF mControl_TemperatureDisable() THEN
         _stAxis.stControl.bEnable:= FALSE;
     END_IF
@@ -382,7 +382,7 @@ END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: LREAL := 85.0;
+    fMAX_TEMP_LIMIT: LREAL := 850.0;
     fMIN_TEMP_LIMIT: LREAL := -200.0;
     bError: BOOL := FALSE;
 END_VAR
@@ -392,9 +392,10 @@ END_VAR
 sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(nAxisId));
 fbErrorTrig(clk:=bError);
 fTemperatureScaledValue := _stAxis.stInputs.nTempPT100/_stAxis.stConfig.nTempScalingFactor;
-fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fSimulatedTemperature);
-fbErrorTON(in:=bError, PT:=T#10S);
+fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
+fbErrorTON(in:=bError, PT:=T#30S);
 
+//Check for disconnection or wrongly connected errors
 IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
     _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
@@ -410,7 +411,7 @@ IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT 
         END_IF
     END_IF
 
-    //Reset bError to display Error message every 10 seconds if error is still there
+    //Reset bError to display Error message every 30 seconds if error is still there
     IF fbErrorTON.Q THEN
         bError := FALSE;
     END_IF
@@ -419,14 +420,15 @@ IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT 
     RETURN;
 END_IF
 
-IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature THEN
+//Check scaled tempearture value agianst max. allowed temperature
+IF fTemperatureValue < _stAXis.stConfig.fMaxAllowedTemperature THEN
     bError := FALSE;
     sErrorMessage := '';
     _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     mControl_TemperatureDisable := FALSE;
     RETURN;
-ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
+ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxAllowedTemperature THEN
     bError := TRUE;
     _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;

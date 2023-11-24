@@ -15,8 +15,8 @@ STRUCT
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
     //Temperature disable configuration
-    bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
-    fMaxTemperature: LREAL := 0;
+    bHighTempDisablingActive: BOOL := FALSE; //Enable disabling axis because of high temperature
+    fMaxAllowedTemperature: LREAL := 0;
     nTempScalingFactor: INT := 10;
 
     //Read and Write parameters
