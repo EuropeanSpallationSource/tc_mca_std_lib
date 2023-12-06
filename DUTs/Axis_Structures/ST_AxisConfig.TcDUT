@@ -16,8 +16,8 @@ STRUCT
 
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
-    fMaxTemperature: LREAL := 0;
-    nTempScalingFactor: INT := 10;
+    fMaxTemperature: LREAL := 0.0;
+    fTempScalingFactor: REAL := 10.0;
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
