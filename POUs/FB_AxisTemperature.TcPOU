@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_AxisTemperature" Id="{dc25bdc5-b5d1-4653-9dd0-c72d7f39ce24}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AxisTemperature
+VAR_INPUT
+    nTempPT100 AT %I*: INT;
+    nAxisID: UINT;
+    fMaxTemperature: LREAL := 0;
+    nTempScalingFactor: INT := 10;
+END_VAR
+VAR_OUTPUT
+    fTemperatureValue: LREAL;
+    bError: BOOL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Scale nTempPT100
+fTemperatureValue := nTempPT100 / nTempScalingFactor;
+
+IF fTemperatureValue = 850.0  THEN //No temperature sensor connected
+    GVL.astAxes[nAxisID].stStatus.fActTemperature := 0;
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
+    bError := TRUE;
+ELSE
+    GVL.astAxes[nAxisID].stStatus.fActTemperature := fTemperatureValue;
+    bError := FALSE;
+END_IF
+
+IF fMaxTemperature = 0 OR fTemperatureValue < fMaxTemperature THEN
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := FALSE;
+ELSIF fTemperatureValue >= fMaxTemperature THEN
+    GVL.astAxes[nAxisID].stStatus.bHighTempAxisDisabled := TRUE;
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
