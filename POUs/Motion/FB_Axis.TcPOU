@@ -394,7 +394,7 @@ sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(n
 fbErrorTrig(clk:=bError);
 fTemperatureScaledValue := INT_TO_LREAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorTON(in:=bError, PT:=T#10S);
+fbErrorTON(in:=bError, PT:=T#30S);
 
 IF bEnableTemperatureDisable THEN
     //Check for disconnection or wrongly connected errors
