@@ -383,7 +383,7 @@ END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: LREAL := 85.0;
+    fMAX_TEMP_LIMIT: LREAL := 850.0;
     fMIN_TEMP_LIMIT: LREAL := -200.0;
     bError: BOOL := FALSE;
 END_VAR
@@ -397,7 +397,9 @@ fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue
 fbErrorTON(in:=bError, PT:=T#10S);
 
 IF bEnableTemperatureDisable THEN
+    //Check for disconnection or wrongly connected errors
     IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
+        _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
         bError := TRUE;
 
@@ -420,6 +422,7 @@ IF bEnableTemperatureDisable THEN
         RETURN;
     END_IF
 
+    //Check scaled tempearture value agianst max. allowed temperature
     IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature THEN
         bError := FALSE;
         sErrorMessage := '';

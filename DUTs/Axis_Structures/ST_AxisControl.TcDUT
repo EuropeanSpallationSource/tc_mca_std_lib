@@ -22,7 +22,7 @@ STRUCT
     fDeceleration: LREAL;
     fPosition: LREAL; //The position to move to for an absolute move and the amount to move in a relative move
     bHWMaskActive: BOOL := FALSE;
-    fSimulatedTemperature: LREAL := 0.0;
+    fMaskedTemperature: LREAL := 0.0;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
