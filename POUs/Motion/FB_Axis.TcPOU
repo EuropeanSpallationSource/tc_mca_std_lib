@@ -393,7 +393,7 @@ END_VAR
 sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(nAxisId));
 fbErrorTrig(clk:=bError);
 fTemperatureScaledValue := INT_TO_LREAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
-fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fSimulatedTemperature);
+fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
 fbErrorTON(in:=bError, PT:=T#10S);
 
 IF bEnableTemperatureDisable THEN
