@@ -34,7 +34,7 @@ VAR
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
     //Hardware Signals
-    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    eLocalLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stLimitSwitchSignal: MC_Ref_Signal_Ref;
     eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stRefSwitchSignal: MC_Ref_Signal_Ref;
@@ -65,8 +65,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-//Hardware signals
+      <ST><![CDATA[//Hardware signals
 stLimitSwitchSignal.SignalSource := SignalSource_Default;
 stLimitSwitchSignal.TouchProbe := PlcEvent;
 stRefSwitchSignal.SignalSource := SignalSource_Default;
@@ -118,7 +117,7 @@ fbStepLimitSwitchPreparation(
     Axis := Axis,
     Parameter := stHomingParameter,
     Direction := stPreparationDirection,
-    LimitSwitchMode:= eLimitSwitchMode,
+    LimitSwitchMode:= mcRisingEdge,
     LimitSwitchSignal:= stLimitSwitchSignal,
     Velocity := fVelocityToCam);
 
@@ -392,23 +391,27 @@ CASE eHomeSeq OF
         stLimitSwitchSignal.Level := NOT(bLimitBwd);
         stDetectDirection:= mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
+        eLocalLimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode;
         bViaLimitSwitch:=FALSE;
     E_HomingRoutines.eHomeToLimit_Fwd:
         stLimitSwitchSignal.Level := NOT(bLimitFwd);
         stDetectDirection:= mcPositiveDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
+        eLocalLimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode;
         bViaLimitSwitch:=FALSE;
     E_HomingRoutines.eHomeToLimit_Bwd_2Speeds:
         stDetectDirection := mcPositiveDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
         stPreparationDirection := mcNegativeDirection;
         stLimitSwitchSignal.Level := NOT(bLimitBwd);
+        eLocalLimitSwitchMode := mcFAllingEdge;
         bViaLimitSwitch := TRUE;
     E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
         stDetectDirection := mcNegativeDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
         stPreparationDirection := mcPositiveDirection;
         stLimitSwitchSignal.Level := NOT(bLimitFwd);
+        eLocalLimitSwitchMode := mcFAllingEdge;
         bViaLimitSwitch := TRUE;
 END_CASE
 
@@ -418,7 +421,7 @@ fbStepLimitSwitchDetection(
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    LimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode,
+    LimitSwitchMode := eLocalLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
     Velocity := fVelocityFromCam,
     Options := stOptions,
