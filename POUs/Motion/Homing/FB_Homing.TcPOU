@@ -140,7 +140,9 @@ fbAbortHoming(
 //ACTs contain function blocks custom to each individual routine for the detection stage
 CASE eHomeSeq OF
     E_HomingRoutines.eHomeToLimit_Bwd,
-    E_HomingRoutines.eHomeToLimit_Fwd:
+    E_HomingRoutines.eHomeToLimit_Fwd,
+    E_HomingRoutines.eHomeToLimit_Bwd_2Speeds,
+    E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
         actHomeToLimit();
 
     E_HomingRoutines.eHomeToRef_Bwd,
@@ -390,12 +392,25 @@ CASE eHomeSeq OF
         stLimitSwitchSignal.Level := NOT(bLimitBwd);
         stDetectDirection:= mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
+        bViaLimitSwitch:=FALSE;
     E_HomingRoutines.eHomeToLimit_Fwd:
         stLimitSwitchSignal.Level := NOT(bLimitFwd);
         stDetectDirection:= mcPositiveDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
+        bViaLimitSwitch:=FALSE;
+    E_HomingRoutines.eHomeToLimit_Bwd_2Speeds:
+        stDetectDirection := mcPositiveDirection;
+        fbFinishHoming.Distance := fHomeFinishDistance;
+        stPreparationDirection := mcNegativeDirection;
+        stLimitSwitchSignal.Level := NOT(bLimitBwd);
+        bViaLimitSwitch := TRUE;
+    E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
+        stDetectDirection := mcNegativeDirection;
+        fbFinishHoming.Distance := -fHomeFinishDistance;
+        stPreparationDirection := mcPositiveDirection;
+        stLimitSwitchSignal.Level := NOT(bLimitFwd);
+        bViaLimitSwitch := TRUE;
 END_CASE
-bViaLimitSwitch:=FALSE;
 
 fbStepLimitSwitchDetection.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
 fbStepLimitSwitchDetection(
