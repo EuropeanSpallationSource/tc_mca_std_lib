@@ -12,8 +12,8 @@ STRUCT
 
     //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
-	bEnableLagErrorDetection :BOOL := FALSE; // Keep the lag error detection active during homing
-	bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
+    bEnableLagErrorDetection :BOOL := FALSE; // Keep the lag error detection active during homing
+    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
     tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
     fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
