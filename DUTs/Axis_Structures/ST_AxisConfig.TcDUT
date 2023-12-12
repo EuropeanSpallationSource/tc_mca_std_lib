@@ -14,6 +14,11 @@ STRUCT
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
 
+    //Temperature disable configuration
+    bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
+    fMaxTemperature: LREAL := 0.0;
+    fTempScalingFactor: REAL := 10.0;
+
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
     fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
