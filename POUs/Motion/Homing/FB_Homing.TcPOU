@@ -109,9 +109,11 @@ END_IF
 
 //Common function blocks used for all routines
 stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
 
 //For StepBlockLagDetection
 stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(
