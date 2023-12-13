@@ -295,42 +295,42 @@
             </o>
             <o>
               <v n="TextID">"eHomeToEncPulse_Bwd"</v>
-              <v n="TextDefault">"Enc Pulse Bwd "</v>
+              <v n="TextDefault">"Enc Index Bwd "</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"eHomeToEncPulse_Fwd"</v>
-              <v n="TextDefault">"Enc Pulse Fwd"</v>
+              <v n="TextDefault">"Enc Index Fwd"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"eHomeToEncPulse_viaBwdLimit"</v>
-              <v n="TextDefault">"Enc Pulse via Bwd Limit"</v>
+              <v n="TextDefault">"Enc Index via Bwd Limit"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"eHomeToEncPulse_viaFwdLimit"</v>
-              <v n="TextDefault">"Enc Pulse via Fwd Limit"</v>
+              <v n="TextDefault">"Enc Index via Fwd Limit"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"eHomeToBlock_Bwd"</v>
-              <v n="TextDefault">"Home To Block Bwd Lag Based"</v>
+              <v n="TextDefault">"Home To Block Bwd"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"eHomeToBlock_Fwd"</v>
-              <v n="TextDefault">"Home To Block Fwd Lag Based"</v>
+              <v n="TextDefault">"Home To Block Fwd"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -421,7 +421,35 @@
             </o>
             <o>
               <v n="TextID">"bInVelocity"</v>
-              <v n="TextDefault">"Target Velocity reached"</v>
+              <v n="TextDefault">"Target velocity reached"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bHighTempAxisDisabled"</v>
+              <v n="TextDefault">"Disabled by High Temp "</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"fActualTemp"</v>
+              <v n="TextDefault">"Actual Temp"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bHWMaskActive"</v>
+              <v n="TextDefault">"HW Mask Active"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bMoving"</v>
+              <v n="TextDefault">"Moving"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
