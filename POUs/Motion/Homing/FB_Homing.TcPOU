@@ -400,14 +400,14 @@ CASE eHomeSeq OF
         eLocalLimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode;
         bViaLimitSwitch:=FALSE;
     E_HomingRoutines.eHomeToLimit_Bwd_2Speeds:
-        stDetectDirection := mcPositiveDirection;
+        stDetectDirection := mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
         stPreparationDirection := mcNegativeDirection;
         stLimitSwitchSignal.Level := NOT(bLimitBwd);
         eLocalLimitSwitchMode := mcFAllingEdge;
         bViaLimitSwitch := TRUE;
     E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
-        stDetectDirection := mcNegativeDirection;
+        stDetectDirection := mcPositiveDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
         stPreparationDirection := mcPositiveDirection;
         stLimitSwitchSignal.Level := NOT(bLimitFwd);
