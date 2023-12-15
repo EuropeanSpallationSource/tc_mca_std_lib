@@ -7,9 +7,6 @@ STRUCT
     eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
     eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
 
-    //Homing parameters
-    stHomingParameter: MC_HomingParameter;
-
     //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
     bEnableLagErrorDetection :BOOL := FALSE; // Keep the lag error detection active during homing

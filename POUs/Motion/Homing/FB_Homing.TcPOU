@@ -34,9 +34,8 @@ VAR
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
     //Hardware Signals
-    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    ePreparationLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stLimitSwitchSignal: MC_Ref_Signal_Ref;
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stRefSwitchSignal: MC_Ref_Signal_Ref;
     stEncPulseSignal: MC_Ref_Signal_Ref;
     //Homing parameters
@@ -120,7 +119,7 @@ fbStepLimitSwitchPreparation(
     Axis := Axis,
     Parameter := stHomingParameter,
     Direction := stPreparationDirection,
-    LimitSwitchMode:= eLimitSwitchMode,
+    LimitSwitchMode:= ePreparationLimitSwitchMode,
     LimitSwitchSignal:= stLimitSwitchSignal,
     Velocity := fVelocityToCam);
 
