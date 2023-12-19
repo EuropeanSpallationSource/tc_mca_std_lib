@@ -1,0 +1,63 @@
+Release notes
+
+In general: update them just before setting a tag:
+git tag -a vx.y.z
+
+Describe the changes (the motivation) which motiviated this tag.
+The same information should be added into this file, so that
+the tag has the "diff" of ReleaseNotes.txt, kind of.
+
+It is probably a good idea to set a new tag with every new feature.
+The first digit should be increased, when there are non compatible changes:
+  Things had been removed, code that had been moved inside the code tree,
+  so that a project will not compile without further changes.
+The second digit will be inccreased when a new feature had been added,
+which will reset the third digit to 0.
+(The word digit is wrong. We can have 2.11.13 or so)
+
+The 3rd digit will be increased, when there is a pure bugfix.
+See v2.0.0 vs 2.0.1
+
+
+
+v2.2.0
+- Improvements:
+  - Home direct as default homing routine. bHomed is set to TRUE,
+    see MBP-255
+  - Add the description fields in Axis_template
+    see MBP-208: implement new description structure
+- New features:
+  - MBP-233: motor temperature monitoring FB
+- Notes:
+  git show v2.2.0 says that See MBP-214 is part of this version,
+  but it is part of v2.1.0
+
+v2.1.0
+- New feature:
+    Make it possible Change velocity and position on the fly
+    See MBP-214
+- Cleanup:
+    Delete extra ST_AxisError. Keep the one under DUT/Axis_Structures
+    Set the ouput of DC voltage monitoring  to TRUE as default value
+
+v2.0.2
+  Support automated testing of different versions better:
+  Add a version string, and set it to 2.0.2
+
+
+v2.0.1
+  Fix a bug when eHomeDirect never set the bDone bit
+
+v2.0.0
+- Various improvements for the pneumatics
+- OOP implementation of FB_Axis
+- MBP-202 new slit code ess rev
+- Add persistent variable for encoder position BIAS
+- Remove Jog from eMotionCommands and all the refrences of it
+- Add bInTargetPosition variable to ST_AxisStatus
+- Remove all LineIDs; Add scripts for bitbucket pipelines
+- Add a filter/ directory to clean up whitespace and more
+- InVelocity in status array
+- MBP-222: Homing through StepBlockDetection
+ Known issue:
+   Done stays FALSE when doing a "home direct"
