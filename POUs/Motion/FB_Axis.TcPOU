@@ -292,7 +292,7 @@ END_IF
       <Declaration><![CDATA[METHOD mControl_LimitLinking : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Linking limit swiches. Fwd and Bwd can be enabled by its respective limit switches or by both of them (this is normally only during first commissioning) 
+        <ST><![CDATA[// Linking limit swiches. Fwd and Bwd can be enabled by its respective limit switches or by both of them (this is normally only during first commissioning)
 _stAxis.stStatus.bFwEnabled := _stAxis.stInputs.bLimitFwd AND (_stAxis.stInputs.bLimitBwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch); //Moved to linking code. Should not say enabled if not enabled
 _stAxis.stStatus.bBwEnabled := _stAxis.stInputs.bLimitBwd AND (_stAxis.stInputs.bLimitFwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch);
 _stAxis.stStatus.bInterlockedFwd := _stAxis.stControl.bInterlockFwd;
