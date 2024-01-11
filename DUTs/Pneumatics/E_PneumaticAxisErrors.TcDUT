@@ -14,8 +14,8 @@ TYPE E_PneumaticAxisErrors :
     eNoPSSPermit := 6, //Permit signal lost, cylinder retracts to Limit Bwd
     eAirPressureErrorLow := 7, //Air pressure too low
     eAirPressureErrorHigh := 8, //Air pressure too high
-	eNoSignalFromEndSwitchBwd :=9, //Lost signal from the EndSwitchBwd
-	eNoSignalFromEndSwitchFwd :=10 //Lost signal from the EndSwitchFwd
+    eNoSignalFromEndSwitchBwd :=9, //Lost signal from the EndSwitchBwd
+    eNoSignalFromEndSwitchFwd :=10 //Lost signal from the EndSwitchFwd
 ):= eNoError;
 END_TYPE
 ]]></Declaration>
