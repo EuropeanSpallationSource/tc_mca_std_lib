@@ -9,7 +9,8 @@ STRUCT
     bPSSPermit AT %I*: BOOL; //Input signal from PSS for the movement
     bPressureExtend AT %I*: BOOL; //Input signal of air pressure for cyclinder extraction
     bPressureRetract AT %I*: BOOL; //Input signal of air pressure for cylinder retraction
-    nAirPressureValve AT %I*: REAL; //Input signal of air pressure for pneumatic valve
+    nAirPressureValueRaw AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic valve
+    fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
     bOpenManual AT %I*: BOOL; //Push button input to extend cylinder
     bCloseManual AT %I*: BOOL; //Push button input to retract the cylinder
 END_STRUCT
