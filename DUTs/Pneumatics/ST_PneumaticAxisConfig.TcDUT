@@ -5,6 +5,9 @@
 STRUCT
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
+    nAllowTimePressureOutOfRange: INT; //User defined allowed time in seconds for the duration of air pressure value fluctuation
+    fLowLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
+    fHighLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
 END_STRUCT
 END_TYPE
 ]]></Declaration>
