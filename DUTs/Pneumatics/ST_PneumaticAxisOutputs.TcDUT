@@ -6,9 +6,9 @@ STRUCT
     bEndSwitchFwdOn AT %Q*: BOOL; //End Switch Fwd power output
     bEndSwitchBwdOn AT %Q*: BOOL; //End Switch Bwd power output
     bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
-    bPressureExtendOn AT %Q*: BOOL; //Power output for air pressure switch
-    bPressureRetractOn AT %Q*: BOOL; //Power output for air pressure switch
-    fAirPressureOn AT %Q*: REAL; //Power output for analog pressure sensor
+    bPressureExtendPowerON AT %Q*: BOOL; //Power output for air pressure switch
+    bPressureRetracPowerON AT %Q*: BOOL; //Power output for air pressure switch
+    bAirPressurePowerON AT %Q*: BOOL; //Power output for analog pressure sensor
 END_STRUCT
 END_TYPE
 ]]></Declaration>
