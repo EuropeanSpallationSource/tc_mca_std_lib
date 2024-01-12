@@ -66,12 +66,11 @@ END_CASE
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-IF NOT stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn AND NOT bStateChange AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
+        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn AND NOT bStateChange AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
      stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd;
      stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCheckEndSwitchFwdStatus" Id="{df07c6b6-6902-4500-8747-be2fd3560637}">
@@ -79,12 +78,11 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-IF stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn AND bStateChange AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
+        <ST><![CDATA[IF stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn AND bStateChange AND NOT stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended THEN
      stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd;
      stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCheckForAirPressureError" Id="{f9b14adb-ed69-49af-a993-e6e5d49fd78d}">
@@ -94,8 +92,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-fbTimerAirPressureErrorLow(IN :=,PT:=INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
+        <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:=INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
 fbTimerAirPressureErrorHigh(IN :=,PT:=INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
 
 //Check if the air pressure value is too low for longer than 5s
@@ -118,7 +115,7 @@ ELSIF (stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled >= stPne
     fbTimerAirPressureErrorHigh.IN := FALSE;
     bAirPressureoutOfRangeError := FALSE;
 END_IF
-{warning restore C0371}
+
 
 
 ]]></ST>
@@ -129,8 +126,7 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
+        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
     IF  fbTimerExtend.Q AND stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted THEN
              stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
              stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingExtract;
@@ -157,7 +153,7 @@ END_IF
             stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractTimedOut;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
         END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCheckStatusOfInterlockSignal" Id="{3759dc88-e87e-4376-86a5-1bdfbc4158fe}">
@@ -165,13 +161,12 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
+        <ST><![CDATA[IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eInterlockOn;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCheckStatusOfPermitSignal" Id="{5d308b37-3dc0-48eb-9350-16f4ad213248}">
@@ -179,13 +174,12 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
+        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mReset" Id="{4721b129-abfa-4113-85bb-a13eb59dedea}">
@@ -195,7 +189,6 @@ END_IF
       <Implementation>
         <ST><![CDATA[//Reset all the error messages
 //Set the operating mode to Single Solenoid Control
-{warning disable C0371}
 fbTrigRisingEdgePermit(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bReset);
 IF fbTrigRisingEdgePermit.Q THEN
     stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
@@ -203,19 +196,14 @@ IF fbTrigRisingEdgePermit.Q THEN
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
       <Declaration><![CDATA[METHOD PUBLIC mRun
-
-
-VAR
-
-END_VAR]]></Declaration>
+]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-//Set the current status of the end position switches, and permit and intelock signals
+        <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
 mSetInputStatuses();
 
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
@@ -241,7 +229,7 @@ mCheckForAirPressureError();
 
 //Reset Error
 mReset();
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mScaledPressureValue" Id="{cb34ab57-a376-4317-a285-420d3612f714}">
@@ -261,7 +249,10 @@ END_VAR
       <Implementation>
         <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
 rOffset:= fScaledHigh - rGradient * fRawHigh;
-mScaledPressureValue := (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow) * nRawValue + rOffset;]]></ST>
+mScaledPressureValue:= rGradient * nRawValue + rOffset;
+
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mSetAllowedTravelTime" Id="{1503d621-dee7-42a9-91aa-f87392c1d737}">
@@ -270,25 +261,23 @@ mScaledPressureValue := (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow) * nRawVa
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-{warning disable C0371}
- fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend)*1000;
- fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract)*1000;
-{warning restore C0371}]]></ST>
+fbTimerExtend.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToExtend)*1000;
+fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nTimeToRetract)*1000;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mSetInputStatuses" Id="{7e8f02a9-eec6-4e57-afc7-756f5956c71a}">
       <Declaration><![CDATA[METHOD PUBLIC mSetInputStatuses
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
+        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
 //Check if cylinder is moving: extending or retracting
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchBwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended := stPneumaticAxisStruct.stPneumaticAxisInputs.bEndSwitchFwd;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bSolenoidActive := stPneumaticAxisStruct.stPneumaticAxisInputs.bSolenoidActive;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bPSSPermitOK := stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock;
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mSingleSolenoid" Id="{8261ebf9-e0cc-4c7d-9850-4c5e547b1764}">
@@ -296,8 +285,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-//Starting the timing of extraction movement
+        <ST><![CDATA[//Starting the timing of extraction movement
 fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
 
 fbTrigExtend(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bExtend);
@@ -369,9 +357,8 @@ IF  (bStartRetractPLC OR bStartRetractManual) AND stPneumaticAxisStruct.stPneuma
         bStartRetractPLC := FALSE;
         bStartRetractManual := FALSE;
 END_IF
-
 mCheckForMovingError();
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mSingleSolenoidError" Id="{9bc66883-6ee1-41c7-aebe-403858ab95d4}">
@@ -379,8 +366,7 @@ mCheckForMovingError();
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[{warning disable C0371}
-CASE  stPneumaticAxisStruct.ePneumaticAxisErrors OF
+        <ST><![CDATA[CASE  stPneumaticAxisStruct.ePneumaticAxisErrors OF
 
     E_PneumaticAxisErrors.eNoError:
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
@@ -435,7 +421,7 @@ bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
-{warning restore C0371}]]></ST>
+]]></ST>
       </Implementation>
     </Method>
   </POU>
