@@ -19,6 +19,20 @@ The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
 
+v2.3.0
+- Improvements:
+  - Homing configuration is extended to be able to select between 
+    falling and rising edge and type of sensor, see MBP-232
+  - Integrate the motor temperature monitoring as part of FB_Axis and delete
+    the temperature monitoring FB, see MBP-259
+- New features:
+  - Add in the VISU the bMoving status, the temperature value and the status
+    of the High Temperature disabled bit, see MBP-265
+  - Add the ReleaseNotes.txt file
+- Bug fix:
+  - Fix error not propagating when moving an axis and disabling the power 
+    during movement. Now the status ID and error bit are propagated, see MBP-260
+  - Delete extra directory VISUs_Org
 
 v2.2.0
 - Improvements:
