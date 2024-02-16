@@ -4,8 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisDescription :
 STRUCT
     sAxisName : STRING(nMAX_AXIS_NAME);
-    eUnit: E_AxisEngUnit; //Code for the axis base unit (like m or degree)
-    nPrefix: INT; //Exponent defining unit prefix, e.g. 3 for k(kilo)
+    eUnit: E_AxisEngUnit; //Code for the axis base unit (like mm or degree)
 END_STRUCT
 END_TYPE
 ]]></Declaration>
