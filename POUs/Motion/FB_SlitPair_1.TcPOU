@@ -160,6 +160,7 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
+		actClearSlitGearing();
 		resetCounterTimeout := 0;
         bError := TRUE;
         bEnabled := FALSE;
@@ -247,9 +248,9 @@ END_IF
 IF NOT bError AND bAxisErrorsPresent THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
-IF eSlitPairState <> E_SlitPairStates.INIT AND NOT bRealAxesEnabled THEN
-    eSlitPairState := E_SlitPairStates.ERROR;
-END_IF
+//IF eSlitPairState <> E_SlitPairStates.INIT AND NOT bRealAxesEnabled THEN
+ //   eSlitPairState := E_SlitPairStates.ERROR;
+//END_IF
 IF (eSlitPairState <> E_SlitPairStates.INIT AND NOT bFunctionInErrorState) AND NOT bEnable THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
