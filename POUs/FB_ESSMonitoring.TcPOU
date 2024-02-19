@@ -191,6 +191,7 @@ FOR i:=1 TO nMaxAlarms DO
         nAlarmCnt := nAlarmCnt + 1;
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
         aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
+		mErrorMessage(aAlarmList[i].sErrorMsg, aAlarmList[i].nErrorID, aAlarmList[i].bAlarmActive);
         IF nLEDAlarmID = 0 OR (nWarningLED = E_MonitoringLedFunction.eUndefined AND nEmergencyLED = E_MonitoringLedFunction.eUndefined AND aAlarmList[i].nWarningLED > E_MonitoringLedFunction.eUndefined) OR (nEmergencyLED = E_MonitoringLedFunction.eUndefined AND aAlarmList[i].nEmergencyLED > E_MonitoringLedFunction.eUndefined) THEN
             nLEDAlarmID := i;
             sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
@@ -320,20 +321,54 @@ bEcMasterNotOK := nEcMasterDevState > 0;
       </Implementation>
     </Action>
     <Method Name="mAlarm" Id="{90084986-c6d4-4ab8-8e9d-f1097d507950}">
-      <Declaration><![CDATA[
-METHOD mAlarm : BOOL
+      <Declaration><![CDATA[METHOD mAlarm : BOOL
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF stAlarmData.bAlarmSet THEN
+        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
     stAlarmData.bAlarmActive := TRUE;
 ELSIF stAlarmData.bAlarmReset THEN
     stAlarmData.bAlarmActive := FALSE;
 END_IF
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mErrorMessage" Id="{c95f959f-2e02-4365-aaa1-b18e2d55ee96}">
+      <Declaration><![CDATA[METHOD mErrorMessage : BOOL
+VAR_INPUT
+	sErrorMessage: STRING;
+	nErrorID: INT;
+	bErrorPresent: BOOL;
+END_VAR
+VAR
+	sFullErrorMessage: STRING;	
+END_VAR
+
+VAR_INST
+	bErrorTemp: BOOL;
+
+	fbErrorTrig: R_TRIG;
+	fbErrorTON: TON;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bErrorTemp := bErrorPresent;
+sFullErrorMessage := CONCAT(STR1:='ERROR. ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
+sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
+sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
+fbErrorTrig(clk:=bErrorTemp);
+fbErrorTON(in:=bErrorTemp, PT:=T#60S);
+
+
+IF fbErrorTrig.Q THEN
+	ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sFullErrorMessage);
+           
+	//Reset bError to display Error message every 60 seconds if error is still there
+    IF fbErrorTON.Q THEN
+    	bErrorTemp := FALSE;
+    END_IF
+END_IF]]></ST>
       </Implementation>
     </Method>
   </POU>
