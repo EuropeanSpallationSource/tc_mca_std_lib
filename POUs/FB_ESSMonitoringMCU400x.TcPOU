@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_ESSMonitoring" Id="{dc4431e2-7ed3-4317-a6e3-038e11ac0910}" SpecialFunc="None">
-    <Declaration><![CDATA[
-FUNCTION_BLOCK FB_ESSMonitoring
+  <POU Name="FB_ESSMonitoringMCU400x" Id="{dc4431e2-7ed3-4317-a6e3-038e11ac0910}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU400x
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -191,7 +190,7 @@ FOR i:=1 TO nMaxAlarms DO
         nAlarmCnt := nAlarmCnt + 1;
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
         aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
-		mErrorMessage(aAlarmList[i].sErrorMsg, aAlarmList[i].nErrorID, aAlarmList[i].bAlarmActive);
+        mErrorMessage(aAlarmList[i].sErrorMsg, aAlarmList[i].nErrorID, aAlarmList[i].bAlarmActive);
         IF nLEDAlarmID = 0 OR (nWarningLED = E_MonitoringLedFunction.eUndefined AND nEmergencyLED = E_MonitoringLedFunction.eUndefined AND aAlarmList[i].nWarningLED > E_MonitoringLedFunction.eUndefined) OR (nEmergencyLED = E_MonitoringLedFunction.eUndefined AND aAlarmList[i].nEmergencyLED > E_MonitoringLedFunction.eUndefined) THEN
             nLEDAlarmID := i;
             sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
@@ -338,22 +337,23 @@ END_IF
     <Method Name="mErrorMessage" Id="{c95f959f-2e02-4365-aaa1-b18e2d55ee96}">
       <Declaration><![CDATA[METHOD mErrorMessage : BOOL
 VAR_INPUT
-	sErrorMessage: STRING;
-	nErrorID: INT;
-	bErrorPresent: BOOL;
+    sErrorMessage: STRING;
+    nErrorID: INT;
+    bErrorPresent: BOOL;
 END_VAR
 VAR
-	sFullErrorMessage: STRING;	
+    sFullErrorMessage: STRING;
 END_VAR
 
 VAR_INST
-	bErrorTemp: BOOL;
+    bErrorTemp: BOOL;
 
-	fbErrorTrig: R_TRIG;
-	fbErrorTON: TON;
-END_VAR]]></Declaration>
+    fbErrorTrig: R_TRIG;
+    fbErrorTON: TON;
+END_VAR
+]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bErrorTemp := bErrorPresent;
+        <ST><![CDATA[bErrorTemp := bErrorPresent; //or bErrorTemp;
 sFullErrorMessage := CONCAT(STR1:='ERROR. ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
@@ -362,13 +362,14 @@ fbErrorTON(in:=bErrorTemp, PT:=T#60S);
 
 
 IF fbErrorTrig.Q THEN
-	ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sFullErrorMessage);
-           
-	//Reset bError to display Error message every 60 seconds if error is still there
+    ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sFullErrorMessage);
+
+    //Reset bError to display Error message every 60 seconds if error is still there
     IF fbErrorTON.Q THEN
-    	bErrorTemp := FALSE;
+        bErrorTemp := FALSE;
     END_IF
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
   </POU>
