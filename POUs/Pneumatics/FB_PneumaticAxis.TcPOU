@@ -174,10 +174,14 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
-            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
-            stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+        <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisConfig.bPneumaticAxisShutter THEN
+       stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := TRUE;
+ELSE
+    IF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
+           stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+           stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
+           stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+    END_IF
 END_IF
 ]]></ST>
       </Implementation>
