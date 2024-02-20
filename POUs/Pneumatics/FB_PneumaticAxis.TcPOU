@@ -11,6 +11,7 @@ VAR
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
     fbTimerAirPressureErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
+    fbTimerAirPressureErrorDelay: TON; //Timer to delay error pressure activation
     fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
     fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
@@ -95,20 +96,24 @@ END_VAR
         <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:=INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
 fbTimerAirPressureErrorHigh(IN :=,PT:=INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
 
-//Check if the air pressure value is too low for longer than 5s
+//Check if the air pressure value is too low for longer than defined time
 IF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled < stPneumaticAxisStruct.stPneumaticAxisConfig.fLowLimitPressureValue  THEN
     fbTimerAirPressureErrorLow.IN := TRUE;
+    IF fbTimerAirPressureErrorLow.Q THEN
     stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
     bAirPressureoutOfRangeError := TRUE;
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorLow;
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
-//Check if the air pressure value is too high for longer than 5s
+    END_IF
+//Check if the air pressure value is too high for longer than defined time
 ELSIF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled > stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue  THEN
     fbTimerAirPressureErrorHigh.IN := TRUE;
+    IF fbTimerAirPressureErrorHigh.Q THEN
     stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
     bAirPressureoutOfRangeError := TRUE;
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorHigh;
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+    END_IF
 //If the air pressure value is in range, no errors
 ELSIF (stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled >= stPneumaticAxisStruct.stPneumaticAxisConfig.fLowLimitPressureValue AND stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled <= stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue) THEN
     fbTimerAirPressureErrorLow.IN := FALSE;
