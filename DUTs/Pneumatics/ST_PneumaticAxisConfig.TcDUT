@@ -3,7 +3,7 @@
   <DUT Name="ST_PneumaticAxisConfig" Id="{0cf5a73f-3f7b-4191-a68d-fd09f581360b}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisConfig :
 STRUCT
-    bPneumaticAxisShutter: BOOL; //Bit to define if neumatic axis is Shutter
+    bPneumaticAxisShutter: BOOL; //Bit to define if pneumatic axis is Shutter
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
     nAllowTimePressureOutOfRange: INT; //User defined allowed time in seconds for the duration of air pressure value fluctuation
