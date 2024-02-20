@@ -11,7 +11,6 @@ VAR
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
     fbTimerAirPressureErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
-    fbTimerAirPressureErrorDelay: TON; //Timer to delay error pressure activation
     fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
     fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
