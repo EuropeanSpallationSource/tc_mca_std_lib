@@ -6,6 +6,7 @@ STRUCT
     bLimitFwd AT %I*: BOOL;
     bLimitBwd AT %I*: BOOL;
     bHomeSensor AT %I*: BOOL; //Reference siganl for homing
+    nTempPT100 AT %I*: INT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
