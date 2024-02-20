@@ -3,8 +3,13 @@
   <DUT Name="ST_PneumaticAxisConfig" Id="{0cf5a73f-3f7b-4191-a68d-fd09f581360b}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisConfig :
 STRUCT
+    bPSSPneumaticAxisShutter: BOOL := FALSE; //Bit to define if pneumatic axis is Shutter needing PSS permit
+    sPneumaticAxisName: String(32);
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
+    nAllowTimePressureOutOfRange: INT; //User defined allowed time in seconds for the duration of air pressure value fluctuation
+    fLowLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
+    fHighLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
 END_STRUCT
 END_TYPE
 ]]></Declaration>
