@@ -4,6 +4,7 @@
     <Declaration><![CDATA[TYPE ST_PneumaticAxisConfig :
 STRUCT
     bPneumaticAxisShutter: BOOL; //Bit to define if pneumatic axis is Shutter
+    sPneumaticAxisName: String(32);
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
     nAllowTimePressureOutOfRange: INT; //User defined allowed time in seconds for the duration of air pressure value fluctuation
