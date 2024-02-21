@@ -22,6 +22,8 @@ VAR
     bStartExtendManual: BOOL; //Variable to extend cylinder with momentary push button
     bStartRetractManual: BOOL; //Variable to retract cylinder with momentary push button
 
+    bStartInitDelay: BOOL := FALSE;
+    tInitializeTimer: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -61,6 +63,20 @@ END_CASE
 
 ]]></ST>
     </Implementation>
+    <Method Name="FB_init" Id="{af7214fb-0537-4a7d-a506-7af30838a02e}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+    bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+    bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#1S);
+bStartInitDelay := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mCheckEndSwitchBwdStatus" Id="{06cf6d5a-16e0-438c-85b6-51ad0c4cc91d}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchBwdStatus
 
@@ -222,26 +238,30 @@ END_IF
       <Declaration><![CDATA[METHOD PUBLIC mRun
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
-mSetInputStatuses();
+        <ST><![CDATA[IF tInitializeTimer.Q THEN
+    bStartInitDelay := FALSE;
+
+//Set the current status of the end position switches, and permit and intelock signals
+    mSetInputStatuses();
 
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-mSetAllowedTravelTime();
+    mSetAllowedTravelTime();
 
 //Get the value of the air pressure in mb
-stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+    stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 
 //Check if Permit signal is ON
-mCheckStatusOfPermitSignal();
+    mCheckStatusOfPermitSignal();
 
 //Check if Interlock signal is ON
-mCheckStatusOfInterlockSignal();
+    mCheckStatusOfInterlockSignal();
 
 //Check if air pressure is in range
-mCheckForAirPressureError();
+    mCheckForAirPressureError();
 
 //Reset Error
-mReset();
+    mReset();
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -300,6 +320,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
       <Implementation>
         <ST><![CDATA[//Starting the timing of extraction movement
 fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
+stPneumaticAxisStruct.stPneumaticAxisStatus.nTimeElapsedExtend := TIME_TO_INT(fbTimerExtend.ET);
 
 fbTrigExtend(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bExtend);
 IF fbTrigExtend.Q THEN
@@ -347,6 +368,7 @@ mCheckEndSwitchFwdStatus();
 
 //Starting the retraction movement and retraction timing
 fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting);
+stPneumaticAxisStruct.stPneumaticAxisStatus.nTimeElapsedRetract := TIME_TO_INT(fbTimerRetract.ET);
 
 fbTrigRetract(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bRetract);
 IF fbTrigRetract.Q THEN
