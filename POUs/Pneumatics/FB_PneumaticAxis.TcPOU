@@ -24,23 +24,33 @@ VAR
 
     bStartInitDelay: BOOL := FALSE;
     tInitializeTimer: TON;
+    bInitialized: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[mRun();
+      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#1S);
 
-CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
+IF tInitializeTimer.Q THEN
+    bStartInitDelay := FALSE;
+    bInitialized := TRUE;
+END_IF
 
-    E_PneumaticMode.eSingleSolenoidControl:
-    mSingleSolenoid();
+IF bInitialized THEN
+    mRun();
 
-    E_PneumaticMode.eError:
-    mSingleSolenoidError();
+    CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
 
-    E_PneumaticMode.eReset:
-    mReset();
+        E_PneumaticMode.eSingleSolenoidControl:
+        mSingleSolenoid();
 
-END_CASE
+        E_PneumaticMode.eError:
+        mSingleSolenoidError();
+
+        E_PneumaticMode.eReset:
+        mReset();
+
+    END_CASE
+END_IF
 
 
 
@@ -71,9 +81,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#1S);
-bStartInitDelay := TRUE;
-
+        <ST><![CDATA[bStartInitDelay := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
@@ -238,30 +246,27 @@ END_IF
       <Declaration><![CDATA[METHOD PUBLIC mRun
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF tInitializeTimer.Q THEN
-    bStartInitDelay := FALSE;
-
-//Set the current status of the end position switches, and permit and intelock signals
-    mSetInputStatuses();
+        <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
+mSetInputStatuses();
 
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-    mSetAllowedTravelTime();
+mSetAllowedTravelTime();
 
 //Get the value of the air pressure in mb
-    stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 
 //Check if Permit signal is ON
-    mCheckStatusOfPermitSignal();
+mCheckStatusOfPermitSignal();
 
 //Check if Interlock signal is ON
-    mCheckStatusOfInterlockSignal();
+mCheckStatusOfInterlockSignal();
 
 //Check if air pressure is in range
-    mCheckForAirPressureError();
+mCheckForAirPressureError();
 
 //Reset Error
-    mReset();
-END_IF
+mReset();
+
 ]]></ST>
       </Implementation>
     </Method>
