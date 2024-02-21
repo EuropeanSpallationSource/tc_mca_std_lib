@@ -213,6 +213,7 @@ IF fbTrigRisingEdgePermit.Q THEN
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+    stPneumaticAxisStruct.stPneumaticAxisControl.bReset := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
@@ -229,12 +230,6 @@ mSetAllowedTravelTime();
 
 //Get the value of the air pressure in mb
 stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-
-//Check if LimitSwitchBwd signal is ON
-mCheckEndSwitchBwdStatus();
-
-//Check if LimitSwitchFwd signal is ON
-mCheckEndSwitchFwdStatus();
 
 //Check if Permit signal is ON
 mCheckStatusOfPermitSignal();
@@ -347,6 +342,8 @@ IF (bStartExtendPLC OR bStartExtendManual) AND stPneumaticAxisStruct.stPneumatic
     bStartExtendManual := FALSE;
 END_IF
 
+//Check if LimitSwitchBwd signal is ON
+mCheckEndSwitchFwdStatus();
 
 //Starting the retraction movement and retraction timing
 fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting);
@@ -439,8 +436,10 @@ stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
 bStateChange := FALSE;
+bStartExtendPLC := FALSE;
 bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
+bStartRetractPLC := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
 ]]></ST>
