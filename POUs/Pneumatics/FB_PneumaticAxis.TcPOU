@@ -256,12 +256,6 @@ mSetAllowedTravelTime();
 //Get the value of the air pressure in mb
 stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 
-//Check if Permit signal is ON
-mCheckStatusOfPermitSignal();
-
-//Check if Interlock signal is ON
-mCheckStatusOfInterlockSignal();
-
 //Check if air pressure is in range
 mCheckForAirPressureError();
 
@@ -324,7 +318,13 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Starting the timing of extraction movement
+        <ST><![CDATA[//Check if Permit signal is ON
+mCheckStatusOfPermitSignal();
+
+//Check if Interlock signal is ON
+mCheckStatusOfInterlockSignal();
+
+//Starting the timing of extraction movement
 fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
 stPneumaticAxisStruct.stPneumaticAxisStatus.nTimeElapsedExtend := TIME_TO_INT(fbTimerExtend.ET);
 
