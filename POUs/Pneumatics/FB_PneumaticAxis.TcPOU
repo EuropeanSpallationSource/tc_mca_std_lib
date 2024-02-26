@@ -214,7 +214,8 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
-    stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := TRUE;
+	stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+    stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := FALSE;
 ELSIF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
     stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
