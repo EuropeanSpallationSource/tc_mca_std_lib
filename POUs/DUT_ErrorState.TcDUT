@@ -5,10 +5,10 @@
 {attribute 'strict'}
 TYPE DUT_ErrorState :
 (
-	None,
-	Active,
-	Inactive,
-	Acknowledged
+    None,
+    Active,
+    Inactive,
+    Acknowledged
 );
 END_TYPE
 ]]></Declaration>

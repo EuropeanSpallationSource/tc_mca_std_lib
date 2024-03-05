@@ -36,9 +36,9 @@ VAR
     resetCounterTimeout: UINT :=0;
     mcHomeGapSize: MC_Home;
     mcHomeGapCentre: MC_Home;
-	fbSetPosGapsize: MC_SetPosition;
-	fbSetPosGapCentre: MC_SetPosition;
-	bSetPosiotnGap: BOOL := FALSE;
+    fbSetPosGapsize: MC_SetPosition;
+    fbSetPosGapCentre: MC_SetPosition;
+    bSetPosiotnGap: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -82,21 +82,21 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
         IF bBladesHomed THEN
-			eSlitPairState := E_SlitPairStates.HOME_GAP;
+            eSlitPairState := E_SlitPairStates.HOME_GAP;
         ELSIF bRealAxesEnabled AND bAutoHome THEN
             eSlitPairState := E_SlitPairStates.HOME_BLADES; //If autohome enabled, home the blades
         END_IF
 
     E_SlitPairStates.HOME_BLADES: //Initiate homing of blade axes. Homing routine must be pre-configured by user
-		mcHomeGapSize.Execute := TRUE;
+        mcHomeGapSize.Execute := TRUE;
         mcHomeGapCentre.Execute := TRUE;
         IF mcHomeGapSize.Done AND mcHomeGapCentre.Done THEN
-       		GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
-        	GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
-        	GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
-        	GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
-        	bHoming := TRUE;
-        	eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;    
+               GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
+            GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
+            GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
+            GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
+            bHoming := TRUE;
+            eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;
         END_IF
 
 
@@ -131,19 +131,19 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.SLITS_OPERATIONAL: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
         bEnabled := TRUE;
-		bSetPosiotnGap := FALSE;
+        bSetPosiotnGap := FALSE;
         IF GVL.astAxes[iGapSize].stStatus.bBusy AND GVL.astAxes[iGapCentre].stStatus.bBusy THEN
-			 eSlitPairState := E_SlitPairStates.SLITS_BUSY;
-		END_IF
+             eSlitPairState := E_SlitPairStates.SLITS_BUSY;
+        END_IF
 
     E_SlitPairStates.SLITS_BUSY:
-	 	IF GVL.astAxes[iGapSize].stStatus.bInTargetPosition AND GVL.astAxes[iGapCentre].stStatus.bInTargetPosition 
-		   AND NOT GVL.astAxes[iBladePositive].stStatus.bMoving 
-		   AND NOT GVL.astAxes[iBladeNegative].stStatus.bMoving THEN
-			eSlitPairState := E_SlitPairStates.GEAROUT_BLADES;
-		END_IF
-		
-	E_SlitPairStates.GEAROUT_BLADES: //Clear amy residual gearing
+         IF GVL.astAxes[iGapSize].stStatus.bInTargetPosition AND GVL.astAxes[iGapCentre].stStatus.bInTargetPosition
+           AND NOT GVL.astAxes[iBladePositive].stStatus.bMoving
+           AND NOT GVL.astAxes[iBladeNegative].stStatus.bMoving THEN
+            eSlitPairState := E_SlitPairStates.GEAROUT_BLADES;
+        END_IF
+
+    E_SlitPairStates.GEAROUT_BLADES: //Clear amy residual gearing
         actClearSlitGearing();
         eSlitPairState := E_SlitPairStates.CHECK_GEAROUT_COMPLETE;
 
@@ -155,13 +155,13 @@ CASE eSlitPairState OF
     E_SlitPairStates.CLEAR_GAP_CALIBRATION:
         bSetPosiotnGap := TRUE; //this ensures the setpoint position of the axis is updated
         IF fbSetPosGapCentre.Done AND fbSetPosGapsize.Done THEN
-			bSetPosiotnGap := FALSE;
+            bSetPosiotnGap := FALSE;
             eSlitPairState := E_SlitPairStates.GEARIN_SLITS; //Back to gear_in
         END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
-		actClearSlitGearing();
-		resetCounterTimeout := 0;
+        actClearSlitGearing();
+        resetCounterTimeout := 0;
         bError := TRUE;
         bEnabled := FALSE;
         IF bReset THEN
@@ -175,7 +175,7 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.ERROR_GEAROUT_CHECK:
         IF bBladesUncoupled THEN
-            eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES; 
+            eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;
         END_IF
 
     E_SlitPairStates.ERROR_RESET_AXES: //RESET ALL AXES
@@ -187,7 +187,7 @@ CASE eSlitPairState OF
         eSlitPairState := E_SlitPairStates.ERROR_RESET_CHECK;
 
     E_SlitPairStates.ERROR_RESET_CHECK:
-	    GVL.astAxes[iBladeNegative].stControl.bReset := FALSE;
+        GVL.astAxes[iBladeNegative].stControl.bReset := FALSE;
         GVL.astAxes[iBladePositive].stControl.bReset := FALSE;
         GVL.astAxes[iGapSize].stControl.bReset := FALSE;
         GVL.astAxes[iGapCentre].stControl.bReset := FALSE;
@@ -207,26 +207,27 @@ END_CASE
 bReset := FALSE;
 
 fbSetPosGapCentre(
-	Axis:= GVL.astAxes[iGapCentre].Axis, 
-	Execute:= bSetPosiotnGap, 
-	Position:= fGapCentrePosition, 
-	Mode:= , 
-	Options:= , 
-	Done=> , 
-	Busy=> , 
-	Error=> , 
-	ErrorID=> );
-	
+    Axis:= GVL.astAxes[iGapCentre].Axis,
+    Execute:= bSetPosiotnGap,
+    Position:= fGapCentrePosition,
+    Mode:= ,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+
 fbSetPosGapsize(
-	Axis:= GVL.astAxes[iGapSize].Axis, 
-	Execute:= bSetPosiotnGap, 
-	Position:= fGapSizePosition, 
-	Mode:= , 
-	Options:= , 
-	Done=> , 
-	Busy=> , 
-	Error=> , 
-	ErrorID=> );]]></ST>
+    Axis:= GVL.astAxes[iGapSize].Axis,
+    Execute:= bSetPosiotnGap,
+    Position:= fGapSizePosition,
+    Mode:= ,
+    Options:= ,
+    Done=> ,
+    Busy=> ,
+    Error=> ,
+    ErrorID=> );
+]]></ST>
     </Implementation>
     <Action Name="actClearSlitGearing" Id="{3a4d22ec-7e5b-4e40-819d-256bca3488c2}">
       <Implementation>
@@ -267,7 +268,8 @@ GVL.astAxes[iGapSize].stInputs.bLimitFwd := GVL.astAxes[iBladePositive].stStatus
 GVL.astAxes[iGapSize].stInputs.bLimitBwd := GVL.astAxes[iBladePositive].stStatus.bBwEnabled AND GVL.astAxes[iBladeNegative].stStatus.bFwEnabled;
 
 GVL.astAxes[iGapCentre].stInputs.bLimitFwd := GVL.astAxes[iBladePositive].stStatus.bFwEnabled AND GVL.astAxes[iBladeNegative].stStatus.bFwEnabled;
-GVL.astAxes[iGapCentre].stInputs.bLimitBwd := GVL.astAxes[iBladePositive].stStatus.bBwEnabled AND GVL.astAxes[iBladeNegative].stStatus.bBwEnabled;]]></ST>
+GVL.astAxes[iGapCentre].stInputs.bLimitBwd := GVL.astAxes[iBladePositive].stStatus.bBwEnabled AND GVL.astAxes[iBladeNegative].stStatus.bBwEnabled;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actRunMethods" Id="{a4d725de-6dce-4b2e-8f7f-739742e93dee}">
@@ -422,10 +424,10 @@ IF eSlitPairState = E_SlitPairStates.ERROR_RESET_CHECK THEN
     bOutput := TRUE;
 END_IF
 IF fbSetPosGapCentre.Error THEN
-	bOutput := TRUE;
+    bOutput := TRUE;
 END_IF
 IF fbSetPosGapSize.Error THEN
-	bOutput := TRUE;
+    bOutput := TRUE;
 END_IF
 ]]></ST>
       </Implementation>

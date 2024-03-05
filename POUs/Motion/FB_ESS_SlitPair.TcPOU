@@ -18,8 +18,8 @@ VAR_OUTPUT
 END_VAR
 VAR
     fbSlitPair: FB_SlitPair_1;
-	fbErrorToAxisTrig: R_TRIG;
-	fbErrorToAxisTON: TON;
+    fbErrorToAxisTrig: R_TRIG;
+    fbErrorToAxisTON: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -27,8 +27,8 @@ END_VAR
     stBladeNegativeAxis.stControl.bEnable := stGapAxis.stStatus.bEnabled OR stCenterAxis.stStatus.bEnabled;
     stBladePositiveAxis.stControl.bEnable := stGapAxis.stStatus.bEnabled OR stCenterAxis.stStatus.bEnabled;
     IF stBladeNegativeAxis.stStatus.bEnabled AND stBladePositiveAxis.stStatus.bEnabled THEN
-		fbSlitPair.bEnable := TRUE;
-	END_IF
+        fbSlitPair.bEnable := TRUE;
+    END_IF
 ELSE
     fbSlitPair.bEnable := FALSE;
 END_IF
@@ -44,8 +44,8 @@ END_IF
 fbErrorToAxisTON(IN:=bError AND NOT fbErrorToAxisTON.q , PT:=T#4S , Q=> , ET=> );
 fbErrorToAxisTrig(CLK:= NOT fbErrorToAxisTON.q AND bError, Q=> );
 IF fbErrorToAxisTrig.q THEN
-	stGapAxis.stStatus.bError := TRUE;
-	stCenterAxis.stStatus.bError := TRUE;
+    stGapAxis.stStatus.bError := TRUE;
+    stCenterAxis.stStatus.bError := TRUE;
 END_IF
 
 
@@ -59,7 +59,8 @@ IF stBladeNegativeAxis.Axis.NcToPlc.AxisId <> 0 AND stBladePositiveAxis.Axis.NcT
         bEnabled=> bEnabled,
         bError=> bError,
         bHoming=> bHoming);
-END_IF;]]></ST>
+END_IF;
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

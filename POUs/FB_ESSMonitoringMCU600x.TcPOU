@@ -16,74 +16,74 @@ END_VAR
 VAR
     //Outputs
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 1^Output'}
-	bStatusLED AT %Q*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 7 (EL2014)^DIG Outputs^Channel 4^Output'}
-    bAcknowledgeLED AT %Q*: BOOL; 
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 2^Output'}
-    bEStopLED AT %Q*: BOOL; 
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 3^Output'}
-	bEmergencyLED AT %Q*: BOOL; 
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 4^Output'}
-    bAbnormalLED AT %Q*: BOOL; 
+    bStatusLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 7 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bAcknowledgeLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 2^Output'}
+    bEStopLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 3^Output'}
+    bEmergencyLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bAbnormalLED AT %Q*: BOOL;
 
     //Inputs
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 1^Input'}
     b24VDC1_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 2^Input'}
     b24VDC2_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 3^Input'}
-	b24VDC3_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 3^Input'}
+    b24VDC3_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 4^Input'}
     b48VDC1_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 5^Input'}
-	b48VDC2_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 6^Input'}
-	b48VDC3_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 7^Input'}
-	b48VDC4_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 5^Input'}
+    b48VDC2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 6^Input'}
+    b48VDC3_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 7^Input'}
+    b48VDC4_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 1^Input'}
-	bFuse1_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 2^Input'}
+    bFuse1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 2^Input'}
     bFuse2_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 3^Input'}
     bFuse3_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 4^Input'}
     bFuse4_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 5^Input'}
     bFuse5_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 6^Input'}
     bFuse6_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 7^Input'}
     bFuse7_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 8^Input'}
     bFuse8_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 1^Input'}
     bEStop1Triggered AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 2^Input'}
-	bSTO1Triggered AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
-	bEStop2Triggered AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
-	bSTO2Triggered AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 2^Input'}
+    bSTO1Triggered AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
+    bEStop2Triggered AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
+    bSTO2Triggered AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 2^Input'}
     bMCB_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 3^Input'}
     bSPD_OK AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 4^Input'}
-	bDoorClosed AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 5^Input'}
-	bAcknowledgeButton AT %I*: BOOL;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 1^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 4^Input'}
+    bDoorClosed AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 5^Input'}
+    bAcknowledgeButton AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 2^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 2^Value'}
     nTemp2 AT %I*: INT;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 3^Value'}
-	nTemp3 AT %I*: INT;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 4^Value'}
-	nTemp4 AT %I*: INT;
-	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 3^Value'}
+    nTemp3 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 4^Value'}
+    nTemp4 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
-	
+
     aAlarmList: ARRAY [1..nMaxAlarms] OF ST_MonitoringAlarm := [
 (*[1]*)(nErrorID:=241 ,sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
 (*[2]*)(nErrorID:=242 ,sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
@@ -167,15 +167,15 @@ VAR
     fbSlowBlinkOn: TON;
     fbSlowBlinkOff: TON;
     bSlowBlink: BOOL;
-	
-	fbErrorMessageTON: TON;
-	bPrintErrorMessage: BOOL;
-	bAlarmActive: BOOL := FALSE;
-	fbErrorTrig: R_TRIG;
-	
-	fbEtherCATAlarmDelayTON: TON;
-	bStartEtherCATdelayTON: BOOL := FALSE;
-	bEtherCATInitialized: BOOL := FALSE;
+
+    fbErrorMessageTON: TON;
+    bPrintErrorMessage: BOOL;
+    bAlarmActive: BOOL := FALSE;
+    fbErrorTrig: R_TRIG;
+
+    fbEtherCATAlarmDelayTON: TON;
+    bStartEtherCATdelayTON: BOOL := FALSE;
+    bEtherCATInitialized: BOOL := FALSE;
 END_VAR
 VAR CONSTANT
     nMaxAlarms: INT := 50;
@@ -274,13 +274,13 @@ FOR i:=1 TO nMaxAlarms DO
         nAlarmCnt := nAlarmCnt + 1;
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
         aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
-		bAlarmActive := TRUE;
-		IF nLEDAlarmID = 0 
-			OR (nAbnormalLED = E_MonitoringLedFunction.eUndefined 
-				AND nEmergencyLED = E_MonitoringLedFunction.eUndefined 
-				AND aAlarmList[i].nAbnormalLED > E_MonitoringLedFunction.eUndefined) 
-			OR (nEmergencyLED = E_MonitoringLedFunction.eUndefined 
-				AND aAlarmList[i].nEmergencyLED > E_MonitoringLedFunction.eUndefined) THEN
+        bAlarmActive := TRUE;
+        IF nLEDAlarmID = 0
+            OR (nAbnormalLED = E_MonitoringLedFunction.eUndefined
+                AND nEmergencyLED = E_MonitoringLedFunction.eUndefined
+                AND aAlarmList[i].nAbnormalLED > E_MonitoringLedFunction.eUndefined)
+            OR (nEmergencyLED = E_MonitoringLedFunction.eUndefined
+                AND aAlarmList[i].nEmergencyLED > E_MonitoringLedFunction.eUndefined) THEN
             nLEDAlarmID := i;
             sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
             nEmergencyLED := aAlarmList[i].nEmergencyLED;
@@ -320,11 +320,11 @@ FOR i:=1 TO nMaxAlarms DO
             nAcknowledgeLED := 0;
         END_IF
     END_IF
-	mErrorMessage(sErrorMessage:=aAlarmList[i].sErrorMsg, nErrorID:=aAlarmList[i].nErrorID);
-	
-	IF fbErrorMessageTON.Q THEN
-		bAlarmActive := FALSE;
-	END_IF
+    mErrorMessage(sErrorMessage:=aAlarmList[i].sErrorMsg, nErrorID:=aAlarmList[i].nErrorID);
+
+    IF fbErrorMessageTON.Q THEN
+        bAlarmActive := FALSE;
+    END_IF
 END_FOR
 
 fbFastBlinkOn(IN:=NOT fbFastBlinkOff.q , PT:=T#250MS , Q=> , ET=> );
@@ -384,30 +384,30 @@ nActualEcSlaves:=UINT_TO_INT(fbGetEcSlaveStates.nSlaves);
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
 
 IF fbEtherCATAlarmDelayTON.Q THEN
-	bStartEtherCATdelayTON := FALSE;
-	bEtherCATInitialized := TRUE;
+    bStartEtherCATdelayTON := FALSE;
+    bEtherCATInitialized := TRUE;
 END_IF
 
 IF bEtherCATInitialized THEN
-	FOR i:=0 TO nActualEcSlaves-1 DO
-    	IF i = 0 THEN
-        	bSlaveStateNotOP := FALSE;
-        	bSlaveLinkNotOK := FALSE;
-    	END_IF
-    	IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
-        	bSlaveStateNotOP := TRUE;
-    	END_IF
-    	IF i = nActualEcSlaves-1 THEN
-			IF NOT stSlaveState[i].linkState = EC_LINK_STATE_OK 
-		       OR NOT stSlaveState[i].linkState = EC_LINK_STATE_MISSING_LINK THEN
-			  	bSlaveLinkNotOK := TRUE;
-			END_IF   
-		ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
-        	bSlaveLinkNotOK := TRUE;
-    	END_IF
-	END_FOR
+    FOR i:=0 TO nActualEcSlaves-1 DO
+        IF i = 0 THEN
+            bSlaveStateNotOP := FALSE;
+            bSlaveLinkNotOK := FALSE;
+        END_IF
+        IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
+            bSlaveStateNotOP := TRUE;
+        END_IF
+        IF i = nActualEcSlaves-1 THEN
+            IF NOT stSlaveState[i].linkState = EC_LINK_STATE_OK
+               OR NOT stSlaveState[i].linkState = EC_LINK_STATE_MISSING_LINK THEN
+                  bSlaveLinkNotOK := TRUE;
+            END_IF
+        ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
+            bSlaveLinkNotOK := TRUE;
+        END_IF
+    END_FOR
 ELSE
-	bStartEtherCATdelayTON := TRUE;
+    bStartEtherCATdelayTON := TRUE;
 END_IF
 
 //Check ethercat master device state
@@ -455,7 +455,7 @@ VAR
 END_VAR
 
 VAR_INST
-	bFirstPrint: BOOL := TRUE;
+    bFirstPrint: BOOL := TRUE;
 END_VAR
 ]]></Declaration>
       <Implementation>
