@@ -8,7 +8,6 @@ STRUCT
     eLimitSwitchSignalProbe: E_TouchProbe := PlcEvent;
     eRefSwitchSignalSource: E_SignalSource := SignalSource_Default;
     eRefSwitchSignalProbe: E_TouchProbe := PlcEvent;
-    bRefSwitchSignalLevel: BOOL; //Home Senosr signal
     eEncPulseSignalSource: E_SignalSource := SignalSource_ZeroPulse;
     eEncPulseSignalProbe: E_TouchProbe  := TouchProbe1;
 
