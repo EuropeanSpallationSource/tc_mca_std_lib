@@ -23,9 +23,9 @@ TYPE E_HomingRoutines :
     //Home to bHome in Fwd direction (will reverse direction if limit hit), record position on first approach
     eHomeToRef_Fwd := 12,
     //Find bHome in Bwd direction (using towardsCam speed) then reverse direction looking for falling edge (using fromCam speed), will reverse direction if limit hit
-    //eHomeToRef_Bwd_2Speeds := 13,
+    eHomeToRef_Bwd_2Speeds := 13,
     //Find bHome in Fwd direction (using towardsCam speed) then reverse direction looking for falling edge (using fromCam speed), will reverse direction if limit hit
-    //eHomeToRef_Fwd_2Speeds := 14,
+    eHomeToRef_Fwd_2Speeds := 14,
 
     //2X: Enc Pulse
     //Home to EncRefPulse in Bwd direction (used for single turn rotary axis without limit switches)
@@ -85,6 +85,16 @@ END_TYPE
             <o>
               <v n="TextID">"eHomeToRef_Fwd"</v>
               <v n="TextDefault">"12"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToRef_Bwd_2Speeds"</v>
+              <v n="TextDefault">"13"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToRef_Fwd_2Speeds"</v>
+              <v n="TextDefault">"14"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
