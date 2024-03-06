@@ -13,9 +13,15 @@ STRUCT
     fHomeFinishDistance: LREAL := 0; //Distrance that the axis should move back into the working zone after homing is finished
     eHomeSeq: E_HomingRoutines; //Homing sequence to perform
     eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
+    bEnableStopWithAnyLimitSwitch :BOOL := TRUE; //Bwd and Fwd movements can be disabled by any of the limit switch, in order to avoid issues during comissioning
 
     //Advanced homing parameters
     stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
+
+    //Temperature disable configuration
+    bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
+    fMaxTemperature: LREAL := 0.0;
+    fTempScalingFactor: REAL := 10.0;
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters

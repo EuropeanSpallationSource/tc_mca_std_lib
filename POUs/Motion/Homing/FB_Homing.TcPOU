@@ -26,7 +26,7 @@ VAR
     //Beckhoff homing function blocks
     fbStepLimitSwitchPreparation: MC_StepLimitSwitchDetection;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
-	fbStepAbsoluteSwitchPreparation: MC_StepAbsoluteSwitchDetection;
+    fbStepAbsoluteSwitchPreparation: MC_StepAbsoluteSwitchDetection;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulseDetection: MC_StepReferencePulseDetection;
     fbStepBlockLagDetection: MC_StepBlockLagBasedDetection;
@@ -35,9 +35,8 @@ VAR
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
     //Hardware Signals
-    eLocalLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    eLocalLimitSwitchMode: MC_Switch_Mode;
     stLimitSwitchSignal: MC_Ref_Signal_Ref;
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stRefSwitchSignal: MC_Ref_Signal_Ref;
     stEncPulseSignal: MC_Ref_Signal_Ref;
     //Homing parameters
@@ -53,7 +52,7 @@ VAR
     //State machine
     fbExecute: R_TRIG;
     bViaLimitSwitch: BOOL;
-	bViaHomeSensor: BOOL;
+    bViaHomeSensor: BOOL;
     eHomingState: (eWaitForRequest := 0, ePreparation := 1, eDetection := 2, eSetPos := 3, eFinishHoming := 4, eAbortHoming := 20);
     iErrorId: UDINT;
     bDetectionFB_Execute: BOOL;
@@ -110,9 +109,11 @@ END_IF
 
 //Common function blocks used for all routines
 stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
 
 //For StepBlockLagDetection
 stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(
@@ -125,15 +126,15 @@ fbStepLimitSwitchPreparation(
 
 fbStepAbsoluteSwitchPreparation.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
 fbStepAbsoluteSwitchPreparation(
-	Axis:= Axis, 
-	Parameter:= stHomingParameter, 
-	Direction:= stPreparationDirection, 
-	SwitchMode:= mcFallingEdge, 
-	ReferenceSignal:= stRefSwitchSignal, 
-	Velocity:= fVelocityToCam, 
+    Axis:= Axis,
+    Parameter:= stHomingParameter,
+    Direction:= stPreparationDirection,
+    SwitchMode:= mcFallingEdge,
+    ReferenceSignal:= stRefSwitchSignal,
+    Velocity:= fVelocityToCam,
     PositiveLimitSwitch := NOT(bLimitFwd),
     NegativeLimitSwitch := NOT(bLimitBwd));
-	
+
 fbSetPos(
     Axis := Axis,
     Position := Axis.NcToPlc.ActPos - fRecordedPositionLatched + fHomePosition);
@@ -159,7 +160,7 @@ CASE eHomeSeq OF
 
     E_HomingRoutines.eHomeToRef_Bwd,
     E_HomingRoutines.eHomeToRef_Fwd,
-	E_HomingRoutines.eHomeToRef_Bwd_2Speeds,
+    E_HomingRoutines.eHomeToRef_Bwd_2Speeds,
     E_HomingRoutines.eHomeToRef_Fwd_2Speeds:
         actHomeToRef();
 
@@ -193,7 +194,7 @@ CASE eHomingState OF
 
             fbStepLimitSwitchPreparation.Execute := FALSE;
             fbStepLimitSwitchDetection.Execute := FALSE;
-			fbStepAbsoluteSwitchPreparation.Execute := FALSE;
+            fbStepAbsoluteSwitchPreparation.Execute := FALSE;
             fbStepAbsoluteSwitchDetection.Execute := FALSE;
             fbStepReferencePulseDetection.Execute := FALSE;
             fbStepBlockLagDetection.Execute := FALSE;
@@ -212,30 +213,30 @@ CASE eHomingState OF
     ePreparation: //If bViaLimitSwitch is set TRUE then go first to a limit otherwise skip this step
         IF bViaLimitSwitch THEN
             fbStepLimitSwitchPreparation.Execute := TRUE;
+
+            IF NOT fbStepLimitSwitchPreparation.Busy AND fbStepLimitSwitchPreparation.Done THEN
+                fbStepLimitSwitchPreparation.Execute := FALSE;
+                eHomingState := eDetection;
+               ELSIF NOT fbStepLimitSwitchPreparation.Busy AND (fbStepLimitSwitchPreparation.Error OR fbStepLimitSwitchPreparation.CommandAborted) THEN
+                iErrorID := fbStepLimitSwitchPreparation.ErrorID;
+                fbStepLimitSwitchPreparation.Execute := FALSE;
+                eHomingState := eAbortHoming;
+            END_IF
+
         ELSIF bViaHomeSensor THEN
-			fbStepAbsoluteSwitchPreparation.Execute := TRUE;
-		ELSE
-            eHomingState := eDetection;
-        END_IF
+            fbStepAbsoluteSwitchPreparation.Execute := TRUE;
 
-        IF NOT fbStepLimitSwitchPreparation.Busy AND fbStepLimitSwitchPreparation.Done THEN
-            fbStepLimitSwitchPreparation.Execute := FALSE;
+            IF NOT fbStepAbsoluteSwitchPreparation.Busy AND fbStepAbsoluteSwitchPreparation.Done THEN
+                fbStepAbsoluteSwitchPreparation.Execute := FALSE;
+                eHomingState := eDetection;
+               ELSIF NOT fbStepAbsoluteSwitchPreparation.Busy AND (fbStepAbsoluteSwitchPreparation.Error OR fbStepAbsoluteSwitchPreparation.CommandAborted) THEN
+                iErrorID := fbStepAbsoluteSwitchPreparation.ErrorID;
+                fbStepAbsoluteSwitchPreparation.Execute := FALSE;
+                eHomingState := eAbortHoming;
+            END_IF
+        ELSE
             eHomingState := eDetection;
-        ELSIF NOT fbStepLimitSwitchPreparation.Busy AND (fbStepLimitSwitchPreparation.Error OR fbStepLimitSwitchPreparation.CommandAborted) THEN
-            iErrorID := fbStepLimitSwitchPreparation.ErrorID;
-            fbStepLimitSwitchPreparation.Execute := FALSE;
-            eHomingState := eAbortHoming;
         END_IF
-		
-		IF NOT fbStepAbsoluteSwitchPreparation.Busy AND fbStepAbsoluteSwitchPreparation.Done THEN
-            fbStepAbsoluteSwitchPreparation.Execute := FALSE;
-            eHomingState := eDetection;
-        ELSIF NOT fbStepAbsoluteSwitchPreparation.Busy AND (fbStepAbsoluteSwitchPreparation.Error OR fbStepAbsoluteSwitchPreparation.CommandAborted) THEN
-            iErrorID := fbStepAbsoluteSwitchPreparation.ErrorID;
-            fbStepAbsoluteSwitchPreparation.Execute := FALSE;
-            eHomingState := eAbortHoming;
-        END_IF
-
 
     eDetection: //Use bDetectionFB_<BOOL Variables> to interact with different detection FBs located in ACTs
         bDetectionFB_Execute := TRUE;
@@ -474,25 +475,25 @@ CASE eHomeSeq OF
     E_HomingRoutines.eHomeToRef_Bwd:
         stDetectDirection := mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
-		eLocalLimitSwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
-		bViaHomeSensor := FALSE;
+        eLocalLimitSwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
+        bViaHomeSensor := FALSE;
     E_HomingRoutines.eHomeToRef_Fwd:
         stDetectDirection := mcPositiveDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
-		eLocalLimitSwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
-		bViaHomeSensor := FALSE;
+        eLocalLimitSwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
+        bViaHomeSensor := FALSE;
     E_HomingRoutines.eHomeToRef_Bwd_2Speeds:
         stDetectDirection := mcNegativeDirection;
-		stPreparationDirection := mcNegativeDirection;
+        stPreparationDirection := mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
-		eLocalLimitSwitchMode := mcRisingEdge;
-		bViaHomeSensor := TRUE;
+        eLocalLimitSwitchMode := mcRisingEdge;
+        bViaHomeSensor := TRUE;
     E_HomingRoutines.eHomeToRef_Fwd_2Speeds:
         stDetectDirection := mcPositiveDirection;
-		stPreparationDirection := mcPositiveDirection;
+        stPreparationDirection := mcPositiveDirection;
         fbFinishHoming.Distance := -fHomeFinishDistance;
-		eLocalLimitSwitchMode := mcRisingEdge;
-		bViaHomeSensor := TRUE;
+        eLocalLimitSwitchMode := mcRisingEdge;
+        bViaHomeSensor := TRUE;
 END_CASE
 
 bViaLimitSwitch := FALSE;
