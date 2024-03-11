@@ -32,6 +32,9 @@ CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
     E_PneumaticMode.eSingleSolenoidControl:
     mSingleSolenoid();
 
+    E_PneumaticMode.eWarning:
+    mSingleSolenoidWarning();
+
     E_PneumaticMode.eError:
     mSingleSolenoidError();
 
@@ -170,13 +173,20 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
-          stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-          stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock := FALSE;
 ELSIF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
-            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-            stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eInterlockOn;
-            stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eWarning;
+    ELSE
+        stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+        stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+        stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
     END_IF
+
+
+
+
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -186,13 +196,12 @@ ELSIF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
-          stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-          stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := FALSE;
 ELSIF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
-           stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-           stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
-           stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
-    END_IF
+    stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+    stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+END_IF
 
 ]]></ST>
       </Implementation>
@@ -340,6 +349,7 @@ END_IF
 //Check if LimitSwitchBwd signal is ON
 mCheckEndSwitchFwdStatus();
 
+
 //Starting the retraction movement and retraction timing
 fbTimerRetract (IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting);
 
@@ -371,6 +381,7 @@ IF  (bStartRetractPLC OR bStartRetractManual) AND stPneumaticAxisStruct.stPneuma
 END_IF
 //Check if LimitSwitchFwd signal is ON
 mCheckEndSwitchBwdStatus();
+
 
 mCheckForMovingError();
 ]]></ST>
@@ -422,9 +433,6 @@ mCheckForMovingError();
     stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL';
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
 
-    E_PneumaticAxisErrors.eInterlockOn:
-    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: INTERLOCK SIGNAL ON';
-    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
 
 END_CASE
 
@@ -438,6 +446,26 @@ bStartRetractManual := FALSE;
 bStartRetractPLC := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSingleSolenoidWarning" Id="{fe00d9da-b558-4fd6-9fcb-c5b4ecaeba18}">
+      <Declaration><![CDATA[METHOD mSingleSolenoidWarning
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE.';
+IF stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracted OR stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting THEN
+    bStartExtendPLC := FALSE;
+    bStartExtendManual := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
+ELSIF stPneumaticAxisStruct.stPneumaticAxisStatus.bExtended OR stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending THEN
+    bStartRetractPLC := FALSE;
+    bStartRetractManual := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
