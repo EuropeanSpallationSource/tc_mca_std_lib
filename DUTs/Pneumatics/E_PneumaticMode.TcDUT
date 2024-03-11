@@ -6,7 +6,8 @@
 TYPE E_PneumaticMode :
 (   eSingleSolenoidControl := 0, //Single solenoid valve with spring return
     eReset := 1,
-    eError := 2
+    eWarning := 2,
+    eError := 3
 ):= eSingleSolenoidControl;
 END_TYPE
 ]]></Declaration>
