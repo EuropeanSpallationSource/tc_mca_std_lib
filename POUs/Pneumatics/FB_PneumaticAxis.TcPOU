@@ -169,11 +169,14 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
+        <ST><![CDATA[IF stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
+          stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+          stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock := FALSE;
+ELSIF stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
             stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
             stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eInterlockOn;
             stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
+    END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -183,7 +186,8 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
-       stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := TRUE;
+          stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+          stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := FALSE;
 ELSIF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
            stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
            stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
@@ -223,12 +227,6 @@ mSetAllowedTravelTime();
 
 //Get the value of the air pressure in mb
 stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  stPneumaticAxisStruct.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-
-//Check if Permit signal is ON
-mCheckStatusOfPermitSignal();
-
-//Check if Interlock signal is ON
-mCheckStatusOfInterlockSignal();
 
 //Check if air pressure is in range
 mCheckForAirPressureError();
@@ -291,7 +289,13 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Starting the timing of extraction movement
+        <ST><![CDATA[//Check if Ithe PSS signal for shutter is ON
+mCheckStatusOfPermitSignal();
+
+//Check if Interlock signal is ON
+mCheckStatusOfInterlockSignal();
+
+//Starting the timing of extraction movement
 fbTimerExtend(IN := stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending);
 
 fbTrigExtend(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bExtend);
