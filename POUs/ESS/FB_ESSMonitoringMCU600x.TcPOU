@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_ESSMonitoringMCU500x" Id="{dc25224c-2805-4e0c-98fe-daa6f852a4e2}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU500x
+  <POU Name="FB_ESSMonitoringMCU600x" Id="{72d47b8a-c938-4d0a-b1a6-1abaa05f5bcd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU600x
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -189,7 +189,7 @@ actMonitorCPU();
 actMonitorEtherCAT();
 ]]></ST>
     </Implementation>
-    <Action Name="actMonitorAlarms" Id="{05cd06da-6727-4135-9b29-65a4335223b8}">
+    <Action Name="actMonitorAlarms" Id="{5f072797-63a7-454b-aa37-b4b45e00fe55}">
       <Implementation>
         <ST><![CDATA[
 aAlarmList[1].bAlarmSet := NOT b24VDC1_OK;
@@ -351,7 +351,7 @@ bAcknowledgeLED := (nAcknowledgeLED = E_MonitoringLedFunction.eSteady) OR (nAckn
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actMonitorCPU" Id="{db0cbd89-0ab0-45d1-9643-6542a9f72fa2}">
+    <Action Name="actMonitorCPU" Id="{ea8b4968-eaac-48c6-b73b-dc2739c9c62a}">
       <Implementation>
         <ST><![CDATA[
 //Cpu Monitor
@@ -366,7 +366,7 @@ bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actMonitorEtherCAT" Id="{a4594d19-0db5-4810-8e12-099bc24ca287}">
+    <Action Name="actMonitorEtherCAT" Id="{66143d86-cae4-40d7-b700-107a846879fd}">
       <Implementation>
         <ST><![CDATA[
 //Read frames
@@ -429,7 +429,7 @@ bEcMasterNotOK := nEcMasterDevState > 0;
 ]]></ST>
       </Implementation>
     </Action>
-    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
+    <Method Name="mAlarm" Id="{eda5f29d-6588-4007-ac50-a40ee8423efe}">
       <Declaration><![CDATA[METHOD mAlarm : BOOL
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
@@ -444,7 +444,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
+    <Method Name="mErrorMessage" Id="{88eedd97-7f8b-4b12-b1d7-33096325912e}">
       <Declaration><![CDATA[METHOD mErrorMessage : BOOL
 VAR_INPUT
     sErrorMessage: STRING;
