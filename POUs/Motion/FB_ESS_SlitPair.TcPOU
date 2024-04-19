@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_ESS_SlitPair" Id="{38e2a901-dcfb-4ff9-9f74-5b52f47e9b69}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESS_SlitPair
+VAR_IN_OUT
+    stBladeNegativeAxis: ST_AxisStruct;
+    stBladePositiveAxis: ST_AxisStruct;
+    stGapAxis: ST_AxisStruct;
+    stCenterAxis: ST_AxisStruct;
+END_VAR
+VAR_INPUT
+    fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
+END_VAR
+VAR_OUTPUT
+    bEnabled: BOOL := FALSE; //Enabled status of function
+    bError: BOOL; //Error status of function
+    bHoming: BOOL := FALSE; //TRUE if function is homing axes
+END_VAR
+VAR
+    fbSlitPair: FB_SlitPair_1;
+    fbErrorToAxisTrig: R_TRIG;
+    fbErrorToAxisTON: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF stGapAxis.stStatus.bEnabled OR stCenterAxis.stStatus.bEnabled THEN
+    stBladeNegativeAxis.stControl.bEnable := stGapAxis.stStatus.bEnabled OR stCenterAxis.stStatus.bEnabled;
+    stBladePositiveAxis.stControl.bEnable := stGapAxis.stStatus.bEnabled OR stCenterAxis.stStatus.bEnabled;
+    IF stBladeNegativeAxis.stStatus.bEnabled AND stBladePositiveAxis.stStatus.bEnabled THEN
+        fbSlitPair.bEnable := TRUE;
+    END_IF
+ELSE
+    fbSlitPair.bEnable := FALSE;
+END_IF
+
+IF stGapAxis.stControl.bReset OR stCenterAxis.stControl.bReset THEN
+    fbSlitPair.bReset := TRUE;
+END_IF
+
+IF stGapAxis.stStatus.bHomed OR stCenterAxis.stStatus.bHomed THEN
+    fbSlitPair.bAutoHome := TRUE;
+END_IF
+
+fbErrorToAxisTON(IN:=bError AND NOT fbErrorToAxisTON.q , PT:=T#4S , Q=> , ET=> );
+fbErrorToAxisTrig(CLK:= NOT fbErrorToAxisTON.q AND bError, Q=> );
+IF fbErrorToAxisTrig.q THEN
+    stGapAxis.stStatus.bError := TRUE;
+    stCenterAxis.stStatus.bError := TRUE;
+END_IF
+
+
+IF stBladeNegativeAxis.Axis.NcToPlc.AxisId <> 0 AND stBladePositiveAxis.Axis.NcToPlc.AxisId <> 0 AND stGapAxis.Axis.NcToPlc.AxisId <> 0 AND stCenterAxis.Axis.NcToPlc.AxisId <> 0 THEN
+    fbSlitPair(
+        iBladeNegative:= UDINT_TO_UINT(stBladeNegativeAxis.Axis.NcToPlc.AxisId),
+        iBladePositive:= UDINT_TO_UINT(stBladePositiveAxis.Axis.NcToPlc.AxisId),
+        iGapSize:= UDINT_TO_UINT(stGapAxis.Axis.NcToPlc.AxisId),
+        iGapCentre:= UDINT_TO_UINT(stCenterAxis.Axis.NcToPlc.AxisId),
+        fEncoderScaling:= fEncoderScaling,
+        bEnabled=> bEnabled,
+        bError=> bError,
+        bHoming=> bHoming);
+END_IF;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

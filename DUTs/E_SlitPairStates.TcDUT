@@ -5,7 +5,7 @@
 {attribute 'strict'}
 TYPE E_SlitPairStates :
 (
-    INIT := 0,
+    INIT,
     INIT_CLEAR_GEARING,
     INIT_GEAROUT_CHECK,
     CHECK_HOME_STATUS,
@@ -16,6 +16,7 @@ TYPE E_SlitPairStates :
     GEARIN_SLITS,
     CHECK_GEARIN_SLITS_COMPLETE,
     SLITS_OPERATIONAL,
+    SLITS_BUSY,
     GEAROUT_BLADES,
     CHECK_GEAROUT_COMPLETE,
     CLEAR_GAP_CALIBRATION,
@@ -24,7 +25,7 @@ TYPE E_SlitPairStates :
     ERROR_GEAROUT_CHECK,
     ERROR_RESET_AXES,
     ERROR_RESET_CHECK
-);
+):=INIT;
 END_TYPE
 ]]></Declaration>
   </DUT>

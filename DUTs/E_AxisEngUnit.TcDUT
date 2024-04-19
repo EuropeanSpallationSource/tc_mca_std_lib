@@ -5,9 +5,9 @@
 {attribute 'strict'}
 TYPE E_AxisEngUnit :
 (
-    eMeter := 0,
-    eDegree := 1
-) := eMeter;
+    eMilimeter := 16#FD04, //PILS code for mm
+    eDegree := 16#000C //PILS code for degree
+) := eMilimeter;
 END_TYPE
 ]]></Declaration>
   </DUT>
