@@ -11,11 +11,12 @@ TYPE E_PneumaticAxisErrors :
     eNotMovingExtract := 3, //Extract command not executed, cylinder stays in place
     eNotMovingRetract := 4, //Retract command not executed, cylinder stays in place
     eNoPSSPermit := 5, //Permit signal lost, and trying to move
-    eInterlockOn := 6, //Interlock ON, and trying to move
-    eAirPressureErrorLow := 7, //Air pressure too low
-    eAirPressureErrorHigh := 8, //Air pressure too high
-    eNoSignalFromEndSwitchBwd :=9, //Lost signal from the EndSwitchBwd
-    eNoSignalFromEndSwitchFwd :=10 //Lost signal from the EndSwitchFwd
+    eRetractInterlocked := 6, //Cylinder interlocked, but given signal to Extend
+    eExtendInterlocked := 7, //Cylinder interlocked, but given signal to Retract
+    eAirPressureErrorLow := 8, //Air pressure too low
+    eAirPressureErrorHigh := 9, //Air pressure too high
+    eNoSignalFromEndSwitchBwd := 10, //Lost signal from the EndSwitchBwd
+    eNoSignalFromEndSwitchFwd := 11 //Lost signal from the EndSwitchFwd
 ):= eNoError;
 END_TYPE
 ]]></Declaration>
