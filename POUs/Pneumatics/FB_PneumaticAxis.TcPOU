@@ -63,6 +63,12 @@ CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
         E_PneumaticMode.eCylinderExtendInterlockedError:
         mExtendedInterlockedError();
 
+        E_PneumaticMode.eLowAirPressure:
+        mLowAirPressure();
+
+        E_PneumaticMode.eHighAirPressure:
+        mHighAirPressure();
+
         E_PneumaticMode.eError:
         mSingleSolenoidError();
 
@@ -150,7 +156,7 @@ IF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled < stPneumati
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
         bAirPressureoutOfRangeError := TRUE;
         stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorLow;
-        stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+        stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eLowAirPressure;
     END_IF
 
 //Check if the air pressure value is too high for longer than defined time
@@ -160,7 +166,7 @@ ELSIF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled > stPneum
         stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
         bAirPressureoutOfRangeError := TRUE;
         stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorHigh;
-        stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
+        stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eHighAirPressure;
     END_IF
 
 //If the air pressure value is in range, no errors
@@ -248,15 +254,7 @@ END_IF
         <ST><![CDATA[IF NOT stPneumaticAxisStruct.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
     stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit := FALSE;
 ELSIF NOT stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
-    //stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-    //stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermit;
-    //IF (stPneumaticAxisStruct.stPneumaticAxisControl.bExtend OR stPneumaticAxisStruct.stPneumaticAxisInputs.bOpenManual OR stPneumaticAxisStruct.stPneumaticAxisControl.bRetract OR stPneumaticAxisStruct.stPneumaticAxisInputs.bCloseManual) OR bNoPSSPermitError THEN
-    //bNoPSSPermitError := TRUE;
-    //stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
-    //stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
-    //stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eError;
-    //END_IF
     ELSIF stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
         stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
         stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
@@ -306,6 +304,62 @@ IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
 END_IF
 
 
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mHighAirPressure" Id="{a41851e4-8444-48e2-8f12-5249a689e7bc}">
+      <Declaration><![CDATA[METHOD mHighAirPressure : BOOL
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
+stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
+stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+bStateChange := FALSE;
+bStartExtendPLC := FALSE;
+bStartExtendManual := FALSE;
+bStartRetractManual := FALSE;
+bStartRetractPLC := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
+
+IF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled <= stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue THEN
+    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+    fbTimerAirPressureErrorHigh.IN := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mLowAirPressure" Id="{c0310bb5-42a6-4cfb-b918-7f4740f67c8e}">
+      <Declaration><![CDATA[METHOD mLowAirPressure : BOOL
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
+stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
+stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisOutputs.bValveOn := FALSE;
+bStateChange := FALSE;
+bStartExtendPLC := FALSE;
+bStartExtendManual := FALSE;
+bStartRetractManual := FALSE;
+bStartRetractPLC := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bExtending := FALSE;
+stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
+
+IF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled >= stPneumaticAxisStruct.stPneumaticAxisConfig.fLowLimitPressureValue THEN
+    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+    fbTimerAirPressureErrorLow.IN := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -373,13 +427,6 @@ IF fbTrigRisingEdgePermit.Q THEN
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
     stPneumaticAxisStruct.stPneumaticAxisControl.bReset := FALSE;
-        //IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
-        //    bInterlockedExtended:= FALSE;
-        //    bInterlockedRetracted:= FALSE;
-        //END_IF
-        //IF stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
-        //     bNoPSSPermitError := FALSE;
-        //END_IF
 END_IF
 ]]></ST>
       </Implementation>
@@ -604,14 +651,6 @@ mCheckForMovingError();
 
     E_PneumaticAxisErrors.eNoError:
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
-
-    E_PneumaticAxisErrors.eAirPressureErrorLow:
-    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
-    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
-
-    E_PneumaticAxisErrors.eAirPressureErrorHigh:
-    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
-    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
 
     E_PneumaticAxisErrors.eExtractTimedOut:
     stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: COMMAND TIMED OUT';
