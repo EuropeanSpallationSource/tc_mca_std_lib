@@ -5,12 +5,14 @@
 {attribute 'strict'}
 TYPE E_PneumaticMode :
 (   eSingleSolenoidControl := 0, //Single solenoid valve with spring return
-    eCylinderRetractInterlocked := 1,
-    eCylinderExtendInterlocked := 2,
-    eCylinderRetractInterlockedError := 3,
-    eCylinderExtendInterlockedError := 4,
-    eReset := 5,
-    eError := 6
+    eNoPSSPermit := 1,
+    eNoPSSPermitError := 2,
+    eCylinderRetractInterlocked := 3,
+    eCylinderExtendInterlocked := 4,
+    eCylinderRetractInterlockedError := 5,
+    eCylinderExtendInterlockedError := 6,
+    eReset := 7,
+    eError := 8
 ):= eSingleSolenoidControl;
 END_TYPE
 ]]></Declaration>
