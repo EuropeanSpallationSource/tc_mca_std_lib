@@ -11,8 +11,10 @@ TYPE E_PneumaticMode :
     eCylinderExtendInterlocked := 4,
     eCylinderRetractInterlockedError := 5,
     eCylinderExtendInterlockedError := 6,
-    eReset := 7,
-    eError := 8
+    eLowAirPressure := 7,
+    eHighAirPressure := 8,
+    eReset := 9,
+    eError := 10
 ):= eSingleSolenoidControl;
 END_TYPE
 ]]></Declaration>
