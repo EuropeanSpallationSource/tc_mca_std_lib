@@ -289,6 +289,14 @@ stPneumaticAxisStruct.stPneumaticAxisInputs.bCloseManual := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisControl.bRetract := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
+IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
+    bInterlockedExtended := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+END_IF
+
 
 ]]></ST>
       </Implementation>
@@ -325,10 +333,10 @@ IF fbTrigRisingEdgePermit.Q THEN
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
     stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
     stPneumaticAxisStruct.stPneumaticAxisControl.bReset := FALSE;
-        IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
-            bInterlockedExtended:= FALSE;
-            bInterlockedRetracted:= FALSE;
-        END_IF
+        //IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
+        //    bInterlockedExtended:= FALSE;
+        //    bInterlockedRetracted:= FALSE;
+        //END_IF
         IF stPneumaticAxisStruct.stPneumaticAxisInputs.bPSSPermit THEN
              bNoPSSPermitError := FALSE;
         END_IF
@@ -365,6 +373,13 @@ stPneumaticAxisStruct.stPneumaticAxisInputs.bOpenManual := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisControl.bExtend := FALSE;
 stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 stPneumaticAxisStruct.stPneumaticAxisStatus.bError := TRUE;
+IF NOT stPneumaticAxisStruct.stPneumaticAxisControl.bInterlock THEN
+    stPneumaticAxisStruct.stPneumaticAxisStatus.bError := FALSE;
+    bInterlockedRetracted:= FALSE;
+    stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+END_IF
 
 
 
