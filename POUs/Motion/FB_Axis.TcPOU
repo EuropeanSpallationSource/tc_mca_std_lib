@@ -33,6 +33,9 @@ VAR
     fbMoveModulo2: MC_MoveModulo;
     stMcStatusMoveModulo: ST_McStatus;
 
+    fbBacklashCompensation: MC_BacklashCompensation;
+    stMcStatusBacklash: ST_McStatus;
+
     fbHome: FB_Homing;
     stMcStatusHome: ST_McStatus;
 
@@ -78,7 +81,9 @@ VAR
     fbReadAxisMaxPosLagValue: MC_ReadParameter;
     fbReadEnTargetPositionMonitoring: MC_ReadParameter;
     fbReadTargetPositionWindow: MC_ReadParameter;
+    fbReadBacklashConfigEnable: MC_ReadParameter;
 
+	
     //Edge detection triggers for statuses
     fbDoneRTrig: R_TRIG;
     fbErrorRTrig: R_TRIG;
@@ -98,7 +103,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 13;
+    nMCSTATUS_ARRAY_SIZE: UINT := 14;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -143,7 +148,42 @@ astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
 astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
-]]></ST>
+astMcStatus[14] := ADR(stMcStatusBacklash);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mCompensate_Backlash" Id="{7107def5-ab6b-4951-863c-ccb3332d09d0}" FolderPath="Move Methods\">
+      <Declaration><![CDATA[METHOD mCompensate_Backlash : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Backlash compensation function
+// Position compensation needs to be enabled in NC to use the backsash compensation
+
+
+IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
+
+	IF _stAxis.stStatus.bEnabled THEN
+		fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+		fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
+		fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
+		fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
+	ELSE
+		fbBacklashCompensation.Enable := FALSE;
+		fbBacklashCompensation.DisableMode := 1;
+	END_IF
+	
+    fbBacklashCompensation(Axis:= astAxes[1].Axis);
+
+END_IF
+
+
+IF fbBacklashCompensation.Error THEN
+    _stAxis.stError.nBacklashErrorID := fbBacklashCompensation.ErrorID;
+END_IF
+mCompensate_Backlash.Error := fbBacklashCompensation.Error;
+mCompensate_Backlash.ErrorID := fbBacklashCompensation.ErrorID;
+_stAxis.stStatus.bBacklashLimiting := fbBacklashCompensation.Limiting;]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_GearInMultiMaster" Id="{84e0c1c6-290e-43dc-a4d7-42efdf8dec13}" FolderPath="Control Methods\">
@@ -831,7 +871,15 @@ fbReadTargetPositionWindow(Axis := _stAxis.Axis,
                         ReadMode := READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisTargetPositionWindow,
                         Value => _stAxis.stConfig.fTargetPositionWindow);
+						
+// Position Compensation
+fbReadBacklashConfigEnable(Axis := _stAxis.Axis,
+                        Enable := TRUE,
+                        ReadMode := READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnablePosCorrection);
+_stAxis.stConfig.stBacklashConfig.bEnabledInNC := LREAL_TO_BOOL(fbReadBacklashConfigEnable.Value);
 
+						
 //All variables are valid
 _stAxis.stConfig.bReadMcParametersValid := FALSE;
 _stAxis.stConfig.bReadMcParametersValid := fbReadAxisVeloManSlow.Valid AND
@@ -1151,6 +1199,7 @@ stMcStatusGearInMultiMaster := mControl_GearInMultiMaster();
 stMcStatusGearOut := mControl_GearOut();
 
 stMcStatusHome := mControl_Home();
+stMcStatusBacklash := mCompensate_Backlash();
 
 mStatus_NewCommand();
 mStatus_Done();
