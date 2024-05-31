@@ -83,7 +83,7 @@ VAR
     fbReadTargetPositionWindow: MC_ReadParameter;
     fbReadBacklashConfigEnable: MC_ReadParameter;
 
-	
+
     //Edge detection triggers for statuses
     fbDoneRTrig: R_TRIG;
     fbErrorRTrig: R_TRIG;
@@ -163,16 +163,16 @@ END_VAR
 
 IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
 
-	IF _stAxis.stStatus.bEnabled THEN
-		fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
-		fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
-		fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
-		fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
-	ELSE
-		fbBacklashCompensation.Enable := FALSE;
-		fbBacklashCompensation.DisableMode := 1;
-	END_IF
-	
+    IF _stAxis.stStatus.bEnabled THEN
+        fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+        fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
+        fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
+        fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
+    ELSE
+        fbBacklashCompensation.Enable := FALSE;
+        fbBacklashCompensation.DisableMode := 1;
+    END_IF
+
     fbBacklashCompensation(Axis:= astAxes[1].Axis);
 
 END_IF
@@ -871,7 +871,7 @@ fbReadTargetPositionWindow(Axis := _stAxis.Axis,
                         ReadMode := READMODE_CYCLIC,
                         ParameterNumber := E_AxisParameters.AxisTargetPositionWindow,
                         Value => _stAxis.stConfig.fTargetPositionWindow);
-						
+
 // Position Compensation
 fbReadBacklashConfigEnable(Axis := _stAxis.Axis,
                         Enable := TRUE,
@@ -879,7 +879,7 @@ fbReadBacklashConfigEnable(Axis := _stAxis.Axis,
                         ParameterNumber := E_AxisParameters.AxisEnablePosCorrection);
 _stAxis.stConfig.stBacklashConfig.bEnabledInNC := LREAL_TO_BOOL(fbReadBacklashConfigEnable.Value);
 
-						
+
 //All variables are valid
 _stAxis.stConfig.bReadMcParametersValid := FALSE;
 _stAxis.stConfig.bReadMcParametersValid := fbReadAxisVeloManSlow.Valid AND

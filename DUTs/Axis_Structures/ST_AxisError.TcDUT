@@ -17,7 +17,7 @@ STRUCT
     nGearOutErrorID: UDINT;
     nWriteParameterErrorId: UDINT;
     nReadParameterErrorId: UDINT;
-	nBacklashErrorID: UDINT;
+    nBacklashErrorID: UDINT;
 //Error from the NC
     nNCErrorID : UDINT;
 END_STRUCT

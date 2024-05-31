@@ -18,9 +18,9 @@ STRUCT
     //Advanced homing parameters
     stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
 
-	// Backlash compensation config
+    // Backlash compensation config
     stBacklashConfig: ST_BacklashConfig;
-	
+
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
     fMaxTemperature: LREAL := 0.0;

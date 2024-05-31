@@ -22,7 +22,7 @@ STRUCT
     bInterlockedFwd: BOOL; //Axis interlocked in the postive direction
     bInterlockedBwd: BOOL; //Axis interlocked in the negative direction
     bGeared: BOOL; //Axis is an active slave
-	bBacklashLimiting: BOOL; // Axis is compensating for backlash
+    bBacklashLimiting: BOOL; // Axis is compensating for backlash
     bCoupledGear1: BOOL;
     bCoupledGear2: BOOL;
     bCoupledGear3: BOOL;
