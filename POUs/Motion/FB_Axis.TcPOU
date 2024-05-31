@@ -148,7 +148,8 @@ astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
 astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
-astMcStatus[14] := ADR(stMcStatusBacklash);]]></ST>
+astMcStatus[14] := ADR(stMcStatusBacklash);
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCompensate_Backlash" Id="{7107def5-ab6b-4951-863c-ccb3332d09d0}" FolderPath="Move Methods\">
@@ -183,7 +184,8 @@ IF fbBacklashCompensation.Error THEN
 END_IF
 mCompensate_Backlash.Error := fbBacklashCompensation.Error;
 mCompensate_Backlash.ErrorID := fbBacklashCompensation.ErrorID;
-_stAxis.stStatus.bBacklashLimiting := fbBacklashCompensation.Limiting;]]></ST>
+_stAxis.stStatus.bBacklashLimiting := fbBacklashCompensation.Limiting;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_GearInMultiMaster" Id="{84e0c1c6-290e-43dc-a4d7-42efdf8dec13}" FolderPath="Control Methods\">
