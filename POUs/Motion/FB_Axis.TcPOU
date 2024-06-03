@@ -184,7 +184,7 @@ IF fbBacklashCompensation.Error THEN
 END_IF
 mCompensate_Backlash.Error := fbBacklashCompensation.Error;
 mCompensate_Backlash.ErrorID := fbBacklashCompensation.ErrorID;
-_stAxis.stStatus.bBacklashLimiting := fbBacklashCompensation.Limiting;
+_stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
 ]]></ST>
       </Implementation>
     </Method>
