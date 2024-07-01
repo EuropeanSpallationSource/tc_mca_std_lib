@@ -41,6 +41,10 @@ VAR
 
     fbWriteParameter: MC_WriteParameter;
     stMcStatusWriteParameter: ST_McStatus;
+	
+	stMcStatusReadWriteCoE: ST_McStatus;
+	fb_coe_writeEx          : FB_EcCoESdoWriteEx; // Function Block for writing in CoE
+   	fb_coe_readEx           : FB_EcCoESdoReadEx;  // Function Block for reading from CoE
 
     fbGearIn: MC_GearIn;
     stMcStatusGearIn: ST_McStatus;
@@ -98,7 +102,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 13;
+    nMCSTATUS_ARRAY_SIZE: UINT := 14;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -143,6 +147,7 @@ astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
 astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
+astMcStatus[14] := ADR(stMcStatusReadWriteCoE);
 ]]></ST>
       </Implementation>
     </Method>
@@ -896,6 +901,164 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mParameters_ReadWriteCoE" Id="{18f1550d-9340-4c35-816f-9023e1a97d47}" FolderPath="Parameter Methods\">
+      <Declaration><![CDATA[METHOD PUBLIC mParameters_ReadWriteCoE : ST_McStatus]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE _stAxis.stConfig.stCoEParameters.nState OF
+
+-1:		// Read device name
+	fb_coe_readex(
+	   sNetId:= _stAxis.stConfig.stCoEParameters.sEthCATNetId, 
+	   nSlaveAddr:= INT_TO_WORD(_stAxis.stConfig.stCoEParameters.iSlaveAdressDrive), 
+	   nSubIndex:= , 
+	   nIndex:= 16#1008,
+	   pDstBuf:= ADR(_stAxis.stConfig.stCoEParameters.sDeviceName), 
+	   cbBufLen:= 80, 
+	   bExecute:= TRUE, 
+	   tTimeout:= T#1S, 
+	   bCompleteAccess := FALSE
+	   );
+	IF fb_coe_writeex.bError THEN
+      _stAxis.stConfig.stCoEParameters.nState := 100;     // Error case
+   	ELSE				   
+		IF NOT fb_coe_readex.bBusy THEN
+			_stAxis.stConfig.stCoEParameters.nState := 0;
+			fb_coe_readex(bExecute := FALSE);
+			//
+		END_IF
+	END_IF
+	
+0:
+   IF _stAxis.stControl.eCommand = E_MotionFunctions.eWriteCoEParameters AND _stAxis.stControl.bExecute THEN
+      // Prepare CoE-Access: Write value of CoE object/ sub index:
+      fb_coe_writeex(bExecute := FALSE);
+      _stAxis.stConfig.stCoEParameters.nState := 1;// Next state for writing
+	  _stAxis.stConfig.stCoEParameters.bDone := FALSE;
+   END_IF
+   IF _stAxis.stControl.eCommand = E_MotionFunctions.eReadCoEParameters AND _stAxis.stControl.bExecute THEN
+      // Prepare CoE-Access: Read value of CoE object/ sub index:
+      fb_coe_readex(bExecute := FALSE);
+      _stAxis.stConfig.stCoEParameters.nState := 11;// Next state for reading
+	  _stAxis.stConfig.stCoEParameters.bDone := FALSE;
+   END_IF
+
+   
+1:
+   // Write entry
+   fb_coe_writeEx(
+   sNetId:= _stAxis.stConfig.stCoEParameters.sEthCATNetId,
+   nSlaveAddr:= INT_TO_WORD(_stAxis.stConfig.stCoEParameters.iSlaveAdressDrive),
+   nSubIndex:= INT_TO_BYTE(_stAxis.stConfig.stCoEParameters.iSubIndex),
+   nIndex:= _stAxis.stConfig.stCoEParameters.iIndexDrive,
+   pSrcBuf:= ADR(_stAxis.stConfig.stCoEParameters.aMotorParWrite),
+   cbBufLen:= 2,
+   bExecute:= TRUE,
+   tTimeout:= T#1S,
+   bCompleteAccess := FALSE
+   );
+   _stAxis.stConfig.stCoEParameters.nState := _stAxis.stConfig.stCoEParameters.nState + 1; // Next state
+
+2:
+	// Execute CoE write until done
+   fb_coe_writeEx();       
+   IF fb_coe_writeEx.bError THEN
+      _stAxis.stConfig.stCoEParameters.nState := 100;     // Error case
+   ELSE
+	   IF NOT fb_coe_writeEx.bBusy THEN
+		   	fb_coe_writeEx(bExecute := FALSE);
+			_stAxis.stConfig.stCoEParameters.bDone := TRUE;	 
+			_stAxis.stConfig.stCoEParameters.nState := 0; // Done & Next
+	   END_IF
+   END_IF
+
+   
+// ============== COE READ =================
+11:
+	IF _stAxis.stConfig.stCoEParameters.iSlaveAdressDrive <>0 THEN
+	 	IF _stAxis.stConfig.stCoEParameters.iIndexDrive <>0 THEN
+			IF NOT fb_coe_readEx.bExecute THEN	
+				// Read entry
+				fb_coe_readEx(
+				   sNetId:= _stAxis.stConfig.stCoEParameters.sEthCATNetId, 
+				   nSlaveAddr:= INT_TO_WORD(_stAxis.stConfig.stCoEParameters.iSlaveAdressDrive), 
+				   nSubIndex:= INT_TO_BYTE(_stAxis.stConfig.stCoEParameters.iSubIndex), 
+				   nIndex:= (_stAxis.stConfig.stCoEParameters.iIndexDrive),
+				   pDstBuf:= ADR(_stAxis.stConfig.stCoEParameters.aMotorParRead), 
+				   cbBufLen:= 2, 
+				   bExecute:= TRUE, 
+				   tTimeout:= T#1S, 
+				   bCompleteAccess := FALSE
+				   );
+			END_IF
+				fb_coe_readEx();        // Execute CoE read until done
+				IF fb_coe_readEx.bError THEN
+					_stAxis.stConfig.stCoEParameters.nState := 100;     // Error case
+				ELSE
+				IF NOT fb_coe_readEx.bBusy THEN
+					 fb_coe_readEx(bExecute := FALSE);
+						 _stAxis.stConfig.stCoEParameters.bDone := TRUE;
+						 _stAxis.stConfig.stCoEParameters.iSubIndex := 1;
+					IF 	_stAxis.stConfig.stCoEParameters.iMode = 2 THEN    
+						_stAxis.stConfig.stCoEParameters.nState := 12;    // Done
+					ELSE
+						_stAxis.stConfig.stCoEParameters.nState := 0;    // Done & Next
+					END_IF
+				END_IF
+			END_IF
+		END_IF
+	END_IF   
+
+12:
+	IF _stAxis.stConfig.stCoEParameters.iSlaveAdressDrive <>0 THEN
+	 	IF _stAxis.stConfig.stCoEParameters.iIndexDrive <>0 THEN
+			IF NOT fb_coe_readEx.bExecute THEN	
+				// Read entry
+				fb_coe_readEx(
+				   sNetId:= _stAxis.stConfig.stCoEParameters.sEthCATNetId, 
+				   nSlaveAddr:= INT_TO_WORD(_stAxis.stConfig.stCoEParameters.iSlaveAdressFdBck), 
+				   nSubIndex:= INT_TO_BYTE(_stAxis.stConfig.stCoEParameters.iSubIndex), 
+				   nIndex:= (_stAxis.stConfig.stCoEParameters.iIndexDrive),
+				   pDstBuf:= ADR(_stAxis.stConfig.stCoEParameters.aFeedbackParRead), 
+				   cbBufLen:= 2, 
+				   bExecute:= TRUE, 
+				   tTimeout:= T#1S, 
+				   bCompleteAccess := FALSE
+				   );
+			END_IF
+				fb_coe_readEx();        // Execute CoE read until done
+				IF fb_coe_readEx.bError THEN
+					_stAxis.stConfig.stCoEParameters.nState := 100;     // Error case
+				ELSE
+				IF NOT fb_coe_readEx.bBusy THEN
+					 fb_coe_readEx(bExecute := FALSE);
+						 _stAxis.stConfig.stCoEParameters.bDone := TRUE;
+						 _stAxis.stConfig.stCoEParameters.iSubIndex := 1;
+						_stAxis.stConfig.stCoEParameters.nState := 0;    // Done
+				END_IF
+			END_IF
+		END_IF
+	END_IF    
+	
+100:
+    // Error handling..
+	IF _stAxis.stControl.bReset THEN
+		_stAxis.stConfig.stCoEParameters.nState := 0;
+		_stAxis.stConfig.stCoEParameters.iSubIndex := 1;
+	END_IF
+   ;  
+END_CASE
+
+mParameters_ReadWriteCoE.Busy := fb_coe_writeex.bBusy OR fb_coe_readex.bBusy;
+mParameters_ReadWriteCoE.Done := _stAxis.stConfig.stCoEParameters.bDone;
+mParameters_ReadWriteCoE.Error := fb_coe_readex.bError OR fb_coe_writeex.bError;
+IF fb_coe_readex.bError THEN
+	mParameters_ReadWriteCoE.ErrorID := fb_coe_readex.nErrId;
+ELSIF fb_coe_writeex.bError THEN
+	mParameters_ReadWriteCoE.ErrorID := fb_coe_writeex.nErrId;	
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mParameters_WriteParameter" Id="{35a7c0ca-fdb5-465b-bd2a-42d607d9d72f}" FolderPath="Parameter Methods\">
       <Declaration><![CDATA[METHOD mParameters_WriteParameter : ST_McStatus
 ]]></Declaration>
@@ -1133,6 +1296,7 @@ mParameters_ReadNc();
 mParameters_Init();
 stMcStatusReadParameter := mParameters_ReadParameter();
 stMcStatusWriteParameter := mParameters_WriteParameter();
+stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 
 mControl_LimitHitTimer();
 mControl_LimitLinking();
