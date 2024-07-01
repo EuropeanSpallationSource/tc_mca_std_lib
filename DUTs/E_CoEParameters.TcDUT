@@ -5,11 +5,11 @@
 {attribute 'strict'}
 TYPE E_CoEParameters :
 (
-	eMaximalCurrent := 1,
-	eReducedCurrent := 2,
-	eMotorCoilResistence := 4,
-	eFullSteps := 6,
-	eMotorCoilInductance := 10
+    eMaximalCurrent := 1,
+    eReducedCurrent := 2,
+    eMotorCoilResistence := 4,
+    eFullSteps := 6,
+    eMotorCoilInductance := 10
 );
 END_TYPE]]></Declaration>
   </DUT>

@@ -14,8 +14,8 @@ TYPE E_MotionFunctions :
     eHome := 10, //Run the homing routine for the axis
     eWriteParameter := 50, //Writes the set value to the set parameter once bExecute goes high
     eReadParameter := 60, //Reads a single Parameter
-	eWriteCoEParameters := 51, //Writes the set of values to the CoE once bExecute goes high
-    eReadCoEParameters := 61 //Reads the set of values from the CoE once bExecute goes high	
+    eWriteCoEParameters := 51, //Writes the set of values to the CoE once bExecute goes high
+    eReadCoEParameters := 61 //Reads the set of values from the CoE once bExecute goes high
 ) := eHome; //Home is the default behaviour of the axis.
 END_TYPE
 ]]></Declaration>
