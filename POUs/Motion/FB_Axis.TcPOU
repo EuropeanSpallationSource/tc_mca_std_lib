@@ -902,7 +902,8 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mParameters_ReadWriteCoE" Id="{18f1550d-9340-4c35-816f-9023e1a97d47}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[METHOD PUBLIC mParameters_ReadWriteCoE : ST_McStatus]]></Declaration>
+      <Declaration><![CDATA[METHOD PUBLIC mParameters_ReadWriteCoE : ST_McStatus
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE _stAxis.stConfig.stCoEParameters.nState OF
 
