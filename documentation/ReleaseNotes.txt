@@ -18,6 +18,13 @@ which will reset the third digit to 0.
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
+v2.4.0
+- Improvements:
+  - Pneumatic axis code was changed to OOP style, with methods instead of actions (MBP-229).
+- New features:
+  - A bool variable was added in the stConfig to prevent going full speed to a limit switch 
+    when comissioning (MBP-253)
+  - Pneumatic axis has a bool variable to configure if it is a safety shutter or not (MBP-274).
 
 v2.3.0
 - Improvements:
