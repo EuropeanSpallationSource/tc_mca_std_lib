@@ -3,20 +3,20 @@
   <DUT Name="ST_AxisCoE" Id="{538f0b76-83c6-4c79-8458-2b17fa20817b}">
     <Declaration><![CDATA[TYPE ST_AxisCoE :
 STRUCT
-	iMode 				: INT; //1 Just Drive - 2 Drive + Feedback
-	sEthCATNetId 		: T_AmsNetId := '172.18.22.110.2.1';
-	iSlaveAdressDrive	: INT := 1005; // Adress of the drive terminal
-   	iIndexDrive			: WORD := 16#8010; // Index of the drive terminal
-	iSlaveAdressFdBck	: INT := 1005; // Adress of the feedback terminal
-   	iIndexFdBck			: WORD := 16#8010;	// Index of the feedback terminal
-	eCoEParameters		: E_CoEParameters := E_CoEParameters.eMaximalCurrent;
-	aMotorParWrite		: ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to drive
-	aMotorParRead		: ARRAY[1..20] OF UINT; // CoE Parameters to be read from drive
-	aFeedBackParWrite	: ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to terminal
-	aFeedbackParRead	: ARRAY[1..20] OF UINT; // CoE Parameters to be read from terminal
-	sDeviceName			: STRING;
-	bDone				: BOOL;
-	nState				: INT;
+    iMode               : INT; //1 Just Drive - 2 Drive + Feedback
+    sEthCATNetId        : T_AmsNetId := '172.18.22.110.2.1';
+    iSlaveAdressDrive   : INT := 1005; // Adress of the drive terminal
+    iIndexDrive         : WORD := 16#8010; // Index of the drive terminal
+    iSlaveAdressFdBck   : INT := 1005; // Adress of the feedback terminal
+    iIndexFdBck         : WORD := 16#8010;  // Index of the feedback terminal
+    eCoEParameters      : E_CoEParameters := E_CoEParameters.eMaximalCurrent;
+    aMotorParWrite      : ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to drive
+    aMotorParRead       : ARRAY[1..20] OF UINT; // CoE Parameters to be read from drive
+    aFeedBackParWrite   : ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to terminal
+    aFeedbackParRead    : ARRAY[1..20] OF UINT; // CoE Parameters to be read from terminal
+    sDeviceName         : STRING;
+    bDone               : BOOL;
+    nState              : INT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

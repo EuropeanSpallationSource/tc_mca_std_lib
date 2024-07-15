@@ -17,9 +17,9 @@ STRUCT
 
     //Advanced homing parameters
     stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
-	
-	// CoE
-	stCoEParameters : ST_AxisCoE;
+
+    // CoE
+    stCoEParameters : ST_AxisCoE;
 
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
