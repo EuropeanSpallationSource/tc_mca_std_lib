@@ -155,6 +155,7 @@ IF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled < stPneumati
         stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eLowAirPressure;
     END_IF
 
+
 //Check if the air pressure value is too high for longer than defined time
 ELSIF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled > stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue  THEN
     fbTimerAirPressureErrorHigh.IN := TRUE;
@@ -165,13 +166,15 @@ ELSIF stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled > stPneum
         stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eHighAirPressure;
     END_IF
 
+
 //If the air pressure value is in range, no errors
 ELSIF (stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled >= stPneumaticAxisStruct.stPneumaticAxisConfig.fLowLimitPressureValue
-      AND stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled <= stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue) THEN
+     AND stPneumaticAxisStruct.stPneumaticAxisInputs.fPressureValueScaled <= stPneumaticAxisStruct.stPneumaticAxisConfig.fHighLimitPressureValue) THEN
     fbTimerAirPressureErrorLow.IN := FALSE;
     fbTimerAirPressureErrorHigh.IN := FALSE;
     bAirPressureoutOfRangeError := FALSE;
 END_IF
+
 
 
 
@@ -440,7 +443,7 @@ END_IF
         <ST><![CDATA[//Reset all the error messages
 //Set the operating mode to Single Solenoid Control
 fbTrigRisingEdgePermit(clk:=stPneumaticAxisStruct.stPneumaticAxisControl.bReset);
-IF fbTrigRisingEdgePermit.Q THEN
+IF stPneumaticAxisStruct.stPneumaticAxisControl.bReset THEN
     stPneumaticAxisStruct.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     stPneumaticAxisStruct.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     stPneumaticAxisStruct.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
