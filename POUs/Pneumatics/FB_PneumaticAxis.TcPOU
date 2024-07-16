@@ -40,9 +40,9 @@ IF tInitializeTimer.Q THEN
 END_IF
 
 IF bInitialized THEN
-mRun();
+    mRun();
 
-CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
+        CASE stPneumaticAxisStruct.ePneumaticAxisMode OF
 
         E_PneumaticMode.eSingleSolenoidControl:
         mSingleSolenoid();
