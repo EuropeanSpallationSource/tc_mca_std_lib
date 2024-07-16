@@ -77,7 +77,7 @@ IF bInitialized THEN
         E_PneumaticMode.eReset:
         mReset();
 
-    END_CASE
+        END_CASE
 END_IF
 
 
