@@ -5493,7 +5493,7 @@
                   <v>OnMouseDown</v>
                   <a cet="STSnippetInputAction">
                     <o>
-                      <v n="STSnippet">"GVL.astPneumaticAxes[Main.hmiPneumaticAxisSelection].stPneumaticAxisControl.bReset := TRUE;"</v>
+                      <v n="STSnippet">"GVL.astPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisControl.bReset := TRUE;"</v>
                     </o>
                   </a>
                 </d>
@@ -6996,7 +6996,7 @@
                     </o>
                     <o>
                       <v n="Id">651134158L</v>
-                      <v n="Value">"5"</v>
+                      <v n="Value">"10"</v>
                     </o>
                     <o>
                       <v n="Id">397264524L</v>
@@ -9138,6 +9138,8 @@
                 <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
                 <v>FB_Init</v>
                 <v>64f13c03-ce03-44cd-b1dc-cbd6d4b3cf65</v>
+                <v>FB_Exit</v>
+                <v>cc296638-ae8c-4c95-8abd-df99b4b55208</v>
                 <v>FB_Reinit</v>
                 <v>d9ea5219-caff-4f0c-b8bb-39dea38201e8</v>
               </d>

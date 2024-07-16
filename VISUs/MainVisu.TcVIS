@@ -3732,13 +3732,6 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                     <n n="VisualElementOfflinePaintCommands" />
                     <n n="VisualElementFrameInformation" />
                     <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                      <v>OnMouseClick</v>
-                      <a cet="STSnippetInputAction">
-                        <o>
-                          <v n="STSnippet">"
-"</v>
-                        </o>
-                      </a>
                       <v>OnMouseDown</v>
                       <a cet="STSnippetInputAction">
                         <o>
@@ -3933,13 +3926,6 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                     <n n="VisualElementOfflinePaintCommands" />
                     <n n="VisualElementFrameInformation" />
                     <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="STSnippetInputAction[]">
-                      <v>OnMouseClick</v>
-                      <a cet="STSnippetInputAction">
-                        <o>
-                          <v n="STSnippet">"
-"</v>
-                        </o>
-                      </a>
                       <v>OnMouseDown</v>
                       <a cet="STSnippetInputAction">
                         <o>
@@ -7086,7 +7072,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.stMultiMasterAxis[1].fRatio"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -8187,7 +8173,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.stMultiMasterAxis[2].fRatio"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -8369,7 +8355,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.stMultiMasterAxis[3].fRatio"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -8551,7 +8537,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.stMultiMasterAxis[4].fRatio"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -18983,7 +18969,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.fAcceleration"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -19342,7 +19328,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.fDeceleration"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>
@@ -19701,7 +19687,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="InputBoxInputAction">
                         <o>
-                          <v n="InputBoxVariable">"GVL.axes[MAIN.hmiAxisSelection].config.fPosition"</v>
+                          <v n="InputBoxVariable">""</v>
                           <v n="InputType">"Default"</v>
                           <v n="InputBoxMin">""</v>
                           <v n="InputBoxMax">""</v>

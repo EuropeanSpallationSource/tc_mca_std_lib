@@ -13,6 +13,7 @@
     iPneumaticAxis: UINT := 1; //Index for for loops while going through pneumatic axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
+
 END_VAR
 
 VAR_GLOBAL CONSTANT
