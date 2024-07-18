@@ -152,8 +152,8 @@ astMcStatus[14] := ADR(stMcStatusBacklash);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCompensate_Backlash" Id="{7107def5-ab6b-4951-863c-ccb3332d09d0}" FolderPath="Move Methods\">
-      <Declaration><![CDATA[METHOD mCompensate_Backlash : ST_McStatus
+    <Method Name="mControl_BacklashCompensation" Id="{7107def5-ab6b-4951-863c-ccb3332d09d0}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_BacklashCompensation : ST_McStatus
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -182,8 +182,8 @@ END_IF
 IF fbBacklashCompensation.Error THEN
     _stAxis.stError.nBacklashErrorID := fbBacklashCompensation.ErrorID;
 END_IF
-mCompensate_Backlash.Error := fbBacklashCompensation.Error;
-mCompensate_Backlash.ErrorID := fbBacklashCompensation.ErrorID;
+mControl_BacklashCompensation.Error := fbBacklashCompensation.Error;
+mControl_BacklashCompensation.ErrorID := fbBacklashCompensation.ErrorID;
 _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
 ]]></ST>
       </Implementation>
@@ -1201,7 +1201,7 @@ stMcStatusGearInMultiMaster := mControl_GearInMultiMaster();
 stMcStatusGearOut := mControl_GearOut();
 
 stMcStatusHome := mControl_Home();
-stMcStatusBacklash := mCompensate_Backlash();
+stMcStatusBacklash := mControl_BacklashCompensation();
 
 mStatus_NewCommand();
 mStatus_Done();
