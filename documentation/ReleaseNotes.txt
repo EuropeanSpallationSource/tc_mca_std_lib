@@ -18,6 +18,12 @@ which will reset the third digit to 0.
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
+v2.6.0
+- New features:
+  - Add button in MainVisu to control the variable bEnableStopWithAnyLimitSwitch (MBP-280).
+- Bug fix:
+  - Fix bug in MainVisu that did not showed the properties of the Visu elements.
+
 v2.5.0
 - New features:
   - Autoreset the errors of pneumatic axes when they dissapear (MBP-276).
