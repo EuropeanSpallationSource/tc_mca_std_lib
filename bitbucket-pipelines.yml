@@ -8,3 +8,6 @@ pipelines:
             - git submodule update --init
             - python twincat_version_manager.py
             - python check_fix_white_space.py
+            - ./check_no_lineids.sh
+            - ./check_code_before_sq_brackets.sh
+

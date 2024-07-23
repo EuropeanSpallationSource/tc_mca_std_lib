@@ -7,17 +7,17 @@ TYPE E_MotionFunctions :
 (
     eMoveAbsolute := 0,
     eMoveRelative := 1,
-    eJog := 2, //Continous moving in the direction specified by bJogFwd or bJogBwd as long as one is high. Will stop if bExecute goes high. Generally not called by an external control system.
-    eMoveVelocity := 3, //Continous moving at a set velocity once bExecute goes high
-    eMoveModulo := 4, //Move for 360 deg rotation, see Beckhoff docs
-    eGearIn := 5, //Gears in this axis to be the slave of the axis specified in masterAxis with the ratio specified in there
-    eGearOut := 6, //Removes gearing set in the above command
-    eGearInMultiMaster := 7, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
+    eMoveVelocity := 2, //Continous moving at a set velocity once bExecute goes high
+    eMoveModulo := 3, //Move for 360 deg rotation, see Beckhoff docs
+    eGearInMultiMaster := 4, //Gears in this axis to be the slave of the axis specified in stMultiMasterAxis with the ratio specified
+    eGearOut := 5, //Removes gearing set in the above command
     eSelectControlLoop := 8,
     eHome := 10, //Run the homing routine for the axis
     eWriteParameter := 50, //Writes the set value to the set parameter once bExecute goes high
     eReadParameter := 60 //Reads a single Parameter
-) := eJog; //Jog is the default behaviour of the axis.
-END_TYPE]]></Declaration>
+) := eHome; //Home is the default behaviour of the axis.
+END_TYPE
+
+]]></Declaration>
   </DUT>
 </TcPlcObject>

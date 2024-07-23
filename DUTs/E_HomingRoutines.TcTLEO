@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <EnumerationTextList Name="E_HomingRoutines" Id="{80602f9f-a7d4-4c82-a41f-735a98acfb74}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
@@ -37,9 +37,15 @@ TYPE E_HomingRoutines :
     //Home to EncRefPulse via bFwdLimit (using towardsCam speed), then reverse direction looking for falling edge on ref pulse (using fromCam speed)
     eHomeToEncPulse_viaFwdLimit := 24,
 
+    //3X: Home To Mechanical Block (Lag based StepBlockDetection)
+    //Home towards a mechanical block in Bwd direction
+    eHomeToBlock_Bwd := 30,
+    //Home towards a mechanical block in Fwd direction
+    eHomeToBlock_Fwd := 31,
+
     //9X: Software
     eHomeDirect := 90 //Set position directly to fHomePosition
-) := eNoHoming;
+) := eHomeDirect;
 END_TYPE
 ]]></Declaration>
     <XmlArchive>
@@ -89,6 +95,16 @@ END_TYPE
             <o>
               <v n="TextID">"eHomeToEncPulse_viaFwdLimit"</v>
               <v n="TextDefault">"24"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToBlock_Bwd"</v>
+              <v n="TextDefault">"30"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eHomeToBlock_Fwd"</v>
+              <v n="TextDefault">"31"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

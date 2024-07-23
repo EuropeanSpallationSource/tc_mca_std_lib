@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Homing" Id="{427b1d22-ef01-4bbb-ab89-ec8be67f3887}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
 VAR_IN_OUT
@@ -13,6 +13,7 @@ VAR_INPUT
     eHomeSeq: E_HomingRoutines;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
+    stConfig: ST_AxisConfig;
 END_VAR
 VAR_OUTPUT
     bDone : BOOL;
@@ -27,14 +28,14 @@ VAR
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulseDetection: MC_StepReferencePulseDetection;
+    fbStepBlockLagDetection: MC_StepBlockLagBasedDetection;
     fbHomeDirect: MC_HomeDirect;
     fbSetPos: MC_SetPosition;
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
     //Hardware Signals
-    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
+    ePreparationLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stLimitSwitchSignal: MC_Ref_Signal_Ref;
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
     stRefSwitchSignal: MC_Ref_Signal_Ref;
     stEncPulseSignal: MC_Ref_Signal_Ref;
     //Homing parameters
@@ -42,6 +43,7 @@ VAR
     stDetectDirection: MC_Home_Direction;
     stHomingParameter: MC_HomingParameter;
     stOptions: ST_Home_Options4;
+    stOptions3: ST_Home_Options3;
     fbVelocityToCam: MC_ReadParameter;
     fVelocityToCam: LREAL;
     fbVelocityFromCam: MC_ReadParameter;
@@ -59,7 +61,8 @@ VAR
     nDetectionFB_ErrorID: UDINT;
     fRecordedPosition: LREAL;
     fRecordedPositionLatched: LREAL;
-END_VAR ]]></Declaration>
+END_VAR
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[
 //Hardware signals
@@ -104,14 +107,19 @@ ELSIF fbVelocityFromCam.Error THEN
 END_IF
 
 //Common function blocks used for all routines
-stOptions.DisableDriveAccess:=TRUE;
+stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
+
+//For StepBlockLagDetection
+stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 
 fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbStepLimitSwitchPreparation(
     Axis := Axis,
     Parameter := stHomingParameter,
     Direction := stPreparationDirection,
-    LimitSwitchMode:= eLimitSwitchMode,
+    LimitSwitchMode:= ePreparationLimitSwitchMode,
     LimitSwitchSignal:= stLimitSwitchSignal,
     Velocity := fVelocityToCam);
 
@@ -146,6 +154,10 @@ CASE eHomeSeq OF
     E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
         actHomeToEncPulse();
 
+    E_HomingRoutines.eHomeToBlock_Bwd,
+    E_HomingRoutines.eHomeToBlock_Fwd:
+        actHomeToBlock();
+
     E_HomingRoutines.eHomeDirect:
         actHomeDirect();
 END_CASE
@@ -168,6 +180,7 @@ CASE eHomingState OF
             fbStepLimitSwitchDetection.Execute := FALSE;
             fbStepAbsoluteSwitchDetection.Execute := FALSE;
             fbStepReferencePulseDetection.Execute := FALSE;
+            fbStepBlockLagDetection.Execute := FALSE;
             fbHomeDirect.Execute := FALSE;
             fbSetPos.Execute := FALSE;
             fbFinishHoming.Execute := FALSE;
@@ -204,6 +217,11 @@ CASE eHomingState OF
             bDetectionFB_Execute := FALSE;
             fRecordedPositionLatched := fRecordedPosition;
             IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                bBusy := fbHomeDirect.Busy;
+                bDone := fbHomeDirect.Done;
+                bCommandAborted := fbHomeDirect.CommandAborted;
+                bError := fbHomeDirect.Error;
+                nErrorId := fbHomeDirect.ErrorID;
                 eHomingState := eWaitForRequest;
             ELSE
                 eHomingState := eSetPos;
@@ -265,11 +283,13 @@ CASE eHomingState OF
             eHomingState := eWaitForRequest;
         END_IF
 
-END_CASE]]></ST>
+END_CASE
+]]></ST>
     </Implementation>
     <Action Name="actHomeDirect" Id="{d23628f6-b24a-4bef-81d2-3d83fde8f1cd}">
       <Implementation>
-        <ST><![CDATA[bViaLimitSwitch := FALSE;
+        <ST><![CDATA[
+bViaLimitSwitch := FALSE;
 
 fbHomeDirect(
     Axis := Axis,
@@ -280,12 +300,49 @@ fbHomeDirect(
     Busy => bDetectionFB_Busy,
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID);]]></ST>
+    ErrorID => nDetectionFB_ErrorID);
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actHomeToBlock" Id="{7f7639d4-e566-498f-a828-fad9ed0e5d95}">
+      <Implementation>
+        <ST><![CDATA[CASE eHomeSeq OF
+    E_HomingRoutines.eHomeToBlock_Bwd:
+        stDetectDirection:= mcNegativeDirection;
+        fbFinishHoming.Distance := fHomeFinishDistance;
+    E_HomingRoutines.eHomeToBlock_Fwd:
+        stDetectDirection:= mcPositiveDirection;
+        fbFinishHoming.Distance := -fHomeFinishDistance;
+END_CASE
+
+bViaLimitSwitch:=FALSE;
+
+fbStepBlockLagDetection(
+    Axis := Axis,
+    Execute := bDetectionFB_Execute,
+    Parameter := stHomingParameter,
+    Direction := stDetectDirection,
+    Velocity := fVelocityFromCam, //Maximum travel velocity (>0).
+    DetectionVelocityLimit := stConfig.stHomingConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
+    DetectionVelocityTime := stConfig.stHomingConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
+    TimeLimit :=  stConfig.stHomingConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
+    DistanceLimit := stConfig.stHomingConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+    TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+    LagLimit := stConfig.stHomingConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+    Options := stOptions3,
+    Done => bDetectionFB_Done,
+    Busy => bDetectionFB_Busy,
+    CommandAborted => bDetectionFB_CommandAborted,
+    Error => bDetectionFB_Error,
+    ErrorID => nDetectionFB_ErrorID,
+    RecordedPosition => fRecordedPosition);
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToEncPulse" Id="{48b338da-ce35-49b7-b692-c1dd5d495b98}">
       <Implementation>
-        <ST><![CDATA[CASE eHomeSeq OF
+        <ST><![CDATA[
+CASE eHomeSeq OF
     E_HomingRoutines.eHomeToEncPulse_Bwd:
         stDetectDirection := mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
@@ -322,12 +379,14 @@ fbStepReferencePulseDetection(
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
     ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);]]></ST>
+    RecordedPosition => fRecordedPosition);
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToLimit" Id="{3859e05e-8699-4334-9196-1315e94174a0}">
       <Implementation>
-        <ST><![CDATA[CASE eHomeSeq OF
+        <ST><![CDATA[
+CASE eHomeSeq OF
     E_HomingRoutines.eHomeToLimit_Bwd:
         stLimitSwitchSignal.Level := NOT(bLimitBwd);
         stDetectDirection:= mcNegativeDirection;
@@ -345,7 +404,7 @@ fbStepLimitSwitchDetection(
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    LimitSwitchMode := eLimitSwitchMode,
+    LimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
     Velocity := fVelocityFromCam,
     Options := stOptions,
@@ -354,12 +413,14 @@ fbStepLimitSwitchDetection(
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
     ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);]]></ST>
+    RecordedPosition => fRecordedPosition);
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToRef" Id="{1a440701-e71d-439b-9045-d08d31798b28}">
       <Implementation>
-        <ST><![CDATA[CASE eHomeSeq OF
+        <ST><![CDATA[
+CASE eHomeSeq OF
     E_HomingRoutines.eHomeToRef_Bwd:
         stDetectDirection := mcNegativeDirection;
         fbFinishHoming.Distance := fHomeFinishDistance;
@@ -375,7 +436,7 @@ fbStepAbsoluteSwitchDetection(
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    SwitchMode := eRefSwitchMode,
+    SwitchMode := stConfig.stHomingConfig.eRefSwitchMode,
     ReferenceSignal := stRefSwitchSignal,
     Velocity := fVelocityFromCam,
     PositiveLimitSwitch := NOT(bLimitFwd),
@@ -386,73 +447,9 @@ fbStepAbsoluteSwitchDetection(
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
     ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);]]></ST>
+    RecordedPosition => fRecordedPosition);
+]]></ST>
       </Implementation>
     </Action>
-    <LineIds Name="FB_Homing">
-      <LineId Id="3595" Count="9" />
-      <LineId Id="4091" Count="29" />
-      <LineId Id="4090" Count="0" />
-      <LineId Id="3605" Count="61" />
-      <LineId Id="3760" Count="0" />
-      <LineId Id="3762" Count="6" />
-      <LineId Id="3761" Count="0" />
-      <LineId Id="3667" Count="92" />
-    </LineIds>
-    <LineIds Name="FB_Homing.actHomeDirect">
-      <LineId Id="44" Count="1" />
-      <LineId Id="2" Count="4" />
-      <LineId Id="24" Count="4" />
-    </LineIds>
-    <LineIds Name="FB_Homing.actHomeToEncPulse">
-      <LineId Id="88" Count="0" />
-      <LineId Id="3" Count="1" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="6" Count="1" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="12" Count="1" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="139" Count="0" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="143" Count="0" />
-      <LineId Id="1" Count="0" />
-      <LineId Id="115" Count="5" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="121" Count="7" />
-      <LineId Id="20" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Homing.actHomeToLimit">
-      <LineId Id="6" Count="3" />
-      <LineId Id="233" Count="0" />
-      <LineId Id="10" Count="2" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="231" Count="0" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="145" Count="8" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="154" Count="4" />
-      <LineId Id="116" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Homing.actHomeToRef">
-      <LineId Id="4" Count="2" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="1" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="37" Count="8" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="46" Count="4" />
-      <LineId Id="36" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

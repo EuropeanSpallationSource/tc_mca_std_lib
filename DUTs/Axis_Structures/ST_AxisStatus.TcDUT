@@ -11,10 +11,12 @@ STRUCT
     bDone: BOOL; //Last eCommand function block executed successfully;
     //bDone will also be set with the InGear and InVelocity outputs
     //When InVelocity is set, fbMoveVelocity is still acitve, which is reflected by the bBusy status
+    bInVelocity: BOOL; //MC_MoveVelocity has reached target velocity; will stay true until the movement stops
     bHomed: BOOL; //Axis homed
     bMoving: BOOL; //Moving state from the NC
     bMovingForward: BOOL; //Moving forward indicator from NC
     bMovingBackward: BOOL; //Moving backward indicator from NC
+    bInTargetPosition: BOOL; //In target position bit from AxisStatus()
     bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
     bInterlockedFwd: BOOL; //Axis interlocked in the postive direction
@@ -25,6 +27,8 @@ STRUCT
     bCoupledGear3: BOOL;
     bCoupledGear4: BOOL;
     fActPosition: LREAL; //Actual position value
+    fActTemperature: LREAL; //Actual Temperature
+    bHighTempAxisDisabled: BOOL := FALSE; //Bit for disabling the axis when temperature too high
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter from stepper drive
     fActVelocity: LREAL; //Actual velocity

@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlitPair" Id="{1223aca9-e4c9-4d31-9356-dca9871f7373}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPair
+    <Declaration><![CDATA[
+FUNCTION_BLOCK FB_SlitPair
 VAR_INPUT
     iBladeNegative: UINT; //Axis ID for negatively positioned blade
     iBladePositive: UINT; //Axis ID for positively positioned blade
@@ -39,7 +40,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(* NOTES
+      <ST><![CDATA[
+(* NOTES
 For the virtual axis setup, the encoders need their type changed from "simulation encoder" to "Encoder (Universal)".
 In addition the scale factor needs to be changed to a numerator of 1 and denominator of fEncoderScaling which is 10,000 by default)
 Care needs to be taken with scaling and setup of both real and virtual axes to ensure velocities are not too fast and axes have time to settle before they submit a "complete move"
@@ -184,7 +186,8 @@ CASE eSlitPairState OF
             bResetting := FALSE;
         END_IF
 END_CASE
-bReset := FALSE;]]></ST>
+bReset := FALSE;
+]]></ST>
     </Implementation>
     <Action Name="actClearSlitGearing" Id="{e01ab92a-20cf-48ae-913a-9b4bc1f3c9a3}">
       <Implementation>
@@ -192,7 +195,8 @@ bReset := FALSE;]]></ST>
 GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearOut;
 GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eGearOut;
 GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
-GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
+GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actErrorHandling" Id="{2d890ec8-2bb8-4662-99bf-f20cfc75f93d}">
@@ -213,7 +217,8 @@ IF (eSlitPairState <> E_SlitPairStates.INIT AND NOT bFunctionInErrorState) AND N
 END_IF
 IF bEnabled AND NOT bBladesHomed THEN
     eSlitPairState := E_SlitPairStates.ERROR;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actGapLimits" Id="{25d5c061-b303-4e71-ae15-49914f4789a8}">
@@ -222,7 +227,8 @@ END_IF]]></ST>
 GVL.astAxes[iGapSize].stInputs.bLimitBwd := TRUE;
 GVL.astAxes[iGapSize].stInputs.bLimitFwd := TRUE;
 GVL.astAxes[iGapCentre].stInputs.bLimitBwd := TRUE;
-GVL.astAxes[iGapCentre].stInputs.bLimitFwd := TRUE;]]></ST>
+GVL.astAxes[iGapCentre].stInputs.bLimitFwd := TRUE;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actRunMethods" Id="{6bcc71e6-9559-4f3b-a747-0f306a2cb822}">
@@ -233,7 +239,8 @@ checkVirtualHomed(bOutput => bGapHomed);
 checkBladesCoupled(bOutput => bBladesCoupled);
 checkBladesUncoupled(bOutput => bBladesUncoupled);
 checkAllAxisErrors(bOutput => bAxisErrorsPresent);
-checkErrorState(bOutput => bFunctionInErrorState);]]></ST>
+checkErrorState(bOutput => bFunctionInErrorState);
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actSetupSlitGearing" Id="{8c35be5d-8704-40d0-99d8-cf48bc76a94c}">
@@ -249,7 +256,8 @@ GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[1].fRatio := 0.5;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].fRatio := 1;
 GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
-GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;]]></ST>
+GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="actVirtualAxisPositions" Id="{84408ed0-12a9-4a20-9ee2-393320dd5a43}">
@@ -270,7 +278,8 @@ IF bBladesHomed THEN
     IF ABS(fGapCentrePosition) < 100000 THEN
         iGapCentrePosition := LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
     END_IF
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Method Name="checkAllAxesEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
@@ -293,7 +302,8 @@ IF NOT GVL.astAxes[iGapSize].stStatus.bEnabled THEN
 END_IF
 IF NOT GVL.astAxes[iGapCentre].stStatus.bEnabled THEN
     bOutput := FALSE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkAllAxisErrors" Id="{c3f4c623-4869-4c97-837f-af64e9be8aeb}">
@@ -316,7 +326,8 @@ IF GVL.astAxes[iBladeNegative].stStatus.bError THEN
 END_IF
 IF GVL.astAxes[iBladePositive].stStatus.bError THEN
     bOutput := TRUE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkBladesCoupled" Id="{b67c9216-9a28-4bc7-afbb-4bdb360ee51b}">
@@ -333,7 +344,8 @@ END_VAR
 END_IF
 IF NOT GVL.astAxes[iBladePositive].stStatus.bGeared THEN
     bOutput := FALSE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkBladesHomed" Id="{7ae32968-8cc1-44db-8a5f-f24d48501289}">
@@ -368,7 +380,8 @@ END_VAR
 END_IF
 IF GVL.astAxes[iBladePositive].stStatus.bGeared THEN
     bOutput := FALSE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkErrorState" Id="{283fb96b-f4da-4c0a-8f9d-5c3166e66b83}">
@@ -392,7 +405,8 @@ IF eSlitPairState = E_SlitPairStates.ERROR_RESET_AXES THEN
 END_IF
 IF eSlitPairState = E_SlitPairStates.ERROR_RESET_CHECK THEN
     bOutput := TRUE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkVirtualHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
@@ -409,125 +423,9 @@ END_VAR
 END_IF
 IF NOT GVL.astAxes[iGapCentre].stStatus.bHomed THEN
     bOutput := FALSE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_SlitPair">
-      <LineId Id="1687" Count="14" />
-      <LineId Id="1856" Count="0" />
-      <LineId Id="1855" Count="0" />
-      <LineId Id="1857" Count="1" />
-      <LineId Id="1860" Count="1" />
-      <LineId Id="1702" Count="75" />
-      <LineId Id="1862" Count="6" />
-      <LineId Id="1778" Count="5" />
-      <LineId Id="1906" Count="0" />
-      <LineId Id="1784" Count="22" />
-      <LineId Id="1907" Count="0" />
-      <LineId Id="1807" Count="6" />
-      <LineId Id="1908" Count="0" />
-      <LineId Id="1814" Count="0" />
-      <LineId Id="1816" Count="0" />
-      <LineId Id="396" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actClearSlitGearing">
-      <LineId Id="13" Count="0" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actErrorHandling">
-      <LineId Id="99" Count="0" />
-      <LineId Id="135" Count="1" />
-      <LineId Id="133" Count="1" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="129" Count="1" />
-      <LineId Id="117" Count="1" />
-      <LineId Id="1" Count="0" />
-      <LineId Id="121" Count="1" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="131" Count="1" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actGapLimits">
-      <LineId Id="5" Count="0" />
-      <LineId Id="2" Count="2" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actRunMethods">
-      <LineId Id="2" Count="4" />
-      <LineId Id="1" Count="0" />
-      <LineId Id="7" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actSetupSlitGearing">
-      <LineId Id="2" Count="10" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.actVirtualAxisPositions">
-      <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="2" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="4" Count="6" />
-      <LineId Id="1" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkAllAxesEnabled">
-      <LineId Id="5" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="12" Count="1" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="17" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkAllAxisErrors">
-      <LineId Id="5" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="15" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkBladesCoupled">
-      <LineId Id="5" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="9" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkBladesHomed">
-      <LineId Id="5" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="12" Count="1" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="20" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkBladesUncoupled">
-      <LineId Id="5" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="9" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkErrorState">
-      <LineId Id="5" Count="0" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="11" Count="1" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="18" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlitPair.checkVirtualHomed">
-      <LineId Id="9" Count="5" />
-    </LineIds>
   </POU>
 </TcPlcObject>

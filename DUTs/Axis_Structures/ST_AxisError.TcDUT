@@ -9,12 +9,10 @@ STRUCT
     nMoveRelativeErrorID : UDINT;
     nMoveVelocityErrorID : UDINT;
     nMoveModuloErrorID : UDINT;
-    nJogErrorID : UDINT;
     nHomeErrorID : UDINT;
     nHaltErrorID : UDINT;
     nResetErrorID : UDINT;
     nStopErrorID : UDINT;
-    nGearInErrorID : UDINT;
     nGearInMultiMasterErrorID : UDINT;
     nGearOutErrorID : UDINT;
     nWriteParameterErrorId : UDINT;
