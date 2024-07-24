@@ -41,7 +41,7 @@ VAR
 
     fbWriteParameter: MC_WriteParameter;
     stMcStatusWriteParameter: ST_McStatus;
-    
+
     fbSelectControlLoop : MC_SelectControlLoop;
     mcStatusSelectControlLoop : ST_McStatus;
 
@@ -146,7 +146,8 @@ astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
 astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
-astMcStatus[14] := ADR(stMcStatusSelectControlLoop);]]></ST>
+astMcStatus[14] := ADR(stMcStatusSelectControlLoop);
+]]></ST>
 
 ]]></ST>
       </Implementation>
@@ -475,7 +476,8 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_SelectControlLoop" Id="{619ee7ef-9a71-48ae-960a-b37765875611}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_SelectControlLoop : ST_McStatus]]></Declaration>
+      <Declaration><![CDATA[METHOD mControl_SelectControlLoop : ST_McStatus
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eSelectControlLoop THEN
     fbSelectControlLoop.Execute := _stAxis.stControl.bExecute;
@@ -493,7 +495,7 @@ IF fbSelectControlLoop.Done THEN
             _stAxis.Axis REF= _stAxis.Ctrl_2_Axis;
         2:
             _stAxis.Axis REF= _stAxis.Ctrl_3_Axis;
-	END_CASE
+    END_CASE
 END_IF
 
 mControl_SelectControlLoop.Busy := fbSelectControlLoop.Busy;
@@ -503,7 +505,8 @@ mControl_SelectControlLoop.ErrorID := fbSelectControlLoop.ErrorID;
 
 IF fbSelectControlLoop.Error THEN
     _stAxis.stError.nSelectControlLoopErrorID := fbSelectControlLoop.ErrorID;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mMove_Halt" Id="{957bd44f-6ec5-4ad2-9776-ed5c1512fc84}" FolderPath="Move Methods\">
