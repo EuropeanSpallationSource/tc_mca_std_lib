@@ -14,7 +14,7 @@ STRUCT
     Ctrl_1_Axis : AXIS_REF;
     Ctrl_2_Axis : AXIS_REF;
     Ctrl_3_Axis : AXIS_REF;
-    Axis : REFERENCE TO AXIS_REF REF= Ctrl_1_Axis; (*~ (OPC: 0 : unavailable for OPC-clients) *)  
+    Axis : REFERENCE TO AXIS_REF REF= Ctrl_1_Axis; (*~ (OPC: 0 : unavailable for OPC-clients) *)
 
 END_STRUCT
 END_TYPE
