@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
@@ -43,7 +43,7 @@ VAR
     stMcStatusWriteParameter: ST_McStatus;
 
     fbSelectControlLoop : MC_SelectControlLoop;
-    mcStatusSelectControlLoop : ST_McStatus;
+    stMcStatusSelectControlLoop : ST_McStatus;
 
     fbGearIn: MC_GearIn;
     stMcStatusGearIn: ST_McStatus;
@@ -388,6 +388,40 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mControl_SelectControlLoop" Id="{619ee7ef-9a71-48ae-960a-b37765875611}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_SelectControlLoop : ST_McStatus
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eSelectControlLoop THEN
+    fbSelectControlLoop.Execute := _stAxis.stControl.bExecute;
+END_IF
+fbSelectControlLoop.SelectType:= E_SelectControlLoopType.SelectControlLoopType_Standard;
+fbSelectControlLoop.EncoderIndex := _stAxis.stConfig.iSelectControlLoopIndex;
+
+fbSelectControlLoop(Axis:= _stAxis.Axis);
+//we could array this
+IF fbSelectControlLoop.Done THEN
+    CASE _stAxis.stConfig.iSelectControlLoopIndex OF
+        0:
+            _stAxis.Axis REF= _stAxis.Ctrl_1_Axis;
+        1:
+            _stAxis.Axis REF= _stAxis.Ctrl_2_Axis;
+        2:
+            _stAxis.Axis REF= _stAxis.Ctrl_3_Axis;
+    END_CASE
+END_IF
+
+mControl_SelectControlLoop.Busy := fbSelectControlLoop.Busy;
+mControl_SelectControlLoop.Done := fbSelectControlLoop.Done;
+mControl_SelectControlLoop.Error := fbSelectControlLoop.Error;
+mControl_SelectControlLoop.ErrorID := fbSelectControlLoop.ErrorID;
+
+IF fbSelectControlLoop.Error THEN
+    _stAxis.stError.nSelectControlLoopErrorID := fbSelectControlLoop.ErrorID;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mControl_TemperatureDisable" Id="{58055d1b-34bd-4ddd-bc44-21d66410d7af}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_TemperatureDisable: BOOL
 VAR_INPUT
@@ -470,40 +504,6 @@ ELSE
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     mControl_TemperatureDisable := FALSE;
     RETURN;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mControl_SelectControlLoop" Id="{619ee7ef-9a71-48ae-960a-b37765875611}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_SelectControlLoop : ST_McStatus
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eSelectControlLoop THEN
-    fbSelectControlLoop.Execute := _stAxis.stControl.bExecute;
-END_IF
-fbSelectControlLoop.SelectType:= E_SelectControlLoopType.SelectControlLoopType_Standard;
-fbSelectControlLoop.EncoderIndex := _stAxis.stConfig.iSelectControlLoopIndex;
-
-fbSelectControlLoop(Axis:= _stAxis.Axis);
-//we could array this
-IF fbSelectControlLoop.Done THEN
-    CASE _stAxis.stConfig.iSelectControlLoopIndex OF
-        0:
-            _stAxis.Axis REF= _stAxis.Ctrl_1_Axis;
-        1:
-            _stAxis.Axis REF= _stAxis.Ctrl_2_Axis;
-        2:
-            _stAxis.Axis REF= _stAxis.Ctrl_3_Axis;
-    END_CASE
-END_IF
-
-mControl_SelectControlLoop.Busy := fbSelectControlLoop.Busy;
-mControl_SelectControlLoop.Done := fbSelectControlLoop.Done;
-mControl_SelectControlLoop.Error := fbSelectControlLoop.Error;
-mControl_SelectControlLoop.ErrorID := fbSelectControlLoop.ErrorID;
-
-IF fbSelectControlLoop.Error THEN
-    _stAxis.stError.nSelectControlLoopErrorID := fbSelectControlLoop.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
