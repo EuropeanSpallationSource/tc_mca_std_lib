@@ -3,10 +3,8 @@
   <POU Name="FB_PneumaticAxis" Id="{0ba43c5d-0b1b-4802-81a2-a56c90343a83}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_PneumaticAxis
 
-VAR_IN_OUT
-    stPneumaticAxisStruct: ST_PneumaticAxisStruct;
-END_VAR
 VAR
+    _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
@@ -726,5 +724,27 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bRetracting := FALSE;
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="stPneumaticAxis" Id="{32b385f3-2648-4c7a-b2e7-2316433a21ee}">
+      <Declaration><![CDATA[PROPERTY PUBLIC stPneumaticAxis : REFERENCE TO ST_PneumaticAxisStruct
+]]></Declaration>
+      <Get Name="Get" Id="{adb8011b-822d-0d9a-11a8-4f5c0c464fc5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[stPneumaticAxis REF= _stPneumaticAxis;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{83f042d6-81e0-4e48-8d59-f688cd15c5d1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_stPneumaticAxis REF= stPneumaticAxis;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
   </POU>
 </TcPlcObject>
