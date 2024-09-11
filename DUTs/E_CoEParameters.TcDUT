@@ -7,9 +7,9 @@ TYPE E_CoEParameters :
 (
     eMaximalCurrent := 1,
     eReducedCurrent := 2,
-    eMotorCoilResistence := 4,
+    eMotorCoilResistance := 4,
     eFullSteps := 6,
-    eMotorCoilInductance := 10
+    eMotorCoilInductance := 10 // Valid for EL7047
 );
 END_TYPE
 ]]></Declaration>
