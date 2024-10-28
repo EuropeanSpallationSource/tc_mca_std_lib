@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Homing" Id="{427b1d22-ef01-4bbb-ab89-ec8be67f3887}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
 VAR_IN_OUT
@@ -10,75 +10,106 @@ VAR_INPUT
     bLimitFwd: BOOL;
     bLimitBwd: BOOL;
     bHomeSensor: BOOL;
+    bHomeReference: BOOL;
     eHomeSeq: E_HomingRoutines;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
     stConfig: ST_AxisConfig;
 END_VAR
 VAR_OUTPUT
-    bDone : BOOL;
+    bDone: BOOL;
     bBusy: BOOL;
     bCommandAborted: BOOL;
     bError: BOOL;
     nErrorId: UDINT;
 END_VAR
 VAR
+    //Hardware Signals
+    stLimitSwitchSignal: MC_Ref_Signal_Ref;
+    stRefSwitchSignal: MC_Ref_Signal_Ref;
+    stEncPulseSignal: MC_Ref_Signal_Ref;
+
     //Beckhoff homing function blocks
-    fbStepLimitSwitchPreparation: MC_StepLimitSwitchDetection;
-    fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
-    fbStepAbsoluteSwitchPreparation: MC_StepAbsoluteSwitchDetection;
-    fbStepAbsoluteOnSwitchPreparation: MC_StepAbsoluteSwitchDetection;
-    fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
-    fbStepReferencePulseDetection: MC_StepReferencePulseDetection;
-    fbStepBlockLagDetection: MC_StepBlockLagBasedDetection;
+    fbStepLimitSwitch: MC_StepLimitSwitch;
+    fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
+    fbStepReferencePulse: MC_StepReferencePulse;
+    fbStepBlockLag: MC_StepBlockLagBased;
     fbHomeDirect: MC_HomeDirect;
     fbSetPos: MC_SetPosition;
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
-    //Hardware Signals
-    eLocalSwitchMode: MC_Switch_Mode;
-    ePreparationRefSwitchMode: MC_Switch_Mode;
-    stLimitSwitchSignal: MC_Ref_Signal_Ref;
-    stRefSwitchSignal: MC_Ref_Signal_Ref;
-    stEncPulseSignal: MC_Ref_Signal_Ref;
+    fbExecute: R_TRIG;
+    fbTimerOnDelay: TON;
+    fbHomeRefR_TRIG: R_TRIG;
+    fbHomeRefF_TRIG: F_TRIG;
+
     //Homing parameters
-    stPreparationDirection: MC_Home_Direction;
     stDetectDirection: MC_Home_Direction;
+    stDetectLimitDirection: MC_Home_Direction;
     stHomingParameter: MC_HomingParameter;
     stOptions: ST_Home_Options4;
     stOptions3: ST_Home_Options3;
+
+    fSetHomePosition: LREAL;
+    fHomeRefPosition: LREAL;
+    fActPosition_Done: LREAL;
+
     fbVelocityToCam: MC_ReadParameter;
     fVelocityToCam: LREAL;
     fbVelocityFromCam: MC_ReadParameter;
     fVelocityFromCam: LREAL;
-    //State machine
-    fbExecute: R_TRIG;
-    bViaLimitSwitch: BOOL;
-    bViaHomeSensor: BOOL;
-    bViaHomeSensorDone: BOOL;
-    bHomeSensorAtStart: BOOL;
-    bViaOnHomeSensor: BOOL;
-    eHomingState: (eWaitForRequest := 0, ePreparation := 1, eDetection := 2, eSetPos := 3, eFinishHoming := 4, eAbortHoming := 20);
-    iErrorId: UDINT;
+    fDetectionVelocity: LREAL;
+    fDetectionAcceleration: LREAL;
+    fDetectionDeceleration: LREAL;
+
     bDetectionFB_Execute: BOOL;
     bDetectionFB_Done: BOOL;
     bDetectionFB_Busy: BOOL;
     bDetectionFB_CommandAborted: BOOL;
     bDetectionFB_Error: BOOL;
     nDetectionFB_ErrorID: UDINT;
-    fRecordedPosition: LREAL;
-    fRecordedPositionLatched: LREAL;
+    iErrorId: UDINT;
+
+    bSignalRisingEdge: BOOL;
+    bSignalFallingEdge: BOOL;
+    fRisingEdgePosition: LREAL;
+    fFallingEdgePosition: LREAL;
+    bDelay: BOOL;
+    tDelayTime: TIME;
+
+    //State machine
+    eHomingState: (eWaitForRequest := 0, eCoarseDetection := 1, eMoveReverse := 2, eFineDetection := 3, eSetPos := 4, eFinishHoming := 5, eAbortHoming := 20);
+    bHomeRefSensor: BOOL;
+    bHomeRefLimit: BOOL;
+    bHomeRefEncPulse: BOOL;
+    bHomeBlock: BOOL;
+
+    bTwoSpeedHoming:BOOL;
+    bReversedDirection: BOOL;
+    bFineDetection_Done: BOOL;
+    bViaLimitCoarseDetect: BOOL;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//Hardware signals
-stLimitSwitchSignal.SignalSource := SignalSource_Default;
+      <ST><![CDATA[stLimitSwitchSignal.SignalSource := SignalSource_Default;
 stLimitSwitchSignal.TouchProbe := PlcEvent;
+stLimitSwitchSignal.Level := bHomeReference; //bHomeReference = NOT(bLimitFwd)/NOT(bLimitBwd)
 stRefSwitchSignal.SignalSource := SignalSource_Default;
 stRefSwitchSignal.TouchProbe := PlcEvent;
-stRefSwitchSignal.Level := bHomeSensor;
+stRefSwitchSignal.Level := bHomeReference; //bHomeReference = bHomeSensor
 stEncPulseSignal.SignalSource := SignalSource_ZeroPulse;
 stEncPulseSignal.TouchProbe := TouchProbe1;
+
+fbHomeRefR_TRIG(CLK := bHomeReference);
+
+fbHomeRefF_TRIG(CLK := bHomeReference);
+
+fbTimerOnDelay(IN := bDelay, PT := tDelayTime);
+tDelayTime := T#1S0MS; //Delay Time 1sec befor switching the motor direction for mechanical saftey.
+
+fDetectionAcceleration := 0; //If the value is 0, the standard acceleration from the axis configuration in the System Manager is used.
+fDetectionDeceleration := 0; //If the value is 0, the standard deceleration from the axis configuration in the System Manager is used.
 
 //Constantly read the NC for homing velocities so they are available when a homing is executed
 fbVelocityToCam(
@@ -88,12 +119,12 @@ fbVelocityToCam(
     ReadMode := READMODE_CYCLIC);
 
 fbVelocityFromCam(
-    Axis := Axis,
+    Axis:= Axis,
     Enable := TRUE,
     ParameterNumber := E_AxisParameters.AxisVelocityFromCam,
     ReadMode := READMODE_CYCLIC);
 
-    //Only write velocity if the function block has not errored
+//Only write velocity if the function block has not errored
 IF NOT fbVelocityToCam.Error THEN
     fVelocityToCam := fbVelocityToCam.Value;
 END_IF
@@ -102,11 +133,10 @@ IF NOT fbVelocityFromCam.Error THEN
     fVelocityFromCam := fbVelocityFromCam.Value;
 END_IF
 
-    //Feeds function block errors through
+ //Feeds function block errors through
 IF fbVelocityToCam.Error THEN
     bError := TRUE;
     nErrorID := fbVelocityToCam.ErrorID;
-
 ELSIF fbVelocityFromCam.Error THEN
     bError := TRUE;
     nErrorID := fbVelocityFromCam.ErrorID;
@@ -120,42 +150,18 @@ stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDete
 stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
 stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 
-fbStepLimitSwitchPreparation.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
-fbStepLimitSwitchPreparation(
-    Axis := Axis,
-    Parameter := stHomingParameter,
-    Direction := stPreparationDirection,
-    LimitSwitchMode:= mcRisingEdge,
-    LimitSwitchSignal:= stLimitSwitchSignal,
-    Velocity := fVelocityToCam);
-
-fbStepAbsoluteSwitchPreparation.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
-fbStepAbsoluteSwitchPreparation(
-    Axis:= Axis,
-    Parameter:= stHomingParameter,
-    SwitchMode:= mcRisingEdge,
-    ReferenceSignal:= stRefSwitchSignal,
-    PositiveLimitSwitch := NOT(bLimitFwd),
-    NegativeLimitSwitch := NOT(bLimitBwd));
-
-fbStepAbsoluteOnSwitchPreparation.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
-fbStepAbsoluteOnSwitchPreparation(
-    Axis:= Axis,
-    Parameter:= stHomingParameter,
-    ReferenceSignal:= stRefSwitchSignal,
-    SwitchMode:= mcFallingEdge,
-    PositiveLimitSwitch := NOT(bLimitFwd),
-    NegativeLimitSwitch := NOT(bLimitBwd));
-
+fbSetPos.Options.ClearPositionLag := TRUE;
 fbSetPos(
-    Axis := Axis,
-    Position := Axis.NcToPlc.ActPos - fRecordedPositionLatched + fHomePosition);
+   Axis := Axis,
+   Position := (fActPosition_Done - fHomeRefPosition) + fHomePosition);
 
 fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbFinishHoming(
     Axis := Axis,
-    Parameter := stHomingParameter,
-    Velocity := fVelocityFromCam);
+    Velocity := fVelocityFromCam,
+    Acceleration := fDetectionAcceleration,
+    Deceleration := fDetectionDeceleration,
+    Parameter := stHomingParameter);
 
 fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbAbortHoming(
@@ -164,206 +170,242 @@ fbAbortHoming(
 
 //ACTs contain function blocks custom to each individual routine for the detection stage
 CASE eHomeSeq OF
-    E_HomingRoutines.eHomeToLimit_Bwd,
     E_HomingRoutines.eHomeToLimit_Fwd,
-    E_HomingRoutines.eHomeToLimit_Bwd_2Speeds,
-    E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
+    E_HomingRoutines.eHomeToLimit_Bwd:
         actHomeToLimit();
 
-    E_HomingRoutines.eHomeToRef_Bwd,
     E_HomingRoutines.eHomeToRef_Fwd,
-    E_HomingRoutines.eHomeToRef_Bwd_2Speeds,
-    E_HomingRoutines.eHomeToRef_Fwd_2Speeds:
+    E_HomingRoutines.eHomeToRef_Bwd:
         actHomeToRef();
 
-    E_HomingRoutines.eHomeToEncPulse_Bwd,
     E_HomingRoutines.eHomeToEncPulse_Fwd,
-    E_HomingRoutines.eHomeToEncPulse_viaBwdLimit,
-    E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
+    E_HomingRoutines.eHomeToEncPulse_Bwd,
+    E_HomingRoutines.eHomeToEncPulse_viaFwdLimit,
+    E_HomingRoutines.eHomeToEncPulse_viaBwdLimit:
         actHomeToEncPulse();
 
-    E_HomingRoutines.eHomeToBlock_Bwd,
-    E_HomingRoutines.eHomeToBlock_Fwd:
+    E_HomingRoutines.eHomeToBlock_Fwd,
+    E_HomingRoutines.eHomeToBlock_Bwd:
         actHomeToBlock();
 
     E_HomingRoutines.eHomeDirect:
         actHomeDirect();
 END_CASE
 
-
-//State machine
-fbExecute(CLK:= bExecute);
+//State machine for Two Speed Homing
+fbExecute(CLK := bExecute);
 CASE eHomingState OF
-
     eWaitForRequest:
-        IF NOT bExecute THEN
-            bBusy := FALSE;
-            bDone := FALSE;
-            bCommandAborted := FALSE;
-            bError := FALSE;
-            nErrorID := 0;
-            iErrorID := 0;
+    IF NOT bExecute THEN
+        bBusy := FALSE;
+        bDone := FALSE;
+        bCommandAborted := FALSE;
+        bError := FALSE;
+        bDelay := FALSE;
+        bDetectionFB_Execute := FALSE;
+        bTwoSpeedHoming := FALSE;
+        bHomeRefSensor := FALSE;
+        bHomeRefLimit := FALSE;
+        bReversedDirection := FALSE;
+        bSignalRisingEdge := FALSE;
+        bSignalFallingEdge := FALSE;
+        bFineDetection_Done := FALSE;
+        nErrorID := 0;
+        iErrorID := 0;
 
-            fbStepLimitSwitchPreparation.Execute := FALSE;
-            fbStepLimitSwitchDetection.Execute := FALSE;
-            fbStepAbsoluteSwitchPreparation.Execute := FALSE;
-            fbStepAbsoluteSwitchDetection.Execute := FALSE;
-            fbStepReferencePulseDetection.Execute := FALSE;
-            bViaHomeSensorDone := FALSE;
-            fbStepBlockLagDetection.Execute := FALSE;
-            fbHomeDirect.Execute := FALSE;
-            fbSetPos.Execute := FALSE;
-            fbFinishHoming.Execute := FALSE;
-            fbAbortHoming.Execute := FALSE;
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := FALSE;
+        fbHomeDirect.Execute := FALSE;
+        fbStepAbsoluteSwitch.Execute := FALSE;
+        fbStepLimitSwitch.Execute := FALSE;
+        fbStepReferencePulse.Execute := FALSE;
+        fbStepBlockLag.Execute := FALSE;
+        fbSetPos.Execute := FALSE;
+        fbFinishHoming.Execute := FALSE;
+        fbAbortHoming.Execute := FALSE;
         END_IF
 
         IF fbExecute.Q AND NOT(eHomeSeq = E_HomingRoutines.eNoHoming)THEN
-            bHomeSensorAtStart := bHomeSensor;
-            bBusy:= TRUE;
-            eHomingState:= ePreparation;
-        END_IF
-
-
-    ePreparation: //If bViaLimitSwitch or bViaHomeSensor is set TRUE then go first fast to a limit otherwise skip this step
-        IF bViaLimitSwitch THEN
-            fbStepLimitSwitchPreparation.Execute := TRUE;
-
-            IF NOT fbStepLimitSwitchPreparation.Busy AND fbStepLimitSwitchPreparation.Done THEN
-                fbStepLimitSwitchPreparation.Execute := FALSE;
-                eHomingState := eDetection;
-               ELSIF NOT fbStepLimitSwitchPreparation.Busy AND (fbStepLimitSwitchPreparation.Error OR fbStepLimitSwitchPreparation.CommandAborted) THEN
-                iErrorID := fbStepLimitSwitchPreparation.ErrorID;
-                fbStepLimitSwitchPreparation.Execute := FALSE;
-                eHomingState := eAbortHoming;
-            END_IF
-
-        ELSIF bViaOnHomeSensor THEN
-            IF bViaHomeSensor AND NOT bViaHomeSensorDone THEN
-                fbStepAbsoluteSwitchPreparation.Execute := TRUE;
-
-                IF NOT fbStepAbsoluteSwitchPreparation.Busy AND fbStepAbsoluteSwitchPreparation.Done THEN
-                    fbStepAbsoluteSwitchPreparation.Execute := FALSE;
-                    bViaHomeSensorDone := TRUE;
-                    eHomingState := ePreparation;
-                   ELSIF NOT fbStepAbsoluteSwitchPreparation.Busy AND (fbStepAbsoluteSwitchPreparation.Error OR fbStepAbsoluteSwitchPreparation.CommandAborted) THEN
-                    iErrorID := fbStepAbsoluteSwitchPreparation.ErrorID;
-                    fbStepAbsoluteSwitchPreparation.Execute := FALSE;
-                    eHomingState := eAbortHoming;
+            IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                fSetHomePosition := fHomePosition;
+                bDetectionFB_Execute := TRUE;
+                bBusy := bDetectionFB_Busy;
+                bDone := bDetectionFB_Done;
+                bCommandAborted := bDetectionFB_CommandAborted;
+                bError :=  bDetectionFB_Error;
+                nErrorId := nDetectionFB_ErrorID;
+                IF NOT bDetectionFB_Busy AND bDetectionFB_Done THEN
+                    bDetectionFB_Execute := FALSE;
+                    eHomingState := eFinishHoming;
                 END_IF
-
+            ELSIF bTwoSpeedHoming THEN
+                IF NOT bBusy AND bHomeReference THEN
+                    IF bHomeRefSensor THEN
+                        eHomingState := eMoveReverse;
+                    ELSE
+                        eHomingState := eFineDetection;
+                    END_IF
+                ELSIF NOT bBusy AND NOT bHomeReference THEN
+                    eHomingState := eCoarseDetection;
+                END_IF
             ELSE
-                fbStepAbsoluteOnSwitchPreparation.Execute := TRUE;
-
-                IF NOT fbStepAbsoluteOnSwitchPreparation.Busy AND fbStepAbsoluteOnSwitchPreparation.Done THEN
-                    fbStepAbsoluteOnSwitchPreparation.Execute := FALSE;
-                    eHomingState := eDetection;
-                   ELSIF NOT fbStepAbsoluteOnSwitchPreparation.Busy AND (fbStepAbsoluteOnSwitchPreparation.Error OR fbStepAbsoluteOnSwitchPreparation.CommandAborted) THEN
-                    iErrorID := fbStepAbsoluteOnSwitchPreparation.ErrorID;
-                    fbStepAbsoluteOnSwitchPreparation.Execute := FALSE;
-                    eHomingState := eAbortHoming;
-                END_IF
+                eHomingState := eFineDetection;
             END_IF
-        ELSE
-            eHomingState := eDetection;
         END_IF
 
-    eDetection: //Use bDetectionFB_<BOOL Variables> to interact with different detection FBs located in ACTs
+eCoarseDetection: //Detect the Home Reference with high speed (fVelocityToCam).
+    bDelay := TRUE;
+    bViaLimitCoarseDetect := TRUE;
+    bReversedDirection := FALSE;
+    fDetectionVelocity := fVelocityToCam;
+    fSetHomePosition := Axis.NcToPlc.ActPos; //Set the Act. position as home position (no change until the home procedure is finished)
+    IF fbTimerOnDelay.Q THEN
         bDetectionFB_Execute := TRUE;
-
+        bBusy := bDetectionFB_Busy;
         IF NOT bDetectionFB_Busy AND bDetectionFB_Done THEN
             bDetectionFB_Execute := FALSE;
-            fRecordedPositionLatched := fRecordedPosition;
-            IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
-                bBusy := fbHomeDirect.Busy;
-                bDone := fbHomeDirect.Done;
-                bCommandAborted := fbHomeDirect.CommandAborted;
-                bError := fbHomeDirect.Error;
-                nErrorId := fbHomeDirect.ErrorID;
-                eHomingState := eWaitForRequest;
+            bDelay := FALSE;
+            IF bHomeRefSensor THEN //If the HomeToRef is called
+                eHomingState := eMoveReverse;
             ELSE
-                eHomingState := eSetPos;
+                eHomingState := eFineDetection;
             END_IF
         ELSIF NOT bDetectionFB_Busy AND (bDetectionFB_Error OR bDetectionFB_CommandAborted) THEN
             iErrorID := nDetectionFB_ErrorID;
             bDetectionFB_Execute := FALSE;
+            bDelay := FALSE;
             eHomingState := eAbortHoming;
         END_IF
+    END_IF
 
+eMoveReverse: //Reversed Direction
+    bDelay := TRUE;
+    bReversedDirection := TRUE;
+    fDetectionVelocity := fVelocityToCam;
+    fSetHomePosition := Axis.NcToPlc.ActPos;
+    IF fbTimerOnDelay.Q THEN
+        bDetectionFB_Execute := TRUE;
+        bBusy := bDetectionFB_Busy;
+        IF NOT bDetectionFB_Busy AND bDetectionFB_Done THEN
+            bDetectionFB_Execute := FALSE;
+            bDelay := FALSE;
+            eHomingState := eFineDetection;
+        ELSIF NOT bDetectionFB_Busy AND (bDetectionFB_Error OR bDetectionFB_CommandAborted) THEN
+            iErrorID := nDetectionFB_ErrorID;
+            bDetectionFB_Execute := FALSE;
+            bDelay := FALSE;
+            eHomingState := eAbortHoming;
+        END_IF
+    END_IF
 
-
-
-    eSetPos:
-        fbSetPos.Execute := TRUE;
-
-        fbSetPos.Options.ClearPositionLag := TRUE;
-        IF NOT fbSetPos.Busy AND fbSetPos.Done THEN
-            fbSetPos.Execute := FALSE;
+eFineDetection: //Detect the Home Reference with low speed (fVelocityFromCam).
+    bDelay := TRUE;
+    bViaLimitCoarseDetect := FALSE;
+    bReversedDirection := FALSE;
+    fDetectionVelocity := fVelocityFromCam;
+    IF bHomeRefLimit OR bHomeRefSensor THEN
+        fSetHomePosition := Axis.NcToPlc.ActPos;
+        IF bFineDetection_Done THEN
+            bFineDetection_Done := FALSE;
+            eHomingState := eSetPos;
+        END_IF
+    ELSE
+        fSetHomePosition := fHomePosition;
+        IF bFineDetection_Done THEN
+            bFineDetection_Done := FALSE;
             eHomingState := eFinishHoming;
-        ELSIF NOT fbSetPos.Busy AND fbSetPos.Error THEN
-            iErrorID := fbSetPos.ErrorID;
-            fbSetPos.Execute := FALSE;
+        END_IF
+    END_IF
+    IF fbTimerOnDelay.Q THEN
+        bDetectionFB_Execute := TRUE;
+        bBusy := bDetectionFB_Busy;
+        IF bHomeRefLimit OR bHomeRefSensor THEN
+            IF bSignalRisingEdge AND fbHomeRefR_TRIG.Q THEN
+                fRisingEdgePosition := Axis.NcToPlc.ActPos; //Read positon when Rising Edge of the home reference (Sensor/Limit)
+                fHomeRefPosition := fRisingEdgePosition;
+            ELSIF bSignalFallingEdge AND fbHomeRefF_TRIG.Q THEN
+                fFallingEdgePosition := Axis.NcToPlc.ActPos; //Read positon when Falling Edge of the home reference (Sensor/Limit)
+                fHomeRefPosition := fFallingEdgePosition;
+            END_IF
+        END_IF
+        IF NOT bDetectionFB_Busy AND bDetectionFB_Done THEN
+            fActPosition_Done := Axis.NcToPlc.ActPos;
+            bDetectionFB_Execute := FALSE;
+            bDelay := FALSE;
+            bFineDetection_Done := TRUE;
+        ELSIF NOT bDetectionFB_Busy AND (bDetectionFB_Error OR bDetectionFB_CommandAborted) THEN
+            iErrorID := nDetectionFB_ErrorID;
+            bDetectionFB_Execute := FALSE;
+            bDelay := FALSE;
             eHomingState := eAbortHoming;
         END_IF
+    END_IF
 
+eSetPos:
+    fbSetPos.Execute := TRUE;
+    IF NOT fbSetPos.Busy AND fbSetPos.Done THEN
+        fbSetPos.Execute := FALSE;
+        eHomingState := eFinishHoming;
+    ELSIF NOT fbSetPos.Busy AND fbSetPos.Error THEN
+        iErrorID := fbSetPos.ErrorID;
+        fbSetPos.Execute := FALSE;
+        eHomingState := eAbortHoming;
+    END_IF
 
-    eFinishHoming:
+ eFinishHoming:
+    bDelay := TRUE;
+    IF fbTimerOnDelay.Q THEN
+        fbFinishHoming.Distance := fHomeFinishDistance;
         fbFinishHoming.Execute := TRUE;
-        bHomeSensorAtStart := FALSE;
-        bViaHomeSensor := FALSE;
-        bViaOnHomeSensor := FALSE;
-
         IF NOT fbFinishHoming.Busy AND fbFinishHoming.Done THEN
             bBusy := FALSE;
             bDone := TRUE;
             fbFinishHoming.Execute := FALSE;
+            bDelay := FALSE;
             eHomingState := eWaitForRequest;
         ELSIF NOT fbFinishHoming.Busy AND (fbFinishHoming.Error OR fbFinishHoming.CommandAborted) THEN
             iErrorID := fbFinishHoming.ErrorID;
             fbFinishHoming.Execute := FALSE;
+            bDelay := FALSE;
             eHomingState := eAbortHoming;
         END_IF
+    END_IF
 
-
-    eAbortHoming:
-        fbAbortHoming.Execute := TRUE;
-        bHomeSensorAtStart := FALSE;
-        bViaHomeSensor := FALSE;
-        bViaOnHomeSensor := FALSE;
-
-        IF NOT fbAbortHoming.Busy AND fbAbortHoming.Done THEN
-            bBusy := FALSE;
-            IF iErrorId <> 0 THEN
-                bError := TRUE;
-                nErrorId := iErrorId;
-            ELSE
-                bCommandAborted := TRUE;
-            END_IF
-            fbAbortHoming.Execute := FALSE;
-            eHomingState := eWaitForRequest;
-        ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.Error THEN
-            bBusy := FALSE;
+eAbortHoming:
+    fbAbortHoming.Execute := TRUE;
+    IF NOT fbAbortHoming.Busy AND fbAbortHoming.Done THEN
+        bBusy := FALSE;
+        IF iErrorId <> 0 THEN
             bError := TRUE;
-            nErrorID := fbAbortHoming.ErrorID;
-            fbAbortHoming.Execute := FALSE;
-            eHomingState := eWaitForRequest;
+            nErrorId := iErrorId;
+        ELSE
+            bCommandAborted := TRUE;
         END_IF
+        fbAbortHoming.Execute := FALSE;
+        bFineDetection_Done := FALSE;
+        bDelay := FALSE;
+        eHomingState := eWaitForRequest;
+   ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.Error THEN
+        bBusy := FALSE;
+        bError := TRUE;
+        nErrorID := fbAbortHoming.ErrorID;
+        fbAbortHoming.Execute := FALSE;
+        bFineDetection_Done := FALSE;
+        bDelay := FALSE;
+        eHomingState := eWaitForRequest;
+   END_IF
 
-END_CASE
+ END_CASE
+
 ]]></ST>
     </Implementation>
     <Action Name="actHomeDirect" Id="{d23628f6-b24a-4bef-81d2-3d83fde8f1cd}">
       <Implementation>
-        <ST><![CDATA[
-bViaLimitSwitch := FALSE;
-bViaHomeSensor := FALSE;
+        <ST><![CDATA[bTwoSpeedHoming := FALSE;
 
 fbHomeDirect(
     Axis := Axis,
     Parameter := stHomingParameter,
     Execute := bDetectionFB_Execute,
-    SetPosition := fHomePosition,
+    SetPosition := fSetHomePosition,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
     CommandAborted => bDetectionFB_CommandAborted,
@@ -374,222 +416,192 @@ fbHomeDirect(
     </Action>
     <Action Name="actHomeToBlock" Id="{7f7639d4-e566-498f-a828-fad9ed0e5d95}">
       <Implementation>
-        <ST><![CDATA[CASE eHomeSeq OF
+        <ST><![CDATA[
+CASE eHomeSeq OF
     E_HomingRoutines.eHomeToBlock_Bwd:
-        stDetectDirection:= mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
+        stDetectDirection := mcNegativeDirection;
     E_HomingRoutines.eHomeToBlock_Fwd:
-        stDetectDirection:= mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
+        stDetectDirection := mcPositiveDirection;
 END_CASE
 
-bViaLimitSwitch:=FALSE;
-bViaHomeSensor := FALSE;
+bTwoSpeedHoming := FALSE;
 
-fbStepBlockLagDetection(
+fbStepBlockLag(
     Axis := Axis,
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    Velocity := fVelocityFromCam, //Maximum travel velocity (>0).
+    Velocity := fDetectionVelocity, //Maximum travel velocity (>0).
     DetectionVelocityLimit := stConfig.stHomingConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
     DetectionVelocityTime := stConfig.stHomingConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
     TimeLimit :=  stConfig.stHomingConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
     DistanceLimit := stConfig.stHomingConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
     TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
     LagLimit := stConfig.stHomingConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+    SetPosition:= fSetHomePosition,
     Options := stOptions3,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);
+    ErrorID => nDetectionFB_ErrorID);
+
 ]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToEncPulse" Id="{48b338da-ce35-49b7-b692-c1dd5d495b98}">
       <Implementation>
-        <ST><![CDATA[
-CASE eHomeSeq OF
-    E_HomingRoutines.eHomeToEncPulse_Bwd:
-        stDetectDirection := mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        bViaLimitSwitch := FALSE;
+        <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToEncPulse_Fwd:
         stDetectDirection := mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-        bViaLimitSwitch := FALSE;
-    E_HomingRoutines.eHomeToEncPulse_viaBwdLimit:
-        stDetectDirection := mcPositiveDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        stPreparationDirection := mcNegativeDirection;
-        stLimitSwitchSignal.Level := NOT(bLimitBwd);
-        bViaLimitSwitch := TRUE;
-    E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
+        bTwoSpeedHoming := FALSE;
+    E_HomingRoutines.eHomeToEncPulse_Bwd:
         stDetectDirection := mcNegativeDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-        stPreparationDirection := mcPositiveDirection;
-        stLimitSwitchSignal.Level := NOT(bLimitFwd);
-        bViaLimitSwitch := TRUE;
+        bTwoSpeedHoming := FALSE;
+    E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
+        stDetectLimitDirection := mcPositiveDirection;
+        stDetectDirection := mcNegativeDirection;
+        bHomeReference := NOT(bLimitFwd);
+        bTwoSpeedHoming := TRUE;
+    E_HomingRoutines.eHomeToEncPulse_viaBwdLimit:
+        stDetectLimitDirection := mcNegativeDirection;
+        stDetectDirection := mcPositiveDirection;
+        bHomeReference := NOT(bLimitBwd);
+        bTwoSpeedHoming := TRUE;
 END_CASE
 
-bViaHomeSensor := FALSE;
+IF bViaLimitCoarseDetect AND bTwoSpeedHoming THEN
+   fbStepLimitSwitch.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+   fbStepLimitSwitch(
+        Axis := Axis,
+        Execute := bDetectionFB_Execute,
+        Parameter := stHomingParameter,
+        Direction := stDetectLimitDirection,
+        LimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode,
+        LimitSwitchSignal := stLimitSwitchSignal,
+        Velocity := fDetectionVelocity,
+        Acceleration := fDetectionAcceleration,
+        Deceleration := fDetectionDeceleration,
+        SetPosition := fSetHomePosition,
+        Options := stOptions,
+        Done => bDetectionFB_Done,
+        Busy => bDetectionFB_Busy,
+        CommandAborted => bDetectionFB_CommandAborted,
+        Error => bDetectionFB_Error,
+        ErrorID => nDetectionFB_ErrorID);
 
-fbStepReferencePulseDetection.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
-fbStepReferencePulseDetection(
-    Axis := Axis,
-    Execute := bDetectionFB_Execute,
-    Parameter := stHomingParameter,
-    Direction := stDetectDirection,
-    ReferenceSignal := stEncPulseSignal,
-    Velocity := fVelocityFromCam,
-    Options := stOptions,
-    Done => bDetectionFB_Done,
-    Busy => bDetectionFB_Busy,
-    CommandAborted => bDetectionFB_CommandAborted,
-    Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);
+ELSIF NOT bViaLimitCoarseDetect THEN
+    fbStepReferencePulse.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+    fbStepReferencePulse(
+        Axis := Axis,
+        Execute := bDetectionFB_Execute,
+        Parameter := stHomingParameter,
+        Direction := stDetectDirection,
+        ReferenceSignal := stEncPulseSignal,
+        Velocity := fDetectionVelocity,
+        Options := stOptions,
+        SetPosition := fSetHomePosition,
+        Done => bDetectionFB_Done,
+        Busy => bDetectionFB_Busy,
+        CommandAborted => bDetectionFB_CommandAborted,
+        Error => bDetectionFB_Error,
+        ErrorID => nDetectionFB_ErrorID);
+END_IF
 ]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToLimit" Id="{3859e05e-8699-4334-9196-1315e94174a0}">
       <Implementation>
-        <ST><![CDATA[
-CASE eHomeSeq OF
-    E_HomingRoutines.eHomeToLimit_Bwd:
-        stLimitSwitchSignal.Level := NOT(bLimitBwd);
-        stDetectDirection:= mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        eLocalSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode;
-        bViaLimitSwitch:=FALSE;
+        <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToLimit_Fwd:
-        stLimitSwitchSignal.Level := NOT(bLimitFwd);
-        stDetectDirection:= mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-        eLocalSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode;
-        bViaLimitSwitch:=FALSE;
-    E_HomingRoutines.eHomeToLimit_Bwd_2Speeds:
-        stDetectDirection := mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        stPreparationDirection := mcNegativeDirection;
-        stLimitSwitchSignal.Level := NOT(bLimitBwd);
-        eLocalSwitchMode := mcFallingEdge;
-        bViaLimitSwitch := TRUE;
-    E_HomingRoutines.eHomeToLimit_Fwd_2Speeds:
-        stDetectDirection := mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-        stPreparationDirection := mcPositiveDirection;
-        stLimitSwitchSignal.Level := NOT(bLimitFwd);
-        eLocalSwitchMode := mcFallingEdge;
-        bViaLimitSwitch := TRUE;
+    stDetectDirection:= mcPositiveDirection;
+    bHomeReference := NOT(bLimitFwd); //The hardware signal is the Fwd Limit switch
+
+    E_HomingRoutines.eHomeToLimit_Bwd:
+    stDetectDirection:= mcNegativeDirection;
+    bHomeReference := NOT(bLimitBwd); //The hardware signal is the Bwd Limit switch
 END_CASE
 
-bViaHomeSensor := FALSE;
+bTwoSpeedHoming := TRUE;
+bHomeRefLimit := TRUE;
 
-fbStepLimitSwitchDetection.Options.DisableDriveAccess:= stOptions.DisableDriveAccess;
-fbStepLimitSwitchDetection(
+//It is used to record the home position at Rising or Falling Edge
+IF stConfig.stHomingConfig.eLimitSwitchMode = mcRisingEdge THEN
+    bSignalRisingEdge := TRUE;
+    bSignalFallingEdge := FALSE;
+ELSIF stConfig.stHomingConfig.eLimitSwitchMode = mcFallingEdge THEN
+    bSignalRisingEdge := FALSE;
+    bSignalFallingEdge := TRUE;
+END_IF
+
+fbStepLimitSwitch.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbStepLimitSwitch(
     Axis := Axis,
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
     Direction := stDetectDirection,
-    LimitSwitchMode := eLocalSwitchMode,
+    LimitSwitchMode := stConfig.stHomingConfig.eLimitSwitchMode,
     LimitSwitchSignal := stLimitSwitchSignal,
-    Velocity := fVelocityFromCam,
+    Velocity := fDetectionVelocity,
+    Acceleration := fDetectionAcceleration,
+    Deceleration := fDetectionDeceleration,
+    SetPosition := fSetHomePosition,
     Options := stOptions,
     Done => bDetectionFB_Done,
     Busy => bDetectionFB_Busy,
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);
+    ErrorID => nDetectionFB_ErrorID);
 ]]></ST>
       </Implementation>
     </Action>
     <Action Name="actHomeToRef" Id="{1a440701-e71d-439b-9045-d08d31798b28}">
       <Implementation>
-        <ST><![CDATA[
-CASE eHomeSeq OF
-    E_HomingRoutines.eHomeToRef_Bwd:
-        stDetectDirection := mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        fbStepAbsoluteOnSwitchPreparation.Direction := mcPositiveDirection;
-        fbStepAbsoluteOnSwitchPreparation.Velocity := fVelocityToCam;
-
-        IF NOT bHomeSensorAtStart THEN
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := FALSE;
-        ELSE
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := TRUE;
-        END_IF
-
+        <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToRef_Fwd:
+    IF NOT bReversedDirection THEN
         stDetectDirection := mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-        fbStepAbsoluteOnSwitchPreparation.Direction := mcNegativeDirection;
-        fbStepAbsoluteOnSwitchPreparation.Velocity := fVelocityFromCam;
-
-        IF NOT bHomeSensorAtStart THEN
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := FALSE;
-        ELSE
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := TRUE;
-        END_IF
-
-    E_HomingRoutines.eHomeToRef_Bwd_2Speeds:
+    ELSE
         stDetectDirection := mcNegativeDirection;
-        fbFinishHoming.Distance := fHomeFinishDistance;
-        stPreparationDirection := mcPositiveDirection;
-        ePreparationRefSwitchMode := mcFallingEdge;
-        fbStepAbsoluteSwitchPreparation.Velocity := fVelocityToCam;
+    END_IF
 
-        IF NOT bHomeSensorAtStart THEN
-            fbStepAbsoluteSwitchPreparation.Direction := mcNegativeDirection;
-            fbStepAbsoluteSwitchPreparation.SwitchMode := mcRisingEdge;
-            fbStepAbsoluteSwitchPreparation.Velocity := fVelocityToCam;
-            bViaHomeSensor := TRUE;
-            bViaOnHomeSensor := TRUE;
-        ELSE
-            fbStepAbsoluteOnSwitchPreparation.Direction := mcPositiveDirection;
-            fbStepAbsoluteOnSwitchPreparation.Velocity := fVelocityFromCam;
-            fbStepAbsoluteOnSwitchPreparation.Velocity := fVelocityToCam;
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := TRUE;
-        END_IF
-
-    E_HomingRoutines.eHomeToRef_Fwd_2Speeds:
+    E_HomingRoutines.eHomeToRef_Bwd:
+    IF NOT bReversedDirection THEN
+        stDetectDirection := mcNegativeDirection;
+    ELSE
         stDetectDirection := mcPositiveDirection;
-        fbFinishHoming.Distance := -fHomeFinishDistance;
-
-        IF NOT bHomeSensorAtStart THEN
-            fbStepAbsoluteSwitchPreparation.Direction := mcPositiveDirection;
-            fbStepAbsoluteSwitchPreparation.SwitchMode := mcRisingEdge;
-            fbStepAbsoluteSwitchPreparation.Velocity := fVelocityToCam;
-            bViaHomeSensor := TRUE;
-            bViaOnHomeSensor := TRUE;
-        ELSE
-            fbStepAbsoluteOnSwitchPreparation.Direction := mcNegativeDirection;
-            fbStepAbsoluteOnSwitchPreparation.Velocity := fVelocityFromCam;
-            fbStepAbsoluteSwitchPreparation.Velocity := fVelocityToCam;
-            bViaHomeSensor := FALSE;
-            bViaOnHomeSensor := TRUE;
-        END_IF
+    END_IF
 END_CASE
 
-bViaLimitSwitch := FALSE;
+bHomeReference := bHomeSensor; //Hardware home sensor (Reference siganl for homing)
+bTwoSpeedHoming := TRUE;
+bHomeRefSensor := TRUE;
 
-fbStepAbsoluteSwitchDetection.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
-fbStepAbsoluteSwitchDetection(
+IF NOT bReversedDirection THEN
+    fbStepAbsoluteSwitch.SwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
+ELSE
+    fbStepAbsoluteSwitch.SwitchMode := stConfig.stHomingConfig.eRefSwitchModeReversed;
+END_IF
+
+ //It is used to record the home position at Rising or Falling Edge
+IF stConfig.stHomingConfig.eRefSwitchMode = mcRisingEdge THEN
+    bSignalRisingEdge := TRUE;
+    bSignalFallingEdge := FALSE;
+ELSIF stConfig.stHomingConfig.eRefSwitchMode = mcFallingEdge THEN
+    bSignalRisingEdge := FALSE;
+    bSignalFallingEdge := TRUE;
+END_IF
+
+fbStepAbsoluteSwitch(
     Axis := Axis,
     Execute := bDetectionFB_Execute,
     Parameter := stHomingParameter,
-    Direction := stDetectDirection,
-    SwitchMode := stConfig.stHomingConfig.eRefSwitchMode,
+    Direction := stDetectDirection, //MC_Home_Direction(mcPositiveDirection, mcNegativeDirection)
     ReferenceSignal := stRefSwitchSignal,
-    Velocity := fVelocityFromCam,
+    Velocity := fDetectionVelocity,
+    Acceleration := fDetectionAcceleration, //If the value is 0, the standard acceleration from the axis configuration in the System Manager is used.
+    Deceleration := fDetectionDeceleration, //If the value is 0, the standard deceleration from the axis configuration in the System Manager is used.
+    SetPosition := fSetHomePosition,
     PositiveLimitSwitch := NOT(bLimitFwd),
     NegativeLimitSwitch := NOT(bLimitBwd),
     Options := stOptions,
@@ -597,8 +609,7 @@ fbStepAbsoluteSwitchDetection(
     Busy => bDetectionFB_Busy,
     CommandAborted => bDetectionFB_CommandAborted,
     Error => bDetectionFB_Error,
-    ErrorID => nDetectionFB_ErrorID,
-    RecordedPosition => fRecordedPosition);
+    ErrorID => nDetectionFB_ErrorID);
 ]]></ST>
       </Implementation>
     </Action>

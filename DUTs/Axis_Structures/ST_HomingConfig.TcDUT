@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_HomingConfig" Id="{3d76c549-a0ce-44cf-a676-89d7d365d0b2}">
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
     eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge;
-
+    eRefSwitchMode: MC_Switch_Mode:= mcRisingEdge;
+    eRefSwitchModeReversed: MC_Switch_Mode := mcFallingEdge; // Ensure that the "RefSwitchModeReversed" is always the opposite of the "RefSwitchMode".
     //General Advanced Homing Configuration
-    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
+    bDisableDriveAccess: BOOL := TRUE;          //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
     bEnableLagErrorDetection :BOOL := FALSE; // Keep the lag error detection active during homing
-    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
+    bInstantLagReduction :BOOL := FALSE;     //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
     tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
     fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
