@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
@@ -159,13 +159,19 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Backlash compensation function
+// Read Backlash documentation in the Confluence page or in Beckhoff before backlash setup
 // Position compensation needs to be enabled in NC to use the backsash compensation
 
 
 IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
 
+// Enabling the backlash functionality. It is disable if homing is performed.
     IF _stAxis.stStatus.bEnabled THEN
-        fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+		IF fbHome.bBusy THEN
+			fbBacklashCompensation.Enable := FALSE;
+		ELSE
+        	fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+		END_IF
         fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
         fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
         fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
