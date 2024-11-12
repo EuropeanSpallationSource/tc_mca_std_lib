@@ -167,11 +167,11 @@ IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
 
 // Enabling the backlash functionality. It is disable if homing is performed.
     IF _stAxis.stStatus.bEnabled THEN
-		IF fbHome.bBusy THEN
-			fbBacklashCompensation.Enable := FALSE;
-		ELSE
-        	fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
-		END_IF
+        IF fbHome.bBusy THEN
+            fbBacklashCompensation.Enable := FALSE;
+        ELSE
+            fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+        END_IF
         fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
         fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
         fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
