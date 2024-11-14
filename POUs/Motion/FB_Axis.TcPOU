@@ -162,7 +162,6 @@ END_VAR
 // Read Backlash documentation in the Confluence page or in Beckhoff before backlash setup
 // Position compensation needs to be enabled in NC to use the backsash compensation
 
-
 IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
 
 // Enabling the backlash functionality. It is disable if homing is performed.
@@ -173,17 +172,16 @@ IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
             fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
         END_IF
         fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
-        fbBacklashCompensation.CompensationInPositiveDirection:= _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
-        fbBacklashCompensation.Ramp:= ABS(_stAxis.stControl.fVelocity/3);
+        fbBacklashCompensation.CompensationInPositiveDirection := _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
+        fbBacklashCompensation.Ramp := ABS(_stAxis.stControl.fVelocity/3);
     ELSE
         fbBacklashCompensation.Enable := FALSE;
         fbBacklashCompensation.DisableMode := 1;
     END_IF
 
-    fbBacklashCompensation(Axis:= astAxes[1].Axis);
+    fbBacklashCompensation(Axis := _stAxis.Axis);
 
 END_IF
-
 
 IF fbBacklashCompensation.Error THEN
     _stAxis.stError.nBacklashErrorID := fbBacklashCompensation.ErrorID;
