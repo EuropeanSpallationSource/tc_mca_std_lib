@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <DUT Name="E_PneumaticAxisErrors" Id="{e2fbdacd-f77d-473b-86e3-9440b104e267}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
@@ -10,12 +10,13 @@ TYPE E_PneumaticAxisErrors :
     eRetractTimedOut := 2, //Retraction movement not done in expected time
     eNotMovingExtract := 3, //Extract command not executed, cylinder stays in place
     eNotMovingRetract := 4, //Retract command not executed, cylinder stays in place
-    eInterlockOn := 5, //Interlock signal on, cylinder retracts to Limit Bwd
-    eNoPSSPermit := 6, //Permit signal lost, cylinder retracts to Limit Bwd
-    eAirPressureErrorLow := 7, //Air pressure too low
-    eAirPressureErrorHigh := 8, //Air pressure too high
-    eNoSignalFromEndSwitchBwd :=9, //Lost signal from the EndSwitchBwd
-    eNoSignalFromEndSwitchFwd :=10 //Lost signal from the EndSwitchFwd
+    eNoPSSPermit := 5, //Permit signal lost, and trying to move
+    eRetractInterlocked := 6, //Cylinder interlocked, but given signal to Extend
+    eExtendInterlocked := 7, //Cylinder interlocked, but given signal to Retract
+    eAirPressureErrorLow := 8, //Air pressure too low
+    eAirPressureErrorHigh := 9, //Air pressure too high
+    eNoSignalFromEndSwitchBwd := 10, //Lost signal from the EndSwitchBwd
+    eNoSignalFromEndSwitchFwd := 11 //Lost signal from the EndSwitchFwd
 ):= eNoError;
 END_TYPE
 ]]></Declaration>
