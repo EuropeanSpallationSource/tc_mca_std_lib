@@ -158,9 +158,9 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Backlash compensation function
-// Read Backlash documentation in the Confluence page or in Beckhoff before backlash setup
-// Position compensation needs to be enabled in NC to use the backsash compensation
+        <ST><![CDATA[(*Read Backlash documentation in the Confluence page or in Beckhoff before backlash setup:
+https://confluence.ess.eu/display/MCAG/Backlash+compensation
+Position compensation needs to be enabled in NC to use the backsash compensation*)
 
 IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
 
