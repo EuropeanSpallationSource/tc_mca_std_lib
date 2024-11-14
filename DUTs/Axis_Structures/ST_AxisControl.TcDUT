@@ -23,6 +23,8 @@ STRUCT
     fPosition: LREAL; //The position to move to for an absolute move and the amount to move in a relative move
     bHWMaskActive: BOOL := FALSE;
     fMaskedTemperature: LREAL := 0.0;
+    bFastStop AT %Q*: BOOL := FALSE; // Fast stop signal used to stop the axis using the fast stop NC param
+    // Fast stop output to be linked to Axis drive input Drive^Inputs^In^nState4<7>
 END_STRUCT
 END_TYPE
 ]]></Declaration>
