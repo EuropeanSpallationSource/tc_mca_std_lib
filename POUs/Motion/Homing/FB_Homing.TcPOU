@@ -86,7 +86,7 @@ VAR
     bReversedDirection: BOOL;
     bFineDetectionDone: BOOL;
     bViaLimitCoarseDetect: BOOL;
-	eRefSwitchModeReversed: MC_Switch_Mode;
+    eRefSwitchModeReversed: MC_Switch_Mode;
 END_VAR
 
 VAR CONSTANT
@@ -578,11 +578,11 @@ bHomingToHomeSensor := TRUE;
 IF stConfig.stHomingConfig.eRefSwitchMode = mcRisingEdge THEN
     bRisingEdgeDetectionOn := TRUE;
     bFallingEdgeDetectionOn := FALSE;
-	eRefSwitchModeReversed := mcFallingEdge;
+    eRefSwitchModeReversed := mcFallingEdge;
 ELSIF stConfig.stHomingConfig.eRefSwitchMode = mcFallingEdge THEN
     bRisingEdgeDetectionOn := FALSE;
     bFallingEdgeDetectionOn := TRUE;
-	eRefSwitchModeReversed := mcRisingEdge;
+    eRefSwitchModeReversed := mcRisingEdge;
 END_IF
 
 IF NOT bReversedDirection THEN

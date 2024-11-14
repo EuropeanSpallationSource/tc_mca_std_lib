@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_PneumaticAxis" Id="{0ba43c5d-0b1b-4802-81a2-a56c90343a83}" SpecialFunc="None">
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_PneumaticAxis" Id="{f0822a38-f63b-03f0-165a-8d38581f4fae}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_PneumaticAxis
 
 VAR_IN_OUT
@@ -73,7 +73,7 @@ END_IF
 
 ]]></ST>
     </Implementation>
-    <Method Name="FB_init" Id="{af7214fb-0537-4a7d-a506-7af30838a02e}">
+    <Method Name="FB_init" Id="{5454029e-f817-018f-32fe-52a7c013d503}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
     bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
@@ -85,7 +85,7 @@ END_VAR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckEndSwitchBwdStatus" Id="{06cf6d5a-16e0-438c-85b6-51ad0c4cc91d}">
+    <Method Name="mCheckEndSwitchBwdStatus" Id="{fde97b3f-ebc0-087e-124e-79f9c467bc30}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchBwdStatus
 
 ]]></Declaration>
@@ -99,7 +99,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckEndSwitchFwdStatus" Id="{df07c6b6-6902-4500-8747-be2fd3560637}">
+    <Method Name="mCheckEndSwitchFwdStatus" Id="{2421d0d3-9422-0ef2-10bf-967b1b7d731a}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchFwdStatus
 
 ]]></Declaration>
@@ -113,7 +113,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckForAirPressureError" Id="{f9b14adb-ed69-49af-a993-e6e5d49fd78d}">
+    <Method Name="mCheckForAirPressureError" Id="{02975cbe-1049-025d-3e6b-ceb11cb4a2a0}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckForAirPressureError : BOOL
 VAR
     bAirPressureoutOfRangeError : BOOL;
@@ -156,7 +156,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckForMovingError" Id="{38f0c607-b572-456d-8f26-90f3b9594647}">
+    <Method Name="mCheckForMovingError" Id="{c3d6d062-4852-0e9f-18de-b8a77172336a}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckForMovingError
 
 ]]></Declaration>
@@ -195,7 +195,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckStatusOfInterlockSignal" Id="{3759dc88-e87e-4376-86a5-1bdfbc4158fe}">
+    <Method Name="mCheckStatusOfInterlockSignal" Id="{cc7fcaed-155e-0884-115d-338b746a2dd3}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfInterlockSignal
 
 ]]></Declaration>
@@ -208,7 +208,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckStatusOfPermitSignal" Id="{5d308b37-3dc0-48eb-9350-16f4ad213248}">
+    <Method Name="mCheckStatusOfPermitSignal" Id="{a6169d52-c0e0-0319-04a8-3ea0650a4765}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfPermitSignal
 
 ]]></Declaration>
@@ -225,7 +225,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mReset" Id="{4721b129-abfa-4113-85bb-a13eb59dedea}">
+    <Method Name="mReset" Id="{bc07a74c-56da-0ae1-1243-896a7db698c7}">
       <Declaration><![CDATA[METHOD PUBLIC mReset
 
 ]]></Declaration>
@@ -243,7 +243,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
+    <Method Name="mRun" Id="{b4d070a0-7784-0558-17c5-7f5403c420ef}">
       <Declaration><![CDATA[METHOD PUBLIC mRun
 ]]></Declaration>
       <Implementation>
@@ -265,7 +265,7 @@ mReset();
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mScaledPressureValue" Id="{cb34ab57-a376-4317-a285-420d3612f714}">
+    <Method Name="mScaledPressureValue" Id="{3012bd32-5e56-08e5-357d-6a59fe398239}">
       <Declaration><![CDATA[METHOD PUBLIC mScaledPressureValue : REAL
 VAR_INPUT
     nRawValue: INT; //Raw value from the Terminal
@@ -288,7 +288,7 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetAllowedTravelTime" Id="{1503d621-dee7-42a9-91aa-f87392c1d737}">
+    <Method Name="mSetAllowedTravelTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}">
       <Declaration><![CDATA[METHOD PUBLIC mSetAllowedTravelTime
 
 ]]></Declaration>
@@ -299,7 +299,7 @@ fbTimerRetract.PT := INT_TO_TIME( stPneumaticAxisStruct.stPneumaticAxisConfig.nT
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetInputStatuses" Id="{7e8f02a9-eec6-4e57-afc7-756f5956c71a}">
+    <Method Name="mSetInputStatuses" Id="{85a914cc-13e6-05a5-383f-5d3b917db237}">
       <Declaration><![CDATA[METHOD PUBLIC mSetInputStatuses
 ]]></Declaration>
       <Implementation>
@@ -313,7 +313,7 @@ stPneumaticAxisStruct.stPneumaticAxisStatus.bInterlocked := stPneumaticAxisStruc
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSingleSolenoid" Id="{8261ebf9-e0cc-4c7d-9850-4c5e547b1764}">
+    <Method Name="mSingleSolenoid" Id="{7947fd9c-1dec-078f-0fa8-640a9c506249}">
       <Declaration><![CDATA[METHOD PUBLIC mSingleSolenoid
 
 ]]></Declaration>
@@ -408,7 +408,7 @@ mCheckForMovingError();
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSingleSolenoidError" Id="{9bc66883-6ee1-41c7-aebe-403858ab95d4}">
+    <Method Name="mSingleSolenoidError" Id="{60e07ee6-93c1-0a35-3946-686c9080e0f9}">
       <Declaration><![CDATA[METHOD PUBLIC mSingleSolenoidError
 
 ]]></Declaration>

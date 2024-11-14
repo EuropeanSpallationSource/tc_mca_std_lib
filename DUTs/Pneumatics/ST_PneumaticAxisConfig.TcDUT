@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <DUT Name="ST_PneumaticAxisConfig" Id="{0cf5a73f-3f7b-4191-a68d-fd09f581360b}">
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PneumaticAxisConfig" Id="{f7d3b15a-c25b-0a63-3175-d55d3daa4326}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisConfig :
 STRUCT
     bPSSPneumaticAxisShutter: BOOL := FALSE; //Bit to define if pneumatic axis is Shutter needing PSS permit
