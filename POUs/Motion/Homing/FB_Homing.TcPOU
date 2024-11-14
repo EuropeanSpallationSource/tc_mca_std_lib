@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_Homing" Id="{427b1d22-ef01-4bbb-ab89-ec8be67f3887}" SpecialFunc="None">
+  <POU Name="FB_Homing" Id="{b95d0b47-1221-0049-3c71-c4df2e544daa}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
 VAR_IN_OUT
     Axis: Axis_Ref;
@@ -86,6 +86,7 @@ VAR
     bReversedDirection: BOOL;
     bFineDetectionDone: BOOL;
     bViaLimitCoarseDetect: BOOL;
+	eRefSwitchModeReversed: MC_Switch_Mode;
 END_VAR
 
 VAR CONSTANT
@@ -396,7 +397,7 @@ CASE eHomingState OF
 
 ]]></ST>
     </Implementation>
-    <Action Name="actHomeDirect" Id="{d23628f6-b24a-4bef-81d2-3d83fde8f1cd}">
+    <Action Name="actHomeDirect" Id="{29103e93-4f6a-001d-162a-15d735c384e0}">
       <Implementation>
         <ST><![CDATA[bTwoSpeedHoming := FALSE;
 
@@ -413,7 +414,7 @@ fbHomeDirect(
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actHomeToBlock" Id="{7f7639d4-e566-498f-a828-fad9ed0e5d95}">
+    <Action Name="actHomeToBlock" Id="{84502fb1-1846-027d-3fd0-d28d252528b8}">
       <Implementation>
         <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToBlock_Bwd:
@@ -447,7 +448,7 @@ fbStepBlockLag(
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actHomeToEncPulse" Id="{48b338da-ce35-49b7-b692-c1dd5d495b98}">
+    <Action Name="actHomeToEncPulse" Id="{b3952ebf-3315-0245-216a-e98995622eb5}">
       <Implementation>
         <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToEncPulse_Fwd:
@@ -508,7 +509,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actHomeToLimit" Id="{3859e05e-8699-4334-9196-1315e94174a0}">
+    <Action Name="actHomeToLimit" Id="{c37ff63b-7bb9-08c6-066e-3b41216a018d}">
       <Implementation>
         <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToLimit_Fwd:
@@ -552,7 +553,7 @@ fbStepLimitSwitch(
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actHomeToSensor" Id="{1a440701-e71d-439b-9045-d08d31798b28}">
+    <Action Name="actHomeToSensor" Id="{e1621164-1a3d-0869-07bd-f8d9f952fe05}">
       <Implementation>
         <ST><![CDATA[CASE eHomeSeq OF
     E_HomingRoutines.eHomeToRef_Fwd:
@@ -574,19 +575,24 @@ bHWSignalForHoming := bHomeSensor; //Hardware home sensor (Reference siganl for 
 bTwoSpeedHoming := TRUE;
 bHomingToHomeSensor := TRUE;
 
-IF NOT bReversedDirection THEN
-    fbStepAbsoluteSwitch.SwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
-ELSE
-    fbStepAbsoluteSwitch.SwitchMode := stConfig.stHomingConfig.eRefSwitchModeReversed;
-END_IF
-
 IF stConfig.stHomingConfig.eRefSwitchMode = mcRisingEdge THEN
     bRisingEdgeDetectionOn := TRUE;
     bFallingEdgeDetectionOn := FALSE;
+	eRefSwitchModeReversed := mcFallingEdge;
 ELSIF stConfig.stHomingConfig.eRefSwitchMode = mcFallingEdge THEN
     bRisingEdgeDetectionOn := FALSE;
     bFallingEdgeDetectionOn := TRUE;
+	eRefSwitchModeReversed := mcRisingEdge;
 END_IF
+
+IF NOT bReversedDirection THEN
+    fbStepAbsoluteSwitch.SwitchMode := stConfig.stHomingConfig.eRefSwitchMode;
+ELSE
+    fbStepAbsoluteSwitch.SwitchMode := eRefSwitchModeReversed;
+END_IF
+
+
+
 
 fbStepAbsoluteSwitch(
     Axis := Axis,
