@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <TextList Name="languageSupport" Id="{a619ca4a-a6ca-0f21-16f0-95bb490c9d0c}">
+  <TextList Name="languageSupport" Id="{5d3fdc2f-5bea-44d3-8108-bdef8127e821}">
     <XmlArchive>
       <Data>
         <o xml:space="preserve" t="TextListObject">
@@ -455,6 +455,13 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"bEnableStopWithAnyLimitSwitch"</v>
+              <v n="TextDefault">"Stop at any Limit Switch"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -465,9 +472,9 @@
           <l n="Languages" t="ArrayList" cet="String">
             <v>Test</v>
           </l>
-          <v n="GuidInit">{949de52b-afa9-405c-a0ca-3cad34854121}</v>
-          <v n="GuidReInit">{09c30e28-d670-4cca-b4c7-2fa2e36e866b}</v>
-          <v n="GuidExitX">{06982fd6-d410-4931-8636-9674e53d20c7}</v>
+          <v n="GuidInit">{a4579515-5fac-4e80-a8ae-fa31e3dd939e}</v>
+          <v n="GuidReInit">{569c99f6-8b6e-4019-a3fb-21d3bd9f16d9}</v>
+          <v n="GuidExitX">{74cde198-f60f-4764-99a7-fab6d8a4e66b}</v>
         </o>
       </Data>
       <TypeList>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_AxisConfig" Id="{1b29f575-72d8-0ed8-17f2-aa6a32a8c48e}">
+  <DUT Name="ST_AxisConfig" Id="{e00fe310-8ff8-452a-800a-823efa83b1a3}">
     <Declaration><![CDATA[(*These are axis parameters that are set up during commissioning and
 in theory don't neeed to be change as part of daily moving of axes.
 For instance they may be changed due to poor parameter selection
@@ -17,6 +17,9 @@ STRUCT
 
     //Advanced homing parameters
     stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
+
+    // Backlash compensation config
+    stBacklashConfig: ST_BacklashConfig;
 
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
