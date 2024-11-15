@@ -104,11 +104,11 @@ stEncPulseSignal.SignalSource := SignalSource_ZeroPulse;
 stEncPulseSignal.TouchProbe := TouchProbe1;
 
 fbHWHomeSignalRTrig(CLK := bHWSignalForHoming);
-
 fbHWHomeSignalFTrig(CLK := bHWSignalForHoming);
 
 fbTimerOnDelay(IN := bDelay, PT := tDELAY_TIME);
 
+//Default accelerations from the NC parameters
 fDetectionAcceleration := stConfig.fDefaultAcc;
 fDetectionDeceleration := stConfig.fDefaultDec;
 
@@ -117,13 +117,17 @@ fbVelocityToCam(
     Axis := Axis,
     Enable := TRUE,
     ParameterNumber := E_AxisParameters.AxisVelocityToCam,
-    ReadMode := READMODE_CYCLIC);
+    ReadMode := READMODE_CYCLIC,
+    Error => bLocalHomingFB_Error,
+    ErrorID => nLocalHomingFB_ErrorID);
 
 fbVelocityFromCam(
     Axis:= Axis,
     Enable := TRUE,
     ParameterNumber := E_AxisParameters.AxisVelocityFromCam,
-    ReadMode := READMODE_CYCLIC);
+    ReadMode := READMODE_CYCLIC,
+    Error => bLocalHomingFB_Error,
+    ErrorID => nLocalHomingFB_ErrorID);
 
 //Only write velocity if the function block has not errored
 IF NOT fbVelocityToCam.Error THEN
@@ -132,15 +136,6 @@ END_IF
 
 IF NOT fbVelocityFromCam.Error THEN
     fVelocityFromCam := fbVelocityFromCam.Value;
-END_IF
-
- //Feeds function block errors through
-IF fbVelocityToCam.Error THEN
-    bError := TRUE;
-    nErrorID := fbVelocityToCam.ErrorID;
-ELSIF fbVelocityFromCam.Error THEN
-    bError := TRUE;
-    nErrorID := fbVelocityFromCam.ErrorID;
 END_IF
 
 //Common function blocks used for all routines
@@ -153,21 +148,31 @@ stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 
 fbSetPos.Options.ClearPositionLag := TRUE;
 fbSetPos(
-   Axis := Axis,
-   Position := (fActPosition_Done - fHomeRefPosition) + fHomePosition);
+    Axis := Axis,
+    Position := (fActPosition_Done - fHomeRefPosition) + fHomePosition,
+    Busy => bLocalHomingFB_Busy,
+    Error => bLocalHomingFB_Error,
+    ErrorID => nLocalHomingFB_ErrorID);
 
 fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbFinishHoming(
     Axis := Axis,
-    Velocity := fVelocityFromCam,
+    Velocity := fVelocityFromCam, //change to VelocityToCam
     Acceleration := fDetectionAcceleration,
     Deceleration := fDetectionDeceleration,
-    Parameter := stHomingParameter);
+    Distance := fHomeFinishDistance,
+    Parameter := stHomingParameter,
+    Busy => bLocalHomingFB_Busy,
+    Error => bLocalHomingFB_Error,
+    ErrorID => nLocalHomingFB_ErrorID,
+    Done => bDone);
 
 fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbAbortHoming(
     Axis := Axis,
-    Parameter := stHomingParameter);
+    Parameter := stHomingParameter,
+    Busy => bLocalHomingFB_Busy);
+
 
 //ACTs contain function blocks custom to each individual routine for the detection stage
 CASE eHomeSeq OF
@@ -198,10 +203,6 @@ fbExecute(CLK := bExecute);
 CASE eHomingState OF
     eWaitForRequest:
         IF NOT bExecute THEN
-            bBusy := FALSE;
-            bDone := FALSE;
-            bCommandAborted := FALSE;
-            bError := FALSE;
             bDelay := FALSE;
             bLocalHomingFB_Execute := FALSE;
             bTwoSpeedHoming := FALSE;
@@ -211,27 +212,19 @@ CASE eHomingState OF
             bRisingEdgeDetectionOn := FALSE;
             bFallingEdgeDetectionOn := FALSE;
             bFineDetectionDone := FALSE;
-            nErrorID := 0;
-
-            fbHomeDirect.Execute := FALSE;
-            fbStepAbsoluteSwitch.Execute := FALSE;
-            fbStepLimitSwitch.Execute := FALSE;
-            fbStepReferencePulse.Execute := FALSE;
-            fbStepBlockLag.Execute := FALSE;
             fbSetPos.Execute := FALSE;
             fbFinishHoming.Execute := FALSE;
             fbAbortHoming.Execute := FALSE;
-            END_IF
+        ELSE
+            bCommandAborted := FALSE;
+            bError := FALSE;
+            nErrorID := 0;
+        END_IF
 
             IF fbExecute.Q AND NOT(eHomeSeq = E_HomingRoutines.eNoHoming)THEN
                 IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
                     fSetHomePosition := fHomePosition;
                     bLocalHomingFB_Execute := TRUE;
-                    bBusy := bLocalHomingFB_Busy;
-                    bDone := bLocalHomingFB_Done;
-                    bCommandAborted := bLocalHomingFB_CommandAborted;
-                    bError :=  bLocalHomingFB_Error;
-                    nErrorId := nLocalHomingFB_ErrorID;
                     IF NOT bLocalHomingFB_Busy AND bLocalHomingFB_Done THEN
                         bLocalHomingFB_Execute := FALSE;
                         eHomingState := eFinishHoming;
@@ -253,6 +246,7 @@ CASE eHomingState OF
 
     eCoarseDetection: //Detect the Home Reference with high speed (fVelocityToCam).
         bDelay := TRUE;
+        bBusy := TRUE;
         bViaLimitCoarseDetect := TRUE;
         bReversedDirection := FALSE;
         fDetectionVelocity := fVelocityToCam;
@@ -269,7 +263,6 @@ CASE eHomingState OF
                     eHomingState := eFineDetection;
                 END_IF
             ELSIF NOT bLocalHomingFB_Busy AND (bLocalHomingFB_Error OR bLocalHomingFB_CommandAborted) THEN
-                nErrorID := nLocalHomingFB_ErrorID;
                 bLocalHomingFB_Execute := FALSE;
                 bDelay := FALSE;
                 eHomingState := eAbortHoming;
@@ -278,6 +271,7 @@ CASE eHomingState OF
 
     eMoveReverse: //After detecting the reference sensor reversed direction
         bDelay := TRUE;
+        bBusy := TRUE;
         bReversedDirection := TRUE;
         fDetectionVelocity := fVelocityToCam;
         fSetHomePosition := Axis.NcToPlc.ActPos;
@@ -289,7 +283,6 @@ CASE eHomingState OF
                 bDelay := FALSE;
                 eHomingState := eFineDetection;
             ELSIF NOT bLocalHomingFB_Busy AND (bLocalHomingFB_Error OR bLocalHomingFB_CommandAborted) THEN
-                nErrorID := nLocalHomingFB_ErrorID;
                 bLocalHomingFB_Execute := FALSE;
                 bDelay := FALSE;
                 eHomingState := eAbortHoming;
@@ -298,6 +291,7 @@ CASE eHomingState OF
 
     eFineDetection: //Detect the Home Reference with low speed (fVelocityFromCam).
         bDelay := TRUE;
+        bBusy := TRUE;
         bViaLimitCoarseDetect := FALSE;
         bReversedDirection := FALSE;
         fDetectionVelocity := fVelocityFromCam;
@@ -332,7 +326,6 @@ CASE eHomingState OF
                 bDelay := FALSE;
                 bFineDetectionDone := TRUE;
             ELSIF NOT bLocalHomingFB_Busy AND (bLocalHomingFB_Error OR bLocalHomingFB_CommandAborted) THEN
-                nErrorID := nLocalHomingFB_ErrorID;
                 bLocalHomingFB_Execute := FALSE;
                 bDelay := FALSE;
                 eHomingState := eAbortHoming;
@@ -345,54 +338,40 @@ CASE eHomingState OF
             fbSetPos.Execute := FALSE;
             eHomingState := eFinishHoming;
         ELSIF NOT fbSetPos.Busy AND fbSetPos.Error THEN
-            nErrorID := fbSetPos.ErrorID;
             fbSetPos.Execute := FALSE;
             eHomingState := eAbortHoming;
         END_IF
 
-    //Check handling of busy
     eFinishHoming:
-        bDelay := TRUE;
-        IF fbTimerOnDelay.Q THEN
-            fbFinishHoming.Distance := fHomeFinishDistance;
-            fbFinishHoming.Execute := TRUE;
-            IF NOT fbFinishHoming.Busy AND fbFinishHoming.Done THEN
-                bBusy := FALSE;
-                bDone := TRUE;
-                fbFinishHoming.Execute := FALSE;
-                bDelay := FALSE;
-                eHomingState := eWaitForRequest;
-            ELSIF NOT fbFinishHoming.Busy AND (fbFinishHoming.Error OR fbFinishHoming.CommandAborted) THEN
-                nErrorID := fbFinishHoming.ErrorID;
-                fbFinishHoming.Execute := FALSE;
-                bDelay := FALSE;
-                eHomingState := eAbortHoming;
-            END_IF
+        fbFinishHoming.Execute := TRUE;
+        IF NOT fbFinishHoming.Busy AND fbFinishHoming.Done THEN
+            fbFinishHoming.Execute := FALSE;
+            bDelay := FALSE;
+            eHomingState := eWaitForRequest;
+        ELSIF NOT fbFinishHoming.Busy AND (fbFinishHoming.Error OR fbFinishHoming.CommandAborted) THEN
+            fbFinishHoming.Execute := FALSE;
+            bDelay := FALSE;
+            eHomingState := eAbortHoming;
         END_IF
 
-    //Check handling of busy
     eAbortHoming:
         fbAbortHoming.Execute := TRUE;
+        bError := bLocalHomingFB_Error;
+        nErrorID := nLocalHomingFB_ErrorID;
         IF NOT fbAbortHoming.Busy AND fbAbortHoming.Done THEN
-            bBusy := FALSE;
-            //delete when iErrorID changes to nErrorID
-            bError := bLocalHomingFB_Error;
-            nErrorId := nLocalHomingFB_ErrorID;
             bCommandAborted := TRUE;
             fbAbortHoming.Execute := FALSE;
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
         ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.Error THEN
-            bBusy := FALSE;
-            bError := TRUE;
+            bError := fbAbortHoming.Error;
             nErrorID := fbAbortHoming.ErrorID;
             fbAbortHoming.Execute := FALSE;
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
         END_IF
-
  END_CASE
 
 ]]></ST>
