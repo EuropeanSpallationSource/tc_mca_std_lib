@@ -90,7 +90,7 @@ VAR
 END_VAR
 
 VAR CONSTANT
-        tDELAY_TIME: TIME := T#1S0MS; //Delay Time 1sec befor switching the motor direction for mechanical saftey
+    tDELAY_TIME: TIME := T#1S0MS; //Delay Time 1sec befor switching the motor direction for mechanical saftey
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -157,7 +157,7 @@ fbSetPos(
 fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
 fbFinishHoming(
     Axis := Axis,
-    Velocity := fVelocityFromCam, //change to VelocityToCam
+    Velocity := fVelocityToCam,
     Acceleration := fDetectionAcceleration,
     Deceleration := fDetectionDeceleration,
     Distance := fHomeFinishDistance,
@@ -221,28 +221,28 @@ CASE eHomingState OF
             nErrorID := 0;
         END_IF
 
-            IF fbExecute.Q AND NOT(eHomeSeq = E_HomingRoutines.eNoHoming)THEN
-                IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
-                    fSetHomePosition := fHomePosition;
-                    bLocalHomingFB_Execute := TRUE;
-                    IF NOT bLocalHomingFB_Busy AND bLocalHomingFB_Done THEN
-                        bLocalHomingFB_Execute := FALSE;
-                        eHomingState := eFinishHoming;
-                    END_IF
-                ELSIF bTwoSpeedHoming THEN
-                    IF NOT bBusy AND bHWSignalForHoming THEN
-                        IF bHomingToHomeSensor AND bFallingEdgeDetectionOn THEN
-                            eHomingState := eFineDetection;
-                        ELSIF bHomingToHomeSensor AND bRisingEdgeDetectionOn THEN
-                            eHomingState := eMoveReverse;
-                        END_IF
-                    ELSIF NOT bBusy AND NOT bHWSignalForHoming THEN
-                        eHomingState := eCoarseDetection;
-                    END_IF
-                ELSE
-                    eHomingState := eFineDetection;
+        IF fbExecute.Q AND NOT(eHomeSeq = E_HomingRoutines.eNoHoming)THEN
+            IF eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                fSetHomePosition := fHomePosition;
+                bLocalHomingFB_Execute := TRUE;
+                IF NOT bLocalHomingFB_Busy AND bLocalHomingFB_Done THEN
+                    bLocalHomingFB_Execute := FALSE;
+                    eHomingState := eFinishHoming;
                 END_IF
+            ELSIF bTwoSpeedHoming THEN
+                IF NOT bBusy AND bHWSignalForHoming THEN
+                    IF bHomingToHomeSensor AND bFallingEdgeDetectionOn THEN
+                        eHomingState := eFineDetection;
+                    ELSIF bHomingToHomeSensor AND bRisingEdgeDetectionOn THEN
+                        eHomingState := eMoveReverse;
+                    END_IF
+                ELSIF NOT bBusy AND NOT bHWSignalForHoming THEN
+                    eHomingState := eCoarseDetection;
+                END_IF
+            ELSE
+                eHomingState := eFineDetection;
             END_IF
+        END_IF
 
     eCoarseDetection: //Detect the Home Reference with high speed (fVelocityToCam).
         bDelay := TRUE;
@@ -308,6 +308,7 @@ CASE eHomingState OF
                 eHomingState := eFinishHoming;
             END_IF
         END_IF
+
         IF fbTimerOnDelay.Q THEN
             bLocalHomingFB_Execute := TRUE;
             bBusy := bLocalHomingFB_Busy;
