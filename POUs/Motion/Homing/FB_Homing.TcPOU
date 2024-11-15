@@ -238,10 +238,10 @@ CASE eHomingState OF
                     END_IF
                 ELSIF bTwoSpeedHoming THEN
                     IF NOT bBusy AND bHWSignalForHoming THEN
-                        IF bHomingToHomeSensor THEN
-                            eHomingState := eMoveReverse;
-                        ELSE
+                        IF bHomingToHomeSensor AND bFallingEdgeDetectionOn THEN
                             eHomingState := eFineDetection;
+                        ELSIF bHomingToHomeSensor AND bRisingEdgeDetectionOn THEN
+                            eHomingState := eMoveReverse;
                         END_IF
                     ELSIF NOT bBusy AND NOT bHWSignalForHoming THEN
                         eHomingState := eCoarseDetection;
