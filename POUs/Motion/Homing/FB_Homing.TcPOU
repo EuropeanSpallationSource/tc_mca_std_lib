@@ -349,6 +349,7 @@ CASE eHomingState OF
             fbFinishHoming.Execute := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
+            bBusy := fbFinishHoming.Busy;
         ELSIF NOT fbFinishHoming.Busy AND (fbFinishHoming.Error OR fbFinishHoming.CommandAborted) THEN
             fbFinishHoming.Execute := FALSE;
             bDelay := FALSE;
@@ -365,6 +366,7 @@ CASE eHomingState OF
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
+            bBusy := fbAbortHoming.Busy;
         ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.Error THEN
             bError := fbAbortHoming.Error;
             nErrorID := fbAbortHoming.ErrorID;
