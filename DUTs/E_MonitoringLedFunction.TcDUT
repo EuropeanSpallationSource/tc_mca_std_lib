@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <DUT Name="E_MonitoringLedFunction" Id="{b7e49b88-88f8-4d97-8125-24afd7415e82}">
     <Declaration><![CDATA[
 {attribute 'qualified_only'}
@@ -15,4 +15,3 @@ END_TYPE
 ]]></Declaration>
   </DUT>
 </TcPlcObject>
-

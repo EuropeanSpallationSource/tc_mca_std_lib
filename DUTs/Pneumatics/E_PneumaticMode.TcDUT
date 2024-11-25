@@ -1,12 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <DUT Name="E_PneumaticMode" Id="{767ff514-f7ef-4e71-a359-d55b64a86d25}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticMode :
 (   eSingleSolenoidControl := 0, //Single solenoid valve with spring return
-    eReset := 1,
-    eError := 2
+    eNoPSSPermit := 1,
+    eNoPSSPermitError := 2,
+    eCylinderRetractInterlocked := 3,
+    eCylinderExtendInterlocked := 4,
+    eCylinderRetractInterlockedError := 5,
+    eCylinderExtendInterlockedError := 6,
+    eLowAirPressure := 7,
+    eHighAirPressure := 8,
+    eReset := 9,
+    eError := 10
 ):= eSingleSolenoidControl;
 END_TYPE
 ]]></Declaration>

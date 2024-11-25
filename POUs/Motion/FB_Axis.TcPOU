@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
@@ -32,6 +32,9 @@ VAR
     fbMoveModulo: MC_MoveModulo;
     fbMoveModulo2: MC_MoveModulo;
     stMcStatusMoveModulo: ST_McStatus;
+
+    fbBacklashCompensation: MC_BacklashCompensation;
+    stMcStatusBacklash: ST_McStatus;
 
     fbHome: FB_Homing;
     stMcStatusHome: ST_McStatus;
@@ -82,6 +85,7 @@ VAR
     fbReadAxisMaxPosLagValue: MC_ReadParameter;
     fbReadEnTargetPositionMonitoring: MC_ReadParameter;
     fbReadTargetPositionWindow: MC_ReadParameter;
+    fbReadBacklashConfigEnable: MC_ReadParameter;
     fbReadDriveAdress: MC_ReadDriveAddress;
 
     //Edge detection triggers for statuses
@@ -103,7 +107,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 14;
+    nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -149,6 +153,47 @@ astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
 astMcStatus[14] := ADR(stMcStatusReadWriteCoE);
+astMcStatus[15] := ADR(stMcStatusBacklash);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_BacklashCompensation" Id="{7107def5-ab6b-4951-863c-ccb3332d09d0}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_BacklashCompensation : ST_McStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*Read Backlash documentation in the Confluence page or in Beckhoff before backlash setup:
+https://confluence.ess.eu/display/MCAG/Backlash+compensation
+Position compensation needs to be enabled in NC to use the backsash compensation*)
+
+IF _stAxis.stConfig.stBacklashConfig.bEnabledInNC THEN
+
+// Enabling the backlash functionality. It is disable if homing is performed.
+    IF _stAxis.stStatus.bEnabled THEN
+        IF fbHome.bBusy THEN
+            fbBacklashCompensation.Enable := FALSE;
+        ELSE
+            fbBacklashCompensation.Enable := _stAxis.stConfig.stBacklashConfig.bEnableCompensation;
+        END_IF
+        fbBacklashCompensation.Backlash := _stAxis.stConfig.stBacklashConfig.fCorrectionSetting;
+        fbBacklashCompensation.CompensationInPositiveDirection := _stAxis.stConfig.stBacklashConfig.bCompensationInPositiveDirection;
+        fbBacklashCompensation.Ramp := ABS(_stAxis.stControl.fVelocity/3);
+    ELSE
+        fbBacklashCompensation.Enable := FALSE;
+        fbBacklashCompensation.DisableMode := 1;
+    END_IF
+
+    fbBacklashCompensation(Axis := _stAxis.Axis);
+
+END_IF
+
+IF fbBacklashCompensation.Error THEN
+    _stAxis.stError.nBacklashErrorID := fbBacklashCompensation.ErrorID;
+END_IF
+mControl_BacklashCompensation.Error := fbBacklashCompensation.Error;
+mControl_BacklashCompensation.ErrorID := fbBacklashCompensation.ErrorID;
+_stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
 ]]></ST>
       </Implementation>
     </Method>
@@ -838,6 +883,14 @@ fbReadTargetPositionWindow(Axis := _stAxis.Axis,
                         ParameterNumber := E_AxisParameters.AxisTargetPositionWindow,
                         Value => _stAxis.stConfig.fTargetPositionWindow);
 
+// Position Compensation
+fbReadBacklashConfigEnable(Axis := _stAxis.Axis,
+                        Enable := TRUE,
+                        ReadMode := READMODE_CYCLIC,
+                        ParameterNumber := E_AxisParameters.AxisEnablePosCorrection);
+_stAxis.stConfig.stBacklashConfig.bEnabledInNC := LREAL_TO_BOOL(fbReadBacklashConfigEnable.Value);
+
+
 //All variables are valid
 _stAxis.stConfig.bReadMcParametersValid := FALSE;
 _stAxis.stConfig.bReadMcParametersValid := fbReadAxisVeloManSlow.Valid AND
@@ -1298,6 +1351,7 @@ stMcStatusGearInMultiMaster := mControl_GearInMultiMaster();
 stMcStatusGearOut := mControl_GearOut();
 
 stMcStatusHome := mControl_Home();
+stMcStatusBacklash := mControl_BacklashCompensation();
 
 mStatus_NewCommand();
 mStatus_Done();
