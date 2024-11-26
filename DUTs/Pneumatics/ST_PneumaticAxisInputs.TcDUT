@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_PneumaticAxisInputs" Id="{5a1ac5ea-cd16-4906-91a9-c21e5f2fe40f}">
+  <DUT Name="ST_PneumaticAxisInputs" Id="{a13cd38f-3036-02f4-0651-ea4a97049122}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisInputs :
 STRUCT
     bEndSwitchFwd AT %I*: BOOL; //End Switch Fwd input
