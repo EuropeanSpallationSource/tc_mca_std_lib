@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_PneumaticAxisControl" Id="{60247fff-ef28-4c35-9aa0-027d94fb1099}">
+  <DUT Name="ST_PneumaticAxisControl" Id="{9b02699a-1208-07c7-0d58-2a295cd065b4}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
 STRUCT
     bExtend: BOOL; //Variable to control solenoid valve from PLC

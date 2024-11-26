@@ -12,20 +12,12 @@ TYPE E_HomingRoutines :
     eHomeToLimit_Bwd := 1,
     //Home to bFwdLimit, record position on first approach
     eHomeToLimit_Fwd := 2,
-    //Find bBwdLimit (using towardsCam speed), then reverse direction looking FOR falling edge (using fromCam speed)
-    //eHomeToLimit_Bwd_2Speeds := 3,
-    //Find bFwdLimit (using towardsCam speed), then reverse direction looking for falling edge (using fromCam speed)
-    //eHomeToLimit_Fwd_2Speeds := 4,
 
     //1X: Home Sensor
     //Home to bHome in Bwd direction (will reverse direction if limit hit), record position on first approach
     eHomeToRef_Bwd := 11,
     //Home to bHome in Fwd direction (will reverse direction if limit hit), record position on first approach
     eHomeToRef_Fwd := 12,
-    //Find bHome in Bwd direction (using towardsCam speed) then reverse direction looking for falling edge (using fromCam speed), will reverse direction if limit hit
-    //eHomeToRef_Bwd_2Speeds := 13,
-    //Find bHome in Fwd direction (using towardsCam speed) then reverse direction looking for falling edge (using fromCam speed), will reverse direction if limit hit
-    //eHomeToRef_Fwd_2Speeds := 14,
 
     //2X: Enc Pulse
     //Home to EncRefPulse in Bwd direction (used for single turn rotary axis without limit switches)
