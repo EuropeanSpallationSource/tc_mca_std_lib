@@ -3,14 +3,13 @@
   <DUT Name="ST_AxisStruct" Id="{9732127f-85ab-48d1-a591-d13402fe3665}">
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
-    stControl: ST_AxisControl;
-    stStatus: ST_AxisStatus;
-    stConfig: ST_AxisConfig;
-    stError: ST_AxisError;
-    stInputs: ST_AxisInputs;
-    stDescription: ST_AxisDescription;
-    //The NC axis link to the hardware that is controlling
-    Axis: AXIS_REF;
+    stControl: ST_AxisControl; //Contains commands and coontrol parameters for the axis
+    stStatus: ST_AxisStatus; //Holds real-time status information of the axis 
+    stConfig: ST_AxisConfig; //Configuration settings for the axis
+    stError: ST_AxisError; //Logs error details related to the axis
+    stInputs: ST_AxisInputs; //Represents the hardware iput signals
+    stDescription: ST_AxisDescription; //Descriptive details about the axis
+    Axis: AXIS_REF; //Reference to the NC axis controlling the physical hardware
 END_STRUCT
 END_TYPE
 ]]></Declaration>

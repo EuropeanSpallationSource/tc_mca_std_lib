@@ -8,54 +8,54 @@ or change of instrument configuration.*)
 TYPE ST_AxisConfig :
 STRUCT
     //Axis Parameters
-    fOverride: LREAL := 100; //Controller override %, used a global scale for an axis in terms of velocity. Generally set to 100%.
-    fHomePosition: LREAL := 0; //The position that the axis should be set to once homing is completed
-    fHomeFinishDistance: LREAL := 0; //Distrance that the axis should move back into the working zone after homing is finished
-    eHomeSeq: E_HomingRoutines; //Homing sequence to perform
-    eRestorePosition: E_RestorePosition; //Restore position of incremental axis after loss of power to the CPU, 0=don't restore, 1=restore but don't home
-    bEnableStopWithAnyLimitSwitch :BOOL := TRUE; //Bwd and Fwd movements can be disabled by any of the limit switch, in order to avoid issues during comissioning
+    fOverride: LREAL := 100; //Controller override (%). Acts as a global velocity scaling factor for the axis. Default: 100%
+    fHomePosition: LREAL := 0; //Position to set the axis to after completing the homing sequence
+    fHomeFinishDistance: LREAL := 0; //Distance to move back into the working zone after homing is complete
+    eHomeSeq: E_HomingRoutines; //Homing sequence routine to execute
+    eRestorePosition: E_RestorePosition; //Option to restore incremental axis position after power loss(0 = No, 1 = Yes)
+    bEnableStopWithAnyLimitSwitch :BOOL := TRUE; //Enable both forward and backward movements to stop with any limit switch
 
     //Advanced homing parameters
-    stHomingConfig: ST_HomingConfig; //Structure containing the advanced homing parameters
+    stHomingConfig: ST_HomingConfig; //Configuration for advanced homing routines
 
-    // Backlash compensation config
-    stBacklashConfig: ST_BacklashConfig;
+    //Backlash compensation config
+    stBacklashConfig: ST_BacklashConfig; //Settings for managing backlash compensation
 
     //Temperature disable configuration
-    bEnableTemperatureDisable: BOOL := FALSE; //Enable disabling axis because of high temperature
-    fMaxTemperature: LREAL := 0.0;
-    fTempScalingFactor: REAL := 10.0;
+    bEnableTemperatureDisable: BOOL := FALSE; //Enable axis disabling due to high temperature
+    fMaxTemperature: LREAL := 0.0; //Maximum temperature allowed before disabling
+    fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
 
     //Read and Write parameters
-    eAxisParameters: E_AxisParameters; //Enumeration of axis parameters
-    fWriteAxisParameter: LREAL; //The value to be writen to eAxisParameterNumber
-    fReadAxisParameter: LREAL; //Read the current value of the selected eAxisParameterNumber
+    eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
+    fWriteAxisParameter: LREAL; //Value to write to the selected axis parameter
+    fReadAxisParameter: LREAL; //Current value of the selected axis parameter
 
-    //Multi master axis parameters
-    astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis;
+    //Multi-master axis parameters
+    astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis; //Master axes for multi-master configuration
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
-    afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL;
+    afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL; //Slave axis ratios for multi-master setup
 
     // Read only MC parameters
-    bReadMcParametersValid: BOOL:= FALSE;
-    bReadMcParametersError: BOOL:= FALSE;
-    fVelocityDefaultSlow: LREAL; //Read only - AxisVeloManSlow
-    fVelocityDefaultFast: LREAL; //Read only - AxisVeloManFast
-    fHomingVelToCam: LREAL; //Read only - AxisCalibrationVelocityForward
-    fHomingVelFromCam: LREAL; //Read only - AxisCalibrationVelocityBackward
+    bReadMcParametersValid: BOOL:= FALSE; //Indicates validity of MC parameter readings
+    bReadMcParametersError: BOOL:= FALSE; //Indicates error in MC parameter readings
+    fVelocityDefaultSlow: LREAL; //Read only - AxisManualVelocitySlow
+    fVelocityDefaultFast: LREAL; //Read only - AxisManualVelocityFast
+    fHomingVelToCam: LREAL; //Read only - AxisVelocityToCam
+    fHomingVelFromCam: LREAL; //Read only - AxisVelocityFromCam
     fVeloMax: LREAL; //Read only - AxisMaxVelocity
     fMaxAcc: LREAL; //Read only - AxisMaximumAcceleration
-    fMaxDec: LREAL; //Read only - AxisMaxDeceleration
+    fMaxDec: LREAL; //Read only - AxisMaximumDeceleration
     fDefaultAcc: LREAL; //Read only - AxisDefaultAcceleration
     fDefaultDec: LREAL; //Read only - AxisDefaultDeceleration
-    bEnMinSoftPosLimit: BOOL; //Read only
-    fMinSoftPosLimit: LREAL; //Read only
-    bEnMaxSoftPosLimit: BOOL; //Read only
-    fMaxSoftPosLimit: LREAL; //Read only
-    bEnPositionLagMonitoring: BOOL; //Read only
-    fMaxPosLagValue: LREAL; //Read only
-    bEnTargetPositionMonitoring: BOOL; //Read only
-    fTargetPositionWindow: LREAL; //Read only
+    bEnMinSoftPosLimit: BOOL; //Read only - EnableLimitForward
+    fMinSoftPosLimit: LREAL; //Read only - SWLimitForward
+    bEnMaxSoftPosLimit: BOOL; //Read only - EnableLimitBackward
+    fMaxSoftPosLimit: LREAL; //Read only - SWLimitBackward
+    bEnPositionLagMonitoring: BOOL; //Read only - EnablePositionLagMonitoring
+    fMaxPosLagValue: LREAL; //Read only - MaxPositionLag
+    bEnTargetPositionMonitoring: BOOL; //Read only - AxisEnTargetPositionMonitoring
+    fTargetPositionWindow: LREAL; //Read only - AxisTargetPositionWindow
 END_STRUCT
 END_TYPE
 ]]></Declaration>

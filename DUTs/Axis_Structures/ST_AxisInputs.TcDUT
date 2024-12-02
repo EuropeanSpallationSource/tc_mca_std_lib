@@ -3,10 +3,10 @@
   <DUT Name="ST_AxisInputs" Id="{c688a7fd-4b78-4e23-92c9-09a1ce1d0174}">
     <Declaration><![CDATA[TYPE ST_AxisInputs :
 STRUCT
-    bLimitFwd AT %I*: BOOL;
-    bLimitBwd AT %I*: BOOL;
-    bHomeSensor AT %I*: BOOL; //Reference siganl for homing
-    nTempPT100 AT %I*: INT;
+    bLimitFwd AT %I*: BOOL; //Forward limit switch input (indicates forward movement limit reached)
+    bLimitBwd AT %I*: BOOL; //Backward limit switch input (indicates backward movement limit reached)
+    bHomeSensor AT %I*: BOOL; //Home sensor input (reference signal for homing operation)
+    nTempPT100 AT %I*: INT; //Temperature sensor input
 END_STRUCT
 END_TYPE
 ]]></Declaration>

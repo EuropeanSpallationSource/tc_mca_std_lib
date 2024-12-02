@@ -4,9 +4,9 @@
     <Declaration><![CDATA[TYPE ST_AxisPersistent :
 STRUCT
     //Settings for restoring positions on power off
-    fPositionAtShutdown: LREAL; //The position that the axis was at when CPU shut down
-    fEncoderBiasAtShutdown: LREAL; //Encoder position BIAS value when CPU shut down
-    bMovingAtShutdown: BOOL; //True if the axis was moving at shutdown, False otherwise
+    fPositionAtShutdown: LREAL; //Position of the axis when the CPU was powered off
+    fEncoderBiasAtShutdown: LREAL; //Encoder bias value when the CPU was powered off 
+    bMovingAtShutdown: BOOL; //Indicates if the axis was moving during the shutdown (True if moving, flase otherwise)
 END_STRUCT
 END_TYPE
 ]]></Declaration>
