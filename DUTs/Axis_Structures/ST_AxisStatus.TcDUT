@@ -32,7 +32,7 @@ STRUCT
     bHighTempAxisDisabled: BOOL := FALSE; //True if the axis is disabled due to high temperature
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter value from the stepper drive
-    fActVelocity: LREAL; //Current Velocity of the Axis 
+    fActVelocity: LREAL; //Current Velocity of the Axis
     bError: BOOL; //Motion function block has produced an error (NC drive not necessarily in error state)
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
 END_STRUCT

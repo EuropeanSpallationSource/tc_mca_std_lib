@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AxisStruct :
 STRUCT
     stControl: ST_AxisControl; //Contains commands and coontrol parameters for the axis
-    stStatus: ST_AxisStatus; //Holds real-time status information of the axis 
+    stStatus: ST_AxisStatus; //Holds real-time status information of the axis
     stConfig: ST_AxisConfig; //Configuration settings for the axis
     stError: ST_AxisError; //Logs error details related to the axis
     stInputs: ST_AxisInputs; //Represents the hardware iput signals

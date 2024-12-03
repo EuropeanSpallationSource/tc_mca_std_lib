@@ -4,11 +4,11 @@
     <Declaration><![CDATA[TYPE ST_AxisError:
 STRUCT
 //PLCopen function block errors
-    nPowerErrorID: UDINT; //Error ID MC_Power function block 
+    nPowerErrorID: UDINT; //Error ID MC_Power function block
     nMoveAbsoluteErrorID: UDINT; //Error ID for MC_MoveAbsolute function block
     nMoveRelativeErrorID: UDINT; //Error ID for MC_MoveRelative function block
     nMoveVelocityErrorID: UDINT; //Error ID for MC_MoveVelocity function block
-    nMoveModuloErrorID: UDINT; //Error ID for MC_MoveModulo function block 
+    nMoveModuloErrorID: UDINT; //Error ID for MC_MoveModulo function block
     nHomeErrorID: UDINT; //Error ID for MC_Home function block
     nHaltErrorID: UDINT; //Error ID for MC_Halt function block
     nResetErrorID: UDINT; //Error ID for MC_Reset function block

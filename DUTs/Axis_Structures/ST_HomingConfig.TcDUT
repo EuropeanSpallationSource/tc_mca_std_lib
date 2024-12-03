@@ -5,7 +5,7 @@
 STRUCT
     //Hardware signals
     eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the limit switch signal
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference switch signal 
+    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference switch signal
 
     //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
