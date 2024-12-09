@@ -315,6 +315,7 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
+_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := TRUE;
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
@@ -330,6 +331,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
 IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue THEN
     fbTimerAirPressureNoErrorHigh.IN := TRUE;
     IF fbTimerAirPressureNoErrorHigh.Q THEN
+	_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
     fbTimerAirPressureErrorHigh.IN := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
