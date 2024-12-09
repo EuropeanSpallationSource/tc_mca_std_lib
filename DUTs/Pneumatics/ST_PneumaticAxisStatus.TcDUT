@@ -13,6 +13,8 @@ STRUCT
     sStatus: STRING; //Pneumatic cylinder current status
     bInterlocked: BOOL; //Interlock siganl active
     bPSSPermitOK: BOOL; //Status of the PSS permit signal
+	bAirPressureLow: BOOL; //Warning bit for the Low air pressure value
+	bAirPressureHigh: BOOL; //Warning bit for the High air pressure value
     bError: BOOL; //Pneumatic axis is in Error state
 END_STRUCT
 END_TYPE
