@@ -1,19 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
   <DUT Name="ST_AxisCoE" Id="{538f0b76-83c6-4c79-8458-2b17fa20817b}">
     <Declaration><![CDATA[TYPE ST_AxisCoE :
 STRUCT
-    sEthCATNetId        : T_AmsNetId := '1.1.1.1.1.1'; // EtherCAT master adress  (e.i.'172.18.22.112.2.1')
+    sEthCATNetId        : T_AmsNetId; // EtherCAT master adress  (e.i.'172.18.22.112.2.1')
     nSlaveAdressDrive   : UINT := 1000; // EtherCAT adress of the drive terminal "e.i.1003"
     nIndexDrive         : WORD := 16#8010; // Index of the drive terminal
     eCoEParameters      : E_CoEParameters := E_CoEParameters.eMaximalCurrent;
-    aParWrite           : ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to drive
-    aParRead            : ARRAY[1..20] OF UINT; // CoE Parameters to be read from drive
+    aParWrite      		: ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to drive
+    aParRead      		: ARRAY[1..20] OF UINT; // CoE Parameters to be read from drive
     sDeviceName         : STRING;
     bDone               : BOOL;
     nState              : E_CoEParamState := E_CoEParamState.eInit;
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>
