@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Axis" Id="{45901cd0-c6d2-4114-b7cf-de832171219f}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
@@ -82,7 +82,7 @@ VAR
     fbReadAxisMaxPosLagValue: MC_ReadParameter;
     fbReadEnTargetPositionMonitoring: MC_ReadParameter;
     fbReadTargetPositionWindow: MC_ReadParameter;
-	fbReadDriveAdress: MC_ReadDriveAddress;
+    fbReadDriveAdress: MC_ReadDriveAddress;
 
     //Edge detection triggers for statuses
     fbDoneRTrig: R_TRIG;
@@ -910,18 +910,18 @@ END_IF
 
 // ============== INIT , READ ADRESS=================
 E_CoEParamState.eInit:
-	fbReadDriveAdress(Axis := _stAxis.Axis, Execute := _stAxis.stStatus.bAxisInitialized);
-	IF fbReadDriveAdress.Done THEN
-		_stAxis.stConfig.stCoEParameters.sEthCATNetId := fbReadDriveAdress.DriveAddress.NetID;
-		_stAxis.stConfig.stCoEParameters.nSlaveAdressDrive := fbReadDriveAdress.DriveAddress.SlaveAddress;
-		fbReadDriveAdress.Execute := FALSE;
-		_stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eIdle; //skip read name  for now...
-	ELSIF fbReadDriveAdress.Error THEN
-		_stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
-		mParameters_ReadWriteCoE.ErrorID := fbReadDriveAdress.ErrorID;
-		fbReadDriveAdress.Execute := FALSE;
-	END_IF
-	
+    fbReadDriveAdress(Axis := _stAxis.Axis, Execute := _stAxis.stStatus.bAxisInitialized);
+    IF fbReadDriveAdress.Done THEN
+        _stAxis.stConfig.stCoEParameters.sEthCATNetId := fbReadDriveAdress.DriveAddress.NetID;
+        _stAxis.stConfig.stCoEParameters.nSlaveAdressDrive := fbReadDriveAdress.DriveAddress.SlaveAddress;
+        fbReadDriveAdress.Execute := FALSE;
+        _stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eIdle; //skip read name  for now...
+    ELSIF fbReadDriveAdress.Error THEN
+        _stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
+        mParameters_ReadWriteCoE.ErrorID := fbReadDriveAdress.ErrorID;
+        fbReadDriveAdress.Execute := FALSE;
+    END_IF
+
 // ============== READ DRIVE NAME =================
 E_CoEParamState.eReadName:     // Read device name
     fb_coe_readex(
@@ -945,7 +945,7 @@ E_CoEParamState.eReadName:     // Read device name
         END_IF
     END_IF
 
-// ============== IDLE =================	
+// ============== IDLE =================
 E_CoEParamState.eIdle:
    IF _stAxis.stControl.eCommand = E_MotionFunctions.eWriteCoEParameters AND _stAxis.stControl.bExecute THEN
       // Prepare CoE-Access: Write value of CoE object/ sub index:
@@ -959,7 +959,7 @@ E_CoEParamState.eIdle:
    END_IF
    _stAxis.stConfig.stCoEParameters.bDone := FALSE;
 
-// ============== COE WRITE =================   
+// ============== COE WRITE =================
 E_CoEParamState.eWriteStart:
    // Write entry
    fb_coe_writeEx(
@@ -1019,8 +1019,8 @@ E_CoEParamState.eReadDriveParam:
             END_IF
         END_IF
     ELSE
-		_stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
-	END_IF
+        _stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
+    END_IF
 
 // ============== COE ERROR =================
 E_CoEParamState.eError:
@@ -1035,12 +1035,11 @@ mParameters_ReadWriteCoE.Busy := fb_coe_writeex.bBusy OR fb_coe_readex.bBusy;
 mParameters_ReadWriteCoE.Done := _stAxis.stConfig.stCoEParameters.bDone;
 mParameters_ReadWriteCoE.Error := fb_coe_readex.bError OR fb_coe_writeex.bError OR _stAxis.stConfig.stCoEParameters.nState = E_CoEParamState.eError;
 IF fb_coe_readex.bError THEN
-	
     mParameters_ReadWriteCoE.ErrorID := fb_coe_readex.nErrId;
 ELSIF fb_coe_writeex.bError THEN
     mParameters_ReadWriteCoE.ErrorID := fb_coe_writeex.nErrId;
 ELSIF _stAxis.stConfig.stCoEParameters.nState = E_CoEParamState.eError THEN
-	mParameters_ReadWriteCoE.ErrorID := 7;
+    mParameters_ReadWriteCoE.ErrorID := 7;
 END_IF
 ]]></ST>
       </Implementation>
@@ -1265,9 +1264,9 @@ IF fbExecuteRTrig.Q THEN
             E_MotionFunctions.eHome :
                 _stAxis.stStatus.nErrorID := 0;
             E_MotionFunctions.eWriteParameter,
-            E_MotionFunctions.eReadParameter, 
-			E_MotionFunctions.eReadCoEParameters,
-			E_MotionFunctions.eWriteCoEParameters:
+            E_MotionFunctions.eReadParameter,
+            E_MotionFunctions.eReadCoEParameters,
+            E_MotionFunctions.eWriteCoEParameters:
             // Nothing
     END_CASE
 END_IF
