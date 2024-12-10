@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_SlitPair" Id="{1223aca9-e4c9-4d31-9356-dca9871f7373}" SpecialFunc="None">
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SlitPair" Id="{e905bacc-19e9-06c3-04ae-f4fd4f34065e}" SpecialFunc="None">
     <Declaration><![CDATA[
 FUNCTION_BLOCK FB_SlitPair
 VAR_INPUT
@@ -189,7 +189,7 @@ END_CASE
 bReset := FALSE;
 ]]></ST>
     </Implementation>
-    <Action Name="actClearSlitGearing" Id="{e01ab92a-20cf-48ae-913a-9b4bc1f3c9a3}">
+    <Action Name="actClearSlitGearing" Id="{1b3caf4f-ddef-035c-06c2-b31f09d8bc8e}">
       <Implementation>
         <ST><![CDATA[//Action to send gearOut command to blade axes
 GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearOut;
@@ -199,7 +199,7 @@ GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actErrorHandling" Id="{2d890ec8-2bb8-4662-99bf-f20cfc75f93d}">
+    <Action Name="actErrorHandling" Id="{d6af18ad-d698-0d90-0e47-da58345e8c10}">
       <Implementation>
         <ST><![CDATA[//Error handling for slit functionality
 IF bResetting THEN //ignore setting in error state if FB going through a reset
@@ -221,7 +221,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actGapLimits" Id="{25d5c061-b303-4e71-ae15-49914f4789a8}">
+    <Action Name="actGapLimits" Id="{def3d604-4e23-0583-39ed-61c5876cfc85}">
       <Implementation>
         <ST><![CDATA[//Set Virtual axis inputs to TRUE to enable movement
 GVL.astAxes[iGapSize].stInputs.bLimitBwd := TRUE;
@@ -231,7 +231,7 @@ GVL.astAxes[iGapCentre].stInputs.bLimitFwd := TRUE;
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actRunMethods" Id="{6bcc71e6-9559-4f3b-a747-0f306a2cb822}">
+    <Action Name="actRunMethods" Id="{90ea6783-6879-04c9-30bf-2764a207cd0f}">
       <Implementation>
         <ST><![CDATA[checkAllAxesEnabled(bOutput => bAxesEnabled);
 checkBladesHomed(bOutput => bBladesHomed);
@@ -243,7 +243,7 @@ checkErrorState(bOutput => bFunctionInErrorState);
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actSetupSlitGearing" Id="{8c35be5d-8704-40d0-99d8-cf48bc76a94c}">
+    <Action Name="actSetupSlitGearing" Id="{7713a838-7a24-0b22-0e20-e71c745ddc61}">
       <Implementation>
         <ST><![CDATA[GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
@@ -260,7 +260,7 @@ GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actVirtualAxisPositions" Id="{84408ed0-12a9-4a20-9ee2-393320dd5a43}">
+    <Action Name="actVirtualAxisPositions" Id="{7f6698b5-ef89-01d2-091a-1167e8f62f6e}">
       <Implementation>
         <ST><![CDATA[(*Calculate virtual axis positions and convert to UDINT.
 Conversion to UDINT is prohibited if it would exceed UDINT max value of 4,294,967,295.
@@ -282,7 +282,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Method Name="checkAllAxesEnabled" Id="{93a74cd7-6e1a-4704-9a10-e4205cfbe435}">
+    <Method Name="checkAllAxesEnabled" Id="{68815ab2-933a-0cf6-0de8-cc7494d09118}">
       <Declaration><![CDATA[(*Method to check if all axes (real and virtual) are enabled.
 Only returns TRUE if BOTH blades are homed*)
 METHOD checkAllAxesEnabled: BOOL
@@ -306,7 +306,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkAllAxisErrors" Id="{c3f4c623-4869-4c97-837f-af64e9be8aeb}">
+    <Method Name="checkAllAxisErrors" Id="{38d2d046-b549-0765-1487-87302195ffc6}">
       <Declaration><![CDATA[(*Method to check if an error is present on any axis.
 Returns TRUE if an error is present on any axis *)
 METHOD checkAllAxisErrors: BOOL
@@ -330,7 +330,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkBladesCoupled" Id="{b67c9216-9a28-4bc7-afbb-4bdb360ee51b}">
+    <Method Name="checkBladesCoupled" Id="{4d5a8473-6708-0035-3843-638ffe259036}">
       <Declaration><![CDATA[(*Method to check if both blades are coupled to the virtual axes.
 Only returns TRUE if BOTH blades are coupled *)
 METHOD checkBladesCoupled: BOOL
@@ -348,7 +348,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkBladesHomed" Id="{7ae32968-8cc1-44db-8a5f-f24d48501289}">
+    <Method Name="checkBladesHomed" Id="{81c53f0d-71e1-0f29-1da7-da19807b67a4}">
       <Declaration><![CDATA[(*Method to check if blade axes are homed/have the calibration flag.
 Only returns TRUE if BOTH blades are homed*)
 METHOD checkBladesHomed: BOOL
@@ -366,7 +366,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkBladesUncoupled" Id="{395fac39-106a-4583-b85a-5e2978dacde5}">
+    <Method Name="checkBladesUncoupled" Id="{c279ba5c-ed4a-0e71-2fa2-767db0f1b8c8}">
       <Declaration><![CDATA[(*Method to check if both blades are uncoupled from the virtual axes.
 Only returns TRUE if BOTH blades are uncoupled *)
 METHOD checkBladesUncoupled: BOOL
@@ -384,7 +384,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkErrorState" Id="{283fb96b-f4da-4c0a-8f9d-5c3166e66b83}">
+    <Method Name="checkErrorState" Id="{d319af0e-09fa-07f8-1865-7465aecd1eae}">
       <Declaration><![CDATA[METHOD checkErrorState: BOOL
 VAR_OUTPUT
     bOutput: BOOL := FALSE;
@@ -409,7 +409,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkVirtualHomed" Id="{bf6f8458-4b3f-4dc9-a487-cf311d4f41bd}">
+    <Method Name="checkVirtualHomed" Id="{4449923d-b61f-063b-337f-e765d5643490}">
       <Declaration><![CDATA[(*Method to check if the virtual axes for gap size and gap centre are homed/the calibration flag is present.
 Only returns TRUE if BOTH virtual axes are homed *)
 METHOD checkVirtualHomed: BOOL
