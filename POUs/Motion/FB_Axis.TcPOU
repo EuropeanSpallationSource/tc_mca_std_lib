@@ -1064,10 +1064,9 @@ E_CoEParamState.eInit:
                     END_IF
                 END_IF
             END_IF
+        ELSE
+            _stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
         END_IF
-    ELSE
-        _stAxis.stConfig.stCoEParameters.nState := E_CoEParamState.eError;     // Error case
-    END_IF
 
 // ============== COE ERROR =================
 E_CoEParamState.eError:

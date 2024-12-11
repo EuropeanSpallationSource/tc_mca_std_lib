@@ -4,13 +4,8 @@
     <Declaration><![CDATA[TYPE ST_AxisCoE :
 STRUCT
     sEthCATNetId        : T_AmsNetId; // EtherCAT master adress  (e.i.'172.18.22.112.2.1')
-<<<<<<< HEAD
-    nSlaveAdressDrive   : UINT := 1000; // EtherCAT adress of the drive terminal "e.i.1003"
-    nIndexDrive         : WORD := 16#8010; // Index of the drive terminal
-=======
     nSlaveAdressDrive   : UINT; // EtherCAT adress of the drive terminal "e.i.1003"
-    nIndexDrive         : WORD; // Index of the drive terminal
->>>>>>> 8facf829bdec93cc7046515f0add498d13b760d3
+    nIndexDrive         : WORD := 16#8010; // Index of the drive terminal
     eCoEParameters      : E_CoEParameters := E_CoEParameters.eMaximalCurrent;
     aParWrite           : ARRAY[1..20] OF UINT; // CoE Parameters to be loaded to drive
     aParRead            : ARRAY[1..20] OF UINT; // CoE Parameters to be read from drive
