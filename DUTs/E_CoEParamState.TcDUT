@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_CoEParamState" Id="{7b256909-45ff-4fb5-8610-f99052702492}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CoEParamState :
+(
+    eInit := -2,
+    eReadName := -1,
+    eIdle := 0,
+    eWriteStart := 1,
+    eWriteWaitingForDone := 2,
+    eReadDriveParam := 11,
+    eError := 100
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

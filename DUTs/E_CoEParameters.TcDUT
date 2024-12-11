@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_CoEParameters" Id="{f0ad2286-4167-4944-8c96-01eefcb70ded}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CoEParameters :
+(
+    eMaximalCurrent := 1,
+    eReducedCurrent := 2,
+    eMotorCoilResistance := 4,
+    eFullSteps := 6,
+    eMotorCoilInductance := 10 // Valid for EL7047
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
