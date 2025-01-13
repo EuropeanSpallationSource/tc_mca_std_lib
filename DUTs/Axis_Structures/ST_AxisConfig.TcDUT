@@ -21,6 +21,9 @@ STRUCT
     //Backlash compensation config
     stBacklashConfig: ST_BacklashConfig; //Settings for managing backlash compensation
 
+    // CoE
+    stCoEParameters : ST_AxisCoE;
+
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable axis disabling due to high temperature
     fMaxTemperature: LREAL := 0.0; //Maximum temperature allowed before disabling

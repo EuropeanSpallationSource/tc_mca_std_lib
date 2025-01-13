@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_PneumaticAxisStatus" Id="{7869817a-a6d6-4657-92fd-c307a4cba7d6}">
+  <DUT Name="ST_PneumaticAxisStatus" Id="{834f971f-5bf6-0da5-0505-eb536ce0d2fb}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisStatus :
 STRUCT
     bExtending: BOOL; //Extending movement status
@@ -13,6 +13,8 @@ STRUCT
     sStatus: STRING; //Pneumatic cylinder current status
     bInterlocked: BOOL; //Interlock siganl active
     bPSSPermitOK: BOOL; //Status of the PSS permit signal
+    bAirPressureLow: BOOL; //Warning bit for the Low air pressure value
+    bAirPressureHigh: BOOL; //Warning bit for the High air pressure value
     bError: BOOL; //Pneumatic axis is in Error state
 END_STRUCT
 END_TYPE

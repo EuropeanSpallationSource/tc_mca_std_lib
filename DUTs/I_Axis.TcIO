@@ -3,27 +3,27 @@
   <Itf Name="I_Axis" Id="{aa3f26f1-e1dd-43e1-ad72-924a566d91d1}">
     <Declaration><![CDATA[INTERFACE I_Axis
 ]]></Declaration>
-    <Method Name="EndOfCycle" Id="{1e7d03ee-b03d-4e24-bc82-27dce521a52e}">
+    <Method Name="EndOfCycle" Id="{e55b158b-4d1d-05d6-2b7a-0f882d0ad003}">
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
-    <Method Name="Run" Id="{7e3148d5-8f02-43cd-bfcb-03545931b5e8}">
+    <Method Name="Run" Id="{85175eb0-7222-083f-2833-2b00911ac0c5}">
       <Declaration><![CDATA[METHOD Run : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
-    <Property Name="stAxis" Id="{c7710a62-b9e1-478e-bbd1-1fb2fb0a2fc5}">
+    <Property Name="stAxis" Id="{3c571c07-44c1-0c7c-2c29-37e633215ae8}">
       <Declaration><![CDATA[PROPERTY stAxis : REFERENCE TO ST_AxisStruct
 ]]></Declaration>
-      <Get Name="Get" Id="{86849ae3-b1b2-4c86-b3ef-f5c9ef8278d9}">
+      <Get Name="Get" Id="{7da28c86-4c92-0774-2417-dd9d27a90df4}">
         <Declaration><![CDATA[
 
 ]]></Declaration>
       </Get>
-      <Set Name="Set" Id="{cddb2d57-7d29-4e35-beef-82c9ff08c26e}">
+      <Set Name="Set" Id="{36fd3b32-8009-05c7-2917-aa9d3723b743}">
         <Declaration><![CDATA[
 
 ]]></Declaration>
