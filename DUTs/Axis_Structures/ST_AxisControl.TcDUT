@@ -8,20 +8,18 @@ STRUCT
     //Actions from controls system
     bExecute: BOOL; //Trigger to execute a motion function block
     bReset: BOOL; //Reset axis from Error state
-    bStop: BOOL; //Stop the axis movement (immediate deceleration)
-    bHalt: BOOL; //Halt the axis movement (controlled the deceleration)
-    bEnable: BOOL; //Enable axis drive (activates the servo drive)
-    bJogFwd: BOOL; //Jog the axis forward(manual movement)
-    bJogBwd: BOOL; //Jog the axis backward (manual movement)
+    bStop: BOOL; //Stop the axis movement
+    bHalt: BOOL; //Halt the axis movement
+    bEnable: BOOL; //Enable axis drive
     bInterlockFwd: BOOL := FALSE; //Enable interlock for forward movement
     bInterlockBwd: BOOL := FALSE; //Enable interlock for backward movement
     eCommand: E_MotionFunctions; //Specifies the motion function to execute
-    fVelocity: LREAL; //Velocity must be specified
+    fVelocity: LREAL; //Specifies the velocity to be used for executing motion commands
     fJogVelocity: LREAL; //Velocity for jogging operations
     fAcceleration: LREAL; //Acceleration for the movement command (0 uses the NC default)
     fDeceleration: LREAL; //Deceleration for the movement command
     fPosition: LREAL; //Target position for absolute moves or distance for relative moves
-    bHWMaskActive: BOOL := FALSE; //Indicates if hardware masking is active (used for conditional movement)
+    bHWMaskActive: BOOL := FALSE; //Indicates if hardware masking is active
     fMaskedTemperature: LREAL := 0.0; //Temperature value used when the hardware masking is active
 END_STRUCT
 END_TYPE

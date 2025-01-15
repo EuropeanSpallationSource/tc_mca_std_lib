@@ -17,11 +17,11 @@ STRUCT
     bMovingForward: BOOL; //Moving forward indicator from NC
     bMovingBackward: BOOL; //Moving backward indicator from NC
     bInTargetPosition: BOOL; //True if the axis is in the target position
-    bFwEnabled: BOOL; //True if the axis is in the target position
+    bFwEnabled: BOOL; //Positive movement of axis is enabled/disabled
     bBwEnabled: BOOL; //Negative movement of axis is enabled/disabled
-    bInterlockedFwd: BOOL; //True if the axis is interlocked in the positive direction
-    bInterlockedBwd: BOOL; //True if the axis is interlocked in the negative direction
-    bGeared: BOOL; //True if the axis is an active slave
+    bInterlockedFwd: BOOL; //True if the axis is interlocked in the forward direction
+    bInterlockedBwd: BOOL; //True if the axis is interlocked in the backward direction
+    bGeared: BOOL; //True if the axis is geared as a slave to another axis
     bBacklashCompensating: BOOL; //True if the axis is currently compensating for backlash
     bCoupledGear1: BOOL; //True if coupled to gear 1
     bCoupledGear2: BOOL; //True if coupled to gear 2
@@ -33,7 +33,7 @@ STRUCT
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter value from the stepper drive
     fActVelocity: LREAL; //Current Velocity of the Axis
-    bError: BOOL; //Motion function block has produced an error (NC drive not necessarily in error state)
+    bError: BOOL; //True if the axis is in an NC Error Stop state from Axis_Status
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
 END_STRUCT
 END_TYPE

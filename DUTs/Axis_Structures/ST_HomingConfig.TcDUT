@@ -5,12 +5,12 @@
 STRUCT
     //Hardware signals
     eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the limit switch signal
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference switch signal
+    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference/homing switch signal
 
     //General Advanced Homing Configuration
-    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
+    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. TRUE when using stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
     bEnableLagErrorDetection :BOOL := TRUE; //Keeps the lag error detection active during homing
-    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
+    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, the lag error is dissipated abruptly by setting this flag.
     tTimeLimit: TIME; //Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; //Distance limit for homing; exceeding this from the start position aborts the procedure
     fTorqueLimit: LREAL; //Torque limit to prevent mechanical damage (considering counterbalance parameters)
