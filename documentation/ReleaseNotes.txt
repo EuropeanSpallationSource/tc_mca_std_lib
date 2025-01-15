@@ -25,9 +25,12 @@ v2.7.0
     This fixes the homing bug of bouncing against the limit non-stop (MBP-269, MBP-279, MBP-288).
   - Add two status variables for detecting low and high pressure in FB_PneuamticAxis (MBP-297).
   - Read and Write CoE parameters to a Beckhoff motor drive (MBP-271).
+  - Improved comments for code and variables (MBP-257).
 - Bug fix:
   - Remove Warnings created by the VAR_IN_OUT in the FB_PneumaticAxis. Instead of VAR_IN_OUT
     it was changed to be handled as a reference like in FB_Axis (MBP-292).
+  - Remove unused bJogFwd and bJogBwd commands from ST_AxisControl (MBP-296).
+  - Remove unused variable fRampVelocity from ST_BacklashConfig (MBP-300).
 
 v2.6.0
 - New features:
