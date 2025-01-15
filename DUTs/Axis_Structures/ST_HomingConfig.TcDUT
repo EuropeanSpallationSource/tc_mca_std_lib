@@ -4,21 +4,22 @@
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
-    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge;
-    eRefSwitchMode: MC_Switch_Mode:= mcRisingEdge;
+    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the limit switch signal
+    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference/homing switch signal
 
     //General Advanced Homing Configuration
-    bDisableDriveAccess: BOOL := TRUE;          //Disables the drive access to drives. Standard for stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
-    bEnableLagErrorDetection :BOOL := TRUE; // Keep the lag error detection active during homing
-    bInstantLagReduction :BOOL := FALSE;     //(belongs to Option4) When referencing to a mechanical fixed stop, it is purposeful in particular with "soft" fixed stops, the lag error is dissipated abruptly by setting this flag.
-    tTimeLimit: TIME; // Exceeding this time leads to the search procedure being aborted.
-    fDistanceLimit: LREAL; // Exceeding this distance in relation to the start position leads to the search procedure being aborted.
-    fTorqueLimit: LREAL; // The motor torque is limited to this value, in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+    bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. TRUE when using stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
+    bEnableLagErrorDetection :BOOL := TRUE; //Keeps the lag error detection active during homing
+    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, the lag error is dissipated abruptly by setting this flag.
+    tTimeLimit: TIME; //Exceeding this time leads to the search procedure being aborted.
+    fDistanceLimit: LREAL; //Distance limit for homing; exceeding this from the start position aborts the procedure
+    fTorqueLimit: LREAL; //Torque limit to prevent mechanical damage
+
 
     //Homing Configuration for Step Block
-    fDetectionVelocityLimit: LREAL; // Velocity that must be fallen below for the DetectionVelocityTime in order to detect driving against the fixed stop.
-    tDetectionVelocityTime: TIME; // Time for detecting the velocity undershoot when driving against the fixed stop.
-    fLagLimit: LREAL; // Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+    fDetectionVelocityLimit: LREAL; //Velocity threshold to detect a fixed stop within the specified time
+    tDetectionVelocityTime: TIME; //Time duration to detect velocity drop at a fixed stop
+    fLagLimit: LREAL; //Lag limit value for detecting a fixed stop
 END_STRUCT
 END_TYPE
 ]]></Declaration>

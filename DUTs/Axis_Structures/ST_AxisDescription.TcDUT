@@ -3,9 +3,9 @@
   <DUT Name="ST_AxisDescription" Id="{50ff6038-4325-4846-892a-422b31e6a32f}">
     <Declaration><![CDATA[TYPE ST_AxisDescription :
 STRUCT
-    sAxisName : STRING(nMAX_AXIS_NAME);
-    eUnit: E_AxisEngUnit; //Code for the axis base unit (like m or degree)
-    nPrefix: INT; //Exponent defining unit prefix, e.g. 3 for k(kilo)
+    sAxisName : STRING(nMAX_AXIS_NAME); //Name of the axis (maximum length defined by nMAX_AXIS_NAME)
+    eUnit: E_AxisEngUnit; //Base unit for the axis (e.g., meters, degrees)
+    nPrefix: INT; //Exponent defining unit prefix (e.g.x, 3 for k(kilo))
 END_STRUCT
 END_TYPE
 ]]></Declaration>
