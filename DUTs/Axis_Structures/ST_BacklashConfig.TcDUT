@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_BacklashConfig" Id="{5c3ebcfe-07e6-4771-b971-6dab1384f7be}">
     <Declaration><![CDATA[TYPE ST_BacklashConfig :
 STRUCT
@@ -8,7 +8,6 @@ STRUCT
     bCompensationInPositiveDirection : BOOL := TRUE;
     eDisableMode : E_DisableMode := E_DisableMode.DisableModeReset;
     fCorrectionSetting : LREAL := 0.0;
-    fRampVelocity : LREAL; // Fixed % value, not configurable
 END_STRUCT
 END_TYPE
 ]]></Declaration>

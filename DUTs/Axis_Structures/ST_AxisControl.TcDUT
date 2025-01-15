@@ -11,8 +11,6 @@ STRUCT
     bStop: BOOL;
     bHalt: BOOL;
     bEnable: BOOL; //Enable axis drive
-    bJogFwd: BOOL;
-    bJogBwd: BOOL;
     bInterlockFwd: BOOL := FALSE; //Bit for interlocking motors in the positive direction
     bInterlockBwd: BOOL := FALSE; //Bit for interlocking motors in the negative direction
     eCommand: E_MotionFunctions;
