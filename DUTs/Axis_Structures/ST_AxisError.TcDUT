@@ -4,22 +4,22 @@
     <Declaration><![CDATA[TYPE ST_AxisError:
 STRUCT
 //PLCopen function block errors
-    nPowerErrorID: UDINT;
-    nMoveAbsoluteErrorID: UDINT;
-    nMoveRelativeErrorID: UDINT;
-    nMoveVelocityErrorID: UDINT;
-    nMoveModuloErrorID: UDINT;
-    nHomeErrorID: UDINT;
-    nHaltErrorID: UDINT;
-    nResetErrorID: UDINT;
-    nStopErrorID: UDINT;
-    nGearInMultiMasterErrorID: UDINT;
-    nGearOutErrorID: UDINT;
-    nWriteParameterErrorId: UDINT;
-    nReadParameterErrorId: UDINT;
-    nBacklashErrorID: UDINT;
+    nPowerErrorID: UDINT; //Error ID MC_Power function block
+    nMoveAbsoluteErrorID: UDINT; //Error ID for MC_MoveAbsolute function block
+    nMoveRelativeErrorID: UDINT; //Error ID for MC_MoveRelative function block
+    nMoveVelocityErrorID: UDINT; //Error ID for MC_MoveVelocity function block
+    nMoveModuloErrorID: UDINT; //Error ID for MC_MoveModulo function block
+    nHomeErrorID: UDINT; //Error ID for MC_Home function block
+    nHaltErrorID: UDINT; //Error ID for MC_Halt function block
+    nResetErrorID: UDINT; //Error ID for MC_Reset function block
+    nStopErrorID: UDINT;//Error ID for MC_Stop function block
+    nGearInMultiMasterErrorID: UDINT; //Error ID for MC_GearInMultiMaster function block
+    nGearOutErrorID: UDINT; //Error ID for MC_GearOut function block
+    nWriteParameterErrorId: UDINT; //Error ID for writing parameters function block
+    nReadParameterErrorId: UDINT; //Error ID for MC_ReadParameter function block
+    nBacklashErrorID: UDINT; //Error ID for MC_BacklashCompensation function block
 //Error from the NC
-    nNCErrorID : UDINT;
+    nNCErrorID : UDINT; //Error ID from the NC Axis_Ref Axis Status
 END_STRUCT
 END_TYPE
 ]]></Declaration>
