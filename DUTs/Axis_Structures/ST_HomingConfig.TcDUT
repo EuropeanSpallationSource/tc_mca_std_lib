@@ -13,7 +13,7 @@ STRUCT
     bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, the lag error is dissipated abruptly by setting this flag.
     tTimeLimit: TIME; //Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; //Distance limit for homing; exceeding this from the start position aborts the procedure
-    fTorqueLimit: LREAL; //Torque limit to prevent mechanical damage (considering counterbalance parameters)
+    fTorqueLimit: LREAL; //Torque limit to prevent mechanical damage
 
 
     //Homing Configuration for Step Block
