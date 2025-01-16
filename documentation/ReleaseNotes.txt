@@ -18,6 +18,20 @@ which will reset the third digit to 0.
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
+v2.7.0
+- New features:
+  - Backlash compensation: https://confluence.ess.eu/display/MCAG/Backlash+compensation (MBP-167).
+  - Homing with two speeds (towards and from CAM) is the new default and only way of homing.
+    This fixes the homing bug of bouncing against the limit non-stop (MBP-269, MBP-279, MBP-288).
+  - Add two status variables for detecting low and high pressure in FB_PneuamticAxis (MBP-297).
+  - Read and Write CoE parameters to a Beckhoff motor drive (MBP-271).
+  - Improved comments for code and variables (MBP-257).
+- Bug fix:
+  - Remove Warnings created by the VAR_IN_OUT in the FB_PneumaticAxis. Instead of VAR_IN_OUT
+    it was changed to be handled as a reference like in FB_Axis (MBP-292).
+  - Remove unused bJogFwd and bJogBwd commands from ST_AxisControl (MBP-296).
+  - Remove unused variable fRampVelocity from ST_BacklashConfig (MBP-300).
+
 v2.6.0
 - New features:
   - Add button in MainVisu to control the variable bEnableStopWithAnyLimitSwitch (MBP-280).
