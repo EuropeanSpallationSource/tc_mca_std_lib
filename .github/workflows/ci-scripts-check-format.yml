@@ -1,0 +1,26 @@
+name: checkformat
+
+on:
+  push:
+
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: check_no_lineids
+      run: |
+        /bin/sh ./check_no_lineids.sh
+
+    - name: check_code_before_sq_brackets
+      run: |
+        /bin/sh ./check_code_before_sq_brackets.sh
+
+    - name: check_fix_white_space
+      run: |
+        python check_fix_white_space.py
+
+
