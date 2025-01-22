@@ -8,14 +8,6 @@ STRUCT
     bCompensationInPositiveDirection : BOOL := TRUE; //Determines the direction for compensation :TRUE for positive, False for negative
     eDisableMode : E_DisableMode := E_DisableMode.DisableModeReset; //Specifies the mode to disable compensation: (0)=HOLD, (1)=RESET
     fCorrectionSetting : LREAL := 0.0; //Sets the magnitude of the backlash correction in engineering units
-    fRampVelocity : LREAL; //Velocity used to perform the backlash compensation
-
-    bEnabledInNC : BOOL;
-    bEnableCompensation : BOOL := FALSE;
-    bCompensationInPositiveDirection : BOOL := TRUE;
-    eDisableMode : E_DisableMode := E_DisableMode.DisableModeReset;
-    fCorrectionSetting : LREAL := 0.0;
-
 END_STRUCT
 END_TYPE
 ]]></Declaration>
