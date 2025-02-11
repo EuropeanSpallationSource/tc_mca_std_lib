@@ -408,9 +408,6 @@ END_IF
     </Method>
     <Method Name="mSetResetAlarms" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
       <Declaration><![CDATA[METHOD mSetResetAlarms : BOOL
-VAR_INPUT
-END_VAR
-
 VAR_INST
     index: INT;
 END_VAR
