@@ -7,9 +7,10 @@ STRUCT
     bAlarmSet: BOOL;
     bAlarmReset: BOOL;
     nStatusLED: E_MonitoringLedFunction;
-    nWarningLED: E_MonitoringLedFunction;
+    nAbnormalLED: E_MonitoringLedFunction;
     nEmergencyLED: E_MonitoringLedFunction;
     nAcknowledgeLED: E_MonitoringLedFunction;
+    nEStopLED: E_MonitoringLedFunction := E_MonitoringLedFunction.eUndefined;
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
