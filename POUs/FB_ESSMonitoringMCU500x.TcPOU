@@ -286,8 +286,7 @@ bAcknowledgeLED := (nAcknowledgeLED = E_MonitoringLedFunction.eSteady) OR (nAckn
     </Action>
     <Action Name="actMonitorCPU" Id="{db0cbd89-0ab0-45d1-9643-6542a9f72fa2}">
       <Implementation>
-        <ST><![CDATA[
-//Cpu Monitor
+        <ST><![CDATA[//Cpu Monitor
 fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
 fbMonitorCPU(START:=fbUpdateCPULoadTON.q, TMOUT:= T#5S);
 
@@ -301,8 +300,7 @@ bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
     </Action>
     <Action Name="actMonitorEtherCAT" Id="{a4594d19-0db5-4810-8e12-099bc24ca287}">
       <Implementation>
-        <ST><![CDATA[
-//Read frames
+        <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q , PT:=T#1000MS , Q=> , ET=> );
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
 
@@ -610,10 +608,10 @@ ELSE
     aAlarmList[31].bAlarmReset:= TRUE;
 END_IF
 
-//Reset selected alarms just when acknowldge button has been pressed
+//Reset selected alarms just when acknowledge button has been pressed
 IF fbAcknowledgeButtonTrig.Q THEN
-    FOR index:=1 TO 18 DO //just unitl 18, the rest should be reseted when they dissappear, no need for acknowledge
-        IF index <> 10 THEN //eStop and STO will be reseted automatically via HW
+    FOR index:=1 TO 18 DO //just until 18, the rest should be reset when they dissappear, no need for acknowledge
+        IF index <> 10 THEN //eStop and STO will be reset automatically via HW
             aAlarmList[index].bAlarmSet := FALSE;
             aAlarmList[index].bAlarmReset := TRUE;
         END_IF
