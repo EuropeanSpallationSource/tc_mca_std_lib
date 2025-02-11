@@ -130,9 +130,9 @@ VAR
     nAlarmBitNumber: UDINT;
 
     bCPUOverloaded: BOOL;
-    bEcMasterNotOK: BOOL;
+    bEcMasterError: BOOL;
     bSlaveStateNotOP: BOOL;
-    bSlaveLinkNotOK: BOOL;
+    bSlaveLinkError: BOOL;
     bCycleTimeExceeded: BOOL;
     //Cpu Monitor
     fbMonitorCPU: TC_CpuUsage;
@@ -324,7 +324,7 @@ IF bEtherCATInitialized THEN
     FOR i:=0 TO nActualEcSlaves-1 DO
         IF i = 0 THEN
             bSlaveStateNotOP := FALSE;
-            bSlaveLinkNotOK := FALSE;
+            bSlaveLinkError := FALSE;
         END_IF
         IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
             bSlaveStateNotOP := TRUE;
@@ -332,10 +332,10 @@ IF bEtherCATInitialized THEN
         IF i = nActualEcSlaves-1 THEN
             IF NOT stSlaveState[i].linkState = EC_LINK_STATE_OK
                OR NOT stSlaveState[i].linkState = EC_LINK_STATE_MISSING_LINK THEN
-                  bSlaveLinkNotOK := TRUE;
+                  bSlaveLinkError := TRUE;
             END_IF
         ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
-            bSlaveLinkNotOK := TRUE;
+            bSlaveLinkError := TRUE;
         END_IF
     END_FOR
 ELSE
@@ -357,7 +357,7 @@ bEcSlaveSafeOP := nEcMasterDevState.10;
 bEcSlaveError := nEcMasterDevState.11;
 bEcDCnotInSync := nEcMasterDevState.12;
 
-bEcMasterNotOK := nEcMasterDevState > 0;
+bEcMasterError := nEcMasterDevState > 0;
 ]]></ST>
       </Implementation>
     </Action>
@@ -572,7 +572,7 @@ ELSE
     aAlarmList[26].bAlarmReset:= TRUE;
 END_IF
 
-IF bEcMasterNotOK THEN
+IF bEcMasterError THEN
     aAlarmList[27].bAlarmSet := TRUE;
     aAlarmList[27].bAlarmReset := FALSE;
 ELSE
@@ -588,7 +588,7 @@ ELSE
     aAlarmList[28].bAlarmReset:= TRUE;
 END_IF
 
-IF bSlaveLinkNotOK THEN
+IF bSlaveLinkError THEN
     aAlarmList[29].bAlarmSet := TRUE;
     aAlarmList[29].bAlarmReset := FALSE;
 ELSE
