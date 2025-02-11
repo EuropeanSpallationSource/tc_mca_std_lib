@@ -232,6 +232,7 @@ FOR i:=1 TO nMaxAlarms DO
             nStatusLED := aAlarmList[i].nStatusLED;
             nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
         END_IF
+
         CASE aAlarmList[i].nErrorID OF
             1,4:
             nAlarmBitNumber.0 := TRUE;
@@ -254,8 +255,8 @@ FOR i:=1 TO nMaxAlarms DO
             30:
             nAlarmBitNumber.9 := TRUE;
         END_CASE
-    ELSIF NOT aAlarmList[i].bAlarmActive THEN
 
+    ELSE
         IF nLEDAlarmID = i THEN
             nLEDAlarmID := 0;
             sLEDAlarmMsg := '';
