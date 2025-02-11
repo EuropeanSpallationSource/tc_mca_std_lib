@@ -133,6 +133,7 @@ VAR
     bEcMasterError: BOOL;
     bSlaveStateNotOP: BOOL;
     bSlaveLinkError: BOOL;
+    aExtraMessage: ARRAY[1..nMaxAlarms] OF STRING := [nMaxAlarms('')];
     bCycleTimeExceeded: BOOL;
     //Cpu Monitor
     fbMonitorCPU: TC_CpuUsage;
@@ -183,6 +184,8 @@ VAR CONSTANT
     nMaxAlarms: INT := 50;
     nMaxECSlaves: INT := 255;
     nMaxTemp: INT := 10000;
+    nSlaveStateNotOPEntry: UDINT := 28;
+    nSlaveLinkErrorEntry: UDINT := 29;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -217,7 +220,7 @@ FOR i:=1 TO nMaxAlarms DO
         nAlarmCnt := nAlarmCnt + 1;
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
         aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
-        mPrintErrorMessage(aAlarmList[i].sErrorMsg,aAlarmList[i].nErrorID);
+        mPrintErrorMessage(aAlarmList[i].sErrorMsg,aAlarmList[i].nErrorID, sExtraMessage:=aExtraMessage[i]);
 
         IF nLEDAlarmID = 0
             OR (nAbnormalLED = E_MonitoringLedFunction.eUndefined
@@ -309,7 +312,11 @@ nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Check ethercat slave device state
 fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q , PT:=T#100MS , Q=> , ET=> );
-fbGetEcSlaveStates(sNetId:= nEcMasterNetId, pStateBuf := ADR(stSlaveState), cbBufLen:=SIZEOF(stSlaveState), bExecute:=fbUpdateEcSlaveStateTON.q);
+fbGetEcSlaveStates(
+    sNetId:=nEcMasterNetId,
+    pStateBuf:=ADR(stSlaveState),
+    cbBufLen:=SIZEOF(stSlaveState),
+    bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=UINT_TO_INT(fbGetEcSlaveStates.nSlaves);
 
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
@@ -324,17 +331,26 @@ IF bEtherCATInitialized THEN
         IF i = 0 THEN
             bSlaveStateNotOP := FALSE;
             bSlaveLinkError := FALSE;
+            aExtraMessage[nSlaveStateNotOPEntry] := 'Slave Nbr: ';
+            aExtraMessage[nSlaveLinkErrorEntry] := 'Slave Nbr: ';
         END_IF
+
         IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
             bSlaveStateNotOP := TRUE;
+            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=INT_TO_STRING(i));
+            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
         END_IF
+
         IF i = nActualEcSlaves-1 THEN
             IF stSlaveState[i].linkState <> EC_LINK_STATE_OK
                OR stSlaveState[i].linkState <> EC_LINK_STATE_MISSING_LINK THEN
                   bSlaveLinkError := TRUE;
             END_IF
+
         ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
             bSlaveLinkError := TRUE;
+            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=INT_TO_STRING(i));
+            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
         END_IF
     END_FOR
 ELSE
@@ -380,6 +396,7 @@ END_IF
 VAR_INPUT
     sErrorMessage: STRING;
     nErrorID: INT;
+    sExtraMessage: STRING := '';
 END_VAR
 VAR
     sFullErrorMessage: STRING;
@@ -389,6 +406,11 @@ END_VAR
         <ST><![CDATA[sFullErrorMessage := CONCAT(STR1:='ERROR. ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
+IF sExtraMessage <> '' THEN
+    sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
+    sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sExtraMessage);
+END_IF
+
 
 
 IF aAlarmList[i].bAlarmActive THEN
