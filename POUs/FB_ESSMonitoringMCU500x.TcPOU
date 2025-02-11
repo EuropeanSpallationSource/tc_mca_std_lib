@@ -330,8 +330,8 @@ IF bEtherCATInitialized THEN
             bSlaveStateNotOP := TRUE;
         END_IF
         IF i = nActualEcSlaves-1 THEN
-            IF NOT stSlaveState[i].linkState = EC_LINK_STATE_OK
-               OR NOT stSlaveState[i].linkState = EC_LINK_STATE_MISSING_LINK THEN
+            IF stSlaveState[i].linkState <> EC_LINK_STATE_OK
+               OR stSlaveState[i].linkState <> EC_LINK_STATE_MISSING_LINK THEN
                   bSlaveLinkError := TRUE;
             END_IF
         ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
