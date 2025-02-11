@@ -341,13 +341,7 @@ IF bEtherCATInitialized THEN
             CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
         END_IF
 
-        IF i = nActualEcSlaves-1 THEN
-            IF stSlaveState[i].linkState <> EC_LINK_STATE_OK
-               OR stSlaveState[i].linkState <> EC_LINK_STATE_MISSING_LINK THEN
-                  bSlaveLinkError := TRUE;
-            END_IF
-
-        ELSIF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
+        IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
             bSlaveLinkError := TRUE;
             CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=INT_TO_STRING(i));
             CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
