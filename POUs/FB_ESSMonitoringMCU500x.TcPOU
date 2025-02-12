@@ -157,7 +157,7 @@ VAR
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
     stSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
     nActualEcSlaves: UINT := 0;
-    i: INT;
+
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
@@ -259,7 +259,8 @@ FOR i:=1 TO nMaxAlarms DO
 
         mPrintErrorMessage(
             sErrorMessage:=aTempErrorMsg[nAlarmCnt],
-            nErrorID:=aAlarmList[i].nErrorID);
+            nErrorID:=aAlarmList[i].nErrorID,
+            nIndex:=i);
 
         // Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
         CASE aAlarmList[i].nErrorID OF
@@ -425,6 +426,7 @@ bEcMasterError := nEcMasterDevState > 0;
 VAR_INPUT
     sErrorMessage: STRING;
     nErrorID: INT;
+    nIndex: UINT;
 END_VAR
 VAR
     sFullErrorMessage: STRING;
@@ -435,17 +437,17 @@ END_VAR
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
 
-IF aAlarmList[i].bAlarmActive THEN
-    aStartErrorMsgTimer[i]:=TRUE;
-    IF afbErrorTrig[i].Q THEN
+IF aAlarmList[nIndex].bAlarmActive THEN
+    aStartErrorMsgTimer[nIndex]:=TRUE;
+    IF afbErrorTrig[nIndex].Q THEN
         ADSLOGSTR(
             msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
             msgFmtStr:='%s',
             strArg:=sFullErrorMessage);
     END_IF
 
-    IF aFbErrorMessageTimer[i].Q THEN
-        aStartErrorMsgTimer[i]:=FALSE;
+    IF aFbErrorMessageTimer[nIndex].Q THEN
+        aStartErrorMsgTimer[nIndex]:=FALSE;
     END_IF
 END_IF
 ]]></ST>
