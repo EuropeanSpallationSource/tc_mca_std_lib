@@ -6,6 +6,8 @@ TYPE ST_MonitoringAlarm :
 STRUCT
     bAlarmSet: BOOL;
     bAlarmReset: BOOL;
+    bLedSet: BOOL;
+    bLedReset: BOOL;
     nStatusLED: E_MonitoringLedFunction;
     nAbnormalLED: E_MonitoringLedFunction;
     nEmergencyLED: E_MonitoringLedFunction;
@@ -14,6 +16,7 @@ STRUCT
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
+    bLedActive: BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
