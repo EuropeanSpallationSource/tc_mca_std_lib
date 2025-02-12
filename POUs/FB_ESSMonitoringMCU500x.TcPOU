@@ -188,12 +188,47 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[actMonitorAlarms();
-actMonitorCPU();
-actMonitorEtherCAT();
+      <ST><![CDATA[mMonitorAlarms();
+mMonitorCPU();
+mMonitorEtherCAT();
 ]]></ST>
     </Implementation>
-    <Action Name="actMonitorAlarms" Id="{05cd06da-6727-4135-9b29-65a4335223b8}">
+    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
+      <Declaration><![CDATA[METHOD mAlarm : BOOL
+VAR_IN_OUT
+    stAlarmData: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
+    stAlarmData.bAlarmActive := TRUE;
+ELSIF stAlarmData.bAlarmReset THEN
+    stAlarmData.bAlarmActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
+      <Declaration><![CDATA[METHOD mLed : BOOL
+VAR_IN_OUT
+    stAlarmData: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stAlarmData.bLedSet THEN
+    stAlarmData.bLedActive := TRUE;
+ELSIF stAlarmData.bLedReset THEN
+    stAlarmData.bLedActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorAlarms" Id="{542f94fc-2447-0df7-2067-48b1bdc9c1ba}">
+      <Declaration><![CDATA[METHOD mMonitorAlarms
+VAR
+    i: UINT := 0;
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=bAcknowledgeButton);
 mSetResetAlarmsLeds();
@@ -294,8 +329,10 @@ bAcknowledgeLED :=
     OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
 ]]></ST>
       </Implementation>
-    </Action>
-    <Action Name="actMonitorCPU" Id="{db0cbd89-0ab0-45d1-9643-6542a9f72fa2}">
+    </Method>
+    <Method Name="mMonitorCPU" Id="{a61c27e8-4c84-0867-118e-ec0a5a4d454e}">
+      <Declaration><![CDATA[METHOD mMonitorCPU
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Cpu Monitor
 fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
@@ -308,8 +345,13 @@ fCycleExecTime_ms := UDINT_TO_REAL(_TaskInfo[fbGetCurTaskIndex.index].LastExecTi
 bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
 ]]></ST>
       </Implementation>
-    </Action>
-    <Action Name="actMonitorEtherCAT" Id="{a4594d19-0db5-4810-8e12-099bc24ca287}">
+    </Method>
+    <Method Name="mMonitorEtherCAT" Id="{27ca7522-14a9-0d7c-33ae-0dd2d861dfe1}">
+      <Declaration><![CDATA[METHOD mMonitorEtherCAT
+VAR
+    i: UINT := 0;
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q , PT:=T#1000MS , Q=> , ET=> );
@@ -375,36 +417,6 @@ bEcSlaveError := nEcMasterDevState.11;
 bEcDCnotInSync := nEcMasterDevState.12;
 
 bEcMasterError := nEcMasterDevState > 0;
-]]></ST>
-      </Implementation>
-    </Action>
-    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
-      <Declaration><![CDATA[METHOD mAlarm : BOOL
-VAR_IN_OUT
-    stAlarmData: ST_MonitoringAlarm;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
-    stAlarmData.bAlarmActive := TRUE;
-ELSIF stAlarmData.bAlarmReset THEN
-    stAlarmData.bAlarmActive := FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
-      <Declaration><![CDATA[METHOD mLed : BOOL
-VAR_IN_OUT
-    stAlarmData: ST_MonitoringAlarm;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF stAlarmData.bLedSet THEN
-    stAlarmData.bLedActive := TRUE;
-ELSIF stAlarmData.bLedReset THEN
-    stAlarmData.bLedActive := FALSE;
-END_IF
 ]]></ST>
       </Implementation>
     </Method>
