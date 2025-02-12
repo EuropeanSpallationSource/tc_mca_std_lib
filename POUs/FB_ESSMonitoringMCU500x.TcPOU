@@ -382,19 +382,19 @@ IF bEtherCATInitialized THEN
         IF i = 0 THEN
             bSlaveStateNotOP := FALSE;
             bSlaveLinkError := FALSE;
-            aExtraMessage[nSlaveStateNotOPEntry] := ', Slave #: ';
-            aExtraMessage[nSlaveLinkErrorEntry] := ', Slave #: ';
+            aExtraMessage[nSlaveStateNotOPEntry] := ', Slave Id #: ';
+            aExtraMessage[nSlaveLinkErrorEntry] := ', Slave Id #: ';
         END_IF
 
         IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
             bSlaveStateNotOP := TRUE;
-            aExtraMessage[nSlaveStateNotOPEntry] := CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:= UINT_TO_STRING(i));
+            aExtraMessage[nSlaveStateNotOPEntry] := CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:= UINT_TO_STRING(i+1));
             aExtraMessage[nSlaveStateNotOPEntry] := CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
         END_IF
 
         IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
             bSlaveLinkError := TRUE;
-            aExtraMessage[nSlaveLinkErrorEntry] := CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=UINT_TO_STRING(i));
+            aExtraMessage[nSlaveLinkErrorEntry] := CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=UINT_TO_STRING(i+1));
             aExtraMessage[nSlaveLinkErrorEntry] := CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
         END_IF
     END_FOR
