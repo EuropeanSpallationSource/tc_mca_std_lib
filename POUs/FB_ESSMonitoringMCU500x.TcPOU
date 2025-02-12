@@ -245,12 +245,14 @@ nStatusLED := 0;
 nAcknowledgeLED := 0;
 
 FOR i:=1 TO nMaxAlarms DO
-    afbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i], PT:=T#60S);
-    aFbErrorTrig[i](clk:=aStartErrorMsgTimer[i]);
     // Update list of active alarms
     mAlarm(stAlarmData:=aAlarmList[i]);
     // Update list of active LEDs
     mLed(stAlarmData:=aAlarmList[i]);
+
+    // Update timer and trigger for new log message
+    aFbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive, PT:=T#60S);
+    aFbErrorTrig[i](clk:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive);
 
     IF aAlarmList[i].bAlarmActive THEN
         nAlarmCnt := nAlarmCnt + 1;
