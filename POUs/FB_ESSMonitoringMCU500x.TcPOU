@@ -194,7 +194,7 @@ mMonitorEtherCAT();
 ]]></ST>
     </Implementation>
     <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
-      <Declaration><![CDATA[METHOD mAlarm : BOOL
+      <Declaration><![CDATA[METHOD mAlarm
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
 END_VAR
@@ -209,7 +209,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
-      <Declaration><![CDATA[METHOD mLed : BOOL
+      <Declaration><![CDATA[METHOD mLed
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
 END_VAR
@@ -422,7 +422,7 @@ bEcMasterError := nEcMasterDevState > 0;
       </Implementation>
     </Method>
     <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
-      <Declaration><![CDATA[METHOD mPrintErrorMessage : BOOL
+      <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
     sErrorMessage: STRING;
     nErrorID: INT;
@@ -453,7 +453,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
-      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds : BOOL
+      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
     index: UINT;
 END_VAR
