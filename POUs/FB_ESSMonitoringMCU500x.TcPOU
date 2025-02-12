@@ -121,6 +121,7 @@ VAR
     aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
 
     aFbErrorMessageTimer: ARRAY[1..nMaxAlarms] OF TON;
+    tNewMessageTimeout: TIME := T#60S;
     aStartErrorMsgTimer: ARRAY[1..nMaxAlarms] OF BOOL;
     aFbErrorTrig: ARRAY[1..nMaxAlarms] OF R_TRIG;
 
@@ -251,7 +252,7 @@ FOR i:=1 TO nMaxAlarms DO
     mLed(stAlarmData:=aAlarmList[i]);
 
     // Update timer and trigger for new log message
-    aFbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive, PT:=T#60S);
+    aFbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive, PT:=tNewMessageTimeout);
     aFbErrorTrig[i](clk:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive);
 
     IF aAlarmList[i].bAlarmActive THEN
