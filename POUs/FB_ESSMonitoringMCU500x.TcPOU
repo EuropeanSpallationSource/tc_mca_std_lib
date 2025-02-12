@@ -196,45 +196,37 @@ actMonitorEtherCAT();
     <Action Name="actMonitorAlarms" Id="{05cd06da-6727-4135-9b29-65a4335223b8}">
       <Implementation>
         <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=bAcknowledgeButton);
-mSetResetAlarms();
+mSetResetAlarmsLeds();
+
+// Reset before loop
+nAlarmCnt := 0;
+nAlarmBitNumber := 0;
+MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
+MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
+nLEDAlarmID := 0;
+nEmergencyLED := 0;
+nAbnormalLED := 0;
+nStatusLED := 0;
+nAcknowledgeLED := 0;
 
 FOR i:=1 TO nMaxAlarms DO
     afbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i], PT:=T#60S);
     aFbErrorTrig[i](clk:=aStartErrorMsgTimer[i]);
-    mAlarm(stAlarmData:= aAlarmList[i]);
-    //mErrorMessage(sErrorMessage:=aAlarmList[i].sErrorMsg, nErrorID:=aAlarmList[i].nErrorID);
-
-    IF i = 1 THEN
-        nAlarmCnt := 0;
-        nAlarmBitNumber := 0;
-        MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
-        MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
-    ELSIF i = nMaxAlarms THEN
-        aErrorID := aTempErrorID;
-        aErrorMsg := aTempErrorMsg;
-        nAlarmGrpBitNumber := nAlarmBitNumber;
-    END_IF
+    // Update list of active alarms
+    mAlarm(stAlarmData:=aAlarmList[i]);
+    // Update list of active LEDs
+    mLed(stAlarmData:=aAlarmList[i]);
 
     IF aAlarmList[i].bAlarmActive THEN
         nAlarmCnt := nAlarmCnt + 1;
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
-        aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
-        mPrintErrorMessage(aAlarmList[i].sErrorMsg,aAlarmList[i].nErrorID, sExtraMessage:=aExtraMessage[i]);
+        aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
 
-        IF nLEDAlarmID = 0
-            OR (nAbnormalLED = E_MonitoringLedFunction.eUndefined
-                AND nEmergencyLED = E_MonitoringLedFunction.eUndefined
-                AND aAlarmList[i].nAbnormalLED > E_MonitoringLedFunction.eUndefined)
-            OR (nEmergencyLED = E_MonitoringLedFunction.eUndefined
-                AND aAlarmList[i].nEmergencyLED > E_MonitoringLedFunction.eUndefined) THEN
-            nLEDAlarmID := i;
-            sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
-            nEmergencyLED := aAlarmList[i].nEmergencyLED;
-            nAbnormalLED := aAlarmList[i].nAbnormalLED;
-            nStatusLED := aAlarmList[i].nStatusLED;
-            nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
-        END_IF
+        mPrintErrorMessage(
+            sErrorMessage:=aTempErrorMsg[nAlarmCnt],
+            nErrorID:=aAlarmList[i].nErrorID);
 
+        // Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
         CASE aAlarmList[i].nErrorID OF
             1,4:
             nAlarmBitNumber.0 := TRUE;
@@ -257,18 +249,16 @@ FOR i:=1 TO nMaxAlarms DO
             30:
             nAlarmBitNumber.9 := TRUE;
         END_CASE
-
-    ELSE
-        IF nLEDAlarmID = i THEN
-            nLEDAlarmID := 0;
-            sLEDAlarmMsg := '';
-            nEmergencyLED := 0;
-            nAbnormalLED := 0;
-            nStatusLED := 0;
-            nAcknowledgeLED := 0;
-        END_IF
     END_IF
 
+    // Set the alarm LEDs according to first occurrence
+    IF nLEDAlarmID = 0 AND aALarmList[i].bLedActive THEN
+        nLEDAlarmID := i;
+        nEmergencyLED := aAlarmList[i].nEmergencyLED;
+        nAbnormalLED := aAlarmList[i].nAbnormalLED;
+        nStatusLED := aAlarmList[i].nStatusLED;
+        nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
+    END_IF
 END_FOR
 
 
@@ -403,6 +393,21 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
+      <Declaration><![CDATA[METHOD mLed : BOOL
+VAR_IN_OUT
+    stAlarmData: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stAlarmData.bLedSet THEN
+    stAlarmData.bLedActive := TRUE;
+ELSIF stAlarmData.bLedReset THEN
+    stAlarmData.bLedActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage : BOOL
 VAR_INPUT
@@ -434,8 +439,8 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetResetAlarms" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
-      <Declaration><![CDATA[METHOD mSetResetAlarms : BOOL
+    <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
+      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds : BOOL
 VAR_INST
     index: INT;
 END_VAR
