@@ -124,7 +124,7 @@ VAR
     aStartErrorMsgTimer: ARRAY[1..nMaxAlarms] OF BOOL;
     aFbErrorTrig: ARRAY[1..nMaxAlarms] OF R_TRIG;
 
-    nLEDAlarmID: INT;
+    bLedActive: BOOL := FALSE;
     nAlarmCnt: INT;
     nAlarmBitNumber: UDINT;
 
@@ -156,7 +156,7 @@ VAR
     fbUpdateEcSlaveStateTON: TON;
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
     stSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
-    nActualEcSlaves: INT := 0;
+    nActualEcSlaves: UINT := 0;
     i: INT;
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
@@ -180,7 +180,7 @@ VAR
     bEtherCATInitialized: BOOL := FALSE;
 END_VAR
 VAR CONSTANT
-    nMaxAlarms: INT := 50;
+    nMaxAlarms: UINT := 50;
     nMaxECSlaves: INT := 255;
     nMaxTemp: INT := 10000;
     nSlaveStateNotOPEntry: UDINT := 28;
@@ -238,7 +238,7 @@ nAlarmCnt := 0;
 nAlarmBitNumber := 0;
 MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
 MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
-nLEDAlarmID := 0;
+bLedActive := FALSE;
 nEmergencyLED := 0;
 nAbnormalLED := 0;
 nStatusLED := 0;
@@ -287,8 +287,8 @@ FOR i:=1 TO nMaxAlarms DO
     END_IF
 
     // Set the alarm LEDs according to first occurrence
-    IF nLEDAlarmID = 0 AND aALarmList[i].bLedActive THEN
-        nLEDAlarmID := i;
+    IF NOT bLedActive AND aALarmList[i].bLedActive THEN
+        bLedActive := TRUE;
         nEmergencyLED := aAlarmList[i].nEmergencyLED;
         nAbnormalLED := aAlarmList[i].nAbnormalLED;
         nStatusLED := aAlarmList[i].nStatusLED;
@@ -367,7 +367,7 @@ fbGetEcSlaveStates(
     pStateBuf:=ADR(stSlaveState),
     cbBufLen:=SIZEOF(stSlaveState),
     bExecute:=fbUpdateEcSlaveStateTON.q);
-nActualEcSlaves:=UINT_TO_INT(fbGetEcSlaveStates.nSlaves);
+nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
 
@@ -387,13 +387,13 @@ IF bEtherCATInitialized THEN
 
         IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
             bSlaveStateNotOP := TRUE;
-            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=INT_TO_STRING(i));
+            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:= UINT_TO_STRING(i));
             CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
         END_IF
 
         IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
             bSlaveLinkError := TRUE;
-            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=INT_TO_STRING(i));
+            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=UINT_TO_STRING(i));
             CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
         END_IF
     END_FOR
@@ -454,7 +454,7 @@ END_IF
     <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds : BOOL
 VAR_INST
-    index: INT;
+    index: UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
