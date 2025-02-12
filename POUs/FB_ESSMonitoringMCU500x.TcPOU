@@ -125,7 +125,6 @@ VAR
     aFbErrorTrig: ARRAY[1..nMaxAlarms] OF R_TRIG;
 
     nLEDAlarmID: INT;
-    sLEDAlarmMsg: STRING;
     nAlarmCnt: INT;
     nAlarmBitNumber: UDINT;
 
@@ -139,7 +138,7 @@ VAR
     fbMonitorCPU: TC_CpuUsage;
     fbUpdateCPULoadTON: TON;
     fMaxCPULoad: USINT := 85;
-    //Ehtercat master device state
+    //Ethercat master device state
     bEcLinkError: BOOL;
     bEcIOlocked: BOOL;
     bEcLinkErrorRedundancyAdapter: BOOL;
@@ -272,6 +271,13 @@ FOR i:=1 TO nMaxAlarms DO
 
 END_FOR
 
+
+// Copy to output variables
+aErrorID := aTempErrorID;
+aErrorMsg := aTempErrorMsg;
+nAlarmGrpBitNumber := nAlarmBitNumber;
+
+// Handle LED blinking
 fbFastBlinkOn(IN:=NOT fbFastBlinkOff.q , PT:=T#250MS , Q=> , ET=> );
 fbFastBlinkOff(IN:=fbFastBlinkOn.Q , PT:=T#250MS , Q=> , ET=> );
 bFastBlink := fbFastBlinkOn.q;
@@ -280,10 +286,22 @@ fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.q , PT:=T#750MS , Q=> , ET=> );
 fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q , PT:=T#750MS , Q=> , ET=> );
 bSlowBlink := fbSlowBlinkOn.q;
 
-bEmergencyLED := (nEmergencyLED = E_MonitoringLedFunction.eSteady) OR (nEmergencyLED = E_MonitoringLedFunction.eFast AND bFastBlink) OR (nEmergencyLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
-bAbnormalLED := (nAbnormalLED = E_MonitoringLedFunction.eSteady) OR (nAbnormalLED = E_MonitoringLedFunction.eFast AND bFastBlink) OR (nAbnormalLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
-bStatusLED := (nStatusLED = E_MonitoringLedFunction.eSteady) OR (nStatusLED = E_MonitoringLedFunction.eFast AND bFastBlink) OR (nStatusLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
-bAcknowledgeLED := (nAcknowledgeLED = E_MonitoringLedFunction.eSteady) OR (nAcknowledgeLED = E_MonitoringLedFunction.eFast AND bFastBlink) OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+bEmergencyLED :=
+    (nEmergencyLED = E_MonitoringLedFunction.eSteady)
+    OR (nEmergencyLED = E_MonitoringLedFunction.eFast AND bFastBlink)
+    OR (nEmergencyLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+bAbnormalLED :=
+    (nAbnormalLED = E_MonitoringLedFunction.eSteady)
+    OR (nAbnormalLED = E_MonitoringLedFunction.eFast AND bFastBlink)
+    OR (nAbnormalLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+bStatusLED :=
+    (nStatusLED = E_MonitoringLedFunction.eSteady)
+    OR (nStatusLED = E_MonitoringLedFunction.eFast AND bFastBlink)
+    OR (nStatusLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+bAcknowledgeLED :=
+    (nAcknowledgeLED = E_MonitoringLedFunction.eSteady)
+    OR (nAcknowledgeLED = E_MonitoringLedFunction.eFast AND bFastBlink)
+    OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
 ]]></ST>
       </Implementation>
     </Action>
@@ -331,8 +349,8 @@ IF bEtherCATInitialized THEN
         IF i = 0 THEN
             bSlaveStateNotOP := FALSE;
             bSlaveLinkError := FALSE;
-            aExtraMessage[nSlaveStateNotOPEntry] := 'Slave Nbr: ';
-            aExtraMessage[nSlaveLinkErrorEntry] := 'Slave Nbr: ';
+            aExtraMessage[nSlaveStateNotOPEntry] := ', Slave Nbr: ';
+            aExtraMessage[nSlaveLinkErrorEntry] := ', Slave Nbr: ';
         END_IF
 
         IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
@@ -390,7 +408,6 @@ END_IF
 VAR_INPUT
     sErrorMessage: STRING;
     nErrorID: INT;
-    sExtraMessage: STRING := '';
 END_VAR
 VAR
     sFullErrorMessage: STRING;
@@ -400,17 +417,14 @@ END_VAR
         <ST><![CDATA[sFullErrorMessage := CONCAT(STR1:='ERROR. ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
 sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
-IF sExtraMessage <> '' THEN
-    sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
-    sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sExtraMessage);
-END_IF
-
-
 
 IF aAlarmList[i].bAlarmActive THEN
     aStartErrorMsgTimer[i]:=TRUE;
     IF afbErrorTrig[i].Q THEN
-           ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sFullErrorMessage);
+        ADSLOGSTR(
+            msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
+            msgFmtStr:='%s',
+            strArg:=sFullErrorMessage);
     END_IF
 
     IF aFbErrorMessageTimer[i].Q THEN
