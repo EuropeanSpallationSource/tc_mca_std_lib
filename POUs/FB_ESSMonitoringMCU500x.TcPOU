@@ -228,25 +228,25 @@ FOR i:=1 TO nMaxAlarms DO
 
         // Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
         CASE aAlarmList[i].nErrorID OF
-            1,4:
+            241, 242, 243:
             nAlarmBitNumber.0 := TRUE;
-            9,12,13:
+            481, 482, 483, 484:
             nAlarmBitNumber.1 := TRUE;
-            10,11:
+            11, 12, 13:
             nAlarmBitNumber.2 := TRUE;
-            14,15:
+            14,15,16,17:
             nAlarmBitNumber.3 := TRUE;
-            21,22:
+            301, 302, 303, 304, 305, 306, 307, 308:
             nAlarmBitNumber.4 := TRUE;
-            23,24:
+            501, 502, 511, 512:
             nAlarmBitNumber.5 := TRUE;
-            104,105:
+            101:
             nAlarmBitNumber.6 := TRUE;
-            103:
-            nAlarmBitNumber.7 := TRUE;
             102:
+            nAlarmBitNumber.7 := TRUE;
+            103:
             nAlarmBitNumber.8 := TRUE;
-            30:
+            104, 105:
             nAlarmBitNumber.9 := TRUE;
         END_CASE
     END_IF
