@@ -802,12 +802,10 @@ END_IF
 //Reset selected alarms just when acknowledge button has been pressed
 IF fbAcknowledgeButtonTrig.Q THEN
     FOR index:=1 TO nMaxAlarms DO
-        IF index <> 10 THEN //eStop and STO will be reset automatically via HW
-            aAlarmList[index].bAlarmSet := FALSE;
-            aAlarmList[index].bAlarmReset := TRUE;
-            aAlarmList[index].bLedSet := FALSE;
-            aAlarmList[index].bLedReset := TRUE;
-        END_IF
+        aAlarmList[index].bAlarmSet := FALSE;
+        aAlarmList[index].bAlarmReset := TRUE;
+        aAlarmList[index].bLedSet := FALSE;
+        aAlarmList[index].bLedReset := TRUE;
     END_FOR
 END_IF
 ]]></ST>
