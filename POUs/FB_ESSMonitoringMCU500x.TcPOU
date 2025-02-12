@@ -429,21 +429,20 @@ VAR_INPUT
     nIndex: UINT;
 END_VAR
 VAR
-    sFullErrorMessage: STRING;
+    sErrorId: STRING;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[sFullErrorMessage := CONCAT(STR1:='ERROR. ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
-sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:='. ');
-sFullErrorMessage := CONCAT(STR1:=sFullErrorMessage, STR2:=sErrorMessage);
+        <ST><![CDATA[sErrorId := CONCAT(STR1:='ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
+sErrorId := CONCAT(STR1:=sErrorId, STR2:='. %s');
 
 IF aAlarmList[nIndex].bAlarmActive THEN
     aStartErrorMsgTimer[nIndex]:=TRUE;
     IF afbErrorTrig[nIndex].Q THEN
         ADSLOGSTR(
             msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
-            msgFmtStr:='%s',
-            strArg:=sFullErrorMessage);
+            msgFmtStr:=sErrorId,
+            strArg:=sErrorMessage);
     END_IF
 
     IF aFbErrorMessageTimer[nIndex].Q THEN
