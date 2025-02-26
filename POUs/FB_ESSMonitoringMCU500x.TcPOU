@@ -169,10 +169,8 @@ VAR
     nEmergencyLED: E_MonitoringLedFunction;
     fbFastBlinkOn: TON;
     fbFastBlinkOff: TON;
-    bFastBlink: BOOL;
     fbSlowBlinkOn: TON;
     fbSlowBlinkOff: TON;
-    bSlowBlink: BOOL;
 
     fbAcknowledgeButtonTrig: R_TRIG;
 
@@ -311,30 +309,28 @@ aErrorMsg := aTempErrorMsg;
 nAlarmGrpBitNumber := nAlarmBitNumber;
 
 // Handle LED blinking
-fbFastBlinkOn(IN:=NOT fbFastBlinkOff.q , PT:=T#250MS , Q=> , ET=> );
-fbFastBlinkOff(IN:=fbFastBlinkOn.Q , PT:=T#250MS , Q=> , ET=> );
-bFastBlink := fbFastBlinkOn.q;
+fbFastBlinkOn(IN:=NOT fbFastBlinkOff.Q, PT:=T#250MS);
+fbFastBlinkOff(IN:=fbFastBlinkOn.Q, PT:=T#250MS);
 
-fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.q , PT:=T#750MS , Q=> , ET=> );
-fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q , PT:=T#750MS , Q=> , ET=> );
-bSlowBlink := fbSlowBlinkOn.q;
+fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
+fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
 
 bEmergencyLED :=
     (nEmergencyLED = E_MonitoringLedFunction.eSteady)
-    OR (nEmergencyLED = E_MonitoringLedFunction.eFast AND bFastBlink)
-    OR (nEmergencyLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+    OR (nEmergencyLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
+    OR (nEmergencyLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
 bAbnormalLED :=
     (nAbnormalLED = E_MonitoringLedFunction.eSteady)
-    OR (nAbnormalLED = E_MonitoringLedFunction.eFast AND bFastBlink)
-    OR (nAbnormalLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+    OR (nAbnormalLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
+    OR (nAbnormalLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
 bStatusLED :=
     (nStatusLED = E_MonitoringLedFunction.eSteady)
-    OR (nStatusLED = E_MonitoringLedFunction.eFast AND bFastBlink)
-    OR (nStatusLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+    OR (nStatusLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
+    OR (nStatusLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
 bAcknowledgeLED :=
     (nAcknowledgeLED = E_MonitoringLedFunction.eSteady)
-    OR (nAcknowledgeLED = E_MonitoringLedFunction.eFast AND bFastBlink)
-    OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND bSlowBlink);
+    OR (nAcknowledgeLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
+    OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
 ]]></ST>
       </Implementation>
     </Method>
