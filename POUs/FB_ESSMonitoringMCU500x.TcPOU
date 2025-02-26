@@ -250,8 +250,14 @@ FOR i:=1 TO nMaxAlarms DO
     mLed(stAlarmData:=aAlarmList[i]);
 
     // Update timer and trigger for new log message
-    aFbErrorMessageTimer[i](IN:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive, PT:=tNewMessageTimeout);
-    aFbErrorTrig[i](clk:=aStartErrorMsgTimer[i] AND aAlarmList[i].bAlarmActive);
+    aStartErrorMsgTimer[i] :=
+        aAlarmList[i].bAlarmActive
+        AND NOT aFbErrorMessageTimer[i].Q;
+    aFbErrorMessageTimer[i](
+        IN:=aStartErrorMsgTimer[i],
+        PT:=tNewMessageTimeout);
+    aFbErrorTrig[i](
+        CLK:=aStartErrorMsgTimer[i]);
 
     IF aAlarmList[i].bAlarmActive THEN
         nAlarmCnt := nAlarmCnt + 1;
@@ -259,6 +265,7 @@ FOR i:=1 TO nMaxAlarms DO
         aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
 
         mPrintErrorMessage(
+            bPrintLog:=aFbErrorTrig[i].Q,
             sErrorMessage:=aTempErrorMsg[nAlarmCnt],
             nErrorID:=aAlarmList[i].nErrorID,
             nIndex:=i);
@@ -427,6 +434,7 @@ bEcMasterError := nEcMasterDevState > 0;
     <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
+    bPrintLog : BOOL;
     sErrorMessage: STRING;
     nErrorID: INT;
     nIndex: UINT;
@@ -436,22 +444,17 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[sErrorId := CONCAT(STR1:='ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
+        <ST><![CDATA[IF NOT bPrintLog THEN
+    RETURN;
+END_IF
+
+sErrorId := CONCAT(STR1:='ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
 sErrorId := CONCAT(STR1:=sErrorId, STR2:='. %s');
 
-IF aAlarmList[nIndex].bAlarmActive THEN
-    aStartErrorMsgTimer[nIndex]:=TRUE;
-    IF afbErrorTrig[nIndex].Q THEN
-        ADSLOGSTR(
-            msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
-            msgFmtStr:=sErrorId,
-            strArg:=sErrorMessage);
-    END_IF
-
-    IF aFbErrorMessageTimer[nIndex].Q THEN
-        aStartErrorMsgTimer[nIndex]:=FALSE;
-    END_IF
-END_IF
+ADSLOGSTR(
+    msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
+    msgFmtStr:=sErrorId,
+    strArg:=sErrorMessage);
 ]]></ST>
       </Implementation>
     </Method>
