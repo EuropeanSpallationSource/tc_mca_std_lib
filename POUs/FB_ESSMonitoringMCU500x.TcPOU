@@ -207,6 +207,77 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mAlarmActive" Id="{aff05498-00f1-0703-1f58-de4c9fc3cb2d}">
+      <Declaration><![CDATA[METHOD mAlarmActive
+VAR_INPUT
+    i: UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Update timer and trigger for new log message
+aStartErrorMsgTimer[i] :=
+    aAlarmList[i].bAlarmActive
+    AND NOT aFbErrorMessageTimer[i].Q;
+aFbErrorMessageTimer[i](
+    IN:=aStartErrorMsgTimer[i],
+    PT:=tNewMessageTimeout);
+aFbErrorTrig[i](
+    CLK:=aStartErrorMsgTimer[i]);
+
+IF NOT aAlarmList[i].bAlarmActive THEN
+    RETURN;
+END_IF
+
+
+nAlarmCnt := nAlarmCnt + 1;
+aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
+aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
+
+mPrintErrorMessage(
+    bPrintLog:=aFbErrorTrig[i].Q,
+    sErrorMessage:=aTempErrorMsg[nAlarmCnt],
+    nErrorID:=aAlarmList[i].nErrorID,
+    nIndex:=i);
+
+// Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
+CASE aAlarmList[i].nErrorID OF
+    241, 242, 243:
+    nAlarmBitNumber.0 := TRUE;
+    481, 482, 483, 484:
+    nAlarmBitNumber.1 := TRUE;
+    11:
+    nAlarmBitNumber.2 := TRUE;
+    12:
+    nAlarmBitNumber.3 := TRUE;
+    13:
+    nAlarmBitNumber.4 := TRUE;
+    14,15,16,17:
+    nAlarmBitNumber.5 := TRUE;
+    301, 302, 303, 304, 305, 306, 307, 308:
+    nAlarmBitNumber.6 := TRUE;
+    501, 502, 511, 512:
+    nAlarmBitNumber.7 := TRUE;
+    101:
+    nAlarmBitNumber.8 := TRUE;
+    102:
+    nAlarmBitNumber.9 := TRUE;
+    103:
+    nAlarmBitNumber.10 := TRUE;
+    104, 105:
+    nAlarmBitNumber.11 := TRUE;
+END_CASE
+
+// Set the alarm LEDs according to first occurrence
+IF NOT bLedActive THEN
+    bLedActive := TRUE;
+    nEmergencyLED := aAlarmList[i].nEmergencyLED;
+    nAbnormalLED := aAlarmList[i].nAbnormalLED;
+    nStatusLED := aAlarmList[i].nStatusLED;
+    nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
       <Declaration><![CDATA[METHOD mLed
 VAR_IN_OUT
@@ -248,65 +319,8 @@ FOR i:=1 TO nMaxAlarms DO
     mAlarm(stAlarmData:=aAlarmList[i]);
     // Update list of active LEDs
     mLed(stAlarmData:=aAlarmList[i]);
-
-    // Update timer and trigger for new log message
-    aStartErrorMsgTimer[i] :=
-        aAlarmList[i].bAlarmActive
-        AND NOT aFbErrorMessageTimer[i].Q;
-    aFbErrorMessageTimer[i](
-        IN:=aStartErrorMsgTimer[i],
-        PT:=tNewMessageTimeout);
-    aFbErrorTrig[i](
-        CLK:=aStartErrorMsgTimer[i]);
-
-    IF aAlarmList[i].bAlarmActive THEN
-        nAlarmCnt := nAlarmCnt + 1;
-        aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
-        aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
-
-        mPrintErrorMessage(
-            bPrintLog:=aFbErrorTrig[i].Q,
-            sErrorMessage:=aTempErrorMsg[nAlarmCnt],
-            nErrorID:=aAlarmList[i].nErrorID,
-            nIndex:=i);
-
-        // Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
-        CASE aAlarmList[i].nErrorID OF
-            241, 242, 243:
-            nAlarmBitNumber.0 := TRUE;
-            481, 482, 483, 484:
-            nAlarmBitNumber.1 := TRUE;
-            11:
-            nAlarmBitNumber.2 := TRUE;
-            12:
-            nAlarmBitNumber.3 := TRUE;
-            13:
-            nAlarmBitNumber.4 := TRUE;
-            14,15,16,17:
-            nAlarmBitNumber.5 := TRUE;
-            301, 302, 303, 304, 305, 306, 307, 308:
-            nAlarmBitNumber.6 := TRUE;
-            501, 502, 511, 512:
-            nAlarmBitNumber.7 := TRUE;
-            101:
-            nAlarmBitNumber.8 := TRUE;
-            102:
-            nAlarmBitNumber.9 := TRUE;
-            103:
-            nAlarmBitNumber.10 := TRUE;
-            104, 105:
-            nAlarmBitNumber.11 := TRUE;
-        END_CASE
-    END_IF
-
-    // Set the alarm LEDs according to first occurrence
-    IF NOT bLedActive AND aALarmList[i].bLedActive THEN
-        bLedActive := TRUE;
-        nEmergencyLED := aAlarmList[i].nEmergencyLED;
-        nAbnormalLED := aAlarmList[i].nAbnormalLED;
-        nStatusLED := aAlarmList[i].nStatusLED;
-        nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
-    END_IF
+    // Handle log prints, alarm bits and prepare alarm LEDs
+    mAlarmActive(i:=i);
 END_FOR
 
 
