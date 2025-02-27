@@ -379,52 +379,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Read frames
-fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q , PT:=T#1000MS , Q=> , ET=> );
+fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
-
-//Check ethercat slave device state
-fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q , PT:=T#100MS , Q=> , ET=> );
-fbGetEcSlaveStates(
-    sNetId:=nEcMasterNetId,
-    pStateBuf:=ADR(stSlaveState),
-    cbBufLen:=SIZEOF(stSlaveState),
-    bExecute:=fbUpdateEcSlaveStateTON.q);
-nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
-
-fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
-
-IF fbEtherCATAlarmDelayTON.Q THEN
-    bStartEtherCATdelayTON := FALSE;
-    bEtherCATInitialized := TRUE;
-END_IF
-
-IF bEtherCATInitialized THEN
-    FOR i:=0 TO nActualEcSlaves-1 DO
-        IF i = 0 THEN
-            bSlaveStateNotOP := FALSE;
-            bSlaveLinkError := FALSE;
-            aExtraMessage[nSlaveStateNotOPEntry] := ', Slave Id #: ';
-            aExtraMessage[nSlaveLinkErrorEntry] := ', Slave Id #: ';
-        END_IF
-
-        IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
-            bSlaveStateNotOP := TRUE;
-            aExtraMessage[nSlaveStateNotOPEntry] := CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:= UINT_TO_STRING(i+1));
-            aExtraMessage[nSlaveStateNotOPEntry] := CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
-        END_IF
-
-        IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
-            bSlaveLinkError := TRUE;
-            aExtraMessage[nSlaveLinkErrorEntry] := CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=UINT_TO_STRING(i+1));
-            aExtraMessage[nSlaveLinkErrorEntry] := CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
-        END_IF
-    END_FOR
-ELSE
-    bStartEtherCATdelayTON := TRUE;
-END_IF
 
 //Check ethercat master device state
 bEcLinkError := nEcMasterDevState.0;
@@ -442,6 +401,51 @@ bEcSlaveError := nEcMasterDevState.11;
 bEcDCnotInSync := nEcMasterDevState.12;
 
 bEcMasterError := nEcMasterDevState > 0;
+
+
+//Check ethercat slave device state
+fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q, PT:=T#100MS);
+fbGetEcSlaveStates(
+    sNetId:=nEcMasterNetId,
+    pStateBuf:=ADR(stSlaveState),
+    cbBufLen:=SIZEOF(stSlaveState),
+    bExecute:=fbUpdateEcSlaveStateTON.q);
+nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
+
+fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
+IF fbEtherCATAlarmDelayTON.Q THEN
+    bStartEtherCATdelayTON := FALSE;
+    bEtherCATInitialized := TRUE;
+END_IF
+
+IF NOT bEtherCATInitialized THEN
+    bStartEtherCATdelayTON := TRUE;
+    RETURN;
+END_IF
+
+// After startup timeout, reset variables before loop
+bSlaveStateNotOP := FALSE;
+bSlaveLinkError := FALSE;
+aExtraMessage[nSlaveStateNotOPEntry] := ', Slave Id #: ';
+aExtraMessage[nSlaveLinkErrorEntry] := ', Slave Id #: ';
+
+FOR i:=0 TO nActualEcSlaves-1 DO
+    IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
+        bSlaveStateNotOP := TRUE;
+        aExtraMessage[nSlaveStateNotOPEntry] :=
+            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:= UINT_TO_STRING(i+1));
+        aExtraMessage[nSlaveStateNotOPEntry] :=
+            CONCAT(STR1:=aExtraMessage[nSlaveStateNotOPEntry], STR2:=', ');
+    END_IF
+
+    IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
+        bSlaveLinkError := TRUE;
+        aExtraMessage[nSlaveLinkErrorEntry] :=
+            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=UINT_TO_STRING(i+1));
+        aExtraMessage[nSlaveLinkErrorEntry] :=
+            CONCAT(STR1:=aExtraMessage[nSlaveLinkErrorEntry], STR2:=', ');
+    END_IF
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
