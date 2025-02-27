@@ -211,6 +211,7 @@ END_IF
       <Declaration><![CDATA[METHOD mAlarmActive
 VAR_INPUT
     i: UINT;
+    bUpdatedExtraMessage : BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -228,13 +229,12 @@ IF NOT aAlarmList[i].bAlarmActive THEN
     RETURN;
 END_IF
 
-
 nAlarmCnt := nAlarmCnt + 1;
 aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
 aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
 
 mPrintErrorMessage(
-    bPrintLog:=aFbErrorTrig[i].Q,
+    bPrintLog:=aFbErrorTrig[i].Q OR bUpdatedExtraMessage,
     sErrorMessage:=aTempErrorMsg[nAlarmCnt],
     nErrorID:=aAlarmList[i].nErrorID,
     nIndex:=i);
@@ -298,6 +298,10 @@ END_IF
 VAR
     i: UINT := 0;
 END_VAR
+
+VAR_INST
+    aExtraMessageOld: ARRAY[1..nMaxAlarms] OF STRING := [nMaxAlarms('')];
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=bAcknowledgeButton);
@@ -320,9 +324,11 @@ FOR i:=1 TO nMaxAlarms DO
     // Update list of active LEDs
     mLed(stAlarmData:=aAlarmList[i]);
     // Handle log prints, alarm bits and prepare alarm LEDs
-    mAlarmActive(i:=i);
+    mAlarmActive(i:=i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
 END_FOR
 
+// Save last messages for next iteration
+aExtraMessageOld := aExtraMessage;
 
 // Copy to output variables
 aErrorID := aTempErrorID;
