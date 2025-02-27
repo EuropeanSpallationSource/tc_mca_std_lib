@@ -488,6 +488,8 @@ ADSLOGSTR(
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
     index: UINT;
+    aDeadBandActive: ARRAY [1..4] OF BOOL;
+    nDeadBandTemperature: INT := 3;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -733,45 +735,57 @@ ELSE
     aAlarmList[22].bLedSet := FALSE;
 END_IF
 
-IF nTemp1 > nMaxTemp THEN
+IF nTemp1 > nMaxTemp
+    OR (aDeadBandActive[1] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
+    aDeadBandActive[1] := TRUE;
     aAlarmList[23].bAlarmSet := TRUE;
     aAlarmList[23].bAlarmReset := FALSE;
     aAlarmList[23].bLedSet := TRUE;
     aAlarmList[23].bLedReset := FALSE;
 ELSE
+    aDeadBandActive[1] := FALSE;
     aAlarmList[23].bAlarmSet := FALSE;
     aAlarmList[23].bAlarmReset:= TRUE;
     aAlarmList[23].bLedSet := FALSE;
 END_IF
 
-IF nTemp2 > nMaxTemp THEN
+IF nTemp2 > nMaxTemp
+    OR (aDeadBandActive[1] AND nTemp2 > (nMaxTemp - nDeadBandTemperature)) THEN
+    aDeadBandActive[2] := TRUE;
     aAlarmList[24].bAlarmSet := TRUE;
     aAlarmList[24].bAlarmReset := FALSE;
     aAlarmList[24].bLedSet := TRUE;
     aAlarmList[24].bLedReset := FALSE;
 ELSE
+    aDeadBandActive[2] := FALSE;
     aAlarmList[24].bAlarmSet := FALSE;
     aAlarmList[24].bAlarmReset:= TRUE;
     aAlarmList[24].bLedSet := FALSE;
 END_IF
 
-IF nTemp3 > nMaxTemp THEN
+IF nTemp3 > nMaxTemp
+    OR (aDeadBandActive[3] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
+    aDeadBandActive[3] := TRUE;
     aAlarmList[25].bAlarmSet := TRUE;
     aAlarmList[25].bAlarmReset := FALSE;
     aAlarmList[25].bLedSet := TRUE;
     aAlarmList[25].bLedReset := FALSE;
 ELSE
+    aDeadBandActive[3] := FALSE;
     aAlarmList[25].bAlarmSet := FALSE;
     aAlarmList[25].bAlarmReset:= TRUE;
     aAlarmList[25].bLedSet := FALSE;
 END_IF
 
-IF nTemp4 > nMaxTemp THEN
+IF nTemp4 > nMaxTemp
+    OR (aDeadBandActive[4] AND nTemp4 > (nMaxTemp - nDeadBandTemperature)) THEN
+    aDeadBandActive[4] := TRUE;
     aAlarmList[26].bAlarmSet := TRUE;
     aAlarmList[26].bAlarmReset := FALSE;
     aAlarmList[26].bLedSet := TRUE;
     aAlarmList[26].bLedReset := FALSE;
 ELSE
+    aDeadBandActive[4] := FALSE;
     aAlarmList[26].bAlarmSet := FALSE;
     aAlarmList[26].bAlarmReset:= TRUE;
     aAlarmList[26].bLedSet := FALSE;
