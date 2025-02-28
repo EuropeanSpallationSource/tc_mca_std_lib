@@ -85,37 +85,37 @@ VAR
     nEcMasterDevState AT %I*: UINT;
 
     aAlarmList: ARRAY [1..nMaxAlarms] OF ST_MonitoringAlarm := [
-(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[8]*)(nErrorID:=11, sErrorMsg:='MCB OK status is OFF', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', nStatusLED:=E_MonitoringLedFunction.eSlow, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eSteady),
-(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined, nEStopLED:=E_MonitoringLedFunction.eSteady),
-(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined, nEStopLED:=E_MonitoringLedFunction.eSteady),
-(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', nStatusLED:=E_MonitoringLedFunction.eFast, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', nStatusLED:=E_MonitoringLedFunction.eUndefined, nAbnormalLED:=E_MonitoringLedFunction.eSteady, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSlow, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSlow, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSlow, nEmergencyLED:=E_MonitoringLedFunction.eSteady, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSlow, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined),
-(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', nStatusLED:=E_MonitoringLedFunction.eSteady, nAbnormalLED:=E_MonitoringLedFunction.eSlow, nEmergencyLED:=E_MonitoringLedFunction.eUndefined, nAcknowledgeLED:=E_MonitoringLedFunction.eUndefined)];
+(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[8]*)(nErrorID:=11, sErrorMsg:='MCB OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady),
+(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady),
+(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined)];
 
     aTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
     aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
@@ -163,10 +163,10 @@ VAR
     fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
 
-    nAcknowledgeLED: E_MonitoringLedFunction;
-    nStatusLED: E_MonitoringLedFunction;
-    nAbnormalLED: E_MonitoringLedFunction;
-    nEmergencyLED: E_MonitoringLedFunction;
+    nAcknowledgeLED: E_MonitorLed;
+    nStatusLED: E_MonitorLed;
+    nAbnormalLED: E_MonitorLed;
+    nEmergencyLED: E_MonitorLed;
     fbFastBlinkOn: TON;
     fbFastBlinkOff: TON;
     fbSlowBlinkOn: TON;
@@ -344,21 +344,21 @@ fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
 fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
 
 bEmergencyLED :=
-    (nEmergencyLED = E_MonitoringLedFunction.eSteady)
-    OR (nEmergencyLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
-    OR (nEmergencyLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
+    (nEmergencyLED = E_MonitorLed.eSteady)
+    OR (nEmergencyLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (nEmergencyLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bAbnormalLED :=
-    (nAbnormalLED = E_MonitoringLedFunction.eSteady)
-    OR (nAbnormalLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
-    OR (nAbnormalLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
+    (nAbnormalLED = E_MonitorLed.eSteady)
+    OR (nAbnormalLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (nAbnormalLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bStatusLED :=
-    (nStatusLED = E_MonitoringLedFunction.eSteady)
-    OR (nStatusLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
-    OR (nStatusLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
+    (nStatusLED = E_MonitorLed.eSteady)
+    OR (nStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (nStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bAcknowledgeLED :=
-    (nAcknowledgeLED = E_MonitoringLedFunction.eSteady)
-    OR (nAcknowledgeLED = E_MonitoringLedFunction.eFast AND fbFastBlinkOn.Q)
-    OR (nAcknowledgeLED = E_MonitoringLedFunction.eSlow AND fbSlowBlinkOn.Q);
+    (nAcknowledgeLED = E_MonitorLed.eSteady)
+    OR (nAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (nAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 ]]></ST>
       </Implementation>
     </Method>
