@@ -516,203 +516,33 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT b24VDC1_OK THEN
-    aAlarmList[1].bAlarmSet := TRUE;
-    aAlarmList[1].bAlarmReset := FALSE;
-    aAlarmList[1].bLedSet := TRUE;
-    aAlarmList[1].bLedReset := FALSE;
-ELSE
-    aAlarmList[1].bAlarmSet := FALSE;
-    aAlarmList[1].bAlarmReset := TRUE;
-    aAlarmList[1].bLedSet := FALSE;
-END_IF
+        <ST><![CDATA[mSetReset(stAlarmLed := aAlarmList[1], bOk := b24VDC1_OK);
+mSetReset(stAlarmLed := aAlarmList[2], bOk := b24VDC2_OK);
+mSetReset(stAlarmLed := aAlarmList[3], bOk := b24VDC3_OK);
 
-IF NOT b24VDC2_OK THEN
-    aAlarmList[2].bAlarmSet := TRUE;
-    aAlarmList[2].bAlarmReset := FALSE;
-    aAlarmList[2].bLedSet := TRUE;
-    aAlarmList[2].bLedReset := FALSE;
-ELSE
-    aAlarmList[2].bAlarmSet := FALSE;
-    aAlarmList[2].bAlarmReset := TRUE;
-    aAlarmList[2].bLedSet := FALSE;
-END_IF
+mSetReset(stAlarmLed := aAlarmList[4], bOk := b48VDC1_OK);
+mSetReset(stAlarmLed := aAlarmList[5], bOk := b48VDC2_OK);
+mSetReset(stAlarmLed := aAlarmList[6], bOk := b48VDC3_OK);
+mSetReset(stAlarmLed := aAlarmList[7], bOk := b48VDC4_OK);
 
-IF NOT b24VDC3_OK THEN
-    aAlarmList[3].bAlarmSet := TRUE;
-    aAlarmList[3].bAlarmReset := FALSE;
-    aAlarmList[3].bLedSet := TRUE;
-    aAlarmList[3].bLedReset := FALSE;
-ELSE
-    aAlarmList[3].bAlarmSet := FALSE;
-    aAlarmList[3].bAlarmReset := TRUE;
-    aAlarmList[3].bLedSet := FALSE;
-END_IF
+mSetReset(stAlarmLed := aAlarmList[8], bOk := bMCB_OK);
+mSetReset(stAlarmLed := aAlarmList[9], bOk := bSPD_OK);
+mSetReset(stAlarmLed := aAlarmList[10], bOk := bDoorClosed);
 
-IF NOT b48VDC1_OK THEN
-    aAlarmList[4].bAlarmSet := TRUE;
-    aAlarmList[4].bAlarmReset := FALSE;
-    aAlarmList[4].bLedSet := TRUE;
-    aAlarmList[4].bLedReset := FALSE;
-ELSE
-    aAlarmList[4].bAlarmSet := FALSE;
-    aAlarmList[4].bAlarmReset := TRUE;
-    aAlarmList[4].bLedSet := FALSE;
-END_IF
+mSetReset(stAlarmLed := aAlarmList[11], bOk := bFuse1_OK);
+mSetReset(stAlarmLed := aAlarmList[12], bOk := NOT bFuse2_OK);
+mSetReset(stAlarmLed := aAlarmList[13], bOk := NOT bFuse3_OK);
+mSetReset(stAlarmLed := aAlarmList[14], bOk := bFuse4_OK);
+mSetReset(stAlarmLed := aAlarmList[15], bOk := bFuse5_OK);
+mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK);
+mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK);
+mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK);
 
-IF NOT b48VDC2_OK THEN
-    aAlarmList[5].bAlarmSet := TRUE;
-    aAlarmList[5].bAlarmReset := FALSE;
-    aAlarmList[5].bLedSet := TRUE;
-    aAlarmList[5].bLedReset := FALSE;
-ELSE
-    aAlarmList[5].bAlarmSet := FALSE;
-    aAlarmList[5].bAlarmReset := TRUE;
-    aAlarmList[5].bLedSet := FALSE;
-END_IF
-
-IF NOT b48VDC3_OK THEN
-    aAlarmList[6].bAlarmSet := TRUE;
-    aAlarmList[6].bAlarmReset := FALSE;
-    aAlarmList[6].bLedSet := TRUE;
-    aAlarmList[6].bLedReset := FALSE;
-ELSE
-    aAlarmList[6].bAlarmSet := FALSE;
-    aAlarmList[6].bAlarmReset := TRUE;
-    aAlarmList[6].bLedSet := FALSE;
-END_IF
-
-IF NOT b48VDC4_OK THEN
-    aAlarmList[7].bAlarmSet := TRUE;
-    aAlarmList[7].bAlarmReset := FALSE;
-    aAlarmList[7].bLedSet := TRUE;
-    aAlarmList[7].bLedReset := FALSE;
-ELSE
-    aAlarmList[7].bAlarmSet := FALSE;
-    aAlarmList[7].bAlarmReset := TRUE;
-    aAlarmList[7].bLedSet := FALSE;
-END_IF
-
-IF NOT bMCB_OK THEN
-    aAlarmList[8].bAlarmSet := TRUE;
-    aAlarmList[8].bAlarmReset := FALSE;
-    aAlarmList[8].bLedSet := TRUE;
-    aAlarmList[8].bLedReset := FALSE;
-ELSE
-    aAlarmList[8].bAlarmSet := FALSE;
-    aAlarmList[8].bAlarmReset := TRUE;
-    aAlarmList[8].bLedSet := FALSE;
-END_IF
-
-IF NOT bSPD_OK THEN
-    aAlarmList[9].bAlarmSet := TRUE;
-    aAlarmList[9].bAlarmReset := FALSE;
-    aAlarmList[9].bLedSet := TRUE;
-    aAlarmList[9].bLedReset := FALSE;
-ELSE
-    aAlarmList[9].bAlarmSet := FALSE;
-    aAlarmList[9].bAlarmReset := TRUE;
-    aAlarmList[9].bLedSet := FALSE;
-END_IF
-
-IF NOT bDoorClosed THEN
-    aAlarmList[10].bAlarmSet := TRUE;
-    aAlarmList[10].bAlarmReset := FALSE;
-    aAlarmList[10].bLedSet := TRUE;
-    aAlarmList[10].bLedReset := FALSE;
-ELSE
-    aAlarmList[10].bAlarmSet := FALSE;
-    aAlarmList[10].bAlarmReset:= TRUE;
-    aAlarmList[10].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse1_OK THEN
-    aAlarmList[11].bAlarmSet := TRUE;
-    aAlarmList[11].bAlarmReset := FALSE;
-    aAlarmList[11].bLedSet := TRUE;
-    aAlarmList[11].bLedReset := FALSE;
-ELSE
-    aAlarmList[11].bAlarmSet := FALSE;
-    aAlarmList[11].bAlarmReset:= TRUE;
-    aAlarmList[11].bLedSet := FALSE;
-END_IF
-
-IF bFuse2_OK THEN
-    aAlarmList[12].bAlarmSet := TRUE;
-    aAlarmList[12].bAlarmReset := FALSE;
-    aAlarmList[12].bLedSet := TRUE;
-    aAlarmList[12].bLedReset := FALSE;
-ELSE
-    aAlarmList[12].bAlarmSet := FALSE;
-    aAlarmList[12].bAlarmReset:= TRUE;
-    aAlarmList[12].bLedSet := FALSE;
-END_IF
-
-IF bFuse3_OK THEN
-    aAlarmList[13].bAlarmSet := TRUE;
-    aAlarmList[13].bAlarmReset := FALSE;
-    aAlarmList[13].bLedSet := TRUE;
-    aAlarmList[13].bLedReset := FALSE;
-ELSE
-    aAlarmList[13].bAlarmSet := FALSE;
-    aAlarmList[13].bAlarmReset:= TRUE;
-    aAlarmList[13].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse4_OK THEN
-    aAlarmList[14].bAlarmSet := TRUE;
-    aAlarmList[14].bAlarmReset := FALSE;
-    aAlarmList[14].bLedSet := TRUE;
-    aAlarmList[14].bLedReset := FALSE;
-ELSE
-    aAlarmList[14].bAlarmSet := FALSE;
-    aAlarmList[14].bAlarmReset:= TRUE;
-    aAlarmList[14].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse5_OK THEN
-    aAlarmList[15].bAlarmSet := TRUE;
-    aAlarmList[15].bAlarmReset := FALSE;
-    aAlarmList[15].bLedSet := TRUE;
-    aAlarmList[15].bLedReset := FALSE;
-ELSE
-    aAlarmList[15].bAlarmSet := FALSE;
-    aAlarmList[15].bAlarmReset:= TRUE;
-    aAlarmList[15].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse6_OK THEN
-    aAlarmList[16].bAlarmSet := TRUE;
-    aAlarmList[16].bAlarmReset := FALSE;
-    aAlarmList[16].bLedSet := TRUE;
-    aAlarmList[16].bLedReset := FALSE;
-ELSE
-    aAlarmList[16].bAlarmSet := FALSE;
-    aAlarmList[16].bAlarmReset:= TRUE;
-    aAlarmList[16].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse7_OK THEN
-    aAlarmList[17].bAlarmSet := TRUE;
-    aAlarmList[17].bAlarmReset := FALSE;
-    aAlarmList[17].bLedSet := TRUE;
-    aAlarmList[17].bLedReset := FALSE;
-ELSE
-    aAlarmList[17].bAlarmSet := FALSE;
-    aAlarmList[17].bAlarmReset:= TRUE;
-    aAlarmList[17].bLedSet := FALSE;
-END_IF
-
-IF NOT bFuse8_OK THEN
-    aAlarmList[18].bAlarmSet := TRUE;
-    aAlarmList[18].bAlarmReset := FALSE;
-    aAlarmList[18].bLedSet := TRUE;
-    aAlarmList[18].bLedReset := FALSE;
-ELSE
-    aAlarmList[18].bAlarmSet := FALSE;
-    aAlarmList[18].bAlarmReset:= TRUE;
-    aAlarmList[18].bLedSet := FALSE;
-END_IF
+mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError);
+mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded);
 
 IF NOT bEStop1Triggered THEN
     aAlarmList[19].bAlarmSet := TRUE;
@@ -814,60 +644,6 @@ ELSE
     aAlarmList[26].bLedSet := FALSE;
 END_IF
 
-IF bEcMasterError THEN
-    aAlarmList[27].bAlarmSet := TRUE;
-    aAlarmList[27].bAlarmReset := FALSE;
-    aAlarmList[27].bLedSet := TRUE;
-    aAlarmList[27].bLedReset := FALSE;
-ELSE
-    aAlarmList[27].bAlarmSet := FALSE;
-    aAlarmList[27].bAlarmReset:= TRUE;
-    aAlarmList[27].bLedSet := FALSE;
-END_IF
-
-IF bSlaveStateNotOP THEN
-    aAlarmList[28].bAlarmSet := TRUE;
-    aAlarmList[28].bAlarmReset := FALSE;
-    aAlarmList[28].bLedSet := TRUE;
-    aAlarmList[28].bLedReset := FALSE;
-ELSE
-    aAlarmList[28].bAlarmSet := FALSE;
-    aAlarmList[28].bAlarmReset:= TRUE;
-    aAlarmList[28].bLedSet := FALSE;
-END_IF
-
-IF bSlaveLinkError THEN
-    aAlarmList[29].bAlarmSet := TRUE;
-    aAlarmList[29].bAlarmReset := FALSE;
-    aAlarmList[29].bLedSet := TRUE;
-    aAlarmList[29].bLedReset := FALSE;
-ELSE
-    aAlarmList[29].bAlarmSet := FALSE;
-    aAlarmList[29].bAlarmReset:= TRUE;
-    aAlarmList[29].bLedSet := FALSE;
-END_IF
-
-IF bCycleTimeExceeded THEN
-    aAlarmList[30].bAlarmSet := TRUE;
-    aAlarmList[30].bAlarmReset := FALSE;
-    aAlarmList[30].bLedSet := TRUE;
-    aAlarmList[30].bLedReset := FALSE;
-ELSE
-    aAlarmList[30].bAlarmSet := FALSE;
-    aAlarmList[30].bAlarmReset:= TRUE;
-    aAlarmList[30].bLedSet := FALSE;
-END_IF
-
-IF bCPUOverloaded THEN
-    aAlarmList[31].bAlarmSet := TRUE;
-    aAlarmList[31].bAlarmReset := FALSE;
-    aAlarmList[31].bLedSet := TRUE;
-    aAlarmList[31].bLedReset := FALSE;
-ELSE
-    aAlarmList[31].bAlarmSet := FALSE;
-    aAlarmList[31].bAlarmReset:= TRUE;
-    aAlarmList[31].bLedSet := FALSE;
-END_IF
 
 //Reset selected alarms just when acknowledge button has been pressed
 IF fbAcknowledgeButtonTrig.Q THEN
