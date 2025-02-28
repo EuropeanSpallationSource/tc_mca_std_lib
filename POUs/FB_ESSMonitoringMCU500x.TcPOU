@@ -266,15 +266,6 @@ CASE aAlarmList[i].nErrorID OF
     104, 105:
     nAlarmBitNumber.11 := TRUE;
 END_CASE
-
-// Set the alarm LEDs according to first occurrence
-IF NOT bLedActive THEN
-    bLedActive := TRUE;
-    nEmergencyLED := aAlarmList[i].nEmergencyLED;
-    nAbnormalLED := aAlarmList[i].nAbnormalLED;
-    nStatusLED := aAlarmList[i].nStatusLED;
-    nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
-END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -325,6 +316,16 @@ FOR i:=1 TO nMaxAlarms DO
     mLed(stAlarmData:=aAlarmList[i]);
     // Handle log prints, alarm bits and prepare alarm LEDs
     mAlarmActive(i:=i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
+
+    // Set the alarm LEDs according to first occurrence
+    IF NOT bLedActive
+        AND aAlarmList[i].bLedActive THEN
+        bLedActive := TRUE;
+        nEmergencyLED := aAlarmList[i].nEmergencyLED;
+        nAbnormalLED := aAlarmList[i].nAbnormalLED;
+        nStatusLED := aAlarmList[i].nStatusLED;
+        nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
+    END_IF
 END_FOR
 
 // Save last messages for next iteration
@@ -488,6 +489,7 @@ ADSLOGSTR(
       <Declaration><![CDATA[METHOD mSetReset
 VAR_INPUT
     bOk: BOOL;
+    bAutoResetLeds: BOOL;
 END_VAR
 
 VAR_IN_OUT
@@ -498,7 +500,14 @@ END_VAR
         <ST><![CDATA[IF bOk THEN
     stAlarmLed.bAlarmSet := FALSE;
     stAlarmLed.bAlarmReset := TRUE;
-ELSE
+END_IF
+
+IF bOK AND bAutoResetLeds THEN
+    stAlarmLed.bLedSet := FALSE;
+    stAlarmLed.bLedReset := TRUE;
+END_IF
+
+IF NOT bOK THEN
     stAlarmLed.bAlarmSet := TRUE;
     stAlarmLed.bAlarmReset := FALSE;
     stAlarmLed.bLedSet := TRUE;
@@ -516,34 +525,36 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mSetReset(stAlarmLed := aAlarmList[1], bOk := b24VDC1_OK);
-mSetReset(stAlarmLed := aAlarmList[2], bOk := b24VDC2_OK);
-mSetReset(stAlarmLed := aAlarmList[3], bOk := b24VDC3_OK);
+        <ST><![CDATA[mSetReset(stAlarmLed := aAlarmList[1], bOk := b24VDC1_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[2], bOk := b24VDC2_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[3], bOk := b24VDC3_OK, bAutoResetLeds := FALSE);
 
-mSetReset(stAlarmLed := aAlarmList[4], bOk := b48VDC1_OK);
-mSetReset(stAlarmLed := aAlarmList[5], bOk := b48VDC2_OK);
-mSetReset(stAlarmLed := aAlarmList[6], bOk := b48VDC3_OK);
-mSetReset(stAlarmLed := aAlarmList[7], bOk := b48VDC4_OK);
+mSetReset(stAlarmLed := aAlarmList[4], bOk := b48VDC1_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[5], bOk := b48VDC2_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[6], bOk := b48VDC3_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[7], bOk := b48VDC4_OK, bAutoResetLeds := FALSE);
 
-mSetReset(stAlarmLed := aAlarmList[8], bOk := bMCB_OK);
-mSetReset(stAlarmLed := aAlarmList[9], bOk := bSPD_OK);
-mSetReset(stAlarmLed := aAlarmList[10], bOk := bDoorClosed);
+mSetReset(stAlarmLed := aAlarmList[8], bOk := bMCB_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[9], bOk := bSPD_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[10], bOk := bDoorClosed, bAutoResetLeds := FALSE);
 
-mSetReset(stAlarmLed := aAlarmList[11], bOk := bFuse1_OK);
-mSetReset(stAlarmLed := aAlarmList[12], bOk := NOT bFuse2_OK);
-mSetReset(stAlarmLed := aAlarmList[13], bOk := NOT bFuse3_OK);
-mSetReset(stAlarmLed := aAlarmList[14], bOk := bFuse4_OK);
-mSetReset(stAlarmLed := aAlarmList[15], bOk := bFuse5_OK);
-mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK);
-mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK);
-mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK);
+mSetReset(stAlarmLed := aAlarmList[11], bOk := bFuse1_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[12], bOk := NOT bFuse2_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[13], bOk := NOT bFuse3_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[14], bOk := bFuse4_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[15], bOk := bFuse5_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK, bAutoResetLeds := FALSE);
 
-mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError);
-mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
-mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError);
-mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
-mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded);
+mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded, bAutoResetLeds := FALSE);
 
+// CHECK THESE - Arent they inverted in logic?
+// Rewrite according to logic in mSetReset if possible
 IF NOT bEStop1Triggered THEN
     aAlarmList[19].bAlarmSet := TRUE;
     aAlarmList[19].bAlarmReset := FALSE;
@@ -553,6 +564,7 @@ ELSE
     aAlarmList[19].bAlarmSet := FALSE;
     aAlarmList[19].bAlarmReset:= TRUE;
     aAlarmList[19].bLedSet := FALSE;
+    aAlarmList[19].bLedReset := TRUE;
 END_IF
 
 IF NOT bSTO1Triggered THEN
@@ -564,6 +576,7 @@ ELSE
     aAlarmList[20].bAlarmSet := FALSE;
     aAlarmList[20].bAlarmReset:= TRUE;
     aAlarmList[20].bLedSet := FALSE;
+    aAlarmList[20].bLedReset := TRUE;
 END_IF
 
 IF NOT bEStop2Triggered THEN
@@ -575,6 +588,7 @@ ELSE
     aAlarmList[21].bAlarmSet := FALSE;
     aAlarmList[21].bAlarmReset:= TRUE;
     aAlarmList[21].bLedSet := FALSE;
+    aAlarmList[21].bLedReset := TRUE;
 END_IF
 
 IF NOT bSTO2Triggered THEN
@@ -586,6 +600,7 @@ ELSE
     aAlarmList[22].bAlarmSet := FALSE;
     aAlarmList[22].bAlarmReset:= TRUE;
     aAlarmList[22].bLedSet := FALSE;
+    aAlarmList[22].bLedReset := TRUE;
 END_IF
 
 IF nTemp1 > nMaxTemp
@@ -599,7 +614,6 @@ ELSE
     aDeadBandActive[1] := FALSE;
     aAlarmList[23].bAlarmSet := FALSE;
     aAlarmList[23].bAlarmReset:= TRUE;
-    aAlarmList[23].bLedSet := FALSE;
 END_IF
 
 IF nTemp2 > nMaxTemp
@@ -613,7 +627,6 @@ ELSE
     aDeadBandActive[2] := FALSE;
     aAlarmList[24].bAlarmSet := FALSE;
     aAlarmList[24].bAlarmReset:= TRUE;
-    aAlarmList[24].bLedSet := FALSE;
 END_IF
 
 IF nTemp3 > nMaxTemp
@@ -627,7 +640,6 @@ ELSE
     aDeadBandActive[3] := FALSE;
     aAlarmList[25].bAlarmSet := FALSE;
     aAlarmList[25].bAlarmReset:= TRUE;
-    aAlarmList[25].bLedSet := FALSE;
 END_IF
 
 IF nTemp4 > nMaxTemp
@@ -641,7 +653,6 @@ ELSE
     aDeadBandActive[4] := FALSE;
     aAlarmList[26].bAlarmSet := FALSE;
     aAlarmList[26].bAlarmReset:= TRUE;
-    aAlarmList[26].bLedSet := FALSE;
 END_IF
 
 
