@@ -17,6 +17,7 @@ STRUCT
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
     bLedActive: BOOL;
+    bLedAutoReset: BOOL := FALSE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

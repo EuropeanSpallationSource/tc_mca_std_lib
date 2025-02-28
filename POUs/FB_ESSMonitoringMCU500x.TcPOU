@@ -94,7 +94,7 @@ VAR
 (*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[8]*)(nErrorID:=11, sErrorMsg:='MCB OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
 (*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
@@ -103,10 +103,10 @@ VAR
 (*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
 (*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady),
-(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady),
-(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
 (*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
@@ -489,7 +489,6 @@ ADSLOGSTR(
       <Declaration><![CDATA[METHOD mSetReset
 VAR_INPUT
     bOk: BOOL;
-    bAutoResetLeds: BOOL;
 END_VAR
 
 VAR_IN_OUT
@@ -502,7 +501,7 @@ END_VAR
     stAlarmLed.bAlarmReset := TRUE;
 END_IF
 
-IF bOK AND bAutoResetLeds THEN
+IF bOK AND stAlarmLed.bLedAutoReset THEN
     stAlarmLed.bLedSet := FALSE;
     stAlarmLed.bLedReset := TRUE;
 END_IF
@@ -525,38 +524,38 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mSetReset(stAlarmLed := aAlarmList[1], bOk := b24VDC1_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[2], bOk := b24VDC2_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[3], bOk := b24VDC3_OK, bAutoResetLeds := FALSE);
+        <ST><![CDATA[mSetReset(stAlarmLed := aAlarmList[1], bOk := b24VDC1_OK);
+mSetReset(stAlarmLed := aAlarmList[2], bOk := b24VDC2_OK);
+mSetReset(stAlarmLed := aAlarmList[3], bOk := b24VDC3_OK);
 
-mSetReset(stAlarmLed := aAlarmList[4], bOk := b48VDC1_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[5], bOk := b48VDC2_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[6], bOk := b48VDC3_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[7], bOk := b48VDC4_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[4], bOk := b48VDC1_OK);
+mSetReset(stAlarmLed := aAlarmList[5], bOk := b48VDC2_OK);
+mSetReset(stAlarmLed := aAlarmList[6], bOk := b48VDC3_OK);
+mSetReset(stAlarmLed := aAlarmList[7], bOk := b48VDC4_OK);
 
-mSetReset(stAlarmLed := aAlarmList[8], bOk := bMCB_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[9], bOk := bSPD_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[10], bOk := bDoorClosed, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[8], bOk := bMCB_OK);
+mSetReset(stAlarmLed := aAlarmList[9], bOk := bSPD_OK);
+mSetReset(stAlarmLed := aAlarmList[10], bOk := bDoorClosed);
 
-mSetReset(stAlarmLed := aAlarmList[11], bOk := bFuse1_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[12], bOk := NOT bFuse2_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[13], bOk := NOT bFuse3_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[14], bOk := bFuse4_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[15], bOk := bFuse5_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[11], bOk := bFuse1_OK);
+mSetReset(stAlarmLed := aAlarmList[12], bOk := NOT bFuse2_OK);
+mSetReset(stAlarmLed := aAlarmList[13], bOk := NOT bFuse3_OK);
+mSetReset(stAlarmLed := aAlarmList[14], bOk := bFuse4_OK);
+mSetReset(stAlarmLed := aAlarmList[15], bOk := bFuse5_OK);
+mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK);
+mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK);
+mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK);
 
-mSetReset(stAlarmLed := aAlarmList[19], bOk := bEStop1Triggered, bAutoResetLeds := TRUE);
-mSetReset(stAlarmLed := aAlarmList[20], bOk := bSTO1Triggered, bAutoResetLeds := TRUE);
-mSetReset(stAlarmLed := aAlarmList[21], bOk := bEStop2Triggered, bAutoResetLeds := TRUE);
-mSetReset(stAlarmLed := aAlarmList[22], bOk := bSTO2Triggered, bAutoResetLeds := TRUE);
+mSetReset(stAlarmLed := aAlarmList[19], bOk := bEStop1Triggered);
+mSetReset(stAlarmLed := aAlarmList[20], bOk := bSTO1Triggered);
+mSetReset(stAlarmLed := aAlarmList[21], bOk := bEStop2Triggered);
+mSetReset(stAlarmLed := aAlarmList[22], bOk := bSTO2Triggered);
 
-mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded, bAutoResetLeds := FALSE);
-mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded, bAutoResetLeds := FALSE);
+mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError);
+mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded);
 
 IF nTemp1 > nMaxTemp
     OR (aDeadBandActive[1] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
