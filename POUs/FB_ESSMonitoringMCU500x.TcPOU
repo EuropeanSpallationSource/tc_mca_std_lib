@@ -547,61 +547,16 @@ mSetReset(stAlarmLed := aAlarmList[16], bOk := bFuse6_OK, bAutoResetLeds := FALS
 mSetReset(stAlarmLed := aAlarmList[17], bOk := bFuse7_OK, bAutoResetLeds := FALSE);
 mSetReset(stAlarmLed := aAlarmList[18], bOk := bFuse8_OK, bAutoResetLeds := FALSE);
 
+mSetReset(stAlarmLed := aAlarmList[19], bOk := bEStop1Triggered, bAutoResetLeds := TRUE);
+mSetReset(stAlarmLed := aAlarmList[20], bOk := bSTO1Triggered, bAutoResetLeds := TRUE);
+mSetReset(stAlarmLed := aAlarmList[21], bOk := bEStop2Triggered, bAutoResetLeds := TRUE);
+mSetReset(stAlarmLed := aAlarmList[22], bOk := bSTO2Triggered, bAutoResetLeds := TRUE);
+
 mSetReset(stAlarmLed := aAlarmList[27], bOk := NOT bEcMasterError, bAutoResetLeds := FALSE);
 mSetReset(stAlarmLed := aAlarmList[28], bOk := NOT bSlaveStateNotOP, bAutoResetLeds := FALSE);
 mSetReset(stAlarmLed := aAlarmList[29], bOk := NOT bSlaveLinkError, bAutoResetLeds := FALSE);
 mSetReset(stAlarmLed := aAlarmList[30], bOk := NOT bCycleTimeExceeded, bAutoResetLeds := FALSE);
 mSetReset(stAlarmLed := aAlarmList[31], bOk := NOT bCPUOverloaded, bAutoResetLeds := FALSE);
-
-// CHECK THESE - Arent they inverted in logic?
-// Rewrite according to logic in mSetReset if possible
-IF NOT bEStop1Triggered THEN
-    aAlarmList[19].bAlarmSet := TRUE;
-    aAlarmList[19].bAlarmReset := FALSE;
-    aAlarmList[19].bLedSet := TRUE;
-    aAlarmList[19].bLedReset := FALSE;
-ELSE
-    aAlarmList[19].bAlarmSet := FALSE;
-    aAlarmList[19].bAlarmReset:= TRUE;
-    aAlarmList[19].bLedSet := FALSE;
-    aAlarmList[19].bLedReset := TRUE;
-END_IF
-
-IF NOT bSTO1Triggered THEN
-    aAlarmList[20].bAlarmSet := TRUE;
-    aAlarmList[20].bAlarmReset := FALSE;
-    aAlarmList[20].bLedSet := TRUE;
-    aAlarmList[20].bLedReset := FALSE;
-ELSE
-    aAlarmList[20].bAlarmSet := FALSE;
-    aAlarmList[20].bAlarmReset:= TRUE;
-    aAlarmList[20].bLedSet := FALSE;
-    aAlarmList[20].bLedReset := TRUE;
-END_IF
-
-IF NOT bEStop2Triggered THEN
-    aAlarmList[21].bAlarmSet := TRUE;
-    aAlarmList[21].bAlarmReset := FALSE;
-    aAlarmList[21].bLedSet := TRUE;
-    aAlarmList[21].bLedReset := FALSE;
-ELSE
-    aAlarmList[21].bAlarmSet := FALSE;
-    aAlarmList[21].bAlarmReset:= TRUE;
-    aAlarmList[21].bLedSet := FALSE;
-    aAlarmList[21].bLedReset := TRUE;
-END_IF
-
-IF NOT bSTO2Triggered THEN
-    aAlarmList[22].bAlarmSet := TRUE;
-    aAlarmList[22].bAlarmReset := FALSE;
-    aAlarmList[22].bLedSet := TRUE;
-    aAlarmList[22].bLedReset := FALSE;
-ELSE
-    aAlarmList[22].bAlarmSet := FALSE;
-    aAlarmList[22].bAlarmReset:= TRUE;
-    aAlarmList[22].bLedSet := FALSE;
-    aAlarmList[22].bLedReset := TRUE;
-END_IF
 
 IF nTemp1 > nMaxTemp
     OR (aDeadBandActive[1] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
