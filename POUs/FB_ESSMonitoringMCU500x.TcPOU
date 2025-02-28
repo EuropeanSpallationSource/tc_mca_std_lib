@@ -484,6 +484,29 @@ ADSLOGSTR(
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mSetReset" Id="{bc20beb2-4ad1-01ee-3c55-7ebdd0373966}">
+      <Declaration><![CDATA[METHOD mSetReset
+VAR_INPUT
+    bOk: BOOL;
+END_VAR
+
+VAR_IN_OUT
+    stAlarmLed: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bOk THEN
+    stAlarmLed.bAlarmSet := FALSE;
+    stAlarmLed.bAlarmReset := TRUE;
+ELSE
+    stAlarmLed.bAlarmSet := TRUE;
+    stAlarmLed.bAlarmReset := FALSE;
+    stAlarmLed.bLedSet := TRUE;
+    stAlarmLed.bLedReset := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
