@@ -505,7 +505,7 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT bOK THEN
+        <ST><![CDATA[IF NOT bOk THEN
     stAlarmList.bAlarmSet := TRUE;
     stAlarmList.bAlarmReset := FALSE;
     stAlarmList.bLedSet := TRUE;
@@ -529,6 +529,7 @@ VAR_INST
     index: UINT;
     aDeadBandActive: ARRAY [1..4] OF BOOL;
     nDeadBandTemperature: INT := 3;
+    aTemperatureAlarm: ARRAY [1..4] OF BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -565,57 +566,29 @@ mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
 mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
 mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
 
-IF nTemp1 > nMaxTemp
-    OR (aDeadBandActive[1] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
-    aDeadBandActive[1] := TRUE;
-    aAlarmList[23].bAlarmSet := TRUE;
-    aAlarmList[23].bAlarmReset := FALSE;
-    aAlarmList[23].bLedSet := TRUE;
-    aAlarmList[23].bLedReset := FALSE;
-ELSE
-    aDeadBandActive[1] := FALSE;
-    aAlarmList[23].bAlarmSet := FALSE;
-    aAlarmList[23].bAlarmReset:= TRUE;
-END_IF
+aTemperatureAlarm[1] :=
+    nTemp1 > nMaxTemp
+    OR (aDeadBandActive[1] AND nTemp1 > (nMaxTemp - nDeadBandTemperature));
+aDeadBandActive[1] := aTemperatureAlarm[1];
+mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[1]);
 
-IF nTemp2 > nMaxTemp
-    OR (aDeadBandActive[1] AND nTemp2 > (nMaxTemp - nDeadBandTemperature)) THEN
-    aDeadBandActive[2] := TRUE;
-    aAlarmList[24].bAlarmSet := TRUE;
-    aAlarmList[24].bAlarmReset := FALSE;
-    aAlarmList[24].bLedSet := TRUE;
-    aAlarmList[24].bLedReset := FALSE;
-ELSE
-    aDeadBandActive[2] := FALSE;
-    aAlarmList[24].bAlarmSet := FALSE;
-    aAlarmList[24].bAlarmReset:= TRUE;
-END_IF
+aTemperatureAlarm[2] :=
+    nTemp2 > nMaxTemp
+    OR (aDeadBandActive[2] AND nTemp2 > (nMaxTemp - nDeadBandTemperature));
+aDeadBandActive[2] := aTemperatureAlarm[2];
+mSetReset(stAlarmList := aAlarmList[24], bOk := NOT aTemperatureAlarm[2]);
 
-IF nTemp3 > nMaxTemp
-    OR (aDeadBandActive[3] AND nTemp1 > (nMaxTemp - nDeadBandTemperature)) THEN
-    aDeadBandActive[3] := TRUE;
-    aAlarmList[25].bAlarmSet := TRUE;
-    aAlarmList[25].bAlarmReset := FALSE;
-    aAlarmList[25].bLedSet := TRUE;
-    aAlarmList[25].bLedReset := FALSE;
-ELSE
-    aDeadBandActive[3] := FALSE;
-    aAlarmList[25].bAlarmSet := FALSE;
-    aAlarmList[25].bAlarmReset:= TRUE;
-END_IF
+aTemperatureAlarm[3] :=
+    nTemp3 > nMaxTemp
+    OR (aDeadBandActive[3] AND nTemp3 > (nMaxTemp - nDeadBandTemperature));
+aDeadBandActive[3] := aTemperatureAlarm[3];
+mSetReset(stAlarmList := aAlarmList[25], bOk := NOT aTemperatureAlarm[3]);
 
-IF nTemp4 > nMaxTemp
-    OR (aDeadBandActive[4] AND nTemp4 > (nMaxTemp - nDeadBandTemperature)) THEN
-    aDeadBandActive[4] := TRUE;
-    aAlarmList[26].bAlarmSet := TRUE;
-    aAlarmList[26].bAlarmReset := FALSE;
-    aAlarmList[26].bLedSet := TRUE;
-    aAlarmList[26].bLedReset := FALSE;
-ELSE
-    aDeadBandActive[4] := FALSE;
-    aAlarmList[26].bAlarmSet := FALSE;
-    aAlarmList[26].bAlarmReset:= TRUE;
-END_IF
+aTemperatureAlarm[4] :=
+    nTemp4 > nMaxTemp
+    OR (aDeadBandActive[4] AND nTemp4 > (nMaxTemp - nDeadBandTemperature));
+aDeadBandActive[4] := aTemperatureAlarm[4];
+mSetReset(stAlarmList := aAlarmList[26], bOk := NOT aTemperatureAlarm[4]);
 
 
 //Reset selected alarms just when acknowledge button has been pressed
