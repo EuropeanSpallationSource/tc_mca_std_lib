@@ -490,29 +490,36 @@
               </l>
             </o>
             <o>
-              <v n="TextID">"minEnabled"</v>
-              <v n="TextDefault">"SW Min Enable"</v>
+              <v n="TextID">"enSoftLimBw"</v>
+              <v n="TextDefault">"Soft Lim Bwd On"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
-              <v n="TextID">"maxEnabled"</v>
-              <v n="TextDefault">"SW Max Enable"</v>
+              <v n="TextID">"enSoftLimFw"</v>
+              <v n="TextDefault">"Soft Lim Fwd On"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
-              <v n="TextID">"minDisabled"</v>
-              <v n="TextDefault">"SW Min Disable"</v>
+              <v n="TextID">"disSoftLimBw"</v>
+              <v n="TextDefault">"Soft Lim Bwd Off"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
-              <v n="TextID">"maxDisabled"</v>
-              <v n="TextDefault">"SW Max Disable"</v>
+              <v n="TextID">"disSoftLimFw"</v>
+              <v n="TextDefault">"Soft Lim Fwd Off"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"SWLimitSwitches"</v>
+              <v n="TextDefault">"SW Limit Switches"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
