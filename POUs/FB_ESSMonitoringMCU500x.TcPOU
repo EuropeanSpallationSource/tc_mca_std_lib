@@ -58,13 +58,13 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 8^Input'}
     bFuse8_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 1^Input'}
-    bEStop1Triggered AT %I*: BOOL;
+    bEStop1Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 2^Input'}
-    bSTO1Triggered AT %I*: BOOL;
+    bSTO1Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
-    bEStop2Triggered AT %I*: BOOL;
+    bEStop2Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
-    bSTO2Triggered AT %I*: BOOL;
+    bSTO2Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 2^Input'}
     bMCB_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 3^Input'}
@@ -555,10 +555,10 @@ mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
 mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
 mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
 
-mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Triggered);
-mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Triggered);
-mSetReset(stAlarmList := aAlarmList[21], bOk := bEStop2Triggered);
-mSetReset(stAlarmList := aAlarmList[22], bOk := bSTO2Triggered);
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Ok);
+mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Ok);
+mSetReset(stAlarmList := aAlarmList[21], bOk := bEStop2Ok);
+mSetReset(stAlarmList := aAlarmList[22], bOk := bSTO2Ok);
 
 mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
