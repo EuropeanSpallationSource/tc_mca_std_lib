@@ -120,12 +120,6 @@ VAR
     aTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
     aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
 
-    aFbErrorMessageTimer: ARRAY[1..nMaxAlarms] OF TON;
-    tNewMessageTimeout: TIME := T#60S;
-    aStartErrorMsgTimer: ARRAY[1..nMaxAlarms] OF BOOL;
-    aFbErrorTrig: ARRAY[1..nMaxAlarms] OF R_TRIG;
-
-    bLedActive: BOOL := FALSE;
     nAlarmCnt: INT;
     nAlarmBitNumber: UDINT;
 
@@ -135,10 +129,7 @@ VAR
     bSlaveLinkError: BOOL;
     aExtraMessage: ARRAY[1..nMaxAlarms] OF STRING := [nMaxAlarms('')];
     bCycleTimeExceeded: BOOL;
-    //Cpu Monitor
-    fbMonitorCPU: TC_CpuUsage;
-    fbUpdateCPULoadTON: TON;
-    fMaxCPULoad: USINT := 85;
+
     //Ethercat master device state
     bEcLinkError: BOOL;
     bEcIOlocked: BOOL;
@@ -153,31 +144,16 @@ VAR
     bEcSlaveSafeOP: BOOL;
     bEcSlaveError: BOOL;
     bEcDCnotInSync: BOOL;
-    //Ehtercat slave device state
-    fbUpdateEcSlaveStateTON: TON;
-    fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
-    stSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
-    nActualEcSlaves: UINT := 0;
-
-    //Frame statistics
-    fbUpdateEcMasterFrame: TON;
-    fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
 
     nAcknowledgeLED: E_MonitorLed;
     nStatusLED: E_MonitorLed;
     nAbnormalLED: E_MonitorLed;
     nEmergencyLED: E_MonitorLed;
-    fbFastBlinkOn: TON;
-    fbFastBlinkOff: TON;
-    fbSlowBlinkOn: TON;
-    fbSlowBlinkOff: TON;
 
     fbAcknowledgeButtonTrig: R_TRIG;
 
-    fbEtherCATAlarmDelayTON: TON;
-    bStartEtherCATdelayTON: BOOL := FALSE;
-    bEtherCATInitialized: BOOL := FALSE;
 END_VAR
+
 VAR CONSTANT
     nMaxAlarms: UINT := 50;
     nMaxECSlaves: INT := 255;
@@ -212,6 +188,13 @@ END_IF
 VAR_INPUT
     i: UINT;
     bUpdatedExtraMessage : BOOL;
+END_VAR
+
+VAR_INST
+    aFbErrorMessageTimer: ARRAY[1..nMaxAlarms] OF TON;
+    tNewMessageTimeout: TIME := T#60S;
+    aStartErrorMsgTimer: ARRAY[1..nMaxAlarms] OF BOOL;
+    aFbErrorTrig: ARRAY[1..nMaxAlarms] OF R_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -292,6 +275,11 @@ END_VAR
 
 VAR_INST
     aExtraMessageOld: ARRAY[1..nMaxAlarms] OF STRING := [nMaxAlarms('')];
+    bLedActive: BOOL := FALSE;
+    fbFastBlinkOn: TON;
+    fbFastBlinkOff: TON;
+    fbSlowBlinkOn: TON;
+    fbSlowBlinkOff: TON;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -364,6 +352,12 @@ bAcknowledgeLED :=
     </Method>
     <Method Name="mMonitorCPU" Id="{a61c27e8-4c84-0867-118e-ec0a5a4d454e}">
       <Declaration><![CDATA[METHOD mMonitorCPU
+
+VAR_INST
+    fbMonitorCPU: TC_CpuUsage;
+    fbUpdateCPULoadTON: TON;
+    fMaxCPULoad: USINT := 85;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Cpu Monitor
@@ -382,6 +376,21 @@ bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
       <Declaration><![CDATA[METHOD mMonitorEtherCAT
 VAR
     i: UINT := 0;
+END_VAR
+
+VAR_INST
+    fbUpdateEcSlaveStateTON: TON;
+    fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
+    stSlaveState: ARRAY[0..nMaxECSlaves] OF ST_EcSlaveState;
+    nActualEcSlaves: UINT := 0;
+
+    //Frame statistics
+    fbUpdateEcMasterFrame: TON;
+    fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
+
+    fbEtherCATAlarmDelayTON: TON;
+    bStartEtherCATdelayTON: BOOL := FALSE;
+    bEtherCATInitialized: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
