@@ -108,7 +108,7 @@ VAR
     bBrakeOutputCmd: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bLocalEnabled: BOOL := FALSE;
-    bLocalEnabledOld: BOOL := FALSE;
+    bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
     bEnableAmpCmdOld: BOOL := FALSE;
 
@@ -133,7 +133,7 @@ END_VAR
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bLocalEnabledOld := _stAxis.stStatus.bEnabled;
+        <ST><![CDATA[bEnabledOld := _stAxis.stStatus.bEnabled;
 bEnableAmpCmdOld := bEnableAmpCmd;
 bEnableCmdOld := _stAxis.stControl.bEnable;
 
@@ -251,7 +251,7 @@ CASE eExternalBrake OF
         bEnableAmpCmd := TRUE;
 
         IF TON_BrakeDelayOn.Q THEN
-            IF NOT bLocalEnabled THEN
+            IF NOT _stAxis.stStatus.bEnabled THEN
                 _stAxis.stControl.bEnable := FALSE;
                 bBrakeOutputCmd := FALSE;
                 tTimeCounterEnd := T#0S;
@@ -265,21 +265,21 @@ CASE eExternalBrake OF
         END_IF
 
         // If enabled lost while opening, go directly to closed
-        IF bLocalEnabledOld AND NOT bLocalEnabled THEN
+        IF bEnabledOld AND NOT _stAxis.stStatus.bEnabled THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             bEnableAmpCmd := FALSE;
             bBrakeOutputCmd := FALSE;
         END_IF
 
         // Start counting when enabled
-        IF bLocalEnabled THEN
+        IF _stAxis.stStatus.bEnabled THEN
             tTimeCounterEnd := TIME();
         END_IF
 
 
     E_ExternalBrake.BRAKE_OPEN:
         // If enabled lost while opening, go directly to closed
-        IF NOT bLocalEnabled AND _stAxis.stControl.bEnable THEN
+        IF NOT _stAxis.stStatus.bEnabled AND _stAxis.stControl.bEnable THEN
             bBrakeOutputCmd := FALSE;
             tTimeCounterEnd := T#0S;
             bEnableAmpCmd := FALSE;
@@ -298,7 +298,7 @@ CASE eExternalBrake OF
         bEnableAmpCmd := TRUE;
 
         IF TON_BrakeDelayClosing.Q
-            OR NOT bLocalEnabled THEN
+            OR NOT _stAxis.stStatus.bEnabled THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             bEnableAmpCmd := FALSE;
             bBrakeOutputCmd := FALSE;
@@ -487,8 +487,14 @@ END_IF
 
 fbPower.Enable := bEnableAmpCmd;
 
-fbPower.Enable_Negative := (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
-fbPower.Enable_Positive := (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
+fbPower.Enable_Negative :=
+    (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedBwd
+    AND bLocalEnabled;
+fbPower.Enable_Positive :=
+    (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedFwd
+    AND bLocalEnabled;
 fbPower.Override := _stAxis.stConfig.fOverride;
 
 fbPower(Axis := _stAxis.Axis);
@@ -678,8 +684,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
-    AND _stAxis.stStatus.bEnabled THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
     fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
@@ -1253,12 +1258,13 @@ _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
-bLocalEnabled := NOT(_stAxis.Axis.Status.Disabled);
+_stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 IF _stAxis.stConfig.bExternalBrake THEN
-    _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled) AND bBrakeOutputCmd;
+    bLocalEnabled := NOT(_stAxis.Axis.Status.Disabled) AND bBrakeOutputCmd;
 ELSE
-    _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
+    bLocalEnabled := _stAxis.stStatus.bEnabled;
 END_IF
+
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
 ]]></ST>
       </Implementation>
