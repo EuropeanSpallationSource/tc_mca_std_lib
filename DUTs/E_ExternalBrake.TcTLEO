@@ -6,9 +6,9 @@
 TYPE E_ExternalBrake :
 (
     BRAKE_CLOSED := 0,
-    BRAKE_OPENING := 1,
-    BRAKE_OPEN := 2,
-    BRAKE_CLOSING := 3
+    BRAKE_DELAY_OPENING := 1,
+    BRAKE_OPENED := 2,
+    BRAKE_CLOSE_DELAY_AMPLIFIER := 3
 );
 END_TYPE
 ]]></Declaration>
@@ -22,17 +22,17 @@ END_TYPE
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"BRAKE_OPENING"</v>
+              <v n="TextID">"BRAKE_DELAY_OPENING"</v>
               <v n="TextDefault">"1"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"BRAKE_OPEN"</v>
+              <v n="TextID">"BRAKE_OPENED"</v>
               <v n="TextDefault">"2"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"BRAKE_CLOSING"</v>
+              <v n="TextID">"BRAKE_CLOSE_DELAY_AMPLIFIER"</v>
               <v n="TextDefault">"3"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
