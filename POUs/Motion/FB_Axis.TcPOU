@@ -104,13 +104,11 @@ VAR
     fbModMovDyn2RiseEdge: R_TRIG;
 
     eExternalBrake: E_ExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
-    bBrakeDisengage: BOOL := FALSE;
     bBrakeOutputCmd: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bLocalEnabled: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
-    bEnableAmpCmdOld: BOOL := FALSE;
 
 END_VAR
 VAR CONSTANT
@@ -134,7 +132,6 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bEnabledOld := _stAxis.stStatus.bEnabled;
-bEnableAmpCmdOld := bEnableAmpCmd;
 bEnableCmdOld := _stAxis.stControl.bEnable;
 
 _stAxis.stControl.bExecute := FALSE;
@@ -210,10 +207,10 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       </Implementation>
     </Method>
     <Method Name="mControl_ExternalBrake" Id="{18ae79d4-85f5-0b8b-295a-ce90fc10f203}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_ExternalBrake
+      <Declaration><![CDATA[METHOD mControl_ExternalBrake: BOOL
 
 VAR_INST
-    nBrakeCounter: UINT := 0;
+    bEnableAmp: BOOL := FALSE;
     TON_BrakeDelayOn: TON;
     TON_BrakeDelayClosing: TON;
     tTimeCounterStart: TIME;
@@ -227,7 +224,8 @@ END_VAR
     tTimeCounterEnd := TIME();
 END_IF
 
-IF NOT _stAxis.stControl.bEnable AND bEnableCmdOld THEN
+IF (NOT _stAxis.stControl.bEnable OR _stAxis.stStatus.bError)
+    AND bEnableCmdOld THEN
     eExternalBrake := E_ExternalBrake.BRAKE_CLOSING;
     tTimeCounterStart := TIME();
     tTimeCounterEnd := TIME();
@@ -244,19 +242,19 @@ CASE eExternalBrake OF
         bBrakeOutputCmd := FALSE;;
         tTimeCounterStart := T#0S;
         tTimeCounterEnd := T#0S;
-        bEnableAmpCmd := FALSE;
+        bEnableAmp := FALSE;
 
 
     E_ExternalBrake.BRAKE_OPENING:
         // Postpone opening of brake
-        bEnableAmpCmd := TRUE;
+        bEnableAmp := TRUE;
 
         IF TON_BrakeDelayOn.Q THEN
-            IF NOT _stAxis.stStatus.bEnabled THEN
+            IF NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError THEN
                 _stAxis.stControl.bEnable := FALSE;
                 bBrakeOutputCmd := FALSE;
                 tTimeCounterEnd := T#0S;
-                bEnableAmpCmd := FALSE;
+                bEnableAmp := FALSE;
                 bEnableCmdOld := FALSE; // to not trigger ECMC_BRAKE_CLOSING
                 eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             ELSE
@@ -266,9 +264,10 @@ CASE eExternalBrake OF
         END_IF
 
         // If enabled lost while opening, go directly to closed
-        IF bEnabledOld AND NOT _stAxis.stStatus.bEnabled THEN
+        IF bEnabledOld
+            AND (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError) THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
-            bEnableAmpCmd := FALSE;
+            bEnableAmp := FALSE;
             bBrakeOutputCmd := FALSE;
         END_IF
 
@@ -280,34 +279,41 @@ CASE eExternalBrake OF
 
     E_ExternalBrake.BRAKE_OPEN:
         // If enabled lost while opening, go directly to closed
-        IF NOT _stAxis.stStatus.bEnabled AND _stAxis.stControl.bEnable THEN
+        IF (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError)
+            AND _stAxis.stControl.bEnable THEN
             bBrakeOutputCmd := FALSE;
             tTimeCounterEnd := T#0S;
-            bEnableAmpCmd := FALSE;
+            bEnableAmp := FALSE;
             bEnableCmdOld := FALSE;
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
         ELSE
             bBrakeOutputCmd := TRUE;
             tTimeCounterEnd := T#0S;
-            bEnableAmpCmd := TRUE;
+            bEnableAmp := TRUE;
         END_IF
 
-
+    // The check for bError in first rows of this function changes state to BRAKE_CLOSING.
+    // If bError TRUE we directly disable amplifier. Good?
+    // Might be good to also perform a check of the bSTOComing signal:
+    // * bStOComing -> wait for axis stopped -> BRAKE_CLOSING
+    // If STO comes before BRAKE_CLOSED -> the detection of bErrorStop should take us into BRAKE_CLOSED.
     E_ExternalBrake.BRAKE_CLOSING:
         // Postpone disabling of amplifier
         bBrakeOutputCmd := 0;
-        bEnableAmpCmd := TRUE;
-
+        bEnableAmp := TRUE;
         IF TON_BrakeDelayClosing.Q
-            OR NOT _stAxis.stStatus.bEnabled THEN
+            OR NOT _stAxis.stStatus.bEnabled
+            OR _stAxis.stStatus.bError THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
-            bEnableAmpCmd := FALSE;
+            bEnableAmp := FALSE;
             bBrakeOutputCmd := FALSE;
         END_IF
 
        tTimeCounterEnd := TIME();
 
 END_CASE
+
+mControl_ExternalBrake := bEnableAmp;
 ]]></ST>
       </Implementation>
     </Method>
@@ -484,7 +490,7 @@ END_VAR
 END_IF
 
 IF _stAxis.stConfig.bExternalBrake THEN
-    mControl_ExternalBrake();
+    bEnableAmpCmd := mControl_ExternalBrake();
 ELSE
     bEnableAmpCmd := _stAxis.stControl.bEnable;
 END_IF
