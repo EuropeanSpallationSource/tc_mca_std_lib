@@ -41,27 +41,27 @@ VAR
     nTemp2 AT %I*: INT;
     nEcMasterDevState AT %I*: UINT;
     aAlarmList: ARRAY [1..nMaxAlarms] OF ST_MonitoringAlarm := [
-                    (*[1]*)(nStatusLED:=E_MonitorLed.eFast, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=1 ,sErrorMsg:='The DC OK Status from PS or DC-DC converter 24V-1 is OFF.'),
-                    (*[2]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=2 ,sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.'),
-                    (*[3]*)(nStatusLED:=E_MonitorLed.eFast, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=4 ,sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.'),
-                    (*[4]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=8 ,sErrorMsg:='Output 1 on LOCC box 1 tripped'),
-                    (*[5]*)(nStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=9 ,sErrorMsg:='Output 2 on LOCC box 1 tripped'),
-                    (*[6]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=10 ,sErrorMsg:='Output 1 on LOCC box 2 tripped'),
-                    (*[7]*)(nStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eUndefined, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=11 ,sErrorMsg:='Output 2 on LOCC box 2 tripped'),
-                    (*[8]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=12 ,sErrorMsg:='Output 1 on LOCC box 3 tripped'),
-                    (*[9]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=13 ,sErrorMsg:='Output 2 on LOCC box 3 tripped'),
-                    (*[10]*)(nStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=14 ,sErrorMsg:='LOCC box 4 or single DC breaker 1 tripped'),
-                    (*[11]*)(nStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=15 ,sErrorMsg:='LOCC box 5 or single DC breaker 2 tripped'),
-                    (*[12]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=21 ,sErrorMsg:='Speed of Fan 1 below a critical limit'),
-                    (*[13]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=22 ,sErrorMsg:='Speed of Fan 2 below a critical limit'),
-                    (*[14]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=23 ,sErrorMsg:='Temperature 1 too high' ),
-                    (*[15]*)(nStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=24 ,sErrorMsg:='Temperature 2 too high'),
-                    (*[16]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=30 ,sErrorMsg:='Safety relay 1 triggered'),
-                    (*[17]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=101 ,sErrorMsg:='EtherCAT Master is not ok'),
-                    (*[18]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=102 ,sErrorMsg:='At least one EtherCAT slave is not in OP state'),
-                    (*[19]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=103 ,sErrorMsg:='At least one EtherCAT slave link is faulted'),
-                    (*[20]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=104 ,sErrorMsg:='Overflow in PLC cycle time'),
-                    (*[21]*)(nStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=105 ,sErrorMsg:='CPU Load High')];
+                    (*[1]*)(eStatusLED:=E_MonitorLed.eFast, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=1 ,sErrorMsg:='The DC OK Status from PS or DC-DC converter 24V-1 is OFF.'),
+                    (*[2]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=2 ,sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.'),
+                    (*[3]*)(eStatusLED:=E_MonitorLed.eFast, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=4 ,sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.'),
+                    (*[4]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=8 ,sErrorMsg:='Output 1 on LOCC box 1 tripped'),
+                    (*[5]*)(eStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=9 ,sErrorMsg:='Output 2 on LOCC box 1 tripped'),
+                    (*[6]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=10 ,sErrorMsg:='Output 1 on LOCC box 2 tripped'),
+                    (*[7]*)(eStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=11 ,sErrorMsg:='Output 2 on LOCC box 2 tripped'),
+                    (*[8]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=12 ,sErrorMsg:='Output 1 on LOCC box 3 tripped'),
+                    (*[9]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=13 ,sErrorMsg:='Output 2 on LOCC box 3 tripped'),
+                    (*[10]*)(eStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=14 ,sErrorMsg:='LOCC box 4 or single DC breaker 1 tripped'),
+                    (*[11]*)(eStatusLED:=E_MonitorLed.eSlow, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=15 ,sErrorMsg:='LOCC box 5 or single DC breaker 2 tripped'),
+                    (*[12]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=21 ,sErrorMsg:='Speed of Fan 1 below a critical limit'),
+                    (*[13]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=22 ,sErrorMsg:='Speed of Fan 2 below a critical limit'),
+                    (*[14]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=23 ,sErrorMsg:='Temperature 1 too high' ),
+                    (*[15]*)(eStatusLED:=E_MonitorLed.eUndefined, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=24 ,sErrorMsg:='Temperature 2 too high'),
+                    (*[16]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=30 ,sErrorMsg:='Safety relay 1 triggered'),
+                    (*[17]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=101 ,sErrorMsg:='EtherCAT Master is not ok'),
+                    (*[18]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=102 ,sErrorMsg:='At least one EtherCAT slave is not in OP state'),
+                    (*[19]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=103 ,sErrorMsg:='At least one EtherCAT slave link is faulted'),
+                    (*[20]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=104 ,sErrorMsg:='Overflow in PLC cycle time'),
+                    (*[21]*)(eStatusLED:=E_MonitorLed.eSteady, nWarningLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, nErrorID:=105 ,sErrorMsg:='CPU Load High')];
 
     aTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
     aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
@@ -191,13 +191,13 @@ FOR i:=1 TO nMaxAlarms DO
         aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
         aTempErrorMsg[nAlarmCnt] := aAlarmList[i].sErrorMsg;
         mErrorMessage(aAlarmList[i].sErrorMsg, aAlarmList[i].nErrorID, aAlarmList[i].bAlarmActive);
-        IF nLEDAlarmID = 0 OR (nWarningLED = E_MonitorLed.eUndefined AND nEmergencyLED = E_MonitorLed.eUndefined AND aAlarmList[i].nWarningLED > E_MonitorLed.eUndefined) OR (nEmergencyLED = E_MonitorLed.eUndefined AND aAlarmList[i].nEmergencyLED > E_MonitorLed.eUndefined) THEN
+        IF nLEDAlarmID = 0 OR (nWarningLED = E_MonitorLed.eUndefined AND nEmergencyLED = E_MonitorLed.eUndefined AND aAlarmList[i].nWarningLED > E_MonitorLed.eUndefined) OR (nEmergencyLED = E_MonitorLed.eUndefined AND aAlarmList[i].eErrorLED > E_MonitorLed.eUndefined) THEN
             nLEDAlarmID := i;
             sLEDAlarmMsg := aAlarmList[i].sErrorMsg;
-            nEmergencyLED := aAlarmList[i].nEmergencyLED;
+            nEmergencyLED := aAlarmList[i].eErrorLED;
             nWarningLED := aAlarmList[i].nWarningLED;
-            nStatusLED := aAlarmList[i].nStatusLED;
-            nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
+            nStatusLED := aAlarmList[i].eStatusLED;
+            nAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
         END_IF
         CASE aAlarmList[i].nErrorID OF
             1,4:
