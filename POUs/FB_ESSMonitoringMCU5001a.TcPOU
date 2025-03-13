@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_ESSMonitoringMCU500x" Id="{dc25224c-2805-4e0c-98fe-daa6f852a4e2}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU500x
+  <POU Name="FB_ESSMonitoringMCU5001a" Id="{dc25224c-2805-4e0c-98fe-daa6f852a4e2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5001a
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -15,107 +15,105 @@ VAR_OUTPUT
 END_VAR
 VAR
     //Outputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 1^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 1^Output'}
     bStatusLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 7 (EL2014)^DIG Outputs^Channel 4^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF207^DIG Outputs^Channel 4^Output'}
     bAcknowledgeLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 2^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 2^Output'}
     bEStopLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 3^Output'}
-    bEmergencyLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 8 (EL2014)^DIG Outputs^Channel 4^Output'}
-    bAbnormalLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 4^Output'}
+    bErrorLED AT %Q*: BOOL;
 
     //Inputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 1^Input'}
     b24VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 2^Input'}
     b24VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 3^Input'}
     b24VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 4^Input'}
     b48VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 5^Input'}
     b48VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 6^Input'}
     b48VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1808)^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 7^Input'}
     b48VDC4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 2^Input'}
     bFuse2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 3^Input'}
     bFuse3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 4^Input'}
     bFuse4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 5^Input'}
     bFuse5_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 6^Input'}
     bFuse6_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 7^Input'}
     bFuse7_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1808)^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 8^Input'}
     bFuse8_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 1^Input'}
-    bEStop1Ok AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 2^Input'}
-    bSTO1Ok AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 1^Input'}
+    bEStop1Active AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 2^Input'}
+    bSTO1Active AT %I*: BOOL;
+    (*{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
     bEStop2Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
-    bSTO2Ok AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 2^Input'}
-    bMCB_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 3^Input'}
+    bSTO2Ok AT %I*: BOOL;*)
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 2^Input'}
+    bMCBFan_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 3^Input'}
     bSPD_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 4^Input'}
     bDoorClosed AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 8^Input'}
     bAcknowledgeButton AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 1^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 2^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 2^Value'}
     nTemp2 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 3^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 3^Value'}
     nTemp3 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 9 (EL3214)^RTD Inputs Channel 4^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 4^Value'}
     nTemp4 AT %I*: INT;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
 
     aAlarmList: ARRAY [1..nMaxAlarms] OF ST_MonitoringAlarm := [
-(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[8]*)(nErrorID:=11, sErrorMsg:='MCB OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', nStatusLED:=E_MonitorLed.eSlow, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, nEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', nStatusLED:=E_MonitorLed.eFast, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', nStatusLED:=E_MonitorLed.eUndefined, nAbnormalLED:=E_MonitorLed.eSteady, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eSteady, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', nStatusLED:=E_MonitorLed.eSteady, nAbnormalLED:=E_MonitorLed.eSlow, nEmergencyLED:=E_MonitorLed.eUndefined, nAcknowledgeLED:=E_MonitorLed.eUndefined)];
+(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[8]*)(nErrorID:=11, sErrorMsg:='MCB Fan OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined)];
 
     aTempErrorID: ARRAY [1..nMaxAlarms] OF INT;
     aTempErrorMsg: ARRAY [1..nMaxAlarms] OF STRING;
@@ -309,10 +307,10 @@ FOR i:=1 TO nMaxAlarms DO
     IF NOT bLedActive
         AND aAlarmList[i].bLedActive THEN
         bLedActive := TRUE;
-        nEmergencyLED := aAlarmList[i].nEmergencyLED;
+        nEmergencyLED := aAlarmList[i].eErrorLED;
         nAbnormalLED := aAlarmList[i].nAbnormalLED;
-        nStatusLED := aAlarmList[i].nStatusLED;
-        nAcknowledgeLED := aAlarmList[i].nAcknowledgeLED;
+        nStatusLED := aAlarmList[i].eStatusLED;
+        nAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
     END_IF
 END_FOR
 
@@ -331,7 +329,7 @@ fbFastBlinkOff(IN:=fbFastBlinkOn.Q, PT:=T#250MS);
 fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
 fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
 
-bEmergencyLED :=
+bErrorLED :=
     (nEmergencyLED = E_MonitorLed.eSteady)
     OR (nEmergencyLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (nEmergencyLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
