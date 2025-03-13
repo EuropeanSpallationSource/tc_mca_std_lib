@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_MonitoringAlarm" Id="{7cf4bf56-9560-4e49-afbe-1511a605e206}">
-    <Declaration><![CDATA[
-TYPE ST_MonitoringAlarm :
+    <Declaration><![CDATA[TYPE ST_MonitoringAlarm :
 STRUCT
     bAlarmSet: BOOL;
     bAlarmReset: BOOL;
     bLedSet: BOOL;
     bLedReset: BOOL;
-    nStatusLED: E_MonitorLed;
-    nAbnormalLED: E_MonitorLed;
-    nEmergencyLED: E_MonitorLed;
-    nAcknowledgeLED: E_MonitorLed;
-    nEStopLED: E_MonitorLed := E_MonitorLed.eUndefined;
+    eStatusLED: E_MonitorLed;
+    eErrorLED: E_MonitorLed;
+    eAcknowledgeLED: E_MonitorLed;
+    eEStopLED: E_MonitorLed := E_MonitorLed.eUndefined;
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
