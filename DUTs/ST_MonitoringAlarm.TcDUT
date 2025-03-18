@@ -11,6 +11,7 @@ STRUCT
     eErrorLED: E_MonitorLed;
     eAcknowledgeLED: E_MonitorLed;
     eEStopLED: E_MonitorLed := E_MonitorLed.eUndefined;
+    eWarningLED: E_MonitorLed; //Only used for MCU400x test crates
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
