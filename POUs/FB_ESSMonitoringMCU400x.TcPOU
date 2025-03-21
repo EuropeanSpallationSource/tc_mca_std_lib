@@ -91,10 +91,10 @@ VAR
     bEcSlaveError: BOOL;
     bEcDCnotInSync: BOOL;
 
-    nAcknowledgeLED: E_MonitorLed;
-    nStatusLED: E_MonitorLed;
-    nAbnormalLED: E_MonitorLed;
-    nEmergencyLED: E_MonitorLed;
+    eAcknowledgeLED: E_MonitorLed;
+    eStatusLED: E_MonitorLed;
+    eAbnormalLED: E_MonitorLed;
+    eEmergencyLED: E_MonitorLed;
 
     fbAcknowledgeButtonTrig: R_TRIG;
 
@@ -238,10 +238,10 @@ nAlarmBitNumber := 0;
 MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
 MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
 bLedActive := FALSE;
-nEmergencyLED := 0;
-nAbnormalLED := 0;
-nStatusLED := 0;
-nAcknowledgeLED := 0;
+eEmergencyLED := 0;
+eAbnormalLED := 0;
+eStatusLED := 0;
+eAcknowledgeLED := 0;
 
 FOR i:=1 TO nMaxAlarms DO
     // Update list of active alarms
@@ -255,10 +255,10 @@ FOR i:=1 TO nMaxAlarms DO
     IF NOT bLedActive
         AND aAlarmList[i].bLedActive THEN
         bLedActive := TRUE;
-        nEmergencyLED := aAlarmList[i].eErrorLED;
-        nAbnormalLED := aAlarmList[i].nAbnormalLED;
-        nStatusLED := aAlarmList[i].eStatusLED;
-        nAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
+        eEmergencyLED := aAlarmList[i].eErrorLED;
+        eAbnormalLED := aAlarmList[i].nAbnormalLED;
+        eStatusLED := aAlarmList[i].eStatusLED;
+        eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
     END_IF
 END_FOR
 
@@ -278,21 +278,21 @@ fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
 fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
 
 bErrorLED :=
-    (nEmergencyLED = E_MonitorLed.eSteady)
-    OR (nEmergencyLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (nEmergencyLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    (eEmergencyLED = E_MonitorLed.eSteady)
+    OR (eEmergencyLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (eEmergencyLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bAbnormalLED :=
-    (nAbnormalLED = E_MonitorLed.eSteady)
-    OR (nAbnormalLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (nAbnormalLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    (eAbnormalLED = E_MonitorLed.eSteady)
+    OR (eAbnormalLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (eAbnormalLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bStatusLED :=
-    (nStatusLED = E_MonitorLed.eSteady)
-    OR (nStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (nStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    (eStatusLED = E_MonitorLed.eSteady)
+    OR (eStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (eStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 bAcknowledgeLED :=
-    (nAcknowledgeLED = E_MonitorLed.eSteady)
-    OR (nAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (nAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    (eAcknowledgeLED = E_MonitorLed.eSteady)
+    OR (eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 ]]></ST>
       </Implementation>
     </Method>
