@@ -15,69 +15,69 @@ VAR_OUTPUT
 END_VAR
 VAR
     //Outputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 1^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 1^Output'}
     bStatusLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF207^DIG Outputs^Channel 4^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 4^Output'}
     bAcknowledgeLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 2^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 2^Output'}
     bEStopLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF208^DIG Outputs^Channel 4^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 4^Output'}
     bErrorLED AT %Q*: BOOL;
 
     //Inputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 1^Input'}
     b24VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 2^Input'}
     b24VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 3^Input'}
     b24VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 4^Input'}
     b48VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
     b48VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 6^Input'}
     b48VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF204^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 7^Input'}
     b48VDC4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 2^Input'}
     bFuse2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 3^Input'}
     bFuse3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 4^Input'}
     bFuse4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
     bFuse5_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 6^Input'}
     bFuse6_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 7^Input'}
     bFuse7_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF203^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 8^Input'}
     bFuse8_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
     bEStop1Active AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
     bSTO1Active AT %I*: BOOL;
     (*{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
     bEStop2Ok AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
     bSTO2Ok AT %I*: BOOL;*)
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
     bMCBFan_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
     bSPD_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF206^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
     bDoorClosed AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF205^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 8^Input'}
     bAcknowledgeButton AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 1^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 2^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 2^Value'}
     nTemp2 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 3^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 3^Value'}
     nTemp3 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201^KF209^RTD Inputs Channel 4^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 4^Value'}
     nTemp4 AT %I*: INT;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
@@ -527,7 +527,7 @@ mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
 mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
 mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
-mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
+mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_OK);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 
