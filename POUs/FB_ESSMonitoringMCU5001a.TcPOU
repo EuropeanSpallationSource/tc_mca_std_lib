@@ -42,9 +42,9 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 2^Input'}
-    bFuse2_OK AT %I*: BOOL;
+    bFuse2_Error AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 3^Input'}
-    bFuse3_OK AT %I*: BOOL;
+    bFuse3_Error AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 4^Input'}
     bFuse4_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
@@ -64,7 +64,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
     bSTO2Ok AT %I*: BOOL;*)
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
-    bMCBFan_OK AT %I*: BOOL;
+    bMCBFan_Error AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
     bSPD_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
@@ -527,13 +527,13 @@ mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
 mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
 mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
-mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_OK);
+mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_Error);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 
 mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
-mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_OK);
-mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_OK);
+mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
+mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
 mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
 mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
 mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
