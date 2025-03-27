@@ -7,7 +7,6 @@ STRUCT
     bEndSwitchBwd AT %I*: BOOL; //End Switch Bwd input
     bSolenoidActive AT %I*: BOOL; //Solenoid valve Extend Input (for single solenoid)
     bPSSPermit AT %I*: BOOL; //Input signal from PSS for the movement
-    nAirPressureValueRaw AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic valve
     fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
     bOpenManual AT %I*: BOOL; //Push button input to extend cylinder
     bCloseManual AT %I*: BOOL; //Push button input to retract the cylinder
