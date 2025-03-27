@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_AirpadBrakeConfig" Id="{6e69cb4e-eda2-07f7-262c-b7dcc5182c8c}">
+    <Declaration><![CDATA[TYPE ST_AirpadBrakeConfig :
+STRUCT
+    eAirpadBrake: E_AirpadBrake;
+    tBrakeOpenDelayTime: TIME := T#0.1S; // Brake only
+    tBrakeCloseAheadTime: TIME := T#0.1S; // Brake only
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
