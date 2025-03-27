@@ -103,8 +103,6 @@ VAR
     fbModMovDyn1RiseEdge: R_TRIG;
     fbModMovDyn2RiseEdge: R_TRIG;
 
-    eExternalBrake: E_ExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
-    bBrakeOutputCmd: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bLocalEnabled: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
@@ -209,6 +207,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       <Declaration><![CDATA[METHOD mControl_ExternalBrake: BOOL
 
 VAR_INST
+    eExternalBrake: E_ExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
     bEnableAmp: BOOL := FALSE;
     TON_BrakeDelayOn: TON;
     TON_BrakeDelayClosing: TON;
@@ -231,14 +230,14 @@ IF (NOT _stAxis.stControl.bEnable OR _stAxis.stStatus.bError)
 END_IF
 
 TON_BrakeDelayOn(
-    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.tBrakeOpenDelayTime);
+    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.stAirpadBrake.tBrakeOpenDelayTime);
 TON_BrakeDelayClosing(
-    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.tBrakeCloseAheadTime);
+    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.stAirpadBrake.tBrakeCloseAheadTime);
 
 CASE eExternalBrake OF
 
     E_ExternalBrake.BRAKE_CLOSED:
-        bBrakeOutputCmd := FALSE;;
+        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
         tTimeCounterStart := T#0S;
         tTimeCounterEnd := T#0S;
         bEnableAmp := FALSE;
@@ -251,14 +250,14 @@ CASE eExternalBrake OF
         IF TON_BrakeDelayOn.Q THEN
             IF NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError THEN
                 _stAxis.stControl.bEnable := FALSE;
-                bBrakeOutputCmd := FALSE;
+                _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
                 tTimeCounterEnd := T#0S;
                 bEnableAmp := FALSE;
                 bEnableCmdOld := FALSE; // to not trigger BRAKE_CLOSE_DELAY_AMPLIFIER
                 eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             ELSE
                 eExternalBrake := E_ExternalBrake.BRAKE_OPENED;
-                bBrakeOutputCmd := TRUE;
+                _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
             END_IF
         END_IF
 
@@ -267,7 +266,7 @@ CASE eExternalBrake OF
             AND (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError) THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             bEnableAmp := FALSE;
-            bBrakeOutputCmd := FALSE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
         END_IF
 
         // Start counting when enabled
@@ -280,13 +279,13 @@ CASE eExternalBrake OF
         // If enabled lost while opening, go directly to closed
         IF (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError)
             AND _stAxis.stControl.bEnable THEN
-            bBrakeOutputCmd := FALSE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
             tTimeCounterEnd := T#0S;
             bEnableAmp := FALSE;
             bEnableCmdOld := FALSE;
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
         ELSE
-            bBrakeOutputCmd := TRUE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
             tTimeCounterEnd := T#0S;
             bEnableAmp := TRUE;
         END_IF
@@ -298,14 +297,14 @@ CASE eExternalBrake OF
     // If STO comes before BRAKE_CLOSED -> the detection of bErrorStop should take us into BRAKE_CLOSED.
     E_ExternalBrake.BRAKE_CLOSE_DELAY_AMPLIFIER:
         // Postpone disabling of amplifier
-        bBrakeOutputCmd := 0;
+        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
         bEnableAmp := TRUE;
         IF TON_BrakeDelayClosing.Q
             OR NOT _stAxis.stStatus.bEnabled
             OR _stAxis.stStatus.bError THEN
             eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
             bEnableAmp := FALSE;
-            bBrakeOutputCmd := FALSE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
         END_IF
 
        tTimeCounterEnd := TIME();
@@ -485,7 +484,7 @@ END_VAR
     _stAxis.stControl.bEnable:= FALSE;
 END_IF
 
-IF _stAxis.stConfig.bExternalBrake THEN
+IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
     bEnableAmpCmd := mControl_ExternalBrake();
 ELSE
     bEnableAmpCmd := _stAxis.stControl.bEnable;
@@ -1265,9 +1264,9 @@ _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
-IF _stAxis.stConfig.bExternalBrake THEN
-    bLocalEnabled := NOT(_stAxis.Axis.Status.Disabled) AND bBrakeOutputCmd;
-ELSE
+IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
+    bLocalEnabled := NOT(_stAxis.Axis.Status.Disabled) AND _stAxis.stControl.bAirpadOnBrakeOpen;
+ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eStandard THEN
     bLocalEnabled := _stAxis.stStatus.bEnabled;
 END_IF
 
