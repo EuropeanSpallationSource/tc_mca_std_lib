@@ -560,12 +560,12 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
       <Implementation>
         <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
 
-        1:
+        E_PneumaticAxisGroup.ePneumaticAxisGroup1:
         _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup1;
         _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup1;
         _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup1;
 
-        2:
+        E_PneumaticAxisGroup.ePneumaticAxisGroup2:
         _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup2;
         _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup2;
         _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup2;
