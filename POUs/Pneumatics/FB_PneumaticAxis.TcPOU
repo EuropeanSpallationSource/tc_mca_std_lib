@@ -519,7 +519,7 @@ mSetInputStatuses();
 mSetAllowedTravelTime();
 
 //Get the value of the air pressure in mb
-_stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  _stPneumaticAxis.stPneumaticAxisInputs.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+mSelectAirPressureSensorGroup();
 
 //Check if air pressure is in range
 mCheckForAirPressureError();
@@ -551,6 +551,27 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
 
 
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSelectAirPressureSensorGroup" Id="{8416effc-de90-0c76-3051-15a05f13b381}">
+      <Declaration><![CDATA[METHOD mSelectAirPressureSensorGroup 
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF 
+
+        1:
+		_stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup1;
+		_stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup1;
+    	_stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup1;
+		
+        2:
+		_stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup2;
+		_stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup2;
+    	_stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup2;
+    END_CASE
+
+_stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );]]></ST>
       </Implementation>
     </Method>
     <Method Name="mSetAllowedTravelTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}">
