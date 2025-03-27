@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_PneumaticAxisGroup" Id="{ddf4013f-9aa0-03e5-2424-e1247355bb7f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_PneumaticAxisGroup :
+(
+	ePneumaticAxisGroup1 := 1,
+	ePneumaticAxisGroup2 := 2
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
