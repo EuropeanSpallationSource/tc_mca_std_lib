@@ -30,9 +30,7 @@ STRUCT
     fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
 
     // Use external brake
-    bExternalBrake: BOOL := FALSE;
-    tBrakeOpenDelayTime: TIME := T#0.1S;
-    tBrakeCloseAheadTime: TIME := T#0.1S;
+    stAirpadBrake: ST_AirpadBrakeConfig;
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
