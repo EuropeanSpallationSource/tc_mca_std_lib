@@ -15,6 +15,12 @@
     iPneumaticAxis: UINT := 1; //Index for for loops while going through pneumatic axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
+	nAirPressureSensorGroup1 AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic axes group 1
+	nAirPressureSensorGroup2 AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic axes group 2
+	fLowLimitAirPressureGroup1: REAL; //User defined value in bar for low limit air pressure value for pneumatic axes group 1
+    fHighLimitAirPressureGroup1: REAL; //User defined value in bar for low limit air pressure value for pneumatic axes group 1
+	fLowLimitAirPressureGroup2: REAL; //User defined value in bar for low limit air pressure value for pneumatic axes group 2
+    fHighLimitAirPressureGroup2: REAL; //User defined value in bar for low limit air pressure value for pneumatic axes group 2
 
 END_VAR
 
