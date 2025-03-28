@@ -216,6 +216,54 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_CommandHandler
+VAR_INPUT
+    bPermit: BOOL := FALSE;
+    bPermitRequired: BOOL := FALSE;
+END_VAR
+
+VAR_INST
+    bExecuteCmdHandler: BOOL := FALSE;
+    RTRIG_Execute: R_TRIG;
+    bWaitingForMovePermit: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
+IF RTRIG_Execute.Q THEN
+    bExecuteCmdHandler := TRUE;
+END_IF
+
+// Abort this with some timeout or something related to bEnable?
+IF bExecuteCmdHandler THEN
+    CASE _stAxis.stControl.eCommand OF
+        E_MotionFunctions.eMoveAbsolute,
+        E_MotionFunctions.eMoveRelative,
+        E_MotionFunctions.eMoveVelocity,
+        E_MotionFunctions.eMoveModulo,
+        E_MotionFunctions.eGearInMultiMaster,
+        E_MotionFunctions.eGearOut,
+        E_MotionFunctions.eHome :
+            IF (bExecuteCmdHandler AND bPermit)
+                OR (NOT bExecuteCmdHandler) THEN
+                _stAxis.stStatus.eInternalMotion := _stAxis.stControl.eCommand;
+                bInternalExecute := TRUE;
+                bExecuteCmdHandler := FALSE;
+                bWaitingForMovePermit := FALSE;
+            ELSE
+                bWaitingForMovePermit := TRUE;
+            END_IF
+        E_MotionFunctions.eWriteParameter,
+        E_MotionFunctions.eReadParameter,
+        E_MotionFunctions.eReadCoEParameters,
+        E_MotionFunctions.eWriteCoEParameters:
+            bExecuteCmdHandler := FALSE;
+    END_CASE
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mControl_ExternalBrake" Id="{18ae79d4-85f5-0b8b-295a-ce90fc10f203}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_ExternalBrake: BOOL
 
@@ -1482,6 +1530,11 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 
 mControl_LimitHitTimer();
 mControl_LimitLinking();
+mControl_CommandHandler(
+    bPermit := bLocalEnabled,
+    bPermitRequired :=
+        _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad
+        OR _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake);
 stMcStatusPower := mControl_Power();
 
 stMcStatusHalt := mMove_Halt();
