@@ -4,6 +4,7 @@
     <Declaration><![CDATA[TYPE ST_AirpadBrakeConfig :
 STRUCT
     eAirpadBrake: E_AirpadBrake;
+    bFeedbackConnected: BOOL := FALSE; // If feedback signal used for pressurized airpad or opened brake
     tBrakeOpenDelayTime: TIME := T#0.1S; // Brake only
     tBrakeCloseAheadTime: TIME := T#0.1S; // Brake only
 END_STRUCT
