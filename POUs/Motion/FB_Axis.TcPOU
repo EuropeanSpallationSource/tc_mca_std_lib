@@ -245,8 +245,8 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eGearInMultiMaster,
         E_MotionFunctions.eGearOut,
         E_MotionFunctions.eHome :
-            IF (bExecuteCmdHandler AND bPermit)
-                OR (NOT bExecuteCmdHandler) THEN
+            IF (bPermitRequired AND bPermit)
+                OR (NOT bPermitRequired) THEN
                 _stAxis.stStatus.eInternalMotion := _stAxis.stControl.eCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
