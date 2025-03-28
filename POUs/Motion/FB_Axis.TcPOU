@@ -115,6 +115,7 @@ VAR CONSTANT
     nNO_GEARING: UINT := 0;
     nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
+    tCOMMANDHANDLER_TIMEOUT: TIME := T#5s;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -226,6 +227,7 @@ VAR_INST
     bExecuteCmdHandler: BOOL := FALSE;
     RTRIG_Execute: R_TRIG;
     bWaitingForMovePermit: BOOL := FALSE;
+    TON_Timeout: TON;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -259,6 +261,14 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eWriteCoEParameters:
             bExecuteCmdHandler := FALSE;
     END_CASE
+END_IF
+
+TON_Timeout(IN := bWaitingForMovePermit, PT := tCOMMANDHANDLER_TIMEOUT);
+IF TON_Timeout.Q
+    OR _stAxis.stControl.bHalt
+    OR _stAxis.stControl.bStop THEN
+    bExecuteCmdHandler := FALSE;
+    bWaitingForMovePermit := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
