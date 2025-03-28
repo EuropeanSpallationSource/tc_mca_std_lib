@@ -103,6 +103,7 @@ VAR
     fbModMovDyn1RiseEdge: R_TRIG;
     fbModMovDyn2RiseEdge: R_TRIG;
 
+    bInternalExecute: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bLocalEnabled: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
@@ -129,7 +130,18 @@ END_VAR
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bEnabledOld := _stAxis.stStatus.bEnabled;
+        <ST><![CDATA[IF _stAxis.stStatus.bDone
+    OR _stAxis.stStatus.bError
+    OR _stAxis.Axis.Status.Error
+    OR _stAxis.Axis.Status.Disabled
+    OR _stAxis.Axis.Status.Stopping
+    OR _stAxis.stStatus.bCommandAborted
+    OR NOT _stAxis.stStatus.bMoving THEN
+    _stAxis.stStatus.eInternalMotion := E_MotionFunctions.eWaitingOnCommand;
+END_IF
+
+bInternalExecute := FALSE;
+bEnabledOld := _stAxis.stStatus.bEnabled;
 bEnableCmdOld := _stAxis.stControl.bEnable;
 
 _stAxis.stControl.bExecute := FALSE;
