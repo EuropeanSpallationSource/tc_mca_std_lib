@@ -1325,7 +1325,12 @@ _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
-    bLocalEnabled := NOT(_stAxis.Axis.Status.Disabled) AND _stAxis.stControl.bAirpadOnBrakeOpen;
+    bLocalEnabled :=
+        _stAxis.stStatus.bEnabled
+        AND _stAxis.stControl.bAirpadOnBrakeOpen
+        AND ((_stAxis.stConfig.stAirpadBrake.bFeedbackConnected
+            AND _stAxis.stInputs.bAirpadBrakeReady)
+        OR NOT _stAxis.stConfig.stAirpadBrake.bFeedbackConnected);
 ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eStandard THEN
     bLocalEnabled := _stAxis.stStatus.bEnabled;
 END_IF
