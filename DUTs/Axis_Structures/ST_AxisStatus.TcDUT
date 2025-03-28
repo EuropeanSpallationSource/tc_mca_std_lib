@@ -36,6 +36,7 @@ STRUCT
     fActVelocity: LREAL; //Current Velocity of the Axis
     bError: BOOL; //True if the axis is in an NC Error Stop state from Axis_Status
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
+    eInternalMotion: E_MotionFunctions;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
