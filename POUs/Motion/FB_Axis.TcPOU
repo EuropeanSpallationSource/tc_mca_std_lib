@@ -744,8 +744,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
-    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveAbsolute THEN
+    fbMoveAbsolute.Execute := bInternalExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
     END_IF
@@ -854,9 +854,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
-    fbMoveRelative.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveRelative THEN
+    fbMoveRelative.Execute := bInternalExecute;
 END_IF
 
 fbMoveRelative.Distance := _stAxis.stControl.fPosition;
@@ -1311,8 +1310,7 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-_stAxis.Axis.ReadStatus();
+        <ST><![CDATA[_stAxis.Axis.ReadStatus();
 IF _stAxis.Axis.Status.OpMode.Modulo THEN
     _stAxis.stStatus.fActPosition := _stAxis.Axis.NcToPlc.ModuloActPos;
 ELSE
@@ -1520,8 +1518,7 @@ END_IF
       <Declaration><![CDATA[METHOD Run : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-mStatus_AxisStatus();
+        <ST><![CDATA[mStatus_AxisStatus();
 mParameters_ReadNc();
 mParameters_Init();
 stMcStatusReadParameter := mParameters_ReadParameter();
