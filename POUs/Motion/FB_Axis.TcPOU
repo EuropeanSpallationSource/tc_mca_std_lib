@@ -749,8 +749,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
-    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveAbsolute THEN
+    fbMoveAbsolute.Execute := bInternalExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
     END_IF
@@ -859,8 +859,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
-    fbMoveRelative.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveRelative THEN
+    fbMoveRelative.Execute := bInternalExecute;
 END_IF
 
 fbMoveRelative.Distance := _stAxis.stControl.fPosition;
