@@ -227,7 +227,7 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
+        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
     _stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
     ELSIF _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
@@ -252,7 +252,7 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bPSSPneumaticAxisShutter THEN
+        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
     _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit := FALSE;
 ELSIF NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit THEN
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermit;
@@ -562,13 +562,13 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup1:
         _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup1;
-        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup1;
-        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup1;
+        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := GVL_APP.fLOW_LIMIT_AIR_PRESSURE1;
+        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := GVL_APP.fHIGH_LIMIT_AIR_PRESSURE1;
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup2:
         _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup2;
-        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := fLowLimitAirPressureGroup2;
-        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := fHighLimitAirPressureGroup2;
+        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := GVL_APP.fLOW_LIMIT_AIR_PRESSURE2;
+        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := GVL_APP.fHIGH_LIMIT_AIR_PRESSURE2;
     END_CASE
 
 _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
