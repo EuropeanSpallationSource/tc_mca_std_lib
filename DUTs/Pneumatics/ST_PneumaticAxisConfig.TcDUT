@@ -3,7 +3,7 @@
   <DUT Name="ST_PneumaticAxisConfig" Id="{f7d3b15a-c25b-0a63-3175-d55d3daa4326}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisConfig :
 STRUCT
-    bPSSPneumaticAxisShutter: BOOL := FALSE; //Bit to define if pneumatic axis is Shutter needing PSS permit
+    bSafetyShutter: BOOL := FALSE; //Bit to define if pneumatic axis is Shutter needing PSS permit
     sPneumaticAxisName: String(32);
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
