@@ -116,7 +116,10 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn AND NOT bStateChange AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
+ AND NOT bStateChange
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
@@ -128,7 +131,9 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn AND bStateChange AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
+AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
+AND bStateChange THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
@@ -594,7 +599,6 @@ fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeTo
 //Check if cylinder is moving: extending or retracting
 _stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoidActive := _stPneumaticAxis.stPneumaticAxisInputs.bSolenoidActive;
 _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit;
 _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
 ]]></ST>
@@ -605,14 +609,31 @@ _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneuma
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Check if Ithe PSS signal for shutter is ON
+        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+
+//Check if Ithe PSS signal for shutter is ON
 mCheckStatusOfPermitSignal();
 
 //Check if Interlock signal is ON
 mCheckStatusOfInterlockSignal();
 
+//Starting the retraction movement and retraction timing
+fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
+_stPneumaticAxis.stPneumaticAxisStatus.nTimeElapsedRetract := TIME_TO_INT(fbTimerRetract.ET);
+
+fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
+IF fbTrigRetract.Q THEN
+   bStartRetractPLC := TRUE;
+END_IF
+
+//If the manual momentary push button is used for control of the pneumatic cylinder
+fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual);
+IF fbTrigRetractManual.Q THEN
+   bStartRetractManual := TRUE;
+END_IF
+
 //Starting the timing of extraction movement
-fbTimerExtend(IN := _stPneumaticAxis.stPneumaticAxisStatus.bExtending);
+fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
 _stPneumaticAxis.stPneumaticAxisStatus.nTimeElapsedExtend := TIME_TO_INT(fbTimerExtend.ET);
 
 fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
@@ -633,9 +654,9 @@ IF (bStartExtendPLC OR bStartExtendManual) THEN
        AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
         _stPneumaticAxis.stPneumaticAxisStatus.bExtending := TRUE;
     END_IF
-    //If the command to retract is given while the cylinder is extracting
+    //If the command to retract is given after the valve was activated
     IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-          AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+          AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
         IF (bStartRetractPLC OR bStartRetractManual) THEN
             _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
             _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
@@ -658,22 +679,6 @@ END_IF
 
 //Check if LimitSwitchBwd signal is ON
 mCheckEndSwitchFwdStatus();
-
-
-//Starting the retraction movement and retraction timing
-fbTimerRetract (IN := _stPneumaticAxis.stPneumaticAxisStatus.bRetracting);
-_stPneumaticAxis.stPneumaticAxisStatus.nTimeElapsedRetract := TIME_TO_INT(fbTimerRetract.ET);
-
-fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
-IF fbTrigRetract.Q THEN
-   bStartRetractPLC := TRUE;
-END_IF
-
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual);
-IF fbTrigRetractManual.Q THEN
-   bStartRetractManual := TRUE;
-END_IF
 
 IF (bStartRetractPLC OR bStartRetractManual) THEN
     _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;

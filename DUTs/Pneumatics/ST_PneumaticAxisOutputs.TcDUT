@@ -3,11 +3,9 @@
   <DUT Name="ST_PneumaticAxisOutputs" Id="{aac9e877-b6e0-0811-2196-0106181b1955}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
 STRUCT
-    bEndSwitchPowerON AT %Q*: BOOL := TRUE; //Power output for pneumatic axis end switches
+    bEndSwitchesPowerON AT %Q*: BOOL := TRUE; //Power output for pneumatic axis end switches
     bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
     bAirPressurePowerON AT %Q*: BOOL := TRUE; //Power output for analog pressure sensor
-    bPressureExtendPowerON AT %Q*: BOOL := TRUE; //Power output for air pressure switch
-    bPressureRetracPowerON AT %Q*: BOOL := TRUE; //Power output for air pressure switch
 END_STRUCT
 END_TYPE
 ]]></Declaration>
