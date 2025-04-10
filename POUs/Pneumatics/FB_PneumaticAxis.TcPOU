@@ -116,7 +116,10 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn AND NOT bStateChange AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
+ AND NOT bStateChange
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
@@ -128,7 +131,9 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn AND bStateChange AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
+AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
+AND bStateChange THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
