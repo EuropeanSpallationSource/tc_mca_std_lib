@@ -103,12 +103,19 @@ VAR
     fbModMovDyn1RiseEdge: R_TRIG;
     fbModMovDyn2RiseEdge: R_TRIG;
 
+    bInternalExecute: BOOL := FALSE;
+    bEnableCmdOld: BOOL := FALSE;
+    bLocalEnabled: BOOL := FALSE;
+    bEnabledOld: BOOL := FALSE;
+    bEnableAmpCmd: BOOL := FALSE;
+
 END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
     nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
+    tCOMMANDHANDLER_TIMEOUT: TIME := T#5s;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -124,7 +131,20 @@ END_VAR
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[IF _stAxis.stStatus.bDone
+    OR _stAxis.stStatus.bError
+    OR _stAxis.Axis.Status.Error
+    OR _stAxis.Axis.Status.Disabled
+    OR _stAxis.Axis.Status.Stopping
+    OR _stAxis.stStatus.bCommandAborted
+    OR NOT _stAxis.stStatus.bMoving THEN
+    _stAxis.stStatus.eInternalMotion := E_MotionFunctions.eWaitingOnCommand;
+END_IF
+
+bInternalExecute := FALSE;
+bEnabledOld := _stAxis.stStatus.bEnabled;
+bEnableCmdOld := _stAxis.stControl.bEnable;
+
 _stAxis.stControl.bExecute := FALSE;
 ]]></ST>
       </Implementation>
@@ -194,6 +214,175 @@ END_IF
 mControl_BacklashCompensation.Error := fbBacklashCompensation.Error;
 mControl_BacklashCompensation.ErrorID := fbBacklashCompensation.ErrorID;
 _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_CommandHandler
+VAR_INPUT
+    bPermit: BOOL := FALSE;
+    bPermitRequired: BOOL := FALSE;
+END_VAR
+
+VAR_INST
+    bExecuteCmdHandler: BOOL := FALSE;
+    RTRIG_Execute: R_TRIG;
+    bWaitingForMovePermit: BOOL := FALSE;
+    TON_Timeout: TON;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
+IF RTRIG_Execute.Q THEN
+    bExecuteCmdHandler := TRUE;
+END_IF
+
+// Abort this with some timeout or something related to bEnable?
+IF bExecuteCmdHandler THEN
+    CASE _stAxis.stControl.eCommand OF
+        E_MotionFunctions.eMoveAbsolute,
+        E_MotionFunctions.eMoveRelative,
+        E_MotionFunctions.eMoveVelocity,
+        E_MotionFunctions.eMoveModulo,
+        E_MotionFunctions.eGearInMultiMaster,
+        E_MotionFunctions.eGearOut,
+        E_MotionFunctions.eHome :
+            IF (bPermitRequired AND bPermit)
+                OR (NOT bPermitRequired) THEN
+                _stAxis.stStatus.eInternalMotion := _stAxis.stControl.eCommand;
+                bInternalExecute := TRUE;
+                bExecuteCmdHandler := FALSE;
+                bWaitingForMovePermit := FALSE;
+            ELSE
+                bWaitingForMovePermit := TRUE;
+            END_IF
+        E_MotionFunctions.eWriteParameter,
+        E_MotionFunctions.eReadParameter,
+        E_MotionFunctions.eReadCoEParameters,
+        E_MotionFunctions.eWriteCoEParameters:
+            bExecuteCmdHandler := FALSE;
+    END_CASE
+END_IF
+
+TON_Timeout(IN := bWaitingForMovePermit, PT := tCOMMANDHANDLER_TIMEOUT);
+IF TON_Timeout.Q
+    OR _stAxis.stControl.bHalt
+    OR _stAxis.stControl.bStop THEN
+    bExecuteCmdHandler := FALSE;
+    bWaitingForMovePermit := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_ExternalBrake" Id="{18ae79d4-85f5-0b8b-295a-ce90fc10f203}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[METHOD mControl_ExternalBrake: BOOL
+
+VAR_INST
+    eExternalBrake: E_ExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
+    bEnableAmp: BOOL := FALSE;
+    TON_BrakeDelayOn: TON;
+    TON_BrakeDelayClosing: TON;
+    tTimeCounterStart: TIME;
+    tTimeCounterEnd: TIME;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld THEN
+    eExternalBrake := E_ExternalBrake.BRAKE_DELAY_OPENING;
+    tTimeCounterStart := TIME();
+    tTimeCounterEnd := TIME();
+END_IF
+
+IF (NOT _stAxis.stControl.bEnable OR _stAxis.stStatus.bError)
+    AND bEnableCmdOld THEN
+    eExternalBrake := E_ExternalBrake.BRAKE_CLOSE_DELAY_AMPLIFIER;
+    tTimeCounterStart := TIME();
+    tTimeCounterEnd := TIME();
+END_IF
+
+TON_BrakeDelayOn(
+    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.stAirpadBrake.tBrakeOpenDelayTime);
+TON_BrakeDelayClosing(
+    IN := (tTimeCounterEnd-tTimeCounterStart) > _stAxis.stConfig.stAirpadBrake.tBrakeCloseAheadTime);
+
+CASE eExternalBrake OF
+
+    E_ExternalBrake.BRAKE_CLOSED:
+        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        tTimeCounterStart := T#0S;
+        tTimeCounterEnd := T#0S;
+        bEnableAmp := FALSE;
+
+
+    E_ExternalBrake.BRAKE_DELAY_OPENING:
+        // Postpone opening of brake
+        bEnableAmp := TRUE;
+
+        IF TON_BrakeDelayOn.Q THEN
+            IF NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError THEN
+                _stAxis.stControl.bEnable := FALSE;
+                _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+                tTimeCounterEnd := T#0S;
+                bEnableAmp := FALSE;
+                bEnableCmdOld := FALSE; // to not trigger BRAKE_CLOSE_DELAY_AMPLIFIER
+                eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
+            ELSE
+                eExternalBrake := E_ExternalBrake.BRAKE_OPENED;
+                _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
+            END_IF
+        END_IF
+
+        // If enabled lost while opening, go directly to closed
+        IF bEnabledOld
+            AND (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError) THEN
+            eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
+            bEnableAmp := FALSE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        END_IF
+
+        // Start counting when enabled
+        IF _stAxis.stStatus.bEnabled THEN
+            tTimeCounterEnd := TIME();
+        END_IF
+
+
+    E_ExternalBrake.BRAKE_OPENED:
+        // If enabled lost while opening, go directly to closed
+        IF (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError)
+            AND _stAxis.stControl.bEnable THEN
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+            tTimeCounterEnd := T#0S;
+            bEnableAmp := FALSE;
+            bEnableCmdOld := FALSE;
+            eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
+        ELSE
+            _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
+            tTimeCounterEnd := T#0S;
+            bEnableAmp := TRUE;
+        END_IF
+
+    // The check for bError in first rows of this function changes state to BRAKE_CLOSE_DELAY_AMPLIFIER.
+    // If bError TRUE we directly disable amplifier. Good?
+    // Might be good to also perform a check of the bSTOComing signal:
+    // * bStOComing -> wait for axis stopped -> BRAKE_CLOSE_DELAY_AMPLIFIER
+    // If STO comes before BRAKE_CLOSED -> the detection of bErrorStop should take us into BRAKE_CLOSED.
+    E_ExternalBrake.BRAKE_CLOSE_DELAY_AMPLIFIER:
+        // Postpone disabling of amplifier
+        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        bEnableAmp := TRUE;
+        IF TON_BrakeDelayClosing.Q
+            OR NOT _stAxis.stStatus.bEnabled
+            OR _stAxis.stStatus.bError THEN
+            eExternalBrake := E_ExternalBrake.BRAKE_CLOSED;
+            bEnableAmp := FALSE;
+            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        END_IF
+
+       tTimeCounterEnd := TIME();
+
+END_CASE
+
+mControl_ExternalBrake := bEnableAmp;
 ]]></ST>
       </Implementation>
     </Method>
@@ -369,10 +558,22 @@ END_VAR
     _stAxis.stControl.bEnable:= FALSE;
 END_IF
 
-fbPower.Enable := _stAxis.stControl.bEnable;
+IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
+    bEnableAmpCmd := mControl_ExternalBrake();
+ELSE
+    bEnableAmpCmd := _stAxis.stControl.bEnable;
+END_IF
 
-fbPower.Enable_Negative := (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedBwd;
-fbPower.Enable_Positive := (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit) AND NOT _stAxis.stStatus.bInterlockedFwd;
+fbPower.Enable := bEnableAmpCmd;
+
+fbPower.Enable_Negative :=
+    (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedBwd
+    AND bLocalEnabled;
+fbPower.Enable_Positive :=
+    (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedFwd
+    AND bLocalEnabled;
 fbPower.Override := _stAxis.stConfig.fOverride;
 
 fbPower(Axis := _stAxis.Axis);
@@ -553,8 +754,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
-    fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveAbsolute THEN
+    fbMoveAbsolute.Execute := bInternalExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
     END_IF
@@ -663,9 +864,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
-    fbMoveRelative.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveRelative THEN
+    fbMoveRelative.Execute := bInternalExecute;
 END_IF
 
 fbMoveRelative.Distance := _stAxis.stControl.fPosition;
@@ -1120,8 +1320,7 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-_stAxis.Axis.ReadStatus();
+        <ST><![CDATA[_stAxis.Axis.ReadStatus();
 IF _stAxis.Axis.Status.OpMode.Modulo THEN
     _stAxis.stStatus.fActPosition := _stAxis.Axis.NcToPlc.ModuloActPos;
 ELSE
@@ -1136,6 +1335,17 @@ _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
+IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
+    bLocalEnabled :=
+        _stAxis.stStatus.bEnabled
+        AND _stAxis.stControl.bAirpadOnBrakeOpen
+        AND ((_stAxis.stConfig.stAirpadBrake.bFeedbackConnected
+            AND _stAxis.stInputs.bAirpadBrakeReady)
+        OR NOT _stAxis.stConfig.stAirpadBrake.bFeedbackConnected);
+ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eStandard THEN
+    bLocalEnabled := _stAxis.stStatus.bEnabled;
+END_IF
+
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
 ]]></ST>
       </Implementation>
@@ -1323,8 +1533,7 @@ END_IF
       <Declaration><![CDATA[METHOD Run : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-mStatus_AxisStatus();
+        <ST><![CDATA[mStatus_AxisStatus();
 mParameters_ReadNc();
 mParameters_Init();
 stMcStatusReadParameter := mParameters_ReadParameter();
@@ -1333,6 +1542,11 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 
 mControl_LimitHitTimer();
 mControl_LimitLinking();
+mControl_CommandHandler(
+    bPermit := bLocalEnabled,
+    bPermitRequired :=
+        _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad
+        OR _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake);
 stMcStatusPower := mControl_Power();
 
 stMcStatusHalt := mMove_Halt();
