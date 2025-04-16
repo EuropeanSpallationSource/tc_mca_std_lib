@@ -566,14 +566,11 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
         <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup1:
-        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup1;
-        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := GVL_APP.fLOW_LIMIT_AIR_PRESSURE1;
-        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := GVL_APP.fHIGH_LIMIT_AIR_PRESSURE1;
+        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := GVL.nAirPressureSensorGroup1;
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup2:
-        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := nAirPressureSensorGroup2;
-        _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue := GVL_APP.fLOW_LIMIT_AIR_PRESSURE2;
-        _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue := GVL_APP.fHIGH_LIMIT_AIR_PRESSURE2;
+        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := GVL.nAirPressureSensorGroup2;
+
     END_CASE
 
 _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );

@@ -8,7 +8,6 @@ STRUCT
     nTimeToExtend: INT; //User defined time for the cylider to extract in seconds
     nTimeToRetract: INT; //User defined time for the cylinder to retract in seconds
     eSelectPneumaticAxisGroup: E_PneumaticAxisGroup; //Select the pneumatic group 1 or 2, to connect to the correct pressure sensor
-    nAirPressureValueRaw: INT; //Raw analog value from pressure sensors
     nAllowTimePressureOutOfRange: INT; //User defined allowed time in seconds for the duration of air pressure value fluctuation
     fLowLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
     fHighLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
