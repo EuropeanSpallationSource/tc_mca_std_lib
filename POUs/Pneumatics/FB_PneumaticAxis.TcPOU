@@ -147,10 +147,10 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:=INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
-fbTimerAirPressureErrorHigh(IN :=,PT:=INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
-fbTimerAirPressureNoErrorLow(IN :=,PT:=INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
-fbTimerAirPressureNoErrorHigh(IN :=,PT:=INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nAllowTimePressureOutOfRange)*1000, Q=>,ET=>);
+        <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
+fbTimerAirPressureErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
+fbTimerAirPressureNoErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
+fbTimerAirPressureNoErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
 
 //Check if the air pressure value is too low for longer than defined time
 IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled < _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue  THEN
@@ -566,14 +566,14 @@ mScaledPressureValue:= rGradient * nRawValue + rOffset;
         <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup1:
-        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := GVL.nAirPressureSensorGroup1;
+            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup1,
+                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 
         E_PneumaticAxisGroup.ePneumaticAxisGroup2:
-        _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw := GVL.nAirPressureSensorGroup2;
+            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup2,
+                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 
     END_CASE
-
-_stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue :=  _stPneumaticAxis.stPneumaticAxisConfig.nAirPressureValueRaw, fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
 ]]></ST>
       </Implementation>
     </Method>
