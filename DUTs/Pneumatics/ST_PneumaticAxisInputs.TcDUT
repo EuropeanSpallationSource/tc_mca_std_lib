@@ -5,7 +5,6 @@
 STRUCT
     bEndSwitchFwd AT %I*: BOOL; //End Switch Fwd input
     bEndSwitchBwd AT %I*: BOOL; //End Switch Bwd input
-    bPSSPermit AT %I*: BOOL; //Input signal from PSS for the movement
     fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
     bOpenManual AT %I*: BOOL; //Push button input to extend cylinder
     bCloseManual AT %I*: BOOL; //Push button input to retract the cylinder
