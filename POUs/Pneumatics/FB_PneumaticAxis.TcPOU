@@ -258,14 +258,16 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
-    _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit := FALSE;
-ELSIF NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+ELSIF NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermit;
-    ELSIF _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-
+ELSIF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
 
 ]]></ST>
@@ -392,7 +394,7 @@ IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneuma
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
 END_IF
-IF _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit THEN
+IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
         _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
         _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
         _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
@@ -431,7 +433,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL.';
 
-IF _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit THEN
+IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
         bNoPSSPermitError := FALSE;
         _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
         _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
@@ -596,7 +598,6 @@ fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeTo
 //Check if cylinder is moving: extending or retracting
 _stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermit;
 _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
 ]]></ST>
       </Implementation>
