@@ -5,7 +5,6 @@
 STRUCT
     bEndSwitchesPowerON AT %Q*: BOOL := TRUE; //Power output for pneumatic axis end switches
     bValveOn AT %Q*: BOOL; //Output of the solenoid valve (for single solenoid)
-    bAirPressurePowerON AT %Q*: BOOL := TRUE; //Power output for analog pressure sensor
 END_STRUCT
 END_TYPE
 ]]></Declaration>
