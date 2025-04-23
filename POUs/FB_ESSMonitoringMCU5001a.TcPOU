@@ -59,10 +59,6 @@ VAR
     bEStop1Active AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
     bSTO1Active AT %I*: BOOL;
-    (*{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 3^Input'}
-    bEStop2Ok AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL1808)^Channel 4^Input'}
-    bSTO2Ok AT %I*: BOOL;*)
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
     bMCBFan_Error AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
@@ -113,7 +109,9 @@ VAR
 (*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
-(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined)];
+(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[32]*)(nErrorID:=18, sErrorMsg:='MCB 19" Piezo Controller OK', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[33]*)(nErrorID:=19, sErrorMsg:='MCB VFD OK', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady)];
 
     aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
     aTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
