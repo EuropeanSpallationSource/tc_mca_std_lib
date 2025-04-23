@@ -7439,7 +7439,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"GVL.astPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisInputs.bPSSPermit"</v>
+                      <v n="Value">"GVL.astPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisStatus.bPSSPermitOK"</v>
                     </o>
                   </l>
                 </o>
@@ -8131,7 +8131,7 @@
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">400</v>
+                      <v n="Value">401</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -8839,8 +8839,8 @@
                       <v n="Id">2812299069L</v>
                       <l n="Value" t="ArrayList" cet="NamedStyleColor">
                         <o>
-                          <v n="Color">-1</v>
-                          <v n="CanonicalName">"White"</v>
+                          <v n="Color">-1381912</v>
+                          <v n="CanonicalName">"Element-Background-Color"</v>
                         </o>
                       </l>
                     </o>
@@ -8947,7 +8947,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"%d"</v>
+                      <v n="Value">"%s"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -8955,45 +8955,26 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"GVL.astPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisConfig.nAllowTimePressureOutOfRange"</v>
+                      <v n="Value">"astPneumaticAxes[MAIN.hmiPneumaticAxisSelection].stPneumaticAxisConfig.tAllowTimePressureOutOfRange"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"982"</v>
+                      <v n="Value">"821"</v>
                     </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Textfield"</v>
                 <v n="VisualElementTypeName">"VisuFbElemTextfield"</v>
                 <v n="VisualElementIsRectangle">true</v>
-                <v n="VisualElementIdentifier">"GenElemInst_222"</v>
+                <v n="VisualElementIdentifier">"GenElemInst_224"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
-                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
-                  <v>OnMouseClick</v>
-                  <a cet="InputBoxInputAction">
-                    <o>
-                      <v n="InputBoxVariable">""</v>
-                      <v n="InputType">"Default"</v>
-                      <v n="InputBoxMin">""</v>
-                      <v n="InputBoxMax">""</v>
-                      <v n="InputBoxDialogTitle">""</v>
-                      <v n="Password">false</v>
-                      <v n="UseTextOutputVariable">true</v>
-                      <v n="TextOutputVariableInitialized">true</v>
-                      <v n="OtherVarConversion">""</v>
-                      <v n="Format">""</v>
-                      <v n="DialogPosition" t="DialogPositionSetting">UseGlobalSetting</v>
-                      <v n="DialogXPos">""</v>
-                      <v n="DialogYPos">""</v>
-                    </o>
-                  </a>
-                </d>
-                <v n="VisualElementIdentification">{61f09790-3cc8-4cd7-995c-820dfbcb81ca}</v>
+                <d n="VisualElementInputActions" t="Hashtable" />
+                <v n="VisualElementIdentification">{49f30cf0-e324-49e3-9050-50d0a0625eaf}</v>
                 <v n="VisualElementOwningObjectGuid">{b76d4b7c-f950-06ce-2833-75b1a7141b87}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
-                <v n="VisualElementId">217</v>
+                <v n="VisualElementId">220</v>
                 <l n="UserManagementAccessRights" t="ArrayList" />
               </o>
             </l>
@@ -9145,7 +9126,7 @@
             </o>
             <v n="DialogDut">{d940e417-8e07-4eb6-b115-3f87dce1720f}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">222</v>
+          <v n="LastUsedIdForIdentifier">224</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
