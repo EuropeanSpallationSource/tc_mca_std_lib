@@ -1,0 +1,577 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ESSMonitoringMCU5002" Id="{ff073033-8784-0815-17c1-261dbe6d3cf7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5002
+VAR_INPUT
+    nEcMasterNetId: T_AmsNetId;
+END_VAR
+VAR_OUTPUT
+    aErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
+    aErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
+    nEcMasterFramesLost: UDINT;
+    nCPULoad: UDINT;
+    fCycleExecTime_ms: REAL;
+    nAlarmGrpBitNumber: UDINT;
+END_VAR
+VAR
+    //Outputs
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 1^Output'}
+    bStatusLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF205 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bAcknowledgeLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 2^Output'}
+    bEStopLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bErrorLED AT %Q*: BOOL;
+
+    //Inputs
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 1^Input'}
+    b24VDC1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 2^Input'}
+    b24VDC2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 3^Input'}
+    b24VDC3_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 4^Input'}
+    b48VDC1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 1^Input'}
+    bFuse1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 2^Input'}
+    bFuse2_Error AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 3^Input'}
+    bFuse3_Error AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
+    bMCB_VFD_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 6^Input'}
+    bMCBFan_Error AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 7^Input'}
+    bSPD_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 8^Input'}
+    bDoorClosed AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
+    bEStop1Active AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 6^Input'}
+    bSTO1Active AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 8^Input'}
+    bAcknowledgeButton AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 1^Value'}
+    nTemp1 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 2^Value'}
+    nTemp2 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 3^Value'}
+    nTemp3 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 4^Value'}
+    nTemp4 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^Inputs^DevState'}
+    nEcMasterDevState AT %I*: UINT;
+
+    aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
+(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[8]*)(nErrorID:=11, sErrorMsg:='MCB Fan OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[28]*)(nErrorID:=102, sErrorMsg:='At least one EtherCAT slave is not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[29]*)(nErrorID:=103, sErrorMsg:='At least one EtherCAT slave link is faulted', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
+(*[32]*)(nErrorID:=18, sErrorMsg:='MCB 19" Piezo Controller OK', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[33]*)(nErrorID:=19, sErrorMsg:='MCB VFD OK', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady)];
+
+    aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
+    aTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
+
+    nAlarmCnt: INT;
+    nAlarmBitNumber: UDINT;
+
+    bCPUOverloaded: BOOL;
+    bEcMasterError: BOOL;
+    bSlaveStateNotOP: BOOL;
+    bSlaveLinkError: BOOL;
+    aExtraMessage: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+    bCycleTimeExceeded: BOOL;
+
+    //Ethercat master device state
+    bEcLinkError: BOOL;
+    bEcIOlocked: BOOL;
+    bEcLinkErrorRedundancyAdapter: BOOL;
+    bEcMissingFrame: BOOL;
+    bEcOutofSendResources: BOOL;
+    bEcWatchdogTriggered: BOOL;
+    bEcEthernetDriverNotFound: BOOL;
+    bEcIOresetActive: BOOL;
+    bEcSlaveINIT: BOOL;
+    bEcSlavePreOP: BOOL;
+    bEcSlaveSafeOP: BOOL;
+    bEcSlaveError: BOOL;
+    bEcDCnotInSync: BOOL;
+
+    fbAcknowledgeButtonTrig: R_TRIG;
+
+END_VAR
+
+VAR CONSTANT
+    tNEW_MESSAGE_TIMEOUT: TIME := T#60S;
+    nMAX_ALARMS: UINT := 50;
+    nMAX_EC_SLAVES: INT := 255;
+    nMAX_TEMP: INT := 10000;
+    nSLAVE_NOT_OP_STATE_ENTRY: UDINT := 28;
+    nSLAVE_LINK_ERROR_ENTRY: UDINT := 29;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[mMonitorAlarms();
+mMonitorCPU();
+mMonitorEtherCAT();
+]]></ST>
+    </Implementation>
+    <Method Name="mAlarm" Id="{e90b8d96-c0cd-0038-3b17-396daf0c3a7c}">
+      <Declaration><![CDATA[METHOD mAlarm
+VAR_IN_OUT
+    stAlarmData: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
+    stAlarmData.bAlarmActive := TRUE;
+ELSIF stAlarmData.bAlarmReset THEN
+    stAlarmData.bAlarmActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mAlarmActive" Id="{15c29a64-0cdf-087c-0a27-9160f712e9e9}">
+      <Declaration><![CDATA[METHOD mAlarmActive
+VAR_INPUT
+    i: UINT;
+    bUpdatedExtraMessage : BOOL;
+END_VAR
+
+VAR_INST
+    aFbErrorMessageTimer: ARRAY[1..nMAX_ALARMS] OF TON;
+    aStartErrorMsgTimer: ARRAY[1..nMAX_ALARMS] OF BOOL;
+    aFbErrorTrig: ARRAY[1..nMAX_ALARMS] OF R_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Update timer and trigger for new log message
+aStartErrorMsgTimer[i] :=
+    aAlarmList[i].bAlarmActive
+    AND NOT aFbErrorMessageTimer[i].Q;
+aFbErrorMessageTimer[i](
+    IN:=aStartErrorMsgTimer[i],
+    PT:=tNEW_MESSAGE_TIMEOUT);
+aFbErrorTrig[i](
+    CLK:=aStartErrorMsgTimer[i]);
+
+IF NOT aAlarmList[i].bAlarmActive THEN
+    RETURN;
+END_IF
+
+nAlarmCnt := nAlarmCnt + 1;
+aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
+aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
+
+mPrintErrorMessage(
+    bPrintLog:=aFbErrorTrig[i].Q OR bUpdatedExtraMessage,
+    sErrorMessage:=aTempErrorMsg[nAlarmCnt],
+    nErrorID:=aAlarmList[i].nErrorID,
+    nIndex:=i);
+
+// Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
+CASE aAlarmList[i].nErrorID OF
+    241, 242, 243:
+    nAlarmBitNumber.0 := TRUE;
+    481, 482, 483, 484:
+    nAlarmBitNumber.1 := TRUE;
+    11:
+    nAlarmBitNumber.2 := TRUE;
+    12:
+    nAlarmBitNumber.3 := TRUE;
+    13:
+    nAlarmBitNumber.4 := TRUE;
+    14,15,16,17:
+    nAlarmBitNumber.5 := TRUE;
+    301, 302, 303, 304, 305, 306, 307, 308:
+    nAlarmBitNumber.6 := TRUE;
+    501, 502, 511, 512:
+    nAlarmBitNumber.7 := TRUE;
+    101:
+    nAlarmBitNumber.8 := TRUE;
+    102:
+    nAlarmBitNumber.9 := TRUE;
+    103:
+    nAlarmBitNumber.10 := TRUE;
+    104, 105:
+    nAlarmBitNumber.11 := TRUE;
+    19:
+    nAlarmBitNumber.13 := TRUE;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mLed" Id="{4eca180e-090c-0e83-385a-889c66ba0366}">
+      <Declaration><![CDATA[METHOD mLed
+VAR_IN_OUT
+    stAlarmData: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF stAlarmData.bLedSet THEN
+    stAlarmData.bLedActive := TRUE;
+ELSIF stAlarmData.bLedReset THEN
+    stAlarmData.bLedActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorAlarms" Id="{e77ca3a2-1c43-064d-0940-1162728d7302}">
+      <Declaration><![CDATA[METHOD mMonitorAlarms
+VAR
+    i: UINT := 0;
+    stMonitorLed: ST_MonitoringAlarm;
+END_VAR
+
+VAR_INST
+    aExtraMessageOld: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+    bLedActive: BOOL := FALSE;
+    fbFastBlinkOn: TON;
+    fbFastBlinkOff: TON;
+    fbSlowBlinkOn: TON;
+    fbSlowBlinkOff: TON;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=bAcknowledgeButton);
+mSetResetAlarmsLeds();
+
+// Reset before loop
+nAlarmCnt := 0;
+nAlarmBitNumber := 0;
+MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
+MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
+bLedActive := FALSE;
+
+FOR i:=1 TO nMAX_ALARMS DO
+    // Update list of active alarms
+    mAlarm(stAlarmData:=aAlarmList[i]);
+    // Update list of active LEDs
+    mLed(stAlarmData:=aAlarmList[i]);
+    // Handle log prints, alarm bits and prepare alarm LEDs
+    mAlarmActive(i:=i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
+
+    // Set the alarm LEDs according to first occurrence
+    IF NOT bLedActive
+        AND aAlarmList[i].bLedActive THEN
+        bLedActive := TRUE;
+        stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
+        stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
+        stMonitorLed.eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
+    END_IF
+END_FOR
+
+// Save last messages for next iteration
+aExtraMessageOld := aExtraMessage;
+
+// Copy to output variables
+aErrorID := aTempErrorID;
+aErrorMsg := aTempErrorMsg;
+nAlarmGrpBitNumber := nAlarmBitNumber;
+
+// Handle LED blinking
+fbFastBlinkOn(IN:=NOT fbFastBlinkOff.Q, PT:=T#250MS);
+fbFastBlinkOff(IN:=fbFastBlinkOn.Q, PT:=T#250MS);
+
+fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
+fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
+
+bErrorLED :=
+    (stMonitorLed.eErrorLED = E_MonitorLed.eSteady)
+    OR (stMonitorLed.eErrorLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (stMonitorLed.eErrorLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+bStatusLED :=
+    (stMonitorLed.eStatusLED = E_MonitorLed.eSteady)
+    OR (stMonitorLed.eStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (stMonitorLed.eStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+bAcknowledgeLED :=
+    (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSteady)
+    OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorCPU" Id="{67191ed0-305c-020b-033f-b835b113e789}">
+      <Declaration><![CDATA[METHOD mMonitorCPU
+
+VAR_INST
+    fbMonitorCPU: TC_CpuUsage;
+    fbUpdateCPULoadTON: TON;
+    fMaxCPULoad: USINT := 85;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Cpu Monitor
+fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
+fbMonitorCPU(START:=fbUpdateCPULoadTON.q, TMOUT:= T#5S);
+
+bCPUOverloaded := fbMonitorCPU.USAGE > fMaxCPULoad;
+nCPULoad := fbMonitorCPU.USAGE;
+
+fCycleExecTime_ms := UDINT_TO_REAL(_TaskInfo[fbGetCurTaskIndex.index].LastExecTime) / 10000;
+bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorEtherCAT" Id="{0b8a1ac8-9811-0d55-20a5-80a4211f69c8}">
+      <Declaration><![CDATA[METHOD mMonitorEtherCAT
+VAR
+    i: UINT := 0;
+END_VAR
+
+VAR_INST
+    fbUpdateEcSlaveStateTON: TON;
+    fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
+    stSlaveState: ARRAY[0..nMAX_EC_SLAVES] OF ST_EcSlaveState;
+    nActualEcSlaves: UINT := 0;
+
+    //Frame statistics
+    fbUpdateEcMasterFrame: TON;
+    fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
+
+    fbEtherCATAlarmDelayTON: TON;
+    bStartEtherCATdelayTON: BOOL := FALSE;
+    bEtherCATInitialized: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Read frames
+fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
+fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
+
+nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
+
+
+//Check ethercat master device state
+bEcLinkError := nEcMasterDevState.0;
+bEcIOlocked := nEcMasterDevState.1;
+bEcLinkErrorRedundancyAdapter := nEcMasterDevState.2;
+bEcMissingFrame := nEcMasterDevState.3;
+bEcOutofSendResources := nEcMasterDevState.4;
+bEcWatchdogTriggered := nEcMasterDevState.5;
+bEcEthernetDriverNotFound := nEcMasterDevState.6;
+bEcIOresetActive := nEcMasterDevState.7;
+bEcSlaveINIT := nEcMasterDevState.8;
+bEcSlavePreOP := nEcMasterDevState.9;
+bEcSlaveSafeOP := nEcMasterDevState.10;
+bEcSlaveError := nEcMasterDevState.11;
+bEcDCnotInSync := nEcMasterDevState.12;
+
+bEcMasterError := nEcMasterDevState > 0;
+
+
+//Check ethercat slave device state
+fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q, PT:=T#100MS);
+fbGetEcSlaveStates(
+    sNetId:=nEcMasterNetId,
+    pStateBuf:=ADR(stSlaveState),
+    cbBufLen:=SIZEOF(stSlaveState),
+    bExecute:=fbUpdateEcSlaveStateTON.q);
+nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
+
+fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
+IF fbEtherCATAlarmDelayTON.Q THEN
+    bStartEtherCATdelayTON := FALSE;
+    bEtherCATInitialized := TRUE;
+END_IF
+
+IF NOT bEtherCATInitialized THEN
+    bStartEtherCATdelayTON := TRUE;
+    RETURN;
+END_IF
+
+// After startup timeout, reset variables before loop
+bSlaveStateNotOP := FALSE;
+bSlaveLinkError := FALSE;
+aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
+aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
+
+FOR i:=0 TO nActualEcSlaves-1 DO
+    IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
+        bSlaveLinkError := TRUE;
+        aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+            CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=UINT_TO_STRING(i+1));
+        aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+            CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=', ');
+        // Do not print slave numbers for deviceState if already printed for linkState
+        CONTINUE;
+    END_IF
+
+    IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
+        bSlaveStateNotOP := TRUE;
+        aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+            CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:= UINT_TO_STRING(i+1));
+        aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+            CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=', ');
+    END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mPrintErrorMessage" Id="{46906a39-9fc6-03cd-3be4-3da499d2b31c}">
+      <Declaration><![CDATA[METHOD mPrintErrorMessage
+VAR_INPUT
+    bPrintLog : BOOL;
+    sErrorMessage: STRING;
+    nErrorID: INT;
+    nIndex: UINT;
+END_VAR
+VAR
+    sErrorId: STRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bPrintLog THEN
+    RETURN;
+END_IF
+
+sErrorId := CONCAT(STR1:='ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
+sErrorId := CONCAT(STR1:=sErrorId, STR2:='. %s');
+
+ADSLOGSTR(
+    msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
+    msgFmtStr:=sErrorId,
+    strArg:=sErrorMessage);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetReset" Id="{7c3dd36f-c010-030e-3421-20fc63750395}">
+      <Declaration><![CDATA[METHOD mSetReset
+VAR_INPUT
+    bOk: BOOL;
+END_VAR
+
+VAR_IN_OUT
+    stAlarmList: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bOk THEN
+    stAlarmList.bAlarmSet := TRUE;
+    stAlarmList.bAlarmReset := FALSE;
+    stAlarmList.bLedSet := TRUE;
+    stAlarmList.bLedReset := FALSE;
+    RETURN;
+END_IF
+
+stAlarmList.bAlarmSet := FALSE;
+stAlarmList.bAlarmReset := TRUE;
+
+IF stAlarmList.bLedAutoReset THEN
+    stAlarmList.bLedSet := FALSE;
+    stAlarmList.bLedReset := TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetResetAlarmsLeds" Id="{327cac97-0d90-07a1-35e5-de27819e1432}">
+      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
+VAR_INST
+    index: UINT;
+    aDeadBandActive: ARRAY [1..4] OF BOOL;
+    nDeadBandTemperature: INT := 3;
+    aTemperatureAlarm: ARRAY [1..4] OF BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mSetReset(stAlarmList := aAlarmList[1], bOk := b24VDC1_OK);
+mSetReset(stAlarmList := aAlarmList[2], bOk := b24VDC2_OK);
+mSetReset(stAlarmList := aAlarmList[3], bOk := b24VDC3_OK);
+
+mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
+//mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
+//mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
+//mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
+
+mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_Error);
+mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
+mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
+mSetReset(stAlarmList := aAlarmList[33], bOk := bMCB_VFD_OK);
+
+mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
+mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
+mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
+//mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
+//mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
+//mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
+//mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
+//mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
+
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Active);
+mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Active);
+
+mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
+mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
+
+aTemperatureAlarm[1] :=
+    nTemp1 > nMAX_TEMP
+    OR (aDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[1] := aTemperatureAlarm[1];
+mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[1]);
+
+aTemperatureAlarm[2] :=
+    nTemp2 > nMAX_TEMP
+    OR (aDeadBandActive[2] AND nTemp2 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[2] := aTemperatureAlarm[2];
+mSetReset(stAlarmList := aAlarmList[24], bOk := NOT aTemperatureAlarm[2]);
+
+aTemperatureAlarm[3] :=
+    nTemp3 > nMAX_TEMP
+    OR (aDeadBandActive[3] AND nTemp3 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[3] := aTemperatureAlarm[3];
+mSetReset(stAlarmList := aAlarmList[25], bOk := NOT aTemperatureAlarm[3]);
+
+aTemperatureAlarm[4] :=
+    nTemp4 > nMAX_TEMP
+    OR (aDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[4] := aTemperatureAlarm[4];
+mSetReset(stAlarmList := aAlarmList[26], bOk := NOT aTemperatureAlarm[4]);
+
+
+//Reset selected alarms just when acknowledge button has been pressed
+IF fbAcknowledgeButtonTrig.Q THEN
+    FOR index:=1 TO nMAX_ALARMS DO
+        aAlarmList[index].bAlarmSet := FALSE;
+        aAlarmList[index].bAlarmReset := TRUE;
+        aAlarmList[index].bLedSet := FALSE;
+        aAlarmList[index].bLedReset := TRUE;
+    END_FOR
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
