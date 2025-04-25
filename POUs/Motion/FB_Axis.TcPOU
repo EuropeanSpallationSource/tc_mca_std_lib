@@ -273,16 +273,25 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       </Implementation>
     </Method>
     <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_CommandHandler
+      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. auto-enable, external brake or airpad
+METHOD mControl_CommandHandler
+
 VAR_INPUT
     bPermit: BOOL := FALSE;
     bPermitRequired: BOOL := FALSE;
 END_VAR
 
+VAR_OUTPUT
+    bWaitingForMovePermit: BOOL;
+    bMovePermit: BOOL;
+END_VAR
+
 VAR_INST
     bExecuteCmdHandler: BOOL := FALSE;
+    bInternalWaitingForMovePermit: BOOL := FALSE;
+    bInternalMovePermit: BOOL := FALSE;
     RTRIG_Execute: R_TRIG;
-    bWaitingForMovePermit: BOOL := FALSE;
+    FTRIG_Moving: F_TRIG;
     TON_Timeout: TON;
 END_VAR
 ]]></Declaration>
@@ -290,6 +299,7 @@ END_VAR
         <ST><![CDATA[RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
 IF RTRIG_Execute.Q THEN
     bExecuteCmdHandler := TRUE;
+    bInternalMovePermit := FALSE;
 END_IF
 
 // Abort this with some timeout or something related to bEnable?
@@ -307,9 +317,11 @@ IF bExecuteCmdHandler THEN
                 _stAxis.stStatus.eInternalMotion := _stAxis.stControl.eCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
-                bWaitingForMovePermit := FALSE;
+                bInternalWaitingForMovePermit := FALSE;
+                bInternalMovePermit := TRUE;
             ELSE
-                bWaitingForMovePermit := TRUE;
+                bInternalWaitingForMovePermit := TRUE;
+                bInternalMovePermit := FALSE;
             END_IF
         E_MotionFunctions.eWriteParameter,
         E_MotionFunctions.eReadParameter,
@@ -319,13 +331,22 @@ IF bExecuteCmdHandler THEN
     END_CASE
 END_IF
 
-TON_Timeout(IN := bWaitingForMovePermit, PT := tCOMMANDHANDLER_TIMEOUT);
+TON_Timeout(IN := bInternalWaitingForMovePermit, PT := tCOMMANDHANDLER_TIMEOUT);
 IF TON_Timeout.Q
     OR _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
     bExecuteCmdHandler := FALSE;
-    bWaitingForMovePermit := FALSE;
+    bInternalWaitingForMovePermit := FALSE;
+    bInternalMovePermit := FALSE;
 END_IF
+
+FTRIG_Moving(CLK := _stAxis.stStatus.bMoving);
+IF FTRIG_Moving.Q THEN
+    bInternalMovePermit := FALSE;
+END_IF
+
+bWaitingForMovePermit := bInternalWaitingForMovePermit;
+bMovePermit := bInternalMovePermit;
 ]]></ST>
       </Implementation>
     </Method>
