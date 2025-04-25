@@ -108,6 +108,8 @@ VAR
     bLocalEnabled: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
+    bCmdHandlerWaitingForMovePermit: BOOL := FALSE;
+    bCmdHandlerMovePermit: BOOL := FALSE;
 
 END_VAR
 VAR CONSTANT
