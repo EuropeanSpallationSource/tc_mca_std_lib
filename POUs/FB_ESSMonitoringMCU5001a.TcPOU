@@ -239,6 +239,8 @@ CASE aAlarmList[i].nErrorID OF
     nAlarmBitNumber.10 := TRUE;
     104, 105:
     nAlarmBitNumber.11 := TRUE;
+    18,19:
+    nAlarmBitNumber.12 := TRUE;
 END_CASE
 ]]></ST>
       </Implementation>
@@ -546,6 +548,9 @@ mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
 mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
 mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
 mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
+
+//mSetReset(stAlarmList := aAlarmList[32], bOk := bMCB19inch_OK);
+//mSetReset(stAlarmList := aAlarmList[33], bOk := bMCB_VFD_OK);
 
 aTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
