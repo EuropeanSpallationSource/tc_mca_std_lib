@@ -16,7 +16,7 @@ TYPE E_MotionFunctions :
     eReadParameter := 60, //Reads a single Parameter
     eWriteCoEParameters := 51, //Writes the set of values to the CoE once bExecute goes high
     eReadCoEParameters := 61, //Reads the set of values from the CoE once bExecute goes high
-    eWaitingOnCommand := 100
+    eWaitingForCommand := 100
 ) := eHome; //Home is the default behaviour of the axis.
 END_TYPE
 ]]></Declaration>

@@ -140,7 +140,7 @@ END_VAR
     OR _stAxis.Axis.Status.Stopping
     OR _stAxis.stStatus.bCommandAborted
     OR NOT _stAxis.stStatus.bMoving THEN
-    _stAxis.stStatus.eInternalMotionCommand := E_MotionFunctions.eWaitingOnCommand;
+    _stAxis.stStatus.eInternalMotionCommand := E_MotionFunctions.eWaitingForCommand;
 END_IF
 
 bInternalExecute := FALSE;
