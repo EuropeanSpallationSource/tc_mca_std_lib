@@ -5,7 +5,7 @@
 {attribute 'strict'}
 TYPE E_Airpad :
 (
-	eDepressurize := 0,
+    eDepressurize := 0,
     eAirpadOnMoveRequest := 1,
     eAirpadOnError := 2
 );
