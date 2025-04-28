@@ -636,6 +636,11 @@ END_IF
 
 IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
     bEnableAmpCmd := mControl_ExternalBrake();
+ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad THEN
+    mControl_Airpad(bMoveRequest :=
+        (bCmdHandlerWaitingForMovePermit OR bCmdHandlerMovePermit)
+        AND _stAxis.stStatus.bEnabled);
+    bEnableAmpCmd := _stAxis.stControl.bEnable;
 ELSE
     bEnableAmpCmd := _stAxis.stControl.bEnable;
 END_IF
@@ -1421,6 +1426,11 @@ IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake TH
         AND ((_stAxis.stConfig.stAirpadBrake.bFeedbackConnected
             AND _stAxis.stInputs.bAirpadBrakeReady)
         OR NOT _stAxis.stConfig.stAirpadBrake.bFeedbackConnected);
+ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad THEN
+    bLocalEnabled :=
+        _stAxis.stStatus.bEnabled
+        AND NOT _stAxis.stControl.bAirpadOnBrakeOpen
+        AND _stAxis.stInputs.bAirpadBrakeReady;
 ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eStandard THEN
     bLocalEnabled := _stAxis.stStatus.bEnabled;
 END_IF
@@ -1620,7 +1630,9 @@ mControl_CommandHandler(
     bPermit := bLocalEnabled,
     bPermitRequired :=
         _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad
-        OR _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake);
+        OR _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake,
+    bWaitingForMovePermit => bCmdHandlerWaitingForMovePermit,
+    bMovePermit => bCmdHandlerMovePermit);
 stMcStatusPower := mControl_Power();
 
 stMcStatusHalt := mMove_Halt();
