@@ -29,7 +29,7 @@ STRUCT
     fMaxTemperature: REAL := 0.0; //Maximum temperature allowed before disabling
     fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
 
-    // Use external brake
+    // Use external brake / airpad
     stAirpadBrake: ST_AirpadBrakeConfig;
 
     //Read and Write parameters
