@@ -200,7 +200,7 @@ CASE eAirpad OF
 
         IF _stAxis.stStatus.bError THEN
             eAirpad := E_Airpad.eAirpadOnError;
-		ELSIF bMoveRequest THEN
+        ELSIF bMoveRequest THEN
             eAirpad := E_Airpad.eAirpadOnMoveRequest;
         END_IF
 
@@ -213,7 +213,7 @@ CASE eAirpad OF
             eAirpad := E_Airpad.eAirpadOnError;
         ELSIF NOT bMoveRequest THEN
             eAirpad := E_Airpad.eDepressurize;
-		END_IF
+        END_IF
 
 
     E_Airpad.eAirpadOnError:
@@ -226,7 +226,7 @@ CASE eAirpad OF
         ELSIF NOT (_stAxis.stStatus.bError)
             AND NOT bMoveRequest THEN
             eAirpad := E_Airpad.eDepressurize;
-		END_IF
+        END_IF
 
 END_CASE
 ]]></ST>
