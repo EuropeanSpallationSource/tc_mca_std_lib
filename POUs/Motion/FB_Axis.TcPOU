@@ -140,7 +140,7 @@ END_VAR
     OR _stAxis.Axis.Status.Stopping
     OR _stAxis.stStatus.bCommandAborted
     OR NOT _stAxis.stStatus.bMoving THEN
-    _stAxis.stStatus.eInternalMotion := E_MotionFunctions.eWaitingOnCommand;
+    _stAxis.stStatus.eInternalMotionCommand := E_MotionFunctions.eWaitingOnCommand;
 END_IF
 
 bInternalExecute := FALSE;
@@ -314,7 +314,7 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eHome :
             IF (bPermitRequired AND bPermit)
                 OR (NOT bPermitRequired) THEN
-                _stAxis.stStatus.eInternalMotion := _stAxis.stControl.eCommand;
+                _stAxis.stStatus.eInternalMotionCommand := _stAxis.stControl.eCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
                 bInternalWaitingForMovePermit := FALSE;
@@ -844,7 +844,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveAbsolute THEN
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eMoveAbsolute THEN
     fbMoveAbsolute.Execute := bInternalExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
@@ -954,7 +954,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotion = E_MotionFunctions.eMoveRelative THEN
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eMoveRelative THEN
     fbMoveRelative.Execute := bInternalExecute;
 END_IF
 
