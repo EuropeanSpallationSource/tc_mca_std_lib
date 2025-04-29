@@ -196,7 +196,7 @@ CASE eAirpad OF
 
     E_Airpad.eDepressurize:
         // No movement, no error -> Airpad off
-        _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
+        _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError THEN
             eAirpad := E_Airpad.eAirpadOnError;
@@ -207,7 +207,7 @@ CASE eAirpad OF
 
     E_Airpad.eAirpadOnMoveRequest:
         // Movement requested -> Airpad on
-        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        _stAxis.stControl.bPressurizeAirpad := FALSE;
 
         IF _stAxis.stStatus.bError THEN
             eAirpad := E_Airpad.eAirpadOnError;
@@ -218,7 +218,7 @@ CASE eAirpad OF
 
     E_Airpad.eAirpadOnError:
         // ErrorStop -> Airpad on
-        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        _stAxis.stControl.bPressurizeAirpad := FALSE;
 
         IF NOT (_stAxis.stStatus.bError)
             AND bMoveRequest THEN
@@ -388,7 +388,7 @@ TON_BrakeDelayClosing(
 CASE eExternalBrake OF
 
     E_ExternalBrake.eBrakeClosed:
-        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        _stAxis.stControl.bReleaseBrake := FALSE;
         bStartDelayBrakeOpening := FALSE;
         bStartDelayAmplifierDisable := FALSE;
         bEnableAmp := FALSE;
@@ -402,12 +402,12 @@ CASE eExternalBrake OF
         IF TON_DelayBrakeOpening.Q THEN
             IF NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError THEN
                 _stAxis.stControl.bEnable := FALSE;
-                _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+                _stAxis.stControl.bReleaseBrake := FALSE;
                 bEnableAmp := FALSE;
                 eExternalBrake := E_ExternalBrake.eBrakeClosed;
             ELSE
                 eExternalBrake := E_ExternalBrake.eBrakeOpened;
-                _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
+                _stAxis.stControl.bReleaseBrake := TRUE;
             END_IF
         END_IF
 
@@ -416,7 +416,7 @@ CASE eExternalBrake OF
             AND (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError) THEN
             eExternalBrake := E_ExternalBrake.eBrakeClosed;
             bEnableAmp := FALSE;
-            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+            _stAxis.stControl.bReleaseBrake := FALSE;
         END_IF
 
         // Start counting when enabled
@@ -432,12 +432,12 @@ CASE eExternalBrake OF
         // If enabled lost while opening, go directly to closed
         IF (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError)
             AND _stAxis.stControl.bEnable THEN
-            _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+            _stAxis.stControl.bReleaseBrake := FALSE;
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
             eExternalBrake := E_ExternalBrake.eBrakeClosed;
         ELSE
-            _stAxis.stControl.bAirpadOnBrakeOpen := TRUE;
+            _stAxis.stControl.bReleaseBrake := TRUE;
             bEnableAmp := TRUE;
         END_IF
 
@@ -448,7 +448,7 @@ CASE eExternalBrake OF
     // If STO comes before eBrakeClosed -> the detection of bErrorStop should take us into eBrakeClosed.
     E_ExternalBrake.eBrakeCloseDelayAmplifier:
         // Postpone disabling of amplifier
-        _stAxis.stControl.bAirpadOnBrakeOpen := FALSE;
+        _stAxis.stControl.bReleaseBrake := FALSE;
         bStartDelayBrakeOpening := FALSE;
         bStartDelayAmplifierDisable := TRUE;
         bEnableAmp := TRUE;
