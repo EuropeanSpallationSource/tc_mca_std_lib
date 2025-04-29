@@ -634,15 +634,16 @@ END_VAR
     _stAxis.stControl.bEnable:= FALSE;
 END_IF
 
-IF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake THEN
+IF _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     bEnableAmpCmd := mControl_ExternalBrake();
-ELSIF _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad THEN
+ELSE
+    bEnableAmpCmd := _stAxis.stControl.bEnable;
+END_IF
+
+IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected THEN
     mControl_Airpad(bMoveRequest :=
         (bCmdHandlerWaitingForMovePermit OR bCmdHandlerMovePermit)
         AND _stAxis.stStatus.bEnabled);
-    bEnableAmpCmd := _stAxis.stControl.bEnable;
-ELSE
-    bEnableAmpCmd := _stAxis.stControl.bEnable;
 END_IF
 
 fbPower.Enable := bEnableAmpCmd;
