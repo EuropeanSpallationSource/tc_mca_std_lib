@@ -1630,8 +1630,8 @@ mControl_LimitLinking();
 mControl_CommandHandler(
     bPermit := bLocalEnabled,
     bPermitRequired :=
-        _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eAirpad
-        OR _stAxis.stConfig.stAirpadBrake.eAirpadBrake = E_AirpadBrake.eExternalBrake,
+        _stAxis.stConfig.stAirpadBrake.bAirpadConnected
+        OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
     bWaitingForMovePermit => bCmdHandlerWaitingForMovePermit,
     bMovePermit => bCmdHandlerMovePermit);
 stMcStatusPower := mControl_Power();
