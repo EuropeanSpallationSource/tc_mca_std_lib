@@ -21,7 +21,8 @@ STRUCT
     fPosition: LREAL; //Target position for absolute moves or distance for relative moves
     bHWMaskActive: BOOL := FALSE; //Indicates if hardware masking is active
     fMaskedTemperature: REAL := 0.0; //Temperature value used when the hardware masking is active
-    bAirpadOnBrakeOpen AT %Q*: BOOL; //Output from method controlling airpad or brake (mutually exclusive)
+    bPressurizeAirpad AT %Q*: BOOL; //Output from method controlling airpad
+    bReleaseBrake AT %Q*: BOOL; //Output from method controlling brake
 END_STRUCT
 END_TYPE
 ]]></Declaration>
