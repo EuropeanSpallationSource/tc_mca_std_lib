@@ -561,8 +561,8 @@ END_IF
     _stAxis.stStatus.bHomed := TRUE;
 END_IF
 
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome THEN
-    fbHome.bExecute := _stAxis.stControl.bExecute;
+IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eHome THEN
+    fbHome.bExecute := bInternalExecute;
 END_IF
 
 
@@ -902,8 +902,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveModulo : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveModulo THEN
-    fbMoveModulo.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eMoveModulo THEN
+    fbMoveModulo.Execute := bInternalExecute;
     IF fbMoveModulo.Execute AND fbMoveModulo.Busy THEN
         fbMoveModulo2.Execute := TRUE;
     END_IF
@@ -984,8 +984,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
-    fbMoveVelocity.Execute := _stAxis.stControl.bExecute;
+        <ST><![CDATA[IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eMoveVelocity THEN
+    fbMoveVelocity.Execute := bInternalExecute;
 END_IF
 
 fbMoveVelocity.Direction := SEL(_stAxis.stControl.fVelocity < 0, MC_Positive_Direction, MC_Negative_Direction);
