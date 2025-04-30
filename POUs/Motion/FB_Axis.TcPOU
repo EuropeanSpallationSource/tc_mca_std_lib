@@ -105,7 +105,7 @@ VAR
 
     bInternalExecute: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
-    bLocalEnabled: BOOL := FALSE;
+    bAxisReadyToMove: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
     bCmdHandlerWaitingForMovePermit: BOOL := FALSE;
@@ -651,11 +651,11 @@ fbPower.Enable := bEnableAmpCmd;
 fbPower.Enable_Negative :=
     (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit)
     AND NOT _stAxis.stStatus.bInterlockedBwd
-    AND bLocalEnabled;
+    AND bAxisReadyToMove;
 fbPower.Enable_Positive :=
     (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit)
     AND NOT _stAxis.stStatus.bInterlockedFwd
-    AND bLocalEnabled;
+    AND bAxisReadyToMove;
 fbPower.Override := _stAxis.stConfig.fOverride;
 
 fbPower(Axis := _stAxis.Axis);
@@ -1437,26 +1437,26 @@ bBrakeOk :=
 
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bLocalEnabled :=
+    bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND NOT _stAxis.stControl.bPressurizeAirpad
         AND bAirpadOk;
 ELSIF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bLocalEnabled :=
+    bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
         AND bBrakeOk;
 ELSIF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bLocalEnabled :=
+    bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
         AND bBrakeOk
         AND NOT _stAxis.stControl.bPressurizeAirpad
         AND bAirpadOk;
 ELSE
-    bLocalEnabled := _stAxis.stStatus.bEnabled;
+    bAxisReadyToMove := _stAxis.stStatus.bEnabled;
 END_IF
 
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
@@ -1651,7 +1651,7 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
-    bPermit := bLocalEnabled,
+    bPermit := bAxisReadyToMove,
     bPermitRequired :=
         _stAxis.stConfig.stAirpadBrake.bAirpadConnected
         OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
