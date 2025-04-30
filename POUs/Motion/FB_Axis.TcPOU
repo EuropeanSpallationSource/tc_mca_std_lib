@@ -340,7 +340,10 @@ IF TON_Timeout.Q
     bInternalMovePermit := FALSE;
 END_IF
 
-FTRIG_Moving(CLK := _stAxis.stStatus.bMoving);
+FTRIG_Moving(CLK :=
+    (_stAxis.stStatus.bMoving AND NOT _stAxis.Axis.Status.HomingBusy)
+    OR _stAxis.Axis.Status.HomingBusy);
+
 IF FTRIG_Moving.Q THEN
     bInternalMovePermit := FALSE;
 END_IF
