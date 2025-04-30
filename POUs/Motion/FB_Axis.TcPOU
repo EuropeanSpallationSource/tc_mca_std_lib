@@ -117,7 +117,7 @@ VAR CONSTANT
     nNO_GEARING: UINT := 0;
     nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
-    tCOMMANDHANDLER_TIMEOUT: TIME := T#5s;
+    tCOMMANDHANDLER_TIMEOUT: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
 END_VAR
 ]]></Declaration>
     <Implementation>
