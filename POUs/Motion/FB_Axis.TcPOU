@@ -185,6 +185,10 @@ VAR_INPUT
     bMoveRequest: BOOL := FALSE;
 END_VAR
 
+VAR_OUTPUT
+    bAirpadReady: BOOL;
+END_VAR
+
 VAR_INST
     eAirpad: E_Airpad := E_Airpad.eDepressurize;
     TON_PressurizeAirpad: TON;
@@ -260,6 +264,11 @@ CASE eAirpad OF
         END_IF
 
 END_CASE
+
+bAirpadReady :=
+    (eAirpad = E_Airpad.eAirpadOnMoveRequest OR eAirpad = E_Airpad.eAirpadOnError)
+    AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected AND _stAxis.stInputs.bAirpadPressurized)
+        OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 ]]></ST>
       </Implementation>
     </Method>
