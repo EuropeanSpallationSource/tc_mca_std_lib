@@ -187,10 +187,14 @@ END_VAR
 
 VAR_INST
     eAirpad: E_Airpad := E_Airpad.eDepressurize;
+    TON_PressurizeAirpad: TON;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Feedback sensor interlocks move - should that be handled here?
+TON_PressurizeAirpad(
+    IN := bMoveRequest,
+    PT := _stAxis.stConfig.stAirpadBrake.tAirpadOnDelayTime);
 
 CASE eAirpad OF
 
@@ -201,7 +205,34 @@ CASE eAirpad OF
         IF _stAxis.stStatus.bError THEN
             eAirpad := E_Airpad.eAirpadOnError;
         ELSIF bMoveRequest THEN
+            _stAxis.stStatus.bAirpadTimeoutError := FALSE;
             eAirpad := E_Airpad.eAirpadOnMoveRequest;
+        END_IF
+
+    E_Airpad.ePressurize:
+        // Movement / error -> Pressurize airpad
+        _stAxis.stControl.bPressurizeAirpad := FALSE;
+
+        IF TON_PressurizeAirpad.Q
+            AND NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected THEN
+            IF _stAxis.stStatus.bError THEN
+                eAirpad := E_Airpad.eAirpadOnError;
+			ELSIF bMoveRequest THEN
+                eAirpad := E_Airpad.eAirpadOnMoveRequest;
+            END_IF
+	    ELSIF TON_PressurizeAirpad.Q
+            AND _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+            AND _stAxis.stInputs.bAirpadPressurized THEN
+            IF _stAxis.stStatus.bError THEN
+                eAirpad := E_Airpad.eAirpadOnError;
+			ELSIF bMoveRequest THEN
+                eAirpad := E_Airpad.eAirpadOnMoveRequest;
+            END_IF
+        ELSIF TON_PressurizeAirpad.Q
+            AND _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+            AND NOT _stAxis.stInputs.bAirpadPressurized THEN
+            _stAxis.stStatus.bAirpadTimeoutError := TRUE;
+            eAirpad := E_Airpad.eDepressurize;
         END_IF
 
 
