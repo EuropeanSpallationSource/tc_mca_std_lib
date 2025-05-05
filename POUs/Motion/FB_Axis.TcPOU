@@ -413,7 +413,7 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld THEN
+IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld THEN
     eExternalBrake := E_ExternalBrake.eDelayBrakeOpening;
     bStartDelayBrakeOpening := FALSE;
     _stAxis.stStatus.bExternalBrakeTimeoutError  := FALSE;
@@ -468,10 +468,17 @@ CASE eExternalBrake OF
                 bEnableAmp := FALSE;
                 eExternalBrake := E_ExternalBrake.eBrakeClosed;
             ELSE
-                eExternalBrake := E_ExternalBrake.eBrakeOpened;
                 _stAxis.stControl.bReleaseBrake := TRUE;
                 bStartBrakeOpeningTimeout := TRUE;
             END_IF
+
+            IF _stAxis.stControl.bReleaseBrake
+                AND ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
+                    AND _stAxis.stInputs.bBrakeReleased)
+                OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected) THEN
+                eExternalBrake := E_ExternalBrake.eBrakeOpened;
+                bStartBrakeOpeningTimeout := FALSE;
+			END_IF
         END_IF
 
         // If enabled lost while opening, go directly to closed
