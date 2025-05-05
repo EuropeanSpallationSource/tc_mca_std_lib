@@ -403,12 +403,20 @@ VAR_INST
     TON_BrakeDelayClosing: TON;
     bStartDelayBrakeOpening: BOOL := FALSE;
     bStartDelayAmplifierDisable: BOOL := FALSE;
+    bStartBrakeOpeningTimeout: BOOL := FALSE;
+    TON_BrakeOpeningTimeoutWhenFeedback: TON;
 END_VAR
+
+VAR CONSTANT
+    tBRAKE_OPENING_TIMEOUT_WHEN_FEEDBACK: TIME := T#5S;
+END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld THEN
     eExternalBrake := E_ExternalBrake.eDelayBrakeOpening;
     bStartDelayBrakeOpening := FALSE;
+    _stAxis.stStatus.bExternalBrakeTimeoutError  := FALSE;
 END_IF
 
 IF (NOT _stAxis.stControl.bEnable OR _stAxis.stStatus.bError)
@@ -427,6 +435,14 @@ TON_BrakeDelayClosing(
     PT := _stAxis.stConfig.stAirpadBrake.tBrakeCloseAheadTime
 );
 
+TON_BrakeOpeningTimeoutWhenFeedback(
+    IN := bStartBrakeOpeningTimeout,
+    PT := tBRAKE_OPENING_TIMEOUT_WHEN_FEEDBACK
+);
+
+IF TON_BrakeOpeningTimeoutWhenFeedback.Q THEN
+    _stAxis.stStatus.bExternalBrakeTimeoutError := TRUE;
+END_IF
 
 CASE eExternalBrake OF
 
@@ -434,6 +450,7 @@ CASE eExternalBrake OF
         _stAxis.stControl.bReleaseBrake := FALSE;
         bStartDelayBrakeOpening := FALSE;
         bStartDelayAmplifierDisable := FALSE;
+        bStartBrakeOpeningTimeout := FALSE;
         bEnableAmp := FALSE;
 
 
@@ -443,7 +460,9 @@ CASE eExternalBrake OF
         bStartDelayAmplifierDisable := FALSE;
 
         IF TON_DelayBrakeOpening.Q THEN
-            IF NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError THEN
+            IF NOT _stAxis.stStatus.bEnabled
+                OR _stAxis.stStatus.bError
+                OR TON_BrakeOpeningTimeoutWhenFeedback.Q THEN
                 _stAxis.stControl.bEnable := FALSE;
                 _stAxis.stControl.bReleaseBrake := FALSE;
                 bEnableAmp := FALSE;
@@ -451,6 +470,7 @@ CASE eExternalBrake OF
             ELSE
                 eExternalBrake := E_ExternalBrake.eBrakeOpened;
                 _stAxis.stControl.bReleaseBrake := TRUE;
+                bStartBrakeOpeningTimeout := TRUE;
             END_IF
         END_IF
 
