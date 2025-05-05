@@ -223,15 +223,15 @@ CASE eAirpad OF
             AND NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected THEN
             IF _stAxis.stStatus.bError THEN
                 eAirpad := E_Airpad.eAirpadOnError;
-			ELSIF bMoveRequest THEN
+            ELSIF bMoveRequest THEN
                 eAirpad := E_Airpad.eAirpadOnMoveRequest;
             END_IF
-	    ELSIF TON_PressurizeAirpad.Q
+        ELSIF TON_PressurizeAirpad.Q
             AND _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND _stAxis.stInputs.bAirpadPressurized THEN
             IF _stAxis.stStatus.bError THEN
                 eAirpad := E_Airpad.eAirpadOnError;
-			ELSIF bMoveRequest THEN
+            ELSIF bMoveRequest THEN
                 eAirpad := E_Airpad.eAirpadOnMoveRequest;
             END_IF
         ELSIF TON_PressurizeAirpad.Q
@@ -491,7 +491,7 @@ CASE eExternalBrake OF
                 OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected) THEN
                 eExternalBrake := E_ExternalBrake.eBrakeOpened;
                 bStartBrakeOpeningTimeout := FALSE;
-			END_IF
+            END_IF
         END_IF
 
         // If enabled lost while opening, go directly to closed
