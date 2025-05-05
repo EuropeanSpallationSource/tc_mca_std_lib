@@ -338,13 +338,15 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
+        <ST><![CDATA[// TODO: also abort with something related to bEnable?
+RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
 IF RTRIG_Execute.Q THEN
     bExecuteCmdHandler := TRUE;
     bInternalMovePermit := FALSE;
+    _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
 END_IF
 
-// Abort this with some timeout or something related to bEnable?
+
 IF bExecuteCmdHandler THEN
     CASE _stAxis.stControl.eCommand OF
         E_MotionFunctions.eMoveAbsolute,
@@ -380,13 +382,18 @@ IF TON_Timeout.Q
     bExecuteCmdHandler := FALSE;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
+    _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
 END_IF
 
 FTRIG_Moving(CLK :=
     (_stAxis.stStatus.bMoving AND NOT _stAxis.Axis.Status.HomingBusy)
     OR _stAxis.Axis.Status.HomingBusy);
 
-IF FTRIG_Moving.Q THEN
+IF FTRIG_Moving.Q
+    OR _stAxis.stStatus.nErrorID = 16#4223
+    OR _stAxis.stStatus.nErrorID = 16#4460 THEN
+    bExecuteCmdHandler := FALSE;
+    bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
 END_IF
 
