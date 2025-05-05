@@ -110,6 +110,8 @@ VAR
     bEnableAmpCmd: BOOL := FALSE;
     bCmdHandlerWaitingForMovePermit: BOOL := FALSE;
     bCmdHandlerMovePermit: BOOL := FALSE;
+    bExternalBrakeReady: BOOL := FALSE;
+    bAirpadReady: BOOL := FALSE;
 
 END_VAR
 VAR CONSTANT
@@ -714,7 +716,7 @@ END_VAR
 END_IF
 
 IF _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bEnableAmpCmd := mControl_ExternalBrake();
+    bEnableAmpCmd := mControl_ExternalBrake(bBrakeReady => bExternalBrakeReady);
 ELSE
     bEnableAmpCmd := _stAxis.stControl.bEnable;
 END_IF
@@ -1482,10 +1484,6 @@ END_IF
     </Method>
     <Method Name="mStatus_AxisStatus" Id="{6f0fec7d-27eb-00a8-18ec-af8d2df08244}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
-VAR_INST
-    bAirpadOk: BOOL := FALSE;
-    bBrakeOk: BOOL := FALSE;
-END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stAxis.Axis.ReadStatus();
@@ -1504,36 +1502,26 @@ _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
-bAirpadOk :=
-    (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-        AND _stAxis.stInputs.bAirpadPressurized)
-    OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected;
-
-bBrakeOk :=
-    (_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
-        AND _stAxis.stInputs.bBrakeReleased)
-    OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected;
-
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND NOT _stAxis.stControl.bPressurizeAirpad
-        AND bAirpadOk;
+        AND bAirpadReady;
 ELSIF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
-        AND bBrakeOk;
+        AND bExternalBrakeReady;
 ELSIF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
-        AND bBrakeOk
+        AND bExternalBrakeReady
         AND NOT _stAxis.stControl.bPressurizeAirpad
-        AND bAirpadOk;
+        AND bAirpadReady;
 ELSE
     bAxisReadyToMove := _stAxis.stStatus.bEnabled;
 END_IF
