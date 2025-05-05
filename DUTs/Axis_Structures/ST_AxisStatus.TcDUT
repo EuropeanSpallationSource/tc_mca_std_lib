@@ -36,6 +36,9 @@ STRUCT
     fActVelocity: LREAL; //Current Velocity of the Axis
     bError: BOOL; //True if the axis is in an NC Error Stop state from Axis_Status
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
+    bAirpadTimeoutError: BOOL; //True if airpad did not report pressurized in time
+    bExternalBrakeTimeoutError: BOOL; //True if external brake id not report released in time
+    bCommandHandlerTimeoutError: BOOL; //True if CommandHandler did not receive a permit in time
     eInternalMotionCommand: E_MotionFunctions;
 END_STRUCT
 END_TYPE
