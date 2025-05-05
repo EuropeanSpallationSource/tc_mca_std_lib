@@ -768,6 +768,9 @@ END_VAR
 fbReset(Axis := _stAxis.Axis);
 IF fbReset.Done THEN
     _stAxis.stStatus.bError := FALSE;
+    _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+    _stAxis.stStatus.bAirpadTimeoutError := FALSE;
+    _stAxis.stStatus.bExternalBrakeTimeoutError := FALSE;
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
         //Reset ST_Status error ID
         _stAxis.stStatus.nErrorID := 0;
