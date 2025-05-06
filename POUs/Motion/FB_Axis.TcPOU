@@ -119,7 +119,6 @@ VAR CONSTANT
     nNO_GEARING: UINT := 0;
     nMCSTATUS_ARRAY_SIZE: UINT := 15;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
-    tCOMMANDHANDLER_TIMEOUT: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -375,7 +374,10 @@ IF bExecuteCmdHandler THEN
     END_CASE
 END_IF
 
-TON_Timeout(IN := bInternalWaitingForMovePermit, PT := tCOMMANDHANDLER_TIMEOUT);
+TON_Timeout(
+    IN := bInternalWaitingForMovePermit,
+    PT := _stAxis.stConfig.tCommandHandlerTimeout);
+
 IF TON_Timeout.Q
     OR _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
@@ -451,7 +453,7 @@ TON_BrakeDelayClosing(
 
 TON_BrakeOpeningTimeoutWhenFeedback(
     IN := bStartBrakeOpeningTimeout,
-    PT := tBRAKE_OPENING_TIMEOUT_WHEN_FEEDBACK
+    PT := _stAxis.stConfig.stAirpadBrake.tBrakeOpeningTimeoutWhenFeedback
 );
 
 IF TON_BrakeOpeningTimeoutWhenFeedback.Q THEN

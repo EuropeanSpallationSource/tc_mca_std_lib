@@ -32,6 +32,8 @@ STRUCT
     // Use external brake / airpad
     stAirpadBrake: ST_AirpadBrakeConfig;
 
+    tCommandHandlerTimeout: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
+
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
     fWriteAxisParameter: LREAL; //Value to write to the selected axis parameter
