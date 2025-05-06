@@ -426,7 +426,8 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld THEN
+IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld
+    AND NOT _stAxis.stError.bExternalBrakeFailure THEN
     eExternalBrake := E_ExternalBrake.eDelayBrakeOpening;
     bStartDelayBrakeOpening := FALSE;
     _stAxis.stStatus.bExternalBrakeTimeoutError  := FALSE;
@@ -512,17 +513,26 @@ CASE eExternalBrake OF
     E_ExternalBrake.eBrakeOpened:
         bStartDelayBrakeOpening := FALSE;
         bStartDelayAmplifierDisable := FALSE;
-        // If enabled lost while opening, go directly to closed
+        // If enabled lost, or if brake feedback fails: go directly to closed
         IF (NOT _stAxis.stStatus.bEnabled OR _stAxis.stStatus.bError)
             AND _stAxis.stControl.bEnable THEN
             _stAxis.stControl.bReleaseBrake := FALSE;
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
             eExternalBrake := E_ExternalBrake.eBrakeClosed;
+        ELSIF _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
+            AND _stAxis.stControl.bReleaseBrake
+            AND NOT _stAxis.stInputs.bBrakeReleased THEN
+            _stAxis.stControl.bReleaseBrake := FALSE;
+            _stAxis.stControl.bEnable := FALSE;
+            bEnableAmp := FALSE;
+            eExternalBrake := E_ExternalBrake.eBrakeClosed;
+            _stAxis.stError.bExternalBrakeFailure := TRUE;
         ELSE
             _stAxis.stControl.bReleaseBrake := TRUE;
             bEnableAmp := TRUE;
         END_IF
+
 
     // The check for bError in first rows of this function changes state to eBrakeCloseDelayAmplifier.
     // If bError TRUE we directly disable amplifier. Good?
