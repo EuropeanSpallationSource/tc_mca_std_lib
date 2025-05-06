@@ -19,7 +19,10 @@ STRUCT
     nReadParameterErrorId: UDINT; //Error ID for MC_ReadParameter function block
     nBacklashErrorID: UDINT; //Error ID for MC_BacklashCompensation function block
 //Error from the NC
-    nNCErrorID : UDINT; //Error ID from the NC Axis_Ref Axis Status
+    nNCErrorID: UDINT; //Error ID from the NC Axis_Ref Axis Status
+//Errors when external brake or airpad
+    bAirpadPressureError: BOOL;
+    bExternalBrakeFailure: BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
