@@ -5,12 +5,13 @@
 STRUCT
     bAirpadConnected: BOOL := FALSE; // An airpad is connected
     bAirpadFeedbackConnected: BOOL := FALSE; // If feedback signal used for pressurized airpad
-    tAirpadOnDelayTime: TIME := T#0.1S; // If no feedback used, airpad delay time when pressurizing
+    tAirpadOnDelayTime: TIME := T#0.1S; // Minimum airpad delay time when pressurizing (with or without feedback)
     tAirpadOffAheadTime: TIME := T#0.1S; // If no feedback used, airpad delay time when depressurizing
     bExternalBrakeConnected: BOOL := FALSE; // An external brake is connected
-    bExternalBrakeFeedbackConnected: BOOL := FALSE; // If feedback signal used for released brake
-    tBrakeOpenDelayTime: TIME := T#0.1S; // If no feedback used, delay brake opening after amplifier enabled
-    tBrakeCloseAheadTime: TIME := T#0.1S; // If no feedback used, delay amplifier disable after brake closing
+    bExternalBrakeFeedbackConnected: BOOL := FALSE; // If feedback signal used for released external brake
+    tBrakeOpenDelayTime: TIME := T#0.1S; // Delay time for command to release external brake after enabled amplifier
+    tBrakeCloseAheadTime: TIME := T#0.1S; // Delay time for command to disable amplifier after close brake command
+    tBrakeOpeningTimeoutWhenFeedback: TIME := T#5S; // If feedback used, timeout of brake released feedback signal after release command given
 END_STRUCT
 END_TYPE
 ]]></Declaration>
