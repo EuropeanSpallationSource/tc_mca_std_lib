@@ -367,7 +367,6 @@ fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q)
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
-
 //Check ethercat master device state
 bEcLinkError := nEcMasterDevState.0;
 bEcIOlocked := nEcMasterDevState.1;
@@ -383,9 +382,6 @@ bEcSlaveSafeOP := nEcMasterDevState.10;
 bEcSlaveError := nEcMasterDevState.11;
 bEcDCnotInSync := nEcMasterDevState.12;
 
-bEcMasterError := nEcMasterDevState > 0;
-
-
 //Check ethercat slave device state
 fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q, PT:=T#100MS);
 fbGetEcSlaveStates(
@@ -395,7 +391,7 @@ fbGetEcSlaveStates(
     bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
-fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#1S);
+fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
 IF fbEtherCATAlarmDelayTON.Q THEN
     bStartEtherCATdelayTON := FALSE;
     bEtherCATInitialized := TRUE;
@@ -405,6 +401,8 @@ IF NOT bEtherCATInitialized THEN
     bStartEtherCATdelayTON := TRUE;
     RETURN;
 END_IF
+
+bEcMasterError := nEcMasterDevState > 0;
 
 // After startup timeout, reset variables before loop
 bSlaveStateNotOP := FALSE;
