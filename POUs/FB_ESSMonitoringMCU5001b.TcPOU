@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_ESSMonitoringMCU5001a" Id="{dc25224c-2805-4e0c-98fe-daa6f852a4e2}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5001a
+  <POU Name="FB_ESSMonitoringMCU5001b" Id="{6ab08be7-abf3-01b6-1c74-7b22ef617170}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5001b
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -35,10 +35,6 @@ VAR
     b48VDC1_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
     b48VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 6^Input'}
-    b48VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 7^Input'}
-    b48VDC4_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 2^Input'}
@@ -49,12 +45,6 @@ VAR
     bFuse4_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
     bFuse5_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 6^Input'}
-    bFuse6_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 7^Input'}
-    bFuse7_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 8^Input'}
-    bFuse8_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
     bEStop1Active AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
@@ -160,7 +150,7 @@ mMonitorCPU();
 mMonitorEtherCAT();
 ]]></ST>
     </Implementation>
-    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
+    <Method Name="mAlarm" Id="{c2e08f42-91f5-0afb-103b-cdd7d9da8183}">
       <Declaration><![CDATA[METHOD mAlarm
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
@@ -175,7 +165,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mAlarmActive" Id="{aff05498-00f1-0703-1f58-de4c9fc3cb2d}">
+    <Method Name="mAlarmActive" Id="{202abe56-e9f0-0cd2-059a-b50a721178f0}">
       <Declaration><![CDATA[METHOD mAlarmActive
 VAR_INPUT
     i: UINT;
@@ -245,7 +235,7 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
+    <Method Name="mLed" Id="{40828ff1-bb63-01aa-208b-786ae86e724f}">
       <Declaration><![CDATA[METHOD mLed
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
@@ -260,7 +250,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorAlarms" Id="{542f94fc-2447-0df7-2067-48b1bdc9c1ba}">
+    <Method Name="mMonitorAlarms" Id="{13709901-6203-03b3-2f5e-7e6108c7d447}">
       <Declaration><![CDATA[METHOD mMonitorAlarms
 VAR
     i: UINT := 0;
@@ -335,7 +325,7 @@ bAcknowledgeLED :=
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorCPU" Id="{a61c27e8-4c84-0867-118e-ec0a5a4d454e}">
+    <Method Name="mMonitorCPU" Id="{5148cdf9-fac3-094d-2e7b-896d35da1c31}">
       <Declaration><![CDATA[METHOD mMonitorCPU
 
 VAR_INST
@@ -357,7 +347,7 @@ bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorEtherCAT" Id="{27ca7522-14a9-0d7c-33ae-0dd2d861dfe1}">
+    <Method Name="mMonitorEtherCAT" Id="{c010f9d4-e43d-0ade-1a29-a78467a6d2dc}">
       <Declaration><![CDATA[METHOD mMonitorEtherCAT
 VAR
     i: UINT := 0;
@@ -450,7 +440,7 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
+    <Method Name="mPrintErrorMessage" Id="{2b37444b-87bd-0c6f-08a3-a79a1fc2e2ba}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
     bPrintLog : BOOL;
@@ -477,7 +467,7 @@ ADSLOGSTR(
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetReset" Id="{bc20beb2-4ad1-01ee-3c55-7ebdd0373966}">
+    <Method Name="mSetReset" Id="{f13314e8-198a-083b-1ff4-a9e7da04aaff}">
       <Declaration><![CDATA[METHOD mSetReset
 VAR_INPUT
     bOk: BOOL;
@@ -506,7 +496,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
+    <Method Name="mSetResetAlarmsLeds" Id="{b719bf62-3239-0e9a-1dee-3d271cffebf9}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
     index: UINT;
@@ -522,8 +512,8 @@ mSetReset(stAlarmList := aAlarmList[3], bOk := b24VDC3_OK);
 
 mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
 mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
-mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
-mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
+//mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
+//mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
 mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
@@ -534,9 +524,9 @@ mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
 mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
 mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
 mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
-mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
-mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
-mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
+//mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
+//mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
+//mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
 
 mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Active);
 mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Active);
