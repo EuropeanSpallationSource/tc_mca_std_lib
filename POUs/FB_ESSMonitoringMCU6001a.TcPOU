@@ -507,7 +507,7 @@ mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
 //mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
 //mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
-//mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_Error);
+//mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 

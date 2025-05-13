@@ -60,7 +60,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
     bSTO1Active AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
-    bMCBFan_Error AT %I*: BOOL;
+    bMCBFan_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
     bSPD_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
@@ -525,7 +525,7 @@ mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
 mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
 mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
-mSetReset(stAlarmList := aAlarmList[8], bOk := NOT bMCBFan_Error);
+mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 
