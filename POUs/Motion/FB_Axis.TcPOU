@@ -452,6 +452,7 @@ VAR_INST
     fMAX_TEMP_LIMIT: LREAL := 850.0;
     fMIN_TEMP_LIMIT: LREAL := -200.0;
     bError: BOOL := FALSE;
+    bAxisWasDisabled: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -480,7 +481,7 @@ IF bEnableTemperatureDisable THEN
             END_IF
         END_IF
 
-        //Reset bError to display Error message every 10 seconds if error is still there
+        //Reset bError to display Error message every 30 seconds if error is still there
         IF fbErrorTON.Q THEN
             bError := FALSE;
         END_IF
@@ -492,17 +493,33 @@ IF bEnableTemperatureDisable THEN
     END_IF
 
     //Check scaled tempearture value agianst max. allowed temperature
-    IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature THEN
+    IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT bAxisWasDisabled THEN
         bError := FALSE;
         sErrorMessage := '';
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
         mControl_TemperatureDisable := FALSE;
         RETURN;
+    ELSIF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND bAxisWasDisabled THEN
+        IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
+            bError := FALSE;
+            sErrorMessage := '';
+            _stAxis.stStatus.fActTemperature := fTemperatureValue;
+            _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
+            mControl_TemperatureDisable := FALSE;
+            bAxisWasDisabled := FALSE;
+            RETURN;
+        ELSE
+            bError := TRUE;
+            _stAxis.stStatus.fActTemperature := fTemperatureValue;
+            _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+            mControl_TemperatureDisable := TRUE;
+        END_IF
     ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
         bError := TRUE;
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+        bAxisWasDisabled := TRUE;
         IF fbErrorTrig.Q THEN
             sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
             ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
