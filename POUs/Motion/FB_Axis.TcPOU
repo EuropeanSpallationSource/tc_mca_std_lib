@@ -467,6 +467,7 @@ IF bEnableTemperatureDisable THEN
     IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+        _stAxis.stError.bTempSensorError := TRUE;
         bError := TRUE;
 
         IF fbErrorTrig.Q THEN
@@ -486,6 +487,8 @@ IF bEnableTemperatureDisable THEN
 
         mControl_TemperatureDisable := TRUE;
         RETURN;
+    ELSE
+        _stAxis.stError.bTempSensorError := FALSE;
     END_IF
 
     //Check scaled tempearture value agianst max. allowed temperature
