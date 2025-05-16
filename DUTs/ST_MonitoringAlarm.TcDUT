@@ -1,18 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="ST_MonitoringAlarm" Id="{7cf4bf56-9560-4e49-afbe-1511a605e206}">
-    <Declaration><![CDATA[
-TYPE ST_MonitoringAlarm :
+    <Declaration><![CDATA[TYPE ST_MonitoringAlarm :
 STRUCT
     bAlarmSet: BOOL;
     bAlarmReset: BOOL;
-    nStatusLED: E_MonitoringLedFunction;
-    nWarningLED: E_MonitoringLedFunction;
-    nEmergencyLED: E_MonitoringLedFunction;
-    nAcknowledgeLED: E_MonitoringLedFunction;
+    bLedSet: BOOL;
+    bLedReset: BOOL;
+    eStatusLED: E_MonitorLed;
+    eErrorLED: E_MonitorLed;
+	eEmergencyLED: E_MonitorLed;
+	eAbnormalLED: E_MonitorLed;
+    eAcknowledgeLED: E_MonitorLed;
+    eEStopLED: E_MonitorLed := E_MonitorLed.eUndefined;
+    eWarningLED: E_MonitorLed; //Only used for MCU400x test crates
     nErrorID: INT;
     sErrorMsg: STRING;
     bAlarmActive: BOOL;
+    bLedActive: BOOL;
+    bLedAutoReset: BOOL := FALSE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
