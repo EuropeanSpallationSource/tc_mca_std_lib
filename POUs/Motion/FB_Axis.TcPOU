@@ -428,7 +428,7 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld
+        <ST><![CDATA[IF _stAxis.stControl.bEnable AND NOT bEnableCmdOld
     AND NOT _stAxis.stError.bExternalBrakeFailure THEN
     eExternalBrake := E_ExternalBrake.eDelayBrakeOpening;
     bStartDelayBrakeOpening := FALSE;
