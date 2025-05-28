@@ -436,16 +436,16 @@ VAR_INPUT
 END_VAR
 VAR
     nAxisId: UINT;
-    fTemperatureScaledValue: LREAL;
-    fTemperatureValue: LREAL;
+    fTemperatureScaledValue: REAL;
+    fTemperatureValue: REAL;
     sErrorMessage: STRING(255);
     sErrorMessageAxis: STRING;
 END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: LREAL := 850.0;
-    fMIN_TEMP_LIMIT: LREAL := -200.0;
+    fMAX_TEMP_LIMIT: REAL := 850.0;
+    fMIN_TEMP_LIMIT: REAL := -200.0;
     bError: BOOL := FALSE;
     bAxisWasDisabled: BOOL := FALSE;
 END_VAR
@@ -454,7 +454,7 @@ END_VAR
         <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
 sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(nAxisId));
 fbErrorTrig(clk:=bError);
-fTemperatureScaledValue := INT_TO_LREAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
+fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
 fbErrorTON(in:=bError, PT:=T#30S);
 

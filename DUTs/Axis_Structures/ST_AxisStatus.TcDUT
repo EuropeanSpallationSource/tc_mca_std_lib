@@ -28,7 +28,7 @@ STRUCT
     bCoupledGear3: BOOL; //True if coupled to gear 3
     bCoupledGear4: BOOL; //True if coupled to gear 4
     fActPosition: LREAL; //Actual position value
-    fActTemperature: LREAL; //Actual Temperature
+    fActTemperature: REAL; //Actual Temperature
     bHighTempAxisDisabled: BOOL := FALSE; //True if the axis is disabled due to high temperature
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter value from the stepper drive
