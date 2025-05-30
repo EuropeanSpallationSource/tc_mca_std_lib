@@ -112,6 +112,8 @@ VAR
     bCmdHandlerMovePermit: BOOL := FALSE;
     bExternalBrakeReady: BOOL := FALSE;
     bAirpadReady: BOOL := FALSE;
+    bAirpadPressureError: BOOL := FALSE;
+    bAirpadPressurizeTimeout: BOOL := FALSE;
 
 END_VAR
 VAR CONSTANT
@@ -187,89 +189,94 @@ VAR_INPUT
 END_VAR
 
 VAR_OUTPUT
-    bAirpadReady: BOOL;
+    bReady: BOOL;
+    bPressureError: BOOL;
+    bPressurizeTimeout: BOOL;
 END_VAR
 
 VAR_INST
     eAirpad: E_Airpad := E_Airpad.eDepressurize;
     TON_PressurizeAirpad: TON;
+    TON_PressurizeTimeout: TON;
+    RTRIG_MoveRequest: R_TRIG;
+    bUnexpectedLossOfPressure: BOOL;
+    bNotPressurizedInTime: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Feedback sensor interlocks move - should that be handled here?
+        <ST><![CDATA[// FIX override
+RTRIG_MoveRequest(CLK :=
+    bMoveRequest);
+
+IF RTRIG_MoveRequest.Q THEN
+    bUnexpectedLossOfPressure := FALSE;
+    bNotPressurizedInTime := FALSE;
+END_IF
+
 TON_PressurizeAirpad(
-    IN := bMoveRequest,
+    IN :=
+        bMoveRequest
+        AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+            AND _stAxis.stInputs.bAirpadPressurized)
+        OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
     PT := _stAxis.stConfig.stAirpadBrake.tAirpadOnDelayTime);
+
+TON_PressurizeTimeout(
+    IN := eAirpad = E_Airpad.ePressurize,
+    PT := _stAxis.stConfig.stAirpadBrake.tAirpadPressurizeTimeout);
 
 CASE eAirpad OF
 
     E_Airpad.eDepressurize:
-        // No movement, no error -> Airpad off
+        // No movement requested -> Airpad off
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError THEN
-            eAirpad := E_Airpad.eAirpadOnError;
-        ELSIF bMoveRequest THEN
+        IF bMoveRequest
+            AND NOT _stAxis.stStatus.bError
+            AND NOT bUnexpectedLossOfPressure
+            AND NOT bNotPressurizedInTime THEN
             _stAxis.stStatus.bAirpadTimeoutError := FALSE;
-            eAirpad := E_Airpad.eAirpadOnMoveRequest;
+            eAirpad := E_Airpad.ePressurize;
         END_IF
+
 
     E_Airpad.ePressurize:
-        // Movement / error -> Pressurize airpad
+        // Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := FALSE;
 
-        IF TON_PressurizeAirpad.Q
-            AND NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected THEN
-            IF _stAxis.stStatus.bError THEN
-                eAirpad := E_Airpad.eAirpadOnError;
-            ELSIF bMoveRequest THEN
-                eAirpad := E_Airpad.eAirpadOnMoveRequest;
-            END_IF
-        ELSIF TON_PressurizeAirpad.Q
-            AND _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-            AND _stAxis.stInputs.bAirpadPressurized THEN
-            IF _stAxis.stStatus.bError THEN
-                eAirpad := E_Airpad.eAirpadOnError;
-            ELSIF bMoveRequest THEN
-                eAirpad := E_Airpad.eAirpadOnMoveRequest;
-            END_IF
-        ELSIF TON_PressurizeAirpad.Q
-            AND _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-            AND NOT _stAxis.stInputs.bAirpadPressurized THEN
-            _stAxis.stStatus.bAirpadTimeoutError := TRUE;
+        IF _stAxis.stStatus.bError
+            OR NOT bMoveRequest THEN
             eAirpad := E_Airpad.eDepressurize;
+        ELSIF TON_PressurizeTimeout.Q THEN
+            bNotPressurizedInTime := TRUE;
+            eAirpad := E_Airpad.eDepressurize;
+        ELSIF TON_PressurizeAirpad.Q THEN
+            eAirpad := E_Airpad.eReady;
         END_IF
 
 
-    E_Airpad.eAirpadOnMoveRequest:
-        // Movement requested -> Airpad on
+    E_Airpad.eReady:
+        // Movement requested -> Airpad inflated
         _stAxis.stControl.bPressurizeAirpad := FALSE;
 
-        IF _stAxis.stStatus.bError THEN
-            eAirpad := E_Airpad.eAirpadOnError;
-        ELSIF NOT bMoveRequest THEN
+        IF _stAxis.stStatus.bError
+            OR NOT bMoveRequest THEN
             eAirpad := E_Airpad.eDepressurize;
-        END_IF
-
-
-    E_Airpad.eAirpadOnError:
-        // ErrorStop -> Airpad on
-        _stAxis.stControl.bPressurizeAirpad := FALSE;
-
-        IF NOT (_stAxis.stStatus.bError)
-            AND bMoveRequest THEN
-            eAirpad := E_Airpad.eAirpadOnMoveRequest;
-        ELSIF NOT (_stAxis.stStatus.bError)
-            AND NOT bMoveRequest THEN
+        ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+            AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
+            bUnexpectedLossOfPressure := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         END_IF
 
 END_CASE
 
-bAirpadReady :=
-    (eAirpad = E_Airpad.eAirpadOnMoveRequest OR eAirpad = E_Airpad.eAirpadOnError)
+bReady :=
+    eAirpad = E_Airpad.eReady
     AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected AND _stAxis.stInputs.bAirpadPressurized)
         OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
+// TODO: Should we check for unexpected pressure when in depressurize state?
+bPressureError := bUnexpectedLossOfPressure;
+bPressurizeTimeout := bNotPressurizedInTime;
 ]]></ST>
       </Implementation>
     </Method>
@@ -736,9 +743,13 @@ ELSE
 END_IF
 
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected THEN
-    mControl_Airpad(bMoveRequest :=
-        (bCmdHandlerWaitingForMovePermit OR bCmdHandlerMovePermit)
-        AND _stAxis.stStatus.bEnabled);
+    mControl_Airpad(
+        bMoveRequest :=
+            (bCmdHandlerWaitingForMovePermit OR bCmdHandlerMovePermit)
+            AND _stAxis.stStatus.bEnabled,
+        bReady => bAirpadReady,
+        bPressureError => bAirpadPressureError,
+        bPressurizeTimeout => bAirpadPressurizeTimeout);
 END_IF
 
 fbPower.Enable := bEnableAmpCmd;

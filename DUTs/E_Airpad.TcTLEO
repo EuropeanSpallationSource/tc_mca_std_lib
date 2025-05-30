@@ -7,8 +7,7 @@ TYPE E_Airpad :
 (
     eDepressurize := 0,
     ePressurize := 1,
-    eAirpadOnMoveRequest := 2,
-    eAirpadOnError := 3
+    eReady := 2
 );
 END_TYPE
 ]]></Declaration>
@@ -27,13 +26,8 @@ END_TYPE
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eAirpadOnMoveRequest"</v>
+              <v n="TextID">"eReady"</v>
               <v n="TextDefault">"2"</v>
-              <l n="LanguageTexts" t="ArrayList" />
-            </o>
-            <o>
-              <v n="TextID">"eAirpadOnError"</v>
-              <v n="TextDefault">"3"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
