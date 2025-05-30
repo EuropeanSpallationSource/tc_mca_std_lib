@@ -6,6 +6,7 @@ STRUCT
     //Outputs & Status
     bAxisInitialized: BOOL := FALSE; //True when all parameters from actReadMcParameters are valid
     bEnabled: BOOL; //Axis drive enabled
+    bAxisReadyToMove: BOOL; //Axis enabled and input ok from additional equipment (e.g. airpad, brake).
     bCommandAborted: BOOL; //Command aborted output of the eCommand function blocks
     bBusy: BOOL; //Axis busy (eCommand function block is active)
     bDone: BOOL; //Last eCommand function block executed successfully
@@ -38,6 +39,7 @@ STRUCT
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
     bAirpadTimeoutError: BOOL; //True if airpad did not report pressurized in time
     bExternalBrakeTimeoutError: BOOL; //True if external brake id not report released in time
+    bCommandHandlerBufferingCommand: BOOL; //True if CommandHandler is waiting on a permit before releasing the command
     bCommandHandlerTimeoutError: BOOL; //True if CommandHandler did not receive a permit in time
     eInternalMotionCommand: E_MotionFunctions;
 END_STRUCT
