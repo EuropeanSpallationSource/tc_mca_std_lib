@@ -5,10 +5,10 @@
 {attribute 'strict'}
 TYPE E_ExternalBrake :
 (
-    eBrakeClosed := 0,
-    eDelayBrakeOpening := 1,
-    eBrakeOpened := 2,
-    eBrakeCloseDelayAmplifier := 3
+    eBrakeEngaged := 0,
+    eDelayBrakeRelease := 1,
+    eBrakeReleased := 2,
+    eCloseBrakeDelayAmplifier := 3
 );
 END_TYPE
 ]]></Declaration>
@@ -17,22 +17,22 @@ END_TYPE
         <o xml:space="preserve" t="TextListEnumerationTextListObject">
           <l n="TextList" t="ArrayList" cet="TextListRow">
             <o>
-              <v n="TextID">"eBrakeClosed"</v>
+              <v n="TextID">"eBrakeEngaged"</v>
               <v n="TextDefault">"0"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eDelayBrakeOpening"</v>
+              <v n="TextID">"eDelayBrakeRelease"</v>
               <v n="TextDefault">"1"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eBrakeOpened"</v>
+              <v n="TextID">"eBrakeReleased"</v>
               <v n="TextDefault">"2"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eBrakeCloseDelayAmplifier"</v>
+              <v n="TextID">"eCloseBrakeDelayAmplifier"</v>
               <v n="TextDefault">"3"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
