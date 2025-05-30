@@ -105,7 +105,6 @@ VAR
 
     bInternalExecute: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
-    bAxisReadyToMove: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
     bCmdHandlerWaitingForMovePermit: BOOL := FALSE;
@@ -345,7 +344,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: also abort with something related to bEnable?
-RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
+RTRIG_Execute(CLK :=
+    _stAxis.stControl.bExecute);
 IF RTRIG_Execute.Q THEN
     bExecuteCmdHandler := TRUE;
     bInternalMovePermit := FALSE;
@@ -363,7 +363,10 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eGearOut,
         E_MotionFunctions.eHome :
             IF (bPermitRequired AND bPermit)
-                OR (NOT bPermitRequired) THEN
+                OR NOT bPermitRequired
+                // If a permit is required, but the drive has not been enabled before giving
+                // a move command, let the command through to alarm the operator.
+                OR (bPermitRequired AND NOT _stAxis.stStatus.bEnabled) THEN
                 _stAxis.stStatus.eInternalMotionCommand := _stAxis.stControl.eCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
@@ -373,6 +376,7 @@ IF bExecuteCmdHandler THEN
                 bInternalWaitingForMovePermit := TRUE;
                 bInternalMovePermit := FALSE;
             END_IF
+
         E_MotionFunctions.eWriteParameter,
         E_MotionFunctions.eReadParameter,
         E_MotionFunctions.eReadCoEParameters,
@@ -385,13 +389,18 @@ TON_Timeout(
     IN := bInternalWaitingForMovePermit,
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
-IF TON_Timeout.Q
-    OR _stAxis.stControl.bHalt
-    OR _stAxis.stControl.bStop THEN
+IF TON_Timeout.Q THEN
     bExecuteCmdHandler := FALSE;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
+END_IF
+
+IF _stAxis.stControl.bHalt
+    OR _stAxis.stControl.bStop THEN
+    bExecuteCmdHandler := FALSE;
+    bInternalWaitingForMovePermit := FALSE;
+    bInternalMovePermit := FALSE;
 END_IF
 
 FTRIG_Moving(CLK :=
@@ -757,11 +766,11 @@ fbPower.Enable := bEnableAmpCmd;
 fbPower.Enable_Negative :=
     (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit)
     AND NOT _stAxis.stStatus.bInterlockedBwd
-    AND bAxisReadyToMove;
+    AND _stAxis.stStatus.bAxisReadyToMove;
 fbPower.Enable_Positive :=
     (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit)
     AND NOT _stAxis.stStatus.bInterlockedFwd
-    AND bAxisReadyToMove;
+    AND _stAxis.stStatus.bAxisReadyToMove;
 fbPower.Override := _stAxis.stConfig.fOverride;
 
 fbPower(Axis := _stAxis.Axis);
@@ -1530,28 +1539,31 @@ _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
+_stAxis.stStatus.bCommandHandlerBufferingCommand := bCmdHandlerWaitingForMovePermit;
+
+{info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bAxisReadyToMove :=
+    _stAxis.stStatus.bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND NOT _stAxis.stControl.bPressurizeAirpad
         AND bAirpadReady;
 ELSIF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bAxisReadyToMove :=
+    _stAxis.stStatus.bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
         AND bExternalBrakeReady;
 ELSIF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bAxisReadyToMove :=
+    _stAxis.stStatus.bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
         AND bExternalBrakeReady
         AND NOT _stAxis.stControl.bPressurizeAirpad
         AND bAirpadReady;
 ELSE
-    bAxisReadyToMove := _stAxis.stStatus.bEnabled;
+    _stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled;
 END_IF
 
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
@@ -1746,7 +1758,7 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
-    bPermit := bAxisReadyToMove,
+    bPermit := _stAxis.stStatus.bAxisReadyToMove,
     bPermitRequired :=
         _stAxis.stConfig.stAirpadBrake.bAirpadConnected
         OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
