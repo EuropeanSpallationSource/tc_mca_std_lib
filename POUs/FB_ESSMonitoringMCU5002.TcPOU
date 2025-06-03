@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <POU Name="FB_ESSMonitoringMCU5001a" Id="{dc25224c-2805-4e0c-98fe-daa6f852a4e2}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5001a
+  <POU Name="FB_ESSMonitoringMCU5002" Id="{ff073033-8784-0815-17c1-261dbe6d3cf7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5002
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
 END_VAR
@@ -15,67 +15,53 @@ VAR_OUTPUT
 END_VAR
 VAR
     //Outputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 1^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 1^Output'}
     bStatusLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 4^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF205 (EL2014)^DIG Outputs^Channel 4^Output'}
     bAcknowledgeLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 2^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 2^Output'}
     bEStopLED AT %Q*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 4^Output'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF206 (EL2014)^DIG Outputs^Channel 4^Output'}
     bErrorLED AT %Q*: BOOL;
 
     //Inputs
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 1^Input'}
     b24VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 2^Input'}
     b24VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 3^Input'}
     b24VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 4^Input'}
     b48VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
-    b48VDC2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 6^Input'}
-    b48VDC3_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 7^Input'}
-    b48VDC4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 2^Input'}
-    bFuse2_Error AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 3^Input'}
-    bFuse3_Error AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 4^Input'}
-    bFuse4_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
-    bFuse5_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 6^Input'}
-    bFuse6_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 7^Input'}
-    bFuse7_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 8^Input'}
-    bFuse8_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
-    bEStop1Active AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
-    bSTO1Active AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 2^Input'}
+    bFuse2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 3^Input'}
+    bFuse3_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 5^Input'}
+    bMCB_VFD_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 6^Input'}
     bMCBFan_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 7^Input'}
     bSPD_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 8^Input'}
     bDoorClosed AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 5^Input'}
+    bEStop1Active AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 6^Input'}
+    bSTO1Active AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 8^Input'}
     bAcknowledgeButton AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 1^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 2^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 2^Value'}
     nTemp2 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 3^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 3^Value'}
     nTemp3 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 4^Value'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 4^Value'}
     nTemp4 AT %I*: INT;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
 
     aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
@@ -160,7 +146,7 @@ mMonitorCPU();
 mMonitorEtherCAT();
 ]]></ST>
     </Implementation>
-    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
+    <Method Name="mAlarm" Id="{e90b8d96-c0cd-0038-3b17-396daf0c3a7c}">
       <Declaration><![CDATA[METHOD mAlarm
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
@@ -175,7 +161,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mAlarmActive" Id="{aff05498-00f1-0703-1f58-de4c9fc3cb2d}">
+    <Method Name="mAlarmActive" Id="{15c29a64-0cdf-087c-0a27-9160f712e9e9}">
       <Declaration><![CDATA[METHOD mAlarmActive
 VAR_INPUT
     i: UINT;
@@ -245,7 +231,7 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
+    <Method Name="mLed" Id="{4eca180e-090c-0e83-385a-889c66ba0366}">
       <Declaration><![CDATA[METHOD mLed
 VAR_IN_OUT
     stAlarmData: ST_MonitoringAlarm;
@@ -260,7 +246,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorAlarms" Id="{542f94fc-2447-0df7-2067-48b1bdc9c1ba}">
+    <Method Name="mMonitorAlarms" Id="{e77ca3a2-1c43-064d-0940-1162728d7302}">
       <Declaration><![CDATA[METHOD mMonitorAlarms
 VAR
     i: UINT := 0;
@@ -335,7 +321,7 @@ bAcknowledgeLED :=
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorCPU" Id="{a61c27e8-4c84-0867-118e-ec0a5a4d454e}">
+    <Method Name="mMonitorCPU" Id="{67191ed0-305c-020b-033f-b835b113e789}">
       <Declaration><![CDATA[METHOD mMonitorCPU
 
 VAR_INST
@@ -357,7 +343,7 @@ bCycleTimeExceeded := _TaskInfo[fbGetCurTaskIndex.index].CycleTimeExceeded;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorEtherCAT" Id="{27ca7522-14a9-0d7c-33ae-0dd2d861dfe1}">
+    <Method Name="mMonitorEtherCAT" Id="{0b8a1ac8-9811-0d55-20a5-80a4211f69c8}">
       <Declaration><![CDATA[METHOD mMonitorEtherCAT
 VAR
     i: UINT := 0;
@@ -450,7 +436,7 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
+    <Method Name="mPrintErrorMessage" Id="{46906a39-9fc6-03cd-3be4-3da499d2b31c}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
     bPrintLog : BOOL;
@@ -477,7 +463,7 @@ ADSLOGSTR(
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetReset" Id="{bc20beb2-4ad1-01ee-3c55-7ebdd0373966}">
+    <Method Name="mSetReset" Id="{7c3dd36f-c010-030e-3421-20fc63750395}">
       <Declaration><![CDATA[METHOD mSetReset
 VAR_INPUT
     bOk: BOOL;
@@ -506,7 +492,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
+    <Method Name="mSetResetAlarmsLeds" Id="{327cac97-0d90-07a1-35e5-de27819e1432}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
     index: UINT;
@@ -521,22 +507,22 @@ mSetReset(stAlarmList := aAlarmList[2], bOk := b24VDC2_OK);
 mSetReset(stAlarmList := aAlarmList[3], bOk := b24VDC3_OK);
 
 mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
-mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
-mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
-mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
+//mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
+//mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
+//mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
 
 mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
 mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 
 mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
-mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
-mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
-mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
-mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
-mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
-mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
-mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
+mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
+mSetReset(stAlarmList := aAlarmList[13], bOk := bFuse3_OK);
+//mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
+//mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
+//mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
+//mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
+//mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
 
 mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Active);
 mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Active);
@@ -548,7 +534,7 @@ mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
 mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
 
 //mSetReset(stAlarmList := aAlarmList[32], bOk := bMCB19inch_OK);
-//mSetReset(stAlarmList := aAlarmList[33], bOk := bMCB_VFD_OK);
+mSetReset(stAlarmList := aAlarmList[33], bOk := bMCB_VFD_OK);
 
 aTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
