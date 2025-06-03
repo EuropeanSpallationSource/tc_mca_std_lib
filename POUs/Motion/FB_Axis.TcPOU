@@ -234,7 +234,7 @@ TON_PressurizeTimeout(
 
 TON_Depressurize(
     IN := NOT bPressureOnRequest,
-    PT := T#2S);
+    PT := _stAxis.stConfig.stAirpadBrake.tAirpadOffHysteresis);
 
 CASE eAirpad OF
 
