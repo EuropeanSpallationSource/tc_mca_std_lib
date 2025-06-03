@@ -39,17 +39,17 @@ VAR
     bFuse2_Error AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 3^Input'}
     bFuse3_Error AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 5^Input'}
     bMCB_VFD_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 6^Input'}
     bMCBFan_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 7^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 7^Input'}
     bSPD_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 8^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 8^Input'}
     bDoorClosed AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 5^Input'}
     bEStop1Active AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 6^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 6^Input'}
     bSTO1Active AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 8^Input'}
     bAcknowledgeButton AT %I*: BOOL;
