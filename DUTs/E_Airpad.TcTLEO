@@ -7,7 +7,7 @@ TYPE E_Airpad :
 (
     eDepressurize := 0,
     ePressurize := 1,
-    eReady := 2
+    eReadyToMove := 2
 );
 END_TYPE
 ]]></Declaration>
@@ -26,7 +26,7 @@ END_TYPE
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eReady"</v>
+              <v n="TextID">"eReadyToMove"</v>
               <v n="TextDefault">"2"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
