@@ -36,9 +36,9 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 1^Input'}
     bFuse1_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 2^Input'}
-    bFuse2_Error AT %I*: BOOL;
+    bFuse2_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 3^Input'}
-    bFuse3_Error AT %I*: BOOL;
+    bFuse3_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 5^Input'}
     bMCB19inch_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 6^Input'}
@@ -517,8 +517,8 @@ mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
 mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 
 mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
-mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
-mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
+mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
+mSetReset(stAlarmList := aAlarmList[13], bOk := bFuse3_OK);
 //mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
 //mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
 //mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
