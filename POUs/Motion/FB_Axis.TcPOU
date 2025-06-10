@@ -108,9 +108,6 @@ VAR
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
     bCmdHandlerWaitingForMovePermit: BOOL := FALSE;
-    bCmdHandlerMovePermit: BOOL := FALSE;
-    bExternalBrakeReady: BOOL := FALSE;
-    bAirpadReady: BOOL := FALSE;
     bAirpadPressureError: BOOL := FALSE;
     bAirpadPressurizeTimeout: BOOL := FALSE;
 
