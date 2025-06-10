@@ -335,7 +335,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       </Implementation>
     </Method>
     <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. auto-enable, external brake or airpad
+      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. airpad or external brake
 METHOD mControl_CommandHandler
 
 VAR_INPUT
@@ -358,8 +358,7 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO: also abort with something related to bEnable?
-// FIX when Relative Vel = 0 and Move Rel, Command Handler buffering, nothing happens.
+        <ST><![CDATA[// FIX when Relative Vel = 0 and Move Rel, Command Handler buffering, nothing happens.
 
 RTRIG_Execute(CLK :=
     _stAxis.stControl.bExecute);
@@ -438,7 +437,8 @@ bMovePermit := bInternalMovePermit;
       </Implementation>
     </Method>
     <Method Name="mControl_ExternalBrake" Id="{18ae79d4-85f5-0b8b-295a-ce90fc10f203}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_ExternalBrake: BOOL
+      <Declaration><![CDATA[// Controls external brake
+METHOD mControl_ExternalBrake: BOOL
 
 VAR_OUTPUT
     bReady: BOOL;
