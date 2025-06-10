@@ -195,6 +195,7 @@ VAR_INST
     RTRIG_PressureRequest: R_TRIG;
     bNotPressurizedInTime: BOOL := FALSE;
     bPressureOnRequest: BOOL := FALSE;
+    RTRIG_ManualControl: R_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -202,6 +203,15 @@ END_VAR
     RETURN;
 END_IF
 
+RTRIG_ManualControl(CLK := _stAxis.stControl.bAirpadManualControl);
+// Use snapshot of bMoveRequest when bAirpadManualPressureOn selected
+IF RTRIG_ManualControl.Q THEN
+    _stAxis.stControl.bAirpadManualPressureOn := bMoveRequest;
+ELSIF NOT _stAxis.stControl.bAirpadManualControl THEN
+    _stAxis.stControl.bAirpadManualPressureOn := FALSE;
+END_IF
+
+bPressureOnRequest :=
     (bMoveRequest
         AND NOT bManualControl)
     OR (bManualControl
