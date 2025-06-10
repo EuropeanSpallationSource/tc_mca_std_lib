@@ -339,7 +339,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
 METHOD mControl_CommandHandler
 
 VAR_INPUT
-    bPermit: BOOL := FALSE;
+    bAxisPermittedToMove: BOOL := FALSE;
     bPermitRequired: BOOL := FALSE;
 END_VAR
 
@@ -378,7 +378,7 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eGearInMultiMaster,
         E_MotionFunctions.eGearOut,
         E_MotionFunctions.eHome :
-            IF (bPermitRequired AND bPermit)
+            IF (bPermitRequired AND bAxisPermittedToMove)
                 OR NOT bPermitRequired
                 // If a permit is required, but the drive has not been enabled before giving
                 // a move command, let the command through to alarm the operator.
@@ -1789,12 +1789,13 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
-    bPermit := _stAxis.stStatus.bAxisReadyToMove,
+    bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove,
     bPermitRequired :=
         _stAxis.stConfig.stAirpadBrake.bAirpadConnected
         OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
-    bWaitingForMovePermit => bCmdHandlerWaitingForMovePermit,
-    bMovePermit => bCmdHandlerMovePermit);
+    bWaitingForMovePermit => _stAxis.stStatus.bCommandHandlerBufferingCommand,
+    bMovePermit => _stAxis.stStatus.bCommandHandlerMovePermit);
+
 stMcStatusPower := mControl_Power();
 
 stMcStatusHalt := mMove_Halt();
