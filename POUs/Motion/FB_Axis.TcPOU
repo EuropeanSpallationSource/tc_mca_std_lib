@@ -198,7 +198,10 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bPressureOnRequest :=
+        <ST><![CDATA[IF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected THEN
+    RETURN;
+END_IF
+
     (bMoveRequest
         AND NOT bManualControl)
     OR (bManualControl
