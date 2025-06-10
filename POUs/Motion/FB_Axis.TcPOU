@@ -754,42 +754,17 @@ END_FOR
     </Method>
     <Method Name="mControl_Power" Id="{173f47fd-8a32-061e-2710-dce09d214d5b}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
-VAR_INST
-    RTRIG_ManualControl: R_TRIG;
-    bAirpadMoveRequest: BOOL := FALSE;
-END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF mControl_TemperatureDisable(_stAxis.stConfig.bEnableTemperatureDisable) THEN
-    _stAxis.stControl.bEnable:= FALSE;
+    _stAxis.stControl.bEnable := FALSE;
 END_IF
 
 IF _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    bEnableAmpCmd := mControl_ExternalBrake(bReady => bExternalBrakeReady);
+    bEnableAmpCmd :=
+        mControl_ExternalBrake(bReady => _stAxis.stStatus.bExternalBrakeReady);
 ELSE
     bEnableAmpCmd := _stAxis.stControl.bEnable;
-END_IF
-
-IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected THEN
-    bAirpadMoveRequest :=
-        (bCmdHandlerWaitingForMovePermit
-            OR bCmdHandlerMovePermit)
-        AND _stAxis.stStatus.bEnabled;
-    RTRIG_ManualControl(CLK := _stAxis.stControl.bAirpadManualControl);
-    // Use snapshot of bMoveRequest when bAirpadManualPressureOn selected
-    IF RTRIG_ManualControl.Q THEN
-        _stAxis.stControl.bAirpadManualPressureOn := bAirpadMoveRequest;
-    ELSIF NOT _stAxis.stControl.bAirpadManualControl THEN
-        _stAxis.stControl.bAirpadManualPressureOn := FALSE;
-    END_IF
-
-    mControl_Airpad(
-        bMoveRequest := bAirpadMoveRequest,
-        bManualControl := _stAxis.stControl.bAirpadManualControl,
-        bManualPressureOn := _stAxis.stControl.bAirpadManualPressureOn,
-        bReady => bAirpadReady,
-        bPressureError => bAirpadPressureError,
-        bPressurizeTimeout => bAirpadPressurizeTimeout);
 END_IF
 
 fbPower.Enable := bEnableAmpCmd;
@@ -1797,6 +1772,15 @@ mControl_CommandHandler(
     bMovePermit => _stAxis.stStatus.bCommandHandlerMovePermit);
 
 stMcStatusPower := mControl_Power();
+
+mControl_Airpad(
+    bMoveRequest :=
+        (_stAxis.stStatus.bCommandHandlerBufferingCommand
+            OR _stAxis.stStatus.bCommandHandlerMovePermit)
+        AND _stAxis.stStatus.bEnabled,
+    bManualControl := _stAxis.stControl.bAirpadManualControl,
+    bManualPressureOn := _stAxis.stControl.bAirpadManualPressureOn,
+    bReady => _stAxis.stStatus.bAirpadReady);
 
 stMcStatusHalt := mMove_Halt();
 stMcStatusStop := mMove_Stop();
