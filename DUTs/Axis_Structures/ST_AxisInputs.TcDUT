@@ -7,6 +7,8 @@ STRUCT
     bLimitBwd AT %I*: BOOL; //Backward limit switch input (indicates backward movement limit reached)
     bHomeSensor AT %I*: BOOL; //Home sensor input (reference signal for homing operation)
     nTempPT100 AT %I*: INT; //Temperature sensor input
+    bAirpadPressurized AT %I*: BOOL; //Airpad pressurized
+    bBrakeReleased AT %I*: BOOL; //External brake released
 END_STRUCT
 END_TYPE
 ]]></Declaration>

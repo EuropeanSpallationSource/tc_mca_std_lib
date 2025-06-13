@@ -525,6 +525,202 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"CmdHandler"</v>
+              <v n="TextDefault">"Command Handler"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bCommandHandlerBufferingCommand"</v>
+              <v n="TextDefault">"Buffering Command"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAxisReadyToMove"</v>
+              <v n="TextDefault">"Axis Permit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bCommandHandlerTimeoutError"</v>
+              <v n="TextDefault">"Timeout Axis Permit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tCommandHandlerTimeout"</v>
+              <v n="TextDefault">"Timeout Buffering Command"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bCommandHandlerMovePermit"</v>
+              <v n="TextDefault">"Move Permit"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"Airpad"</v>
+              <v n="TextDefault">"Airpad"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadConnected"</v>
+              <v n="TextDefault">"Airpad Connected"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadFeedbackConnected"</v>
+              <v n="TextDefault">"Feedback Connected"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadManualControl"</v>
+              <v n="TextDefault">"Allow Manual Control"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadManualPressureOn"</v>
+              <v n="TextDefault">"Pressure On / Off"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tAirpadOnDelayTime"</v>
+              <v n="TextDefault">"Airpad On Delay"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadReady"</v>
+              <v n="TextDefault">"Airpad Ready"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadPressurized"</v>
+              <v n="TextDefault">"Feedback: Pressurized"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadPressureError"</v>
+              <v n="TextDefault">"Pressure Error"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bAirpadTimeoutError"</v>
+              <v n="TextDefault">"Pressurize Timeout"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tAirpadPressurizeTimeout"</v>
+              <v n="TextDefault">"Timeout Pressurizing Airpad"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tAirpadOffHysteresis"</v>
+              <v n="TextDefault">"Hysteresis When Not In Error"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"ExternalBrake"</v>
+              <v n="TextDefault">"External Brake"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bExternalBrakeConnected"</v>
+              <v n="TextDefault">"External Brake Connected"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bExternalBrakeFeedbackConnected"</v>
+              <v n="TextDefault">"Feedback Connected"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tBrakeOpenDelayTime"</v>
+              <v n="TextDefault">"Brake Release Delay"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tBrakeCloseAheadTime"</v>
+              <v n="TextDefault">"Amplifier Off Delay"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"tBrakeOpeningTimeoutWhenFeedback"</v>
+              <v n="TextDefault">"Opening Timeout When Feedback"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bExternalBrakeReady"</v>
+              <v n="TextDefault">"External Brake Ready"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bBrakeReleased"</v>
+              <v n="TextDefault">"Feedback: Released"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bExternalBrakeFailure"</v>
+              <v n="TextDefault">"Brake Error"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
+              <v n="TextID">"bExternalBrakeTimeoutError"</v>
+              <v n="TextDefault">"Timeout Releasing Brake"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">

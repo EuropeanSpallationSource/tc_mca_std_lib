@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_AirpadBrakeConfig" Id="{6e69cb4e-eda2-07f7-262c-b7dcc5182c8c}">
+    <Declaration><![CDATA[TYPE ST_AirpadBrakeConfig :
+STRUCT
+    bAirpadConnected: BOOL := FALSE; // An airpad is connected
+    bAirpadFeedbackConnected: BOOL := FALSE; // If feedback signal used for pressurized airpad
+    tAirpadOnDelayTime: TIME := T#0.1S; // Minimum airpad delay time when pressurizing (with or without feedback)
+    tAirpadOffHysteresis: TIME := T#1s; // Time to wait before depressurizing airpad after movement ready (when not in error)
+    tAirpadPressurizeTimeout: TIME := T#5S; // Maximum time pressurizing airpad
+    bExternalBrakeConnected: BOOL := FALSE; // An external brake is connected
+    bExternalBrakeFeedbackConnected: BOOL := FALSE; // If feedback signal used for released external brake
+    tBrakeOpenDelayTime: TIME := T#0.1S; // Delay time for command to release external brake after enabled amplifier
+    tBrakeCloseAheadTime: TIME := T#0.1S; // Delay time for command to disable amplifier after close brake command
+    tBrakeOpeningTimeoutWhenFeedback: TIME := T#5S; // If feedback used, timeout of brake released feedback signal after release command given
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
