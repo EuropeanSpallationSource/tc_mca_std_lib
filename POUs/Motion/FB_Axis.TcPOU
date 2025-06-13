@@ -335,7 +335,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       </Implementation>
     </Method>
     <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. airpad or external brake
+      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. auto-enable, airpad or external brake
 METHOD mControl_CommandHandler
 
 VAR_INPUT
