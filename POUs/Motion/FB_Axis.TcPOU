@@ -355,6 +355,8 @@ VAR_INST
     RTRIG_Execute: R_TRIG;
     FTRIG_Moving: F_TRIG;
     TON_Timeout: TON;
+    TON_DisableAxis: TON;
+    RTRIG_DisableAxis: R_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -436,6 +438,18 @@ IF FTRIG_Moving.Q
     bExecuteCmdHandler := FALSE;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
+END_IF
+
+TON_DisableAxis(
+    IN := _stAxis.stConfig.bAutoDisable
+        AND _stAxis.stStatus.bEnabled
+        AND NOT bInternalWaitingForMovePermit
+        AND NOT bInternalMovePermit,
+    PT := _stAxis.stConfig.tAutoDisableHysteresis);
+RTRIG_DisableAxis(CLK := TON_DisableAxis.Q);
+IF RTRIG_DisableAxis.Q
+    AND _stAxis.stConfig.bAutoDisable THEN
+    _stAxis.stControl.bEnable := FALSE;
 END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
