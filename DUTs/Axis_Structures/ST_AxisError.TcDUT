@@ -20,8 +20,6 @@ STRUCT
     nBacklashErrorID: UDINT; //Error ID for MC_BacklashCompensation function block
 //Error from the NC
     nNCErrorID : UDINT; //Error ID from the NC Axis_Ref Axis Status
-//PT100 temperature sensor error
-    bTempSensorError: BOOL; //Error when PT1OO is wrongly connected or disconnected
 END_STRUCT
 END_TYPE
 ]]></Declaration>

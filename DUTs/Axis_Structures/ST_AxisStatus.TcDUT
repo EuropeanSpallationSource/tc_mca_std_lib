@@ -30,6 +30,7 @@ STRUCT
     fActPosition: LREAL; //Actual position value
     fActTemperature: REAL; //Actual Temperature
     bHighTempAxisDisabled: BOOL := FALSE; //True if the axis is disabled due to high temperature
+    bTempSensorError: BOOL; //Error when PT1OO is wrongly connected or disconnected
     nEncoderRawCounter AT %I*: UDINT; //Raw encoder counter value
     nStepperDriveCounter AT %I*: UDINT; //Raw internal counter value from the stepper drive
     fActVelocity: LREAL; //Current Velocity of the Axis
