@@ -447,7 +447,6 @@ VAR_INST
     fMAX_TEMP_LIMIT: REAL := 850.0;
     fMIN_TEMP_LIMIT: REAL := -200.0;
     bError: BOOL := FALSE;
-    bAxisWasOverheated: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -488,21 +487,20 @@ IF bEnableTemperatureDisable THEN
     END_IF
 
     //Check scaled tempearture value agianst max. allowed temperature
-    IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT bAxisWasOverheated THEN
+    IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
         bError := FALSE;
         sErrorMessage := '';
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
         mControl_TemperatureDisable := FALSE;
         RETURN;
-    ELSIF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND bAxisWasOverheated THEN
+    ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
         IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
             bError := FALSE;
             sErrorMessage := '';
             _stAxis.stStatus.fActTemperature := fTemperatureValue;
             _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
             mControl_TemperatureDisable := FALSE;
-            bAxisWasOverheated := FALSE;
             RETURN;
         ELSE
             bError := TRUE;
@@ -514,7 +512,6 @@ IF bEnableTemperatureDisable THEN
         bError := TRUE;
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        bAxisWasOverheated := TRUE;
         IF fbErrorTrig.Q THEN
             sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
             ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
