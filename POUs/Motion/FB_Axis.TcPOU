@@ -451,11 +451,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
-sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(nAxisId));
+sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(nAxisId));
 fbErrorTrig(clk:=bError);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorTON(in:=bError, PT:=T#30S);
+fbErrorTON(in:=bError, PT:=T#30m);
 
 IF bEnableTemperatureDisable THEN
     //Check for disconnection or wrongly connected errors
