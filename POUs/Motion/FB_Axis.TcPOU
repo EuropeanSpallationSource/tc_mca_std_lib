@@ -444,8 +444,8 @@ END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: REAL := 850.0;
-    fMIN_TEMP_LIMIT: REAL := -200.0;
+    fDISCONNECTED_VALUE: REAL := 850.0;
+    fWRONG_CONNECTION_VALUE: REAL := -200.0;
     bError: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
@@ -455,21 +455,21 @@ sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(
 fbErrorTrig(clk:=bError);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorTON(in:=bError, PT:=T#30m);
+fbErrorTON(in:=bError, PT:=T#30M);
 
 IF bEnableTemperatureDisable THEN
     //Check for disconnection or wrongly connected errors
-    IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
+    IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNECTION_VALUE THEN
         _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
         _stAxis.stStatus.bTempSensorError := TRUE;
         bError := TRUE;
 
         IF fbErrorTrig.Q THEN
-            IF fTemperatureValue = fMAX_TEMP_LIMIT THEN
+            IF fTemperatureValue = fDISCONNECTED_VALUE THEN
                 sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
                 ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-            ELSIF fTemperatureValue = fMIN_TEMP_LIMIT THEN
+            ELSIF fTemperatureValue = fWRONG_CONNECTION_VALUE THEN
                 sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections.');
                 ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
             END_IF
