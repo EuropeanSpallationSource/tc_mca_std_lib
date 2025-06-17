@@ -444,9 +444,12 @@ END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
+    bError: BOOL := FALSE;
+END_VAR
+
+VAR CONSTANT
     fDISCONNECTED_VALUE: REAL := 850.0;
     fWRONG_CONNECTION_VALUE: REAL := -200.0;
-    bError: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
