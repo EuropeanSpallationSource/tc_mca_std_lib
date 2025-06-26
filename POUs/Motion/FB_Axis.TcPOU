@@ -478,7 +478,7 @@ IF bEnableTemperatureDisable THEN
             END_IF
         END_IF
 
-        //Reset bError to display Error message every 30 seconds if error is still there
+        //Reset bError to display Error message every 30 minutes if error is still there
         IF fbErrorTON.Q THEN
             bError := FALSE;
         END_IF
@@ -489,7 +489,7 @@ IF bEnableTemperatureDisable THEN
         _stAxis.stStatus.bTempSensorError := FALSE;
     END_IF
 
-    //Check scaled tempearture value agianst max. allowed temperature
+    //Check scaled temperature value against max. allowed temperature
     IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
         bError := FALSE;
         sErrorMessage := '';
