@@ -436,14 +436,14 @@ VAR_INPUT
 END_VAR
 VAR
     nAxisId: UINT;
-    fTemperatureScaledValue: REAL;
-    fTemperatureValue: REAL;
-    sErrorMessage: STRING(255);
     sErrorMessageAxis: STRING;
 END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
+    fTemperatureScaledValue: REAL;
+    fTemperatureValue: REAL;
+    sErrorMessage: STRING(255);
     bError: BOOL := FALSE;
 END_VAR
 
