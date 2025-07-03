@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_SlitSoftLimits" Id="{a1aa45be-3833-4a43-8979-34f6ea4ac1df}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_SlitSoftLimits :
+(
+    START := 0,
+    WRITE_GAP_CENTRE_FWD,
+    WRITE_GAP_CENTRE_BWD,
+    WRITE_GAP_SIZE_FWD
+    );
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
