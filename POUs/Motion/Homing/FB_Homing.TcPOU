@@ -83,6 +83,7 @@ VAR
     eHomingState: (eWaitForRequest := 0, eCoarseDetection := 1, eMoveReverse := 2, eFineDetection := 3, eSetPos := 4, eFinishHoming := 5, eAbortHoming := 20);
     bHomingToHomeSensor: BOOL;
     bHomingToLimitSwitch: BOOL;
+    bHomingToEncoderPulse: BOOL;
 
     bTwoSpeedHoming:BOOL;
     bReversedDirection: BOOL;
@@ -210,6 +211,7 @@ CASE eHomingState OF
             bTwoSpeedHoming := FALSE;
             bHomingToHomeSensor := FALSE;
             bHomingToLimitSwitch := FALSE;
+            bHomingToEncoderPulse := FALSE;
             bReversedDirection := FALSE;
             bRisingEdgeDetectionOn := FALSE;
             bFallingEdgeDetectionOn := FALSE;
@@ -233,10 +235,14 @@ CASE eHomingState OF
                 END_IF
             ELSIF bTwoSpeedHoming THEN
                 IF NOT bBusy AND bHWSignalForHoming THEN
-                    IF (bHomingToHomeSensor OR bHomingToLimitSwitch) AND bFallingEdgeDetectionOn THEN
+                    IF (bHomingToHomeSensor OR bHomingToLimitSwitch)
+                        AND bFallingEdgeDetectionOn THEN
                         eHomingState := eFineDetection;
-                    ELSIF (bHomingToHomeSensor OR bHomingToLimitSwitch) AND bRisingEdgeDetectionOn THEN
+                    ELSIF (bHomingToHomeSensor OR bHomingToLimitSwitch)
+                        AND bRisingEdgeDetectionOn THEN
                         eHomingState := eMoveReverse;
+                    ELSIF bHomingToEncoderPulse THEN
+                        eHomingState := eFineDetection;
                     END_IF
                 ELSIF NOT bBusy AND NOT bHWSignalForHoming THEN
                     eHomingState := eCoarseDetection;
@@ -452,6 +458,8 @@ fbStepBlockLag(
         bHWSignalForHoming := NOT(bLimitBwd);
         bTwoSpeedHoming := TRUE;
 END_CASE
+
+bHomingToEncoderPulse := TRUE;
 
 IF bViaLimitCoarseDetect AND bTwoSpeedHoming THEN
    fbStepLimitSwitch.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
