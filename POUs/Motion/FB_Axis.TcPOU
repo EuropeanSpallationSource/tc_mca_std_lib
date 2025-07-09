@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
   <POU Name="FB_Axis" Id="{beb60ab5-3bf2-0ae6-2037-f6d7e95a54b2}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
 FUNCTION_BLOCK FB_Axis IMPLEMENTS I_axis
@@ -479,7 +479,7 @@ IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNE
             sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
             ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
         ELSIF fTemperatureValue = fWRONG_CONNECTION_VALUE THEN
-            sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections.');
+            sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check pin connections.');
             ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
         END_IF
     END_IF
