@@ -464,7 +464,7 @@ _stAxis.stStatus.fActTemperature := fTemperatureValue;
 
 IF NOT bEnableTemperatureDisable THEN
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-    mControl_TemperatureDisable := FALSE;
+    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
     RETURN;
 END_IF
 
@@ -489,7 +489,7 @@ IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNE
         bError := FALSE;
     END_IF
 
-    mControl_TemperatureDisable := TRUE;
+    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
     RETURN;
 ELSE
     _stAxis.stStatus.bTempSensorError := FALSE;
@@ -500,19 +500,14 @@ IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus
     bError := FALSE;
     sErrorMessage := '';
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-    mControl_TemperatureDisable := FALSE;
-    RETURN;
 ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
     IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
         bError := FALSE;
         sErrorMessage := '';
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-        mControl_TemperatureDisable := FALSE;
-        RETURN;
     ELSE
         bError := TRUE;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        mControl_TemperatureDisable := TRUE;
     END_IF
 ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
     bError := TRUE;
@@ -525,8 +520,9 @@ ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
     IF fbErrorTON.Q THEN
         bError := FALSE;
     END_IF
-    mControl_TemperatureDisable := TRUE;
 END_IF
+
+mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
 ]]></ST>
       </Implementation>
     </Method>
