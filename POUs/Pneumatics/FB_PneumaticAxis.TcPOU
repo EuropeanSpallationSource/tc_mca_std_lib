@@ -30,7 +30,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#1S);
+      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#3S);
 
 IF tInitializeTimer.Q THEN
     bStartInitDelay := FALSE;
