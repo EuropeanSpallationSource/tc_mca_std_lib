@@ -460,8 +460,9 @@ fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stCo
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
 fbErrorTON(in:=bError, PT:=T#30M);
 
+_stAxis.stStatus.fActTemperature := fTemperatureValue;
+
 IF NOT bEnableTemperatureDisable THEN
-    _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     mControl_TemperatureDisable := FALSE;
     RETURN;
@@ -469,7 +470,6 @@ END_IF
 
 //Check for disconnection or wrongly connected errors
 IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNECTION_VALUE THEN
-    _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
     _stAxis.stStatus.bTempSensorError := TRUE;
     bError := TRUE;
@@ -499,7 +499,6 @@ END_IF
 IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
     bError := FALSE;
     sErrorMessage := '';
-    _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     mControl_TemperatureDisable := FALSE;
     RETURN;
@@ -507,19 +506,16 @@ ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.
     IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
         bError := FALSE;
         sErrorMessage := '';
-        _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
         mControl_TemperatureDisable := FALSE;
         RETURN;
     ELSE
         bError := TRUE;
-        _stAxis.stStatus.fActTemperature := fTemperatureValue;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
         mControl_TemperatureDisable := TRUE;
     END_IF
 ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
     bError := TRUE;
-    _stAxis.stStatus.fActTemperature := fTemperatureValue;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
     IF fbErrorTrig.Q THEN
         sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
