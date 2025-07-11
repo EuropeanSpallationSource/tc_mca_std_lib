@@ -21137,7 +21137,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="ToggleVarInputAction">
                         <o>
-                          <v n="ToggleVariable">"bLocalMode"</v>
+                          <v n="ToggleVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.bHWMaskActive"</v>
                           <n n="Error" />
                         </o>
                       </a>
