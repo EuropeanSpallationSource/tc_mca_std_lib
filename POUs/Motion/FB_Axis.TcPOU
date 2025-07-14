@@ -553,7 +553,8 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveAbsolute : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
+    AND _stAxis.stStatus.bHomed THEN
     fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
