@@ -554,7 +554,7 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
-    AND _stAxis.stStatus.bHomed THEN
+    AND (_stAxis.stStatus.bHomed OR _stAxis.stControl.bOverrideInterlockMoveAbs) THEN
     fbMoveAbsolute.Execute := _stAxis.stControl.bExecute;
     IF fbMoveAbsolute.Execute AND fbMoveAbsolute.Busy THEN
         fbMoveAbsolute2.Execute := TRUE;
