@@ -20482,7 +20482,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="ToggleVarInputAction">
                         <o>
-                          <v n="ToggleVariable">"bLocalMode"</v>
+                          <v n="ToggleVariable">"GVL.bLocalMode"</v>
                           <n n="Error" />
                         </o>
                       </a>
@@ -20562,7 +20562,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">743958181L</v>
-                          <v n="Value">"bLocalMode"</v>
+                          <v n="Value">"GVL.bLocalMode"</v>
                         </o>
                         <o>
                           <v n="Id">2597686782L</v>
@@ -21137,7 +21137,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <v>OnMouseClick</v>
                       <a cet="ToggleVarInputAction">
                         <o>
-                          <v n="ToggleVariable">"bLocalMode"</v>
+                          <v n="ToggleVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.bHWMaskActive"</v>
                           <n n="Error" />
                         </o>
                       </a>
