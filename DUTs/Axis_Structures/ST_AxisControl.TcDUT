@@ -20,7 +20,7 @@ STRUCT
     fDeceleration: LREAL; //Deceleration for the movement command
     fPosition: LREAL; //Target position for absolute moves or distance for relative moves
     bHWMaskActive: BOOL := FALSE; //Indicates if hardware masking is active
-    fMaskedTemperature: LREAL := 0.0; //Temperature value used when the hardware masking is active
+    fMaskedTemperature: REAL := 0.0; //Temperature value used when the hardware masking is active
 
 END_STRUCT
 END_TYPE

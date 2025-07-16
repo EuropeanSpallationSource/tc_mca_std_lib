@@ -26,7 +26,7 @@ STRUCT
 
     //Temperature disable configuration
     bEnableTemperatureDisable: BOOL := FALSE; //Enable axis disabling due to high temperature
-    fMaxTemperature: LREAL := 0.0; //Maximum temperature allowed before disabling
+    fMaxTemperature: REAL := 0.0; //Maximum temperature allowed before disabling
     fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
 
     //Read and Write parameters

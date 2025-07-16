@@ -124,8 +124,7 @@ END_VAR
       <Declaration><![CDATA[METHOD EndOfCycle : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-_stAxis.stControl.bExecute := FALSE;
+        <ST><![CDATA[_stAxis.stControl.bExecute := FALSE;
 ]]></ST>
       </Implementation>
     </Method>
@@ -137,8 +136,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//Copy address locations for statuses to an array to allow for easier checking of statuses
+        <ST><![CDATA[//Copy address locations for statuses to an array to allow for easier checking of statuses
 astMcStatus[1] := ADR(stMcStatusPower);
 astMcStatus[2] := ADR(stMcStatusStop);
 astMcStatus[3] := ADR(stMcStatusHalt);
@@ -201,8 +199,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       <Declaration><![CDATA[METHOD mControl_GearInMultiMaster : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbGearInMultiMaster.Options.AdvancedSlaveDynamics := TRUE;
+        <ST><![CDATA[fbGearInMultiMaster.Options.AdvancedSlaveDynamics := TRUE;
 fbGearInMultiMaster.Options.SyncMode := E_GearInMultiMasterSyncMode.POSSYNC2;
 IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearInMultiMaster THEN
     fbGearInMultiMaster.Enable := _stAxis.stControl.bExecute;
@@ -259,8 +256,7 @@ END_IF
       <Declaration><![CDATA[METHOD mControl_GearOut : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearOut THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearOut THEN
     fbGearOut.Execute := _stAxis.stControl.bExecute;
 END_IF
 
@@ -327,8 +323,7 @@ END_IF
       <Declaration><![CDATA[METHOD mControl_LimitHitTimer : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//Timer for keeping power on after limit switch hit, needed for homing routines - if power is lost routines are aborted
+        <ST><![CDATA[//Timer for keeping power on after limit switch hit, needed for homing routines - if power is lost routines are aborted
 fbRemovePowerTimer(IN := _stAxis.stInputs.bLimitFwd AND _stAxis.stInputs.bLimitBwd, PT := T#100MS);
 
 IF stMcStatusHome.Busy AND (fbRemovePowerTimer.Q OR _stAxis.Axis.NcToPlc.AxisState = 5) THEN //5=PHASE_ACCNEG
@@ -441,82 +436,92 @@ VAR_INPUT
 END_VAR
 VAR
     nAxisId: UINT;
-    fTemperatureScaledValue: LREAL;
-    fTemperatureValue: LREAL;
-    sErrorMessage: STRING(255);
     sErrorMessageAxis: STRING;
 END_VAR
 VAR_INST
     fbErrorTrig: R_TRIG;
     fbErrorTON: TON;
-    fMAX_TEMP_LIMIT: LREAL := 850.0;
-    fMIN_TEMP_LIMIT: LREAL := -200.0;
+    fTemperatureScaledValue: REAL;
+    fTemperatureValue: REAL;
+    sErrorMessage: STRING(255);
     bError: BOOL := FALSE;
+END_VAR
+
+VAR CONSTANT
+    fDISCONNECTED_VALUE: REAL := 850.0;
+    fWRONG_CONNECTION_VALUE: REAL := -200.0;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
-sErrorMessageAxis := CONCAT('ERROR: Temparture sensor of axis ',UINT_TO_STRING(nAxisId));
+sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(nAxisId));
 fbErrorTrig(clk:=bError);
-fTemperatureScaledValue := INT_TO_LREAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
+fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorTON(in:=bError, PT:=T#30S);
+fbErrorTON(in:=bError, PT:=T#30M);
 
-IF bEnableTemperatureDisable THEN
-    //Check for disconnection or wrongly connected errors
-    IF fTemperatureValue >= fMAX_TEMP_LIMIT OR fTemperatureValue <= fMIN_TEMP_LIMIT THEN
-        _stAxis.stStatus.fActTemperature := fTemperatureValue;
-        _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        bError := TRUE;
+_stAxis.stStatus.fActTemperature := fTemperatureValue;
 
-        IF fbErrorTrig.Q THEN
-            IF fTemperatureValue = fMAX_TEMP_LIMIT THEN
-                sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
-                ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-            ELSIF fTemperatureValue = fMIN_TEMP_LIMIT THEN
-                sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check PT100 pin connections.');
-                ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-            END_IF
-        END_IF
-
-        //Reset bError to display Error message every 10 seconds if error is still there
-        IF fbErrorTON.Q THEN
-            bError := FALSE;
-        END_IF
-
-        mControl_TemperatureDisable := TRUE;
-        RETURN;
-    END_IF
-
-    //Check scaled tempearture value agianst max. allowed temperature
-    IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature THEN
-        bError := FALSE;
-        sErrorMessage := '';
-        _stAxis.stStatus.fActTemperature := fTemperatureValue;
-        _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-        mControl_TemperatureDisable := FALSE;
-        RETURN;
-    ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
-        bError := TRUE;
-        _stAxis.stStatus.fActTemperature := fTemperatureValue;
-        _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        IF fbErrorTrig.Q THEN
-            sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-        END_IF
-
-        IF fbErrorTON.Q THEN
-            bError := FALSE;
-        END_IF
-        mControl_TemperatureDisable := TRUE;
-        RETURN;
-    END_IF
-ELSE
-    _stAxis.stStatus.fActTemperature := fTemperatureValue;
+IF NOT bEnableTemperatureDisable THEN
     _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-    mControl_TemperatureDisable := FALSE;
+    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
     RETURN;
 END_IF
+
+//Check for disconnection or wrongly connected errors
+IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNECTION_VALUE THEN
+    _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+    _stAxis.stStatus.bTempSensorError := TRUE;
+    bError := TRUE;
+
+    IF fbErrorTrig.Q THEN
+        IF fTemperatureValue = fDISCONNECTED_VALUE THEN
+            sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
+            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+        ELSIF fTemperatureValue = fWRONG_CONNECTION_VALUE THEN
+            sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check pin connections.');
+            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+        END_IF
+    END_IF
+
+    //Reset bError to display Error message every 30 minutes if error is still there
+    IF fbErrorTON.Q THEN
+        bError := FALSE;
+    END_IF
+
+    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
+    RETURN;
+ELSE
+    _stAxis.stStatus.bTempSensorError := FALSE;
+END_IF
+
+//Check scaled temperature value against max. allowed temperature
+IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
+    bError := FALSE;
+    sErrorMessage := '';
+ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
+    IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
+        bError := FALSE;
+        sErrorMessage := '';
+        _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
+    ELSE
+        bError := TRUE;
+        _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+    END_IF
+ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
+    bError := TRUE;
+    _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+    IF fbErrorTrig.Q THEN
+        sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
+        ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+    END_IF
+
+    IF fbErrorTON.Q THEN
+        bError := FALSE;
+    END_IF
+END_IF
+
+mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
 ]]></ST>
       </Implementation>
     </Method>
@@ -524,8 +529,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_Halt : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbHalt.Deceleration := _stAxis.stControl.fDeceleration;
+        <ST><![CDATA[fbHalt.Deceleration := _stAxis.stControl.fDeceleration;
 fbHalt.Execute := _stAxis.stControl.bHalt;
 
 fbHalt(Axis := _stAxis.Axis);
@@ -663,8 +667,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveRelative : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveRelative THEN
     fbMoveRelative.Execute := _stAxis.stControl.bExecute;
 END_IF
 
@@ -693,8 +696,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_MoveVelocity : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eMoveVelocity THEN
     fbMoveVelocity.Execute := _stAxis.stControl.bExecute;
 END_IF
 
@@ -723,8 +725,7 @@ END_IF
       <Declaration><![CDATA[METHOD mMove_Stop : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbStop.Deceleration := _stAxis.stControl.fDeceleration;
+        <ST><![CDATA[fbStop.Deceleration := _stAxis.stControl.fDeceleration;
 fbStop.Execute := _stAxis.stControl.bStop;
 
 fbStop(Axis := _stAxis.Axis);
@@ -752,8 +753,7 @@ END_IF
       <Declaration><![CDATA[METHOD mParameters_Init : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stConfig.bReadMcParametersValid AND NOT _stAxis.stStatus.bAxisInitialized THEN
+        <ST><![CDATA[IF _stAxis.stConfig.bReadMcParametersValid AND NOT _stAxis.stStatus.bAxisInitialized THEN
     _stAxis.stControl.fAcceleration := _stAxis.stConfig.fDefaultAcc;
     _stAxis.stControl.fDeceleration := _stAxis.stConfig.fDefaultDec;
     _stAxis.stControl.fVelocity := _stAxis.stConfig.fVelocityDefaultFast;
@@ -770,8 +770,7 @@ END_IF
       <Declaration><![CDATA[METHOD mParameters_ReadNc : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
+        <ST><![CDATA[(*This act reads the MC parameters using an MC_ReadParameter FB FOR each variable
 Intended TO be executed once every PLC cycle
 Another FB is used TO trasnfer default axis parameters TO the stAxisStruct so
 bReadValid is used TO halt that trasnfer UNTIL the parameters have been
@@ -932,8 +931,7 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
       <Declaration><![CDATA[METHOD mParameters_ReadParameter : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eReadParameter THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eReadParameter THEN
     fbReadParameter.Enable := _stAxis.stControl.bExecute;
 END_IF
 
@@ -1094,8 +1092,7 @@ END_IF
       <Declaration><![CDATA[METHOD mParameters_WriteParameter : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.stControl.eCommand = E_MotionFunctions.eWriteParameter THEN
+        <ST><![CDATA[IF _stAxis.stControl.eCommand = E_MotionFunctions.eWriteParameter THEN
     fbWriteParameter.Execute := _stAxis.stControl.bExecute;
 END_IF
 
@@ -1120,8 +1117,7 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-_stAxis.Axis.ReadStatus();
+        <ST><![CDATA[_stAxis.Axis.ReadStatus();
 IF _stAxis.Axis.Status.OpMode.Modulo THEN
     _stAxis.stStatus.fActPosition := _stAxis.Axis.NcToPlc.ModuloActPos;
 ELSE
@@ -1148,8 +1144,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -1164,8 +1159,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -1184,8 +1178,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
     tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
@@ -1255,8 +1248,7 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_MultiGearing : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio1 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
+        <ST><![CDATA[IF _stAxis.Axis.Status.Coupled AND _stAxis.Axis.PlcToNc.GearRatio1 <> 0 AND _stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex <> 0 THEN
     GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex].stConfig.afMultiSlaveAxisRatio[GVL.iAxis] := _stAxis.Axis.PlcToNc.GearRatio1;
     _stAxis.stStatus.bCoupledGear1 := TRUE;
 ELSE
@@ -1293,8 +1285,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-fbExecuteRTrig(CLK := _stAxis.stControl.bExecute);
+        <ST><![CDATA[fbExecuteRTrig(CLK := _stAxis.stControl.bExecute);
 IF fbExecuteRTrig.Q THEN
     _stAxis.stStatus.bDone := FALSE;
     _stAxis.stStatus.bCommandAborted := FALSE;
@@ -1323,8 +1314,7 @@ END_IF
       <Declaration><![CDATA[METHOD Run : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-mStatus_AxisStatus();
+        <ST><![CDATA[mStatus_AxisStatus();
 mParameters_ReadNc();
 mParameters_Init();
 stMcStatusReadParameter := mParameters_ReadParameter();
