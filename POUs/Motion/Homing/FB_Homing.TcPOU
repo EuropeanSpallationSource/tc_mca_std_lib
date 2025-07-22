@@ -2,6 +2,7 @@
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Homing" Id="{b95d0b47-1221-0049-3c71-c4df2e544daa}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
+// Tested with Tc3_MC2_AdvancedHoming, 3.0.26.0
 VAR_IN_OUT
     Axis: Axis_Ref;
 END_VAR
@@ -22,6 +23,7 @@ VAR_OUTPUT
     bError: BOOL;
     nErrorId: UDINT;
 END_VAR
+
 VAR
     bHWSignalForHoming: BOOL;
 
@@ -81,6 +83,7 @@ VAR
     eHomingState: (eWaitForRequest := 0, eCoarseDetection := 1, eMoveReverse := 2, eFineDetection := 3, eSetPos := 4, eFinishHoming := 5, eAbortHoming := 20);
     bHomingToHomeSensor: BOOL;
     bHomingToLimitSwitch: BOOL;
+    bHomingToEncoderPulse: BOOL;
 
     bTwoSpeedHoming:BOOL;
     bReversedDirection: BOOL;
@@ -208,6 +211,7 @@ CASE eHomingState OF
             bTwoSpeedHoming := FALSE;
             bHomingToHomeSensor := FALSE;
             bHomingToLimitSwitch := FALSE;
+            bHomingToEncoderPulse := FALSE;
             bReversedDirection := FALSE;
             bRisingEdgeDetectionOn := FALSE;
             bFallingEdgeDetectionOn := FALSE;
@@ -231,10 +235,14 @@ CASE eHomingState OF
                 END_IF
             ELSIF bTwoSpeedHoming THEN
                 IF NOT bBusy AND bHWSignalForHoming THEN
-                    IF bHomingToHomeSensor AND bFallingEdgeDetectionOn THEN
+                    IF (bHomingToHomeSensor OR bHomingToLimitSwitch)
+                        AND bFallingEdgeDetectionOn THEN
                         eHomingState := eFineDetection;
-                    ELSIF bHomingToHomeSensor AND bRisingEdgeDetectionOn THEN
+                    ELSIF (bHomingToHomeSensor OR bHomingToLimitSwitch)
+                        AND bRisingEdgeDetectionOn THEN
                         eHomingState := eMoveReverse;
+                    ELSIF bHomingToEncoderPulse THEN
+                        eHomingState := eFineDetection;
                     END_IF
                 ELSIF NOT bBusy AND NOT bHWSignalForHoming THEN
                     eHomingState := eCoarseDetection;
@@ -450,6 +458,8 @@ fbStepBlockLag(
         bHWSignalForHoming := NOT(bLimitBwd);
         bTwoSpeedHoming := TRUE;
 END_CASE
+
+bHomingToEncoderPulse := TRUE;
 
 IF bViaLimitCoarseDetect AND bTwoSpeedHoming THEN
    fbStepLimitSwitch.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
