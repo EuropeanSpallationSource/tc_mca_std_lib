@@ -732,6 +732,12 @@ mCheckForMovingError();
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH BWD';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
+    IF _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
+        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
+    END_IF
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM LIMIT SWITCH FWD';
