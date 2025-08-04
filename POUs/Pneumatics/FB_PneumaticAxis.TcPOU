@@ -30,7 +30,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#1S);
+      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#3S);
 
 IF tInitializeTimer.Q THEN
     bStartInitDelay := FALSE;
@@ -77,26 +77,6 @@ IF bInitialized THEN
 
         END_CASE
 END_IF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ]]></ST>
     </Implementation>
     <Method Name="FB_init" Id="{5454029e-f817-018f-32fe-52a7c013d503}">
