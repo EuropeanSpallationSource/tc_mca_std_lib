@@ -24,6 +24,7 @@ v2.9.0
   - Add code to handle the temperature sensor hystersis. The motor will be disabled if the temperature
 	surpasses the defined Max Temperature, and it will not be able to be enabled until the value is
 	5 degrees less than the defined Max temperature (MBP-314).
+  - Autoreset pneumatic error when Backward limit switch signal is gone and then comes back (MBP-328).
 - Bug fix:
   - Increase the initialization timer in FB_PneumaticAxis to avoid starting in error. Due
     to the dealy between the Outpust for powering the swithces and running the PLC program
