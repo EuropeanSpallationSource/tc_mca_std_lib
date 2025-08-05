@@ -13,7 +13,7 @@ STRUCT
     fHomeFinishDistance: LREAL := 0; //Distance to move back into the working zone after homing is complete
     eHomeSeq: E_HomingRoutines; //Homing sequence routine to execute
     eRestorePosition: E_RestorePosition; //Option to restore incremental axis position after power loss(0 = No, 1 = Yes)
-    bEnableStopWithAnyLimitSwitch :BOOL := TRUE; //Option to stop the axis when either the forward or backward limit switch is triggered
+    bEnableStopWithAnyLimitSwitch: BOOL := TRUE; //Option to stop the axis when either the forward or backward limit switch is triggered
 
     //Advanced homing parameters
     stHomingConfig: ST_HomingConfig; //Configuration for advanced homing routines
@@ -28,6 +28,11 @@ STRUCT
     bEnableTemperatureDisable: BOOL := FALSE; //Enable axis disabling due to high temperature
     fMaxTemperature: REAL := 0.0; //Maximum temperature allowed before disabling
     fTempScalingFactor: REAL := 10.0; //Scaling factor for temperature readings
+
+    // Use external brake / airpad
+    stAirpadBrake: ST_AirpadBrakeConfig;
+
+    tCommandHandlerTimeout: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
