@@ -26,6 +26,7 @@ v2.9.0
 	5 degrees less than the defined Max temperature (MBP-314).
   - Autoreset pneumatic error when Backward limit switch signal is gone and then comes back (MBP-328).
   - Support for axis with external brakes and airpads (MBP-118).
+  - Autoenable and autodisable features added (MBP-323).
 - Bug fix:
   - Increase the initialization timer in FB_PneumaticAxis to avoid starting in error. Due
     to the dealy between the Outpust for powering the swithces and running the PLC program
