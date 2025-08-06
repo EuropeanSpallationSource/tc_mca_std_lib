@@ -335,7 +335,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
       </Implementation>
     </Method>
     <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. airpad or external brake
+      <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. auto-enable, airpad or external brake
 METHOD mControl_CommandHandler
 
 VAR_INPUT
@@ -355,6 +355,8 @@ VAR_INST
     RTRIG_Execute: R_TRIG;
     FTRIG_Moving: F_TRIG;
     TON_Timeout: TON;
+    TON_DisableAxis: TON;
+    RTRIG_DisableAxis: R_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -378,11 +380,18 @@ IF bExecuteCmdHandler THEN
         E_MotionFunctions.eGearInMultiMaster,
         E_MotionFunctions.eGearOut,
         E_MotionFunctions.eHome :
+            IF RTRIG_Execute.Q
+                AND _stAxis.stConfig.bAutoEnable THEN
+                _stAxis.stControl.bEnable := TRUE;
+            END_IF
+
             IF (bPermitRequired AND bAxisPermittedToMove)
                 OR NOT bPermitRequired
-                // If a permit is required, but the drive has not been enabled before giving
-                // a move command, let the command through to alarm the operator.
-                OR (bPermitRequired AND NOT _stAxis.stStatus.bEnabled) THEN
+                // If a permit is required, no autoenable configured, and drive disabled when
+                // issuing a move command, let the command through to alarm the operator.
+                OR (bPermitRequired
+                    AND NOT _stAxis.stConfig.bAutoEnable
+                    AND NOT _stAxis.stStatus.bEnabled) THEN
                 _stAxis.stStatus.eInternalMotionCommand := _stAxis.stControl.eCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
@@ -429,6 +438,18 @@ IF FTRIG_Moving.Q
     bExecuteCmdHandler := FALSE;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
+END_IF
+
+TON_DisableAxis(
+    IN := _stAxis.stConfig.bAutoDisable
+        AND _stAxis.stStatus.bEnabled
+        AND NOT bInternalWaitingForMovePermit
+        AND NOT bInternalMovePermit,
+    PT := _stAxis.stConfig.tAutoDisableHysteresis);
+RTRIG_DisableAxis(CLK := TON_DisableAxis.Q);
+IF RTRIG_DisableAxis.Q
+    AND _stAxis.stConfig.bAutoDisable THEN
+    _stAxis.stControl.bEnable := FALSE;
 END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
@@ -1766,7 +1787,8 @@ mControl_LimitLinking();
 mControl_CommandHandler(
     bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove,
     bPermitRequired :=
-        _stAxis.stConfig.stAirpadBrake.bAirpadConnected
+        _stAxis.stConfig.bAutoEnable
+        OR _stAxis.stConfig.stAirpadBrake.bAirpadConnected
         OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
     bWaitingForMovePermit => _stAxis.stStatus.bCommandHandlerBufferingCommand,
     bMovePermit => _stAxis.stStatus.bCommandHandlerMovePermit);
