@@ -32,6 +32,11 @@ STRUCT
     // Use external brake / airpad
     stAirpadBrake: ST_AirpadBrakeConfig;
 
+    // Configure automatic enable / disable
+    bAutoEnable: BOOL := FALSE; //Automatically enable an axis when issuing a motion command
+    bAutoDisable: BOOL := FALSE; //Automatically disable an axis when motion completed/stopped
+    tAutoDisableHysteresis: TIME := T#3S; //Hystersis before issuing automatic disable command after motion completed/stopped
+
     tCommandHandlerTimeout: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
 
     //Read and Write parameters
