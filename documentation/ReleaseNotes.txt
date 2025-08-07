@@ -18,6 +18,25 @@ which will reset the third digit to 0.
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
+v2.9.0
+- New features:
+  - FB_Monitoring for all cabinet types at ESS (MBP-312).
+  - Add code to handle the temperature sensor hystersis. The motor will be disabled if the temperature
+	surpasses the defined Max Temperature, and it will not be able to be enabled until the value is
+	5 degrees less than the defined Max temperature (MBP-314).
+  - Autoreset pneumatic error when Backward limit switch signal is gone and then comes back (MBP-328).
+  - Support for axis with external brakes and airpads (MBP-118).
+  - Autoenable and autodisable features added (MBP-323).
+- Bug fix:
+  - Increase the initialization timer in FB_PneumaticAxis to avoid starting in error. Due
+    to the dealy between the Outpust for powering the swithces and running the PLC program
+	the Pneumatic axis used to start in error state because the Bwd limit switch was not found.
+  - Delete unused stranded grey box in the far right hand side of the MAIN Visu. This was discovered 
+    when scaling the MAIN Visu to be used in a web browser.
+  - In MAIN Visu correct the link of the HWMaskActive button. It was wrongly linked to the bLocalMode (MBP-316).
+  - Fix Homing bug, homing sequences did not start if axis was on a limit switch. All homing works now
+    even if the axis is on the limit switch (MBP-321).
+
 v2.8.0
 - New features:
   - Add buttons in MainVisu to enable and disable the soft limits (MBP-301).
@@ -44,7 +63,7 @@ v2.8.0
 - Bug fix:
   - Fix pneumatics starting displaying no State.
   - Fix when closing while Opening, it went to Error State.
-  - Remove any GVL_APP variables inside the FB_AxisPneuamtics so it can build without errors without 
+  - Remove any GVL_APP variables inside the FB_PneumaticAxis so it can build without errors without 
     the need of the correct tc_generic_structure variables (MBP-310).
   - Link bLocalMode and bHWMaskActive button in MainVisu to the corresponding GVL variable. 
 
@@ -53,7 +72,7 @@ v2.7.0
   - Backlash compensation: https://confluence.ess.eu/display/MCAG/Backlash+compensation (MBP-167).
   - Homing with two speeds (towards and from CAM) is the new default and only way of homing.
     This fixes the homing bug of bouncing against the limit non-stop (MBP-269, MBP-279, MBP-288).
-  - Add two status variables for detecting low and high pressure in FB_PneuamticAxis (MBP-297).
+  - Add two status variables for detecting low and high pressure in FB_PneumaticAxis (MBP-297).
   - Read and Write CoE parameters to a Beckhoff motor drive (MBP-271).
   - Improved comments for code and variables (MBP-257).
 - Bug fix:
