@@ -18,6 +18,7 @@ VAR
 
     fbReset: MC_Reset;
     stMcStatusReset: ST_McStatus;
+    fbReadDriveInfo: FB_ReadDriveInfo;
 
     fbMoveAbsolute: MC_MoveAbsolute;
     fbMoveAbsolute2: MC_MoveAbsolute;
@@ -1185,18 +1186,44 @@ END_IF
     </Method>
     <Method Name="mParameters_Init" Id="{b94f4f04-02f5-00e2-1b47-81c18323a22e}" FolderPath="Parameter Methods\">
       <Declaration><![CDATA[METHOD mParameters_Init : BOOL
+VAR_INST
+    FTRIG_DriveBusy: F_TRIG;
+    bInitializeDriveInfo: BOOL := TRUE;
+    bInitializeParameters: BOOL := TRUE;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stConfig.bReadMcParametersValid AND NOT _stAxis.stStatus.bAxisInitialized THEN
+        <ST><![CDATA[IF _stAxis.stConfig.bReadMcParametersValid
+    AND bInitializeParameters THEN
     _stAxis.stControl.fAcceleration := _stAxis.stConfig.fDefaultAcc;
     _stAxis.stControl.fDeceleration := _stAxis.stConfig.fDefaultDec;
     _stAxis.stControl.fVelocity := _stAxis.stConfig.fVelocityDefaultFast;
     _stAxis.stControl.fJogVelocity := _stAxis.stConfig.fVelocityDefaultSlow;
 
-    _stAxis.stStatus.bAxisInitialized := TRUE;
+    bInitializeParameters := FALSE;
 END_IF
 
+IF bInitializeDriveInfo
+    AND NOT bInitializeParameters THEN
+    FTRIG_DriveBusy(CLK := fbReadDriveInfo.Busy);
 
+    IF FTRIG_DriveBusy.Q THEN
+        bInitializeDriveInfo := FALSE;
+    END_IF
+
+    fbReadDriveInfo(
+        Axis := _stAxis.Axis,
+        Execute := bInitializeDriveInfo,
+        DriveInfo => _stAxis.stConfig.stDriveInfo);
+
+    // Retry if error
+    IF NOT bInitializeDriveInfo
+        AND fbReadDriveInfo.Error THEN
+        bInitializeDriveInfo := TRUE;
+    END_IF
+END_IF
+
+_stAxis.stStatus.bAxisInitialized := NOT(bInitializeParameters AND bInitializeDriveInfo);
 ]]></ST>
       </Implementation>
     </Method>
