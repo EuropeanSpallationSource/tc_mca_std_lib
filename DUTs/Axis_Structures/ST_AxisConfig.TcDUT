@@ -69,6 +69,8 @@ STRUCT
     fMaxPosLagValue: LREAL; //Read only - MaxPositionLag
     bEnTargetPositionMonitoring: BOOL; //Read only - AxisEnTargetPositionMonitoring
     fTargetPositionWindow: LREAL; //Read only - AxisTargetPositionWindow
+
+    stDriveInfo: ST_DriveInfo; //Drive info to e.g. deduce if current axis is connected to Sercos interface
 END_STRUCT
 END_TYPE
 ]]></Declaration>
