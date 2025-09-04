@@ -18,6 +18,10 @@ which will reset the third digit to 0.
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
 
+v2.9.1
+- Bug fix:
+  - Add logic to control the E-Stop LED when the E-Stop is pressed in the cabinet monitoring FBs (issue 25).
+
 v2.9.0
 - New features:
   - FB_Monitoring for all cabinet types at ESS (MBP-312).
