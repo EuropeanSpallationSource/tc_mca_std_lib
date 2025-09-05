@@ -322,6 +322,7 @@ bAcknowledgeLED :=
     (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSteady)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+bEStopLED := NOT bEStop1Active;
 ]]></ST>
       </Implementation>
     </Method>
