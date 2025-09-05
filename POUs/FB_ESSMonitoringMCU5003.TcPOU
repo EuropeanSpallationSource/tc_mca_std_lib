@@ -288,7 +288,6 @@ FOR i:=1 TO nMAX_ALARMS DO
         stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
         stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
         stMonitorLed.eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
-        stMonitorLed.eEStopLED := aAlarmList[i].eEStopLED;
     END_IF
 END_FOR
 
@@ -319,7 +318,7 @@ bAcknowledgeLED :=
     (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSteady)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
-bErrorLED := stMonitorLed.eEStopLED = E_MonitorLed.eSteady;
+bEStopLED := NOT bEStop1Active;
 ]]></ST>
       </Implementation>
     </Method>
