@@ -638,8 +638,8 @@ IF _stAxis.stControl.eCommand = E_MotionFunctions.eGearInMultiMaster AND _stAxis
     //Transfer gear ratios to FB
     fbGearInMultiMaster.GearRatio1 := _stAxis.stConfig.astMultiMasterAxisLatched[1].fRatio;
     fbGearInMultiMaster.GearRatio2 := _stAxis.stConfig.astMultiMasterAxisLatched[2].fRatio;
-    fbGearInMultiMaster.GearRatio3 := _stAxis.stConfig.astMultiMasterAxisLatched[3].fRatio;
-    fbGearInMultiMaster.GearRatio4 := _stAxis.stConfig.astMultiMasterAxisLatched[4].fRatio;
+//  fbGearInMultiMaster.GearRatio3 := _stAxis.stConfig.astMultiMasterAxisLatched[3].fRatio; (Not in use, commented due to slits code)
+//  fbGearInMultiMaster.GearRatio4 := _stAxis.stConfig.astMultiMasterAxisLatched[4].fRatio; (Not in use, commented due to slits code)
     fbGearInMultiMaster.Enable := TRUE;
 END_IF
 
