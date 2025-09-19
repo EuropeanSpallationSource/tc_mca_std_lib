@@ -7,8 +7,6 @@ VAR_INPUT
     iBladePositive: UINT; //Axis ID for positively positioned blade
     iGapSize: UINT; //Axis ID for the size of gap between slit blades
     iGapCentre: UINT; //Axis ID for the centre position of the gap formed by slit blades
-    bEnable: BOOL; //Enable/disable the slit set
-    bReset: BOOL; //Reset the slit set
     fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
     bAutoHome: BOOL := TRUE; // Blades homing is automatically done if they are not homed
     bAnticolisionEnable : BOOL := FALSE;  // Blades anticolision option, only for when blades are moved independiently
@@ -23,6 +21,8 @@ VAR
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.INIT; //statemachine index
 
 //Internal statuses for logic
+    bEnable: BOOL; //Enable/disable the slit set
+    bReset: BOOL; //Reset the slit set
     bResetting: BOOL := FALSE; //TRUE if axis going through a reset
     bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
     bSlitsHomed : BOOL := FALSE; //TRUE if all axes Homed after reboot
