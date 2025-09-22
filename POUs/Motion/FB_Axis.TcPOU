@@ -17,9 +17,12 @@ VAR
     stMcStatusHalt: ST_McStatus;
 
     fbReset: MC_Reset;
-    fbSoEReset: FB_SoEReset;
     stMcStatusReset: ST_McStatus;
+
+    // SERCOS drive
+    fbSoEReadDiagNumber : FB_SoEReadDiagNumber;
     fbReadDriveInfo: FB_ReadDriveInfo;
+    fbSoEReset: FB_SoEReset;
 
     fbMoveAbsolute: MC_MoveAbsolute;
     fbMoveAbsolute2: MC_MoveAbsolute;
@@ -1725,19 +1728,36 @@ END_FOR
 
 fbErrorRTrig(CLK := tmpError);
 
+IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+    // Read SERCOS drive error information,
+    fbSoEReadDiagNumber(
+        Axis := stAxis.Axis,
+        Execute :=TRUE,
+        Timeout := DEFAULT_ADS_TIMEOUT,
+        SercosErrId => stAxis.stStatus.nSoEErrorID,
+        DiagNumber => stAxis.stStatus.nSoEDiagID);
+
+    IF NOT fbSoEReadDiagNumber.Busy THEN
+        fbSoEReadDiagNumber(Axis := stAxis.Axis, Execute := FALSE);
+    END_IF
+ELSE
+    stAxis.stStatus.nSoEErrorID := 0;
+    stAxis.stStatus.nSoEDiagID := 0;
+END_IF
+
 IF _stAxis.Axis.Status.ErrorStop THEN
     _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
     _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
 ELSIF _stAxis.Axis.Status.Error THEN
     _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
 ELSIF fbErrorRTrig.Q THEN
-        //For each mcStatus
-        FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-            //If there's an error present propagate
-            IF astMcStatus[i]^.ErrorID <> 0 THEN
-                _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
-            END_IF
-        END_FOR
+    //For each mcStatus
+    FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+        //If there's an error present propagate
+        IF astMcStatus[i]^.ErrorID <> 0 THEN
+            _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
+        END_IF
+    END_FOR
 END_IF
 ]]></ST>
       </Implementation>

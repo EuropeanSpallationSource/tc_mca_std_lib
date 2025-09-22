@@ -37,6 +37,9 @@ STRUCT
     fActVelocity: LREAL; //Current Velocity of the Axis
     bError: BOOL; //True if the axis is in an NC Error Stop state from Axis_Status
     nErrorID: UDINT; //ID of the last error from a motion function block or NC
+    bDriveDeviceError: BOOL; //Drive hardware has an error (no warning)
+    nSoEErrorID: UINT;
+    nSoEDiagID: UDINT;
     bAirpadReady: BOOL; //True if airpad in ready to move state + feedback ok (if connected)
     bAirpadPressureError: BOOL; //True if pressure unexpectedly lost
     bAirpadTimeoutError: BOOL; //True if airpad did not report pressurized in time
