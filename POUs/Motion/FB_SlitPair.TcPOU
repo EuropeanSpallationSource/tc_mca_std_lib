@@ -275,6 +275,13 @@ bReset := GVL.astAxes[iGapCentre].stControl.bReset OR GVL.astAxes[iGapSize].stCo
 IF NOT bError AND bAxisErrorsPresent THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
+
+// Report error to virtual axes
+IF eSlitPairState = E_SlitPairStates.ERROR THEN
+    GVL.astAxes[iGapCentre].stStatus.bError := TRUE;
+    GVL.astAxes[iGapSize].stStatus.bError := TRUE;
+END_IF
+
 //IF eSlitPairState <> E_SlitPairStates.INIT AND NOT bAxesEnabled THEN
 //    eSlitPairState := E_SlitPairStates.ERROR;
 //END_IF
