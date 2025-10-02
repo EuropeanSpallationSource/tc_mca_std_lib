@@ -19,7 +19,7 @@ VAR
     _bStatusLED: BOOL;
     _bEStopLED: BOOL;
     _bErrorLED: BOOL;
-    _bEStop1Active: BOOL;
+    _bEStop1Released: BOOL;
     _nEcMasterDevState: UINT;
 
     aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
@@ -105,68 +105,80 @@ mLink();
 ]]></ST>
     </Implementation>
     <Property Name="AcknowledgeButton" Id="{4553ddaa-9a47-067f-1824-16747e3b18bb}">
-      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeButton : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeButton : BOOL
+]]></Declaration>
       <Set Name="Set" Id="{097bd8e4-8f42-0d2f-3b2d-68c813444beb}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_bAcknowledgeButton := AcknowledgeButton;]]></ST>
+          <ST><![CDATA[_bAcknowledgeButton := AcknowledgeButton;
+]]></ST>
         </Implementation>
       </Set>
     </Property>
     <Property Name="AcknowledgeLED" Id="{87e182de-d7eb-0e63-0a1a-4287ee4dac3d}">
-      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeLED : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeLED : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{c85992ab-d415-0e8f-2295-5c0c5b4bcb43}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[AcknowledgeLED := _bAcknowledgeLED;]]></ST>
+          <ST><![CDATA[AcknowledgeLED := _bAcknowledgeLED;
+]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="EcMasterDevState" Id="{4d86de19-f4c1-0929-075b-548e5f42ca15}">
-      <Declaration><![CDATA[PROPERTY EcMasterDevState : UINT]]></Declaration>
+      <Declaration><![CDATA[PROPERTY EcMasterDevState : UINT
+]]></Declaration>
       <Set Name="Set" Id="{17101c7e-75b1-0240-27ab-ffc2d1577fcb}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_nEcMasterDevState := EcMasterDevState;]]></ST>
+          <ST><![CDATA[_nEcMasterDevState := EcMasterDevState;
+]]></ST>
         </Implementation>
       </Set>
     </Property>
     <Property Name="ErrorLED" Id="{7eb12b12-2c1a-030f-02c0-dc876b161c7d}">
-      <Declaration><![CDATA[PROPERTY PROTECTED ErrorLED : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PROTECTED ErrorLED : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{dee2b4e1-cf32-02a5-164a-d408751a1e36}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[ErrorLED := _bErrorLED;]]></ST>
+          <ST><![CDATA[ErrorLED := _bErrorLED;
+]]></ST>
         </Implementation>
       </Get>
     </Property>
-    <Property Name="EStop1Active" Id="{0f76b944-cd05-0d53-20d1-3839916d7d3a}">
-      <Declaration><![CDATA[PROPERTY PROTECTED EStop1Active : BOOL]]></Declaration>
+    <Property Name="EStop1Released" Id="{0f76b944-cd05-0d53-20d1-3839916d7d3a}">
+      <Declaration><![CDATA[PROPERTY PROTECTED EStop1Released : BOOL
+]]></Declaration>
       <Set Name="Set" Id="{2d659b6b-6763-0d53-355a-5af1c0fcb381}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_bEStop1Active := EStop1Active;]]></ST>
+          <ST><![CDATA[_bEStop1Released := EStop1Released;
+]]></ST>
         </Implementation>
       </Set>
     </Property>
     <Property Name="EStopLED" Id="{11c0d295-1ba3-0cb3-34ae-5cedaebe894d}">
-      <Declaration><![CDATA[PROPERTY PROTECTED EStopLED : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PROTECTED EStopLED : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{c6083b86-6c45-076c-267f-649012ee9fb9}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[EStopLED := _bEStopLED;]]></ST>
+          <ST><![CDATA[EStopLED := _bEStopLED;
+]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -274,7 +286,8 @@ END_IF
       <Declaration><![CDATA[METHOD ABSTRACT mLink
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mMonitorAlarms" Id="{542f94fc-2447-0df7-2067-48b1bdc9c1ba}">
@@ -349,7 +362,7 @@ _bAcknowledgeLED :=
     (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSteady)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
-_bEStopLED := NOT _bEStop1Active;
+_bEStopLED := NOT _bEStop1Released;
 ]]></ST>
       </Implementation>
     </Method>
@@ -528,17 +541,20 @@ END_IF
       <Declaration><![CDATA[METHOD ABSTRACT mSetResetAlarmsLeds
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="StatusLED" Id="{aae8b4d5-2209-0213-0845-6c75706f0ec1}">
-      <Declaration><![CDATA[PROPERTY PROTECTED StatusLED : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PROTECTED StatusLED : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{771086b7-4d2a-0e03-15a1-c2c5934c123b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[StatusLED := _bStatusLED;]]></ST>
+          <ST><![CDATA[StatusLED := _bStatusLED;
+]]></ST>
         </Implementation>
       </Get>
     </Property>
