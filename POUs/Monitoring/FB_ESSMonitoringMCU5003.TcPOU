@@ -37,9 +37,9 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF203 (EL1808)^Channel 8^Input'}
     bDoorClosed AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 5^Input'}
-    bEStop1Active AT %I*: BOOL;
+    bEStop1Released AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 6^Input'}
-    bSTO1Active AT %I*: BOOL;
+    bSTO1Released AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF204 (EL1808)^Channel 8^Input'}
     bAcknowledgeButton AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF207 (EL3214)^RTD Inputs Channel 1^Value'}
@@ -64,7 +64,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Input variables
 AcknowledgeButton := bAcknowledgeButton;
-EStop1Active := bEStop1Active;
+EStop1Released := bEStop1Released;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
@@ -99,8 +99,8 @@ mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
 mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
 mSetReset(stAlarmList := aAlarmList[13], bOk := bFuse3_OK);
 
-mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Active);
-mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Active);
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Released);
+mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
 
 mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
