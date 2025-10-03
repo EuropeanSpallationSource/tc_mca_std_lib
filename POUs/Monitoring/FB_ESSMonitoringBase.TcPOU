@@ -475,21 +475,29 @@ aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
 FOR i:=0 TO nActualEcSlaves-1 DO
     IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
-        bSlaveLinkError := TRUE;
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=UINT_TO_STRING(i+1));
+        IF NOT bSlaveLinkError THEN
+            aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+        END_IF
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=', ');
+        bSlaveLinkError := TRUE;
         // Do not print slave numbers for deviceState if already printed for linkState
         CONTINUE;
     END_IF
 
     IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
-        bSlaveStateNotOP := TRUE;
         aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:= UINT_TO_STRING(i+1));
+        IF NOT bSlaveStateNotOP THEN
+            aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+        END_IF
         aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=', ');
+        bSlaveStateNotOP := TRUE;
     END_IF
 END_FOR
 ]]></ST>
