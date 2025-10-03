@@ -399,6 +399,10 @@ VAR_INST
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
     stSlaveState: ARRAY[0..nMAX_EC_SLAVES] OF ST_EcSlaveState;
     nActualEcSlaves: UINT := 0;
+    TON_UpdateGetEcConfSlaves: TON;
+    fbGetEcConfSlaves: FB_EcGetConfSlaves;
+    _aSlaveConfig: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;  // Temporary container
+    aSlaveConfig: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
 
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
@@ -413,6 +417,16 @@ END_VAR
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
+TON_UpdateGetEcConfSlaves(IN:=NOT TON_UpdateGetEcConfSlaves.Q, PT:=T#100MS);
+fbGetEcConfSlaves(
+    sNetId:=nEcMasterNetId,
+    pArrEcConfSlaveInfo := ADR(_aSlaveConfig),
+    cbBufLen := SIZEOF(_aSlaveConfig),
+    bExecute := TON_UpdateGetEcConfSlaves.Q);
+IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
+    aSlaveConfig := _aSlaveConfig;
+END_IF
+
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
