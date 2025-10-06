@@ -363,6 +363,10 @@ FOR i:=1 TO nMAX_ALARMS DO
         bLedActive := TRUE;
         stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
         stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
+    END_IF
+
+    // If any error exists requiring an acknowledge, highlight LED.
+    IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
         stMonitorLed.eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
     END_IF
 END_FOR
