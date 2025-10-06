@@ -48,6 +48,16 @@ VAR
     nTemp4 AT %I*: INT;
     {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
+
+    //Shutter OP
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 1^Input'}
+    bShutterOPFuse1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 2^Input'}
+    bShutterOPFuse2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 3^Input'}
+    bShutterOP24VDC1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 4^Input'}
+    bShutterOPSPD_OK AT %I*: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -102,6 +112,11 @@ mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
 mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
 mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
 mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
+
+mSetReset(stAlarmList := aAlarmList[34], bOk := bShutterOPFuse1_OK);
+mSetReset(stAlarmList := aAlarmList[35], bOk := bShutterOPFuse2_OK);
+mSetReset(stAlarmList := aAlarmList[36], bOk := bShutterOP24VDC1_OK);
+mSetReset(stAlarmList := aAlarmList[37], bOk := bShutterOPSPD_OK);
 
 aTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
