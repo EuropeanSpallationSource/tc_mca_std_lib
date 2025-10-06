@@ -437,8 +437,8 @@ VAR_INST
     nActualEcSlaves: UINT := 0;
     TON_UpdateGetEcConfSlaves: TON;
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
-    _aSlaveConfig: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;  // Temporary container
-    aSlaveConfig: ARRAY[0..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
+    _aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;  // Temporary container
+    aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
 
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
