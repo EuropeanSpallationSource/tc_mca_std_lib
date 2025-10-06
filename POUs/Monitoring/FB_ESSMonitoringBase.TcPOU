@@ -55,7 +55,17 @@ VAR
 (*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eUndefined),
 (*[32]*)(nErrorID:=18, sErrorMsg:='MCB Piezo Controller Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
-(*[33]*)(nErrorID:=19, sErrorMsg:='MCB VFD Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady)];
+(*[33]*)(nErrorID:=19, sErrorMsg:='MCB VFD Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady),
+(*[34]*)(nErrorID:=601, sErrorMsg:='Shutter OP Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[35]*)(nErrorID:=602, sErrorMsg:='Shutter OP Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[36]*)(nErrorID:=603, sErrorMsg:='Shutter OP DC OK Status from PS 24V is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[37]*)(nErrorID:=604, sErrorMsg:='Shutter OP SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[38]*)(nErrorID:=701, sErrorMsg:='EC Nodebox Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[39]*)(nErrorID:=702, sErrorMsg:='EC Nodebox Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[40]*)(nErrorID:=703, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[41]*)(nErrorID:=704, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[42]*)(nErrorID:=705, sErrorMsg:='EC Nodebox SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, eAcknowledgeLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE)];
+
 
     aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
     aTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
