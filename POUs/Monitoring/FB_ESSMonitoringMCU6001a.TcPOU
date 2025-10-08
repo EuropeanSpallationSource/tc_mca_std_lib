@@ -118,6 +118,7 @@ mSetReset(stAlarmList := aAlarmList[35], bOk := bShutterOPFuse2_OK);
 mSetReset(stAlarmList := aAlarmList[36], bOk := bShutterOP24VDC1_OK);
 mSetReset(stAlarmList := aAlarmList[37], bOk := bShutterOPSPD_OK);
 
+
 aTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
     OR (aDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
@@ -141,17 +142,6 @@ aTemperatureAlarm[4] :=
     OR (aDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
 aDeadBandActive[4] := aTemperatureAlarm[4];
 mSetReset(stAlarmList := aAlarmList[26], bOk := NOT aTemperatureAlarm[4]);
-
-
-//Reset selected alarms just when acknowledge button has been pressed
-IF fbAcknowledgeButtonTrig.Q THEN
-    FOR index:=1 TO nMAX_ALARMS DO
-        aAlarmList[index].bAlarmSet := FALSE;
-        aAlarmList[index].bAlarmReset := TRUE;
-        aAlarmList[index].bLedSet := FALSE;
-        aAlarmList[index].bLedReset := TRUE;
-    END_FOR
-END_IF
 ]]></ST>
       </Implementation>
     </Method>

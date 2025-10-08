@@ -588,7 +588,7 @@ END_IF
 stAlarmList.bAlarmSet := FALSE;
 stAlarmList.bAlarmReset := TRUE;
 
-IF stAlarmList.bLedAutoReset THEN
+IF stAlarmList.bLedAutoReset OR fbAcknowledgeButtonTrig.Q THEN
     stAlarmList.bLedSet := FALSE;
     stAlarmList.bLedReset := TRUE;
 END_IF
