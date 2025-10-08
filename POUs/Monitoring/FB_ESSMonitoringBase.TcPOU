@@ -214,21 +214,6 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mAlarm" Id="{bc357e09-9ee8-4234-8c76-7cdeb0e72989}">
-      <Declaration><![CDATA[METHOD mAlarm
-VAR_IN_OUT
-    stAlarmData: ST_MonitoringAlarm;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF stAlarmData.bAlarmSet THEN
-    stAlarmData.bAlarmActive := TRUE;
-ELSIF stAlarmData.bAlarmReset THEN
-    stAlarmData.bAlarmActive := FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mAlarmActive" Id="{aff05498-00f1-0703-1f58-de4c9fc3cb2d}">
       <Declaration><![CDATA[METHOD mAlarmActive
 VAR_INPUT
@@ -299,21 +284,6 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mLed" Id="{e7c0d21c-5d75-0ad9-14e4-781003dce579}">
-      <Declaration><![CDATA[METHOD mLed
-VAR_IN_OUT
-    stAlarmData: ST_MonitoringAlarm;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF stAlarmData.bLedSet THEN
-    stAlarmData.bLedActive := TRUE;
-ELSIF stAlarmData.bLedReset THEN
-    stAlarmData.bLedActive := FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mLink" Id="{92e02a6e-69e5-0850-2551-9162736c466e}">
       <Declaration><![CDATA[METHOD ABSTRACT mLink
 ]]></Declaration>
@@ -350,10 +320,6 @@ MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
 bLedActive := FALSE;
 
 FOR i:=1 TO nMAX_ALARMS DO
-    // Update list of active alarms
-    mAlarm(stAlarmData:=aAlarmList[i]);
-    // Update list of active LEDs
-    mLed(stAlarmData:=aAlarmList[i]);
     // Handle log prints, alarm bits and prepare alarm LEDs
     mAlarmActive(i:=i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
 
@@ -365,7 +331,7 @@ FOR i:=1 TO nMAX_ALARMS DO
         stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
     END_IF
 
-    // If any error exists requiring an acknowledge, highlight LED.
+    // If any error exists requiring an acknowledge, highlight Acknowledge LED.
     IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
         stMonitorLed.eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
     END_IF
@@ -578,19 +544,15 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT bOk THEN
-    stAlarmList.bAlarmSet := TRUE;
-    stAlarmList.bAlarmReset := FALSE;
-    stAlarmList.bLedSet := TRUE;
-    stAlarmList.bLedReset := FALSE;
+    stAlarmList.bAlarmActive := TRUE;
+    stAlarmList.bLedActive := TRUE;
     RETURN;
 END_IF
 
-stAlarmList.bAlarmSet := FALSE;
-stAlarmList.bAlarmReset := TRUE;
+stAlarmList.bAlarmActive := FALSE;
 
 IF stAlarmList.bLedAutoReset OR fbAcknowledgeButtonTrig.Q THEN
-    stAlarmList.bLedSet := FALSE;
-    stAlarmList.bLedReset := TRUE;
+    stAlarmList.bLedActive := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
