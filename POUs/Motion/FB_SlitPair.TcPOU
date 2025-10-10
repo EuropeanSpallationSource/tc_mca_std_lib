@@ -144,6 +144,8 @@ CASE eSlitPairState OF
     E_SlitPairStates.CHECK_GEARIN_SLITS_COMPLETE: //Wait for gearing complete
         IF bBladesCoupled THEN
             eSlitPairState := E_SlitPairStates.SLITS_OPERATIONAL;
+        ELSIF NOT GVL.astAxes[iGapSize].stStatus.bEnabled AND NOT GVL.astAxes[iGapCentre].stStatus.bEnabled THEN
+            eSlitPairState := E_SlitPairStates.ERROR_GEAROUT;
         END_IF
 
     E_SlitPairStates.SLITS_OPERATIONAL: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
