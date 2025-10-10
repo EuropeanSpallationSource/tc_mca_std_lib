@@ -645,9 +645,9 @@ END_IF
 
 fbGearInMultiMaster(Slave := _stAxis.Axis,
     Master1 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[1].nIndex].Axis,
-    Master2 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis,
-    Master3 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
-    Master4 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
+    Master2 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[2].nIndex].Axis);
+//    Master3 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[3].nIndex].Axis,
+//    Master4 := GVL.astAxes[_stAxis.stConfig.astMultiMasterAxisLatched[4].nIndex].Axis);
 fbGearInMultiMaster.Enable:= FALSE;
 
 IF fbGearInMultiMaster.InGear THEN
