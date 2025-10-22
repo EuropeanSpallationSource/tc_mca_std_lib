@@ -1630,6 +1630,7 @@ _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
+_stAxis.stStatus.bDriveDeviceError := _stAxis.Axis.Status.DriveDeviceError;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
 {info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
