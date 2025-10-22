@@ -17,6 +17,7 @@ VAR
     stMcStatusHalt: ST_McStatus;
 
     fbReset: MC_Reset;
+    fbSoEReset: FB_SoEReset;
     stMcStatusReset: ST_McStatus;
     fbReadDriveInfo: FB_ReadDriveInfo;
 
@@ -815,12 +816,42 @@ END_IF
 VAR
     i: UINT;
 END_VAR
+VAR_INST
+    bSoEReset: BOOL := FALSE;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbReset.Execute := _stAxis.stControl.bReset;
+        <ST><![CDATA[// The function block MC_Reset is used to reset the NC axis. In many cases this also leads
+// to a reset of a connected drive device. Depending on the bus system or drive types,
+// in some cases a separate reset may be required for the drive device.
 
-fbReset(Axis := _stAxis.Axis);
-IF fbReset.Done THEN
+IF _stAxis.stControl.bReset
+    AND _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+    bSoEReset := TRUE;
+
+    fbSoEReset(
+        Axis := _stAxis.Axis,
+        Execute := bSoEReset);
+END_IF
+
+IF bSoEReset
+    AND NOT fbSoEReset.Busy THEN
+    fbSoEReset(
+        Axis := _stAxis.Axis,
+        Execute := FALSE);
+    bSoEReset := FALSE;
+END_IF
+
+IF NOT fbSoEReset.Busy THEN
+    fbReset(
+        Axis := _stAxis.Axis,
+        Execute := _stAxis.stControl.bReset
+    );
+END_IF
+
+IF fbReset.Done
+    AND NOT bSoEReset
+    AND NOT fbSoEReset.Busy THEN
     _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
