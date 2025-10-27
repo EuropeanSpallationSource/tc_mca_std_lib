@@ -21,8 +21,9 @@ VAR
 
     // SERCOS drive
     fbSoEReadDiagNumber : FB_SoEReadDiagNumber;
-    fbReadDriveInfo: FB_ReadDriveInfo;
     fbSoEReset: FB_SoEReset;
+
+    fbReadDriveInfo: FB_ReadDriveInfo;
 
     fbMoveAbsolute: MC_MoveAbsolute;
     fbMoveAbsolute2: MC_MoveAbsolute;
@@ -824,9 +825,9 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// The function block MC_Reset is used to reset the NC axis. In many cases this also leads
-// to a reset of a connected drive device. Depending on the bus system or drive types,
-// in some cases a separate reset may be required for the drive device.
+        <ST><![CDATA[(*The function block MC_Reset is used to reset the NC axis. In many cases this also leads
+to a reset of a connected drive device. Depending on the bus system or drive types,
+in some cases a separate reset may be required for the drive device.*)
 
 IF _stAxis.stControl.bReset
     AND _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
