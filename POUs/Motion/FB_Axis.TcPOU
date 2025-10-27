@@ -1222,6 +1222,7 @@ VAR_INST
     FTRIG_DriveBusy: F_TRIG;
     bInitializeDriveInfo: BOOL := TRUE;
     bInitializeParameters: BOOL := TRUE;
+    nInitializeDriveCounter: UINT := 0;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -1250,12 +1251,15 @@ IF bInitializeDriveInfo
 
     // Retry if error
     IF NOT bInitializeDriveInfo
-        AND fbReadDriveInfo.Error THEN
+        AND fbReadDriveInfo.Error
+        AND nInitializeDriveCounter < 3 THEN
         bInitializeDriveInfo := TRUE;
+        nInitializeDriveCounter := nInitializeDriveCounter + 1;
     END_IF
 END_IF
 
-_stAxis.stStatus.bAxisInitialized := NOT(bInitializeParameters AND bInitializeDriveInfo);
+_stAxis.stStatus.bAxisInitialized :=
+    NOT bInitializeParameters AND NOT bInitializeDriveInfo;
 ]]></ST>
       </Implementation>
     </Method>
