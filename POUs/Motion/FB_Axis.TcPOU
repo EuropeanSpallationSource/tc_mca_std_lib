@@ -830,28 +830,25 @@ to a reset of a connected drive device. Depending on the bus system or drive typ
 in some cases a separate reset may be required for the drive device.*)
 
 IF _stAxis.stControl.bReset
-    AND _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+    AND _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT
+    AND NOT fbReset.Busy THEN
     bSoEReset := TRUE;
-
-    fbSoEReset(
-        Axis := _stAxis.Axis,
-        Execute := bSoEReset);
+    fbSoEReset.Execute := bSoEReset;
 END_IF
+
+fbSoEReset(Axis := _stAxis.Axis);
 
 IF bSoEReset
     AND NOT fbSoEReset.Busy THEN
-    fbSoEReset(
-        Axis := _stAxis.Axis,
-        Execute := FALSE);
+    fbSoEReset.Execute := FALSE;
     bSoEReset := FALSE;
 END_IF
 
 IF NOT fbSoEReset.Busy THEN
-    fbReset(
-        Axis := _stAxis.Axis,
-        Execute := _stAxis.stControl.bReset
-    );
+    fbReset.Execute := _stAxis.stControl.bReset;
 END_IF
+
+fbReset(Axis := _stAxis.Axis);
 
 IF fbReset.Done
     AND NOT bSoEReset
