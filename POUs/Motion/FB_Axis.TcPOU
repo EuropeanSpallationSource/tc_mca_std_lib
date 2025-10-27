@@ -880,9 +880,9 @@ IF fbReset.Done
     END_FOR
 END_IF
 
-mControl_Reset.Busy := fbReset.Busy;
-mControl_Reset.Done := fbReset.Done;
-mControl_Reset.Error := fbReset.Error;
+mControl_Reset.Busy := fbReset.Busy OR fbSoEReset.Busy;
+mControl_Reset.Done := fbReset.Done AND NOT fbSoEReset.Busy;
+mControl_Reset.Error := fbReset.Error OR fbSoEReset.Error;
 mControl_Reset.ErrorID := fbReset.ErrorID;
 
 IF fbReset.Error THEN
