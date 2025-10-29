@@ -811,14 +811,10 @@ END_IF
 
 fbPower.Enable := bEnableAmpCmd;
 
-fbPower.Enable_Negative :=
-    (_stAxis.stStatus.bBwEnabled OR bWaitForStopAfterLimitHit)
-    AND NOT _stAxis.stStatus.bInterlockedBwd
-    AND _stAxis.stStatus.bAxisReadyToMove;
-fbPower.Enable_Positive :=
-    (_stAxis.stStatus.bFwEnabled OR bWaitForStopAfterLimitHit)
-    AND NOT _stAxis.stStatus.bInterlockedFwd
-    AND _stAxis.stStatus.bAxisReadyToMove;
+fbPower.Enable_Negative := _stAxis.stStatus.bBwEnabled;
+
+fbPower.Enable_Positive := _stAxis.stStatus.bFwEnabled;
+
 fbPower.Override := _stAxis.stConfig.fOverride;
 
 fbPower(Axis := _stAxis.Axis);
