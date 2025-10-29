@@ -757,17 +757,38 @@ END_IF
       <Declaration><![CDATA[METHOD mControl_LimitLinking : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Linking limit swiches. Fwd and Bwd can be enabled by its respective limit switches or by both of them (this is normally only during first commissioning)
-_stAxis.stStatus.bFwEnabled := _stAxis.stInputs.bLimitFwd AND (_stAxis.stInputs.bLimitBwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch); //Moved to linking code. Should not say enabled if not enabled
-_stAxis.stStatus.bBwEnabled := _stAxis.stInputs.bLimitBwd AND (_stAxis.stInputs.bLimitFwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch);
+        <ST><![CDATA[(*Linking Fwd/BwdEnabled. Fwd and Bwd can e.g. be enabled by its respective limit
+switches or by both of them (this is normally only during first commissioning*)
+
+_stAxis.stStatus.bFwEnabled :=
+    (_stAxis.stInputs.bLimitFwd
+    AND (_stAxis.stInputs.bLimitBwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch)
+    OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedFwd
+    AND _stAxis.stStatus.bAxisReadyToMove;
+_stAxis.stStatus.bBwEnabled :=
+    (_stAxis.stInputs.bLimitBwd
+    AND (_stAxis.stInputs.bLimitFwd OR NOT _stAxis.stConfig.bEnableStopWithAnyLimitSwitch)
+    OR bWaitForStopAfterLimitHit)
+    AND NOT _stAxis.stStatus.bInterlockedBwd
+    AND _stAxis.stStatus.bAxisReadyToMove;
+
 _stAxis.stStatus.bInterlockedFwd := _stAxis.stControl.bInterlockFwd;
 _stAxis.stStatus.bInterlockedBwd := _stAxis.stControl.bInterlockBwd;
 
 //Multimaster limit linking
 FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
-    IF (_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0) THEN
-        _stAxis.stStatus.bFwEnabled := _stAxis.stStatus.bFwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
-        _stAxis.stStatus.bBwEnabled := _stAxis.stStatus.bBwEnabled AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0, GVL.astAxes[nAxisIndex].stStatus.bFwEnabled, GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
+    IF _stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] <> 0 THEN
+        _stAxis.stStatus.bFwEnabled :=
+            _stAxis.stStatus.bFwEnabled
+            AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0,
+                GVL.astAxes[nAxisIndex].stStatus.bBwEnabled,
+                GVL.astAxes[nAxisIndex].stStatus.bFwEnabled);
+        _stAxis.stStatus.bBwEnabled :=
+            _stAxis.stStatus.bBwEnabled
+            AND SEL(_stAxis.stConfig.afMultiSlaveAxisRatio[nAxisIndex] > 0,
+                GVL.astAxes[nAxisIndex].stStatus.bFwEnabled,
+                GVL.astAxes[nAxisIndex].stStatus.bBwEnabled);
     END_IF
 END_FOR
 ]]></ST>
