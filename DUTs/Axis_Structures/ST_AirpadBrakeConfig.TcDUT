@@ -5,8 +5,8 @@
 STRUCT
     bAirpadConnected: BOOL := FALSE; // An airpad is connected
     bAirpadFeedbackConnected: BOOL := FALSE; // If feedback signal used for pressurized airpad
-    tAirpadOnDelayTime: TIME := T#0.1S; // Minimum airpad delay time when pressurizing (with or without feedback)
-    tAirpadOffHysteresis: TIME := T#1s; // Time to wait before depressurizing airpad after movement ready (when not in error)
+    tAirpadOnDelayTime: TIME := T#2S; // Minimum airpad delay time when pressurizing (with or without feedback)
+    tAirpadOffHysteresis: TIME := T#2S; // Time to wait before depressurizing airpad after movement ready (when not in error)
     tAirpadPressurizeTimeout: TIME := T#5S; // Maximum time pressurizing airpad
     bExternalBrakeConnected: BOOL := FALSE; // An external brake is connected
     bExternalBrakeFeedbackConnected: BOOL := FALSE; // If feedback signal used for released external brake
