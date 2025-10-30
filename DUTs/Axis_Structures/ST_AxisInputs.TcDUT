@@ -10,6 +10,7 @@ STRUCT
     bAirpadPressurized AT %I*: BOOL; //Airpad pressurized
     bBrakeReleased AT %I*: BOOL; //External brake released
     fExternalPos AT %I*: LREAL; //External measurement tool
+    wBrakeTerminalDiagnositics AT %I*: WORD; //External brake output terminal diagnostics.
 END_STRUCT
 END_TYPE
 ]]></Declaration>
