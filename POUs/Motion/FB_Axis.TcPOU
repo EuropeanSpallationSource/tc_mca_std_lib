@@ -618,6 +618,76 @@ mControl_ExternalBrake := bEnableAmp;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mControl_ExtSetPointGen" Id="{dfce07ce-0d00-06e4-1ded-daf10cdf7b25}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[// External Setpoint Generator Control
+METHOD mControl_ExtSetPointGen
+VAR
+    nDirection: SINT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eExtSetPointGen OF
+
+    STANDBY:
+        fbExtSetPointGenEnable.Execute := FALSE;
+        fbExtSetPointGenDisable.Execute := FALSE;
+        IF _stAxis.stControl.bEnableSetPointGen
+            AND_THEN _stAxis.stStatus.bEnabled THEN
+            eExtSetPointGen := ENABLE_GEN;
+        END_IF
+
+    ENABLE_GEN:
+        fbExtSetPointGenEnable.Execute := TRUE;
+
+        IF NOT fbExtSetPointGenEnable.Busy
+            AND_THEN fbExtSetPointGenEnable.Done THEN
+            fbExtSetPointGenEnable.Execute := FALSE;
+            eExtSetPointGen := ENABLED;
+        ELSIF fbExtSetPointGenEnable.Error THEN
+            fbExtSetPointGenEnable.Execute := FALSE;
+            _stAxis.stControl.bEnableSetPointGen := FALSE;
+            eExtSetPointGen := STANDBY;
+        END_IF
+
+    ENABLED:
+        IF NOT _stAxis.stControl.bEnableSetPointGen THEN
+            eExtSetPointGen := DISABLE_GEN;
+        END_IF
+
+    DISABLE_GEN:
+        fbExtSetPointGenDisable.Execute := TRUE;
+
+        IF NOT fbExtSetPointGenDisable.Busy
+            AND_THEN fbExtSetPointGenDisable.Done THEN
+            fbExtSetPointGenDisable.Execute := FALSE;
+            eExtSetPointGen := STANDBY;
+        END_IF
+
+END_CASE
+
+IF _stAxis.stControl.stExternalSetpoint.fVelocity = 0
+    AND_THEN _stAxis.stControl.stExternalSetpoint.fAcceleration = 0 THEN
+    nDirection := 0;
+ELSIF _stAxis.stControl.stExternalSetpoint.fVelocity >= 0 THEN
+    nDirection := 1;
+ELSE
+    nDirection := -1;
+END_IF
+
+fbExtSetPointGenEnable(Axis := _stAxis.Axis);
+fbExtSetPointGenDisable(Axis := _stAxis.Axis);
+
+MC_ExtSetPointGenFeed(
+    Axis := _stAxis.Axis,
+    Position := _stAxis.stControl.stExternalSetpoint.fPosition,
+    Velocity := _stAxis.stControl.stExternalSetpoint.fVelocity,
+    Acceleration := _stAxis.stControl.stExternalSetpoint.fAcceleration,
+    Direction := nDirection);
+
+stAxis.stStatus.bExternalSetpointGeneratorEnabled := eExtSetPointGen = ENABLED;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mControl_GearInMultiMaster" Id="{7fc6d7a3-d42e-082e-332f-6abb17a6993e}" FolderPath="Control Methods\">
       <Declaration><![CDATA[METHOD mControl_GearInMultiMaster : ST_McStatus
 ]]></Declaration>
@@ -1812,6 +1882,7 @@ stMcStatusHalt := mMove_Halt();
 stMcStatusStop := mMove_Stop();
 stMcStatusReset := mControl_Reset();
 
+mControl_ExtSetPointGen();
 stMcStatusMoveAbsolute := mMove_MoveAbsolute();
 stMcStatusMoveRelative := mMove_MoveRelative();
 stMcStatusMoveModulo := mMove_MoveModulo();
