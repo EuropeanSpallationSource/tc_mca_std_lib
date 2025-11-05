@@ -55,6 +55,10 @@ VAR
     fbGearOut: MC_GearOut;
     stMcStatusGearOut: ST_McStatus;
 
+    fbExtSetPointGenEnable: MC_ExtSetPointGenEnable;
+    fbExtSetPointGenDisable: MC_ExtSetPointGenDisable;
+    eExtSetPointGen: (STANDBY, ENABLE_GEN, ENABLED, DISABLE_GEN);
+
     stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
     nSlaveAxesIndex: UINT;
     nAxisIndex: UINT;
