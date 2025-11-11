@@ -6,7 +6,8 @@
 TYPE E_RestorePosition :
 (
     eDontRestore :=0,
-    eRestoreWithoutHome := 1 //Redefined the position of the axis to that when the power was lost
+    eRestoreWithoutHome := 1, //Redefine the position of the axis to that when the power was lost
+    eRestoreWithHome := 2 //Redefine the position of the axis to that when the power was lost and home
 );
 END_TYPE
 ]]></Declaration>
