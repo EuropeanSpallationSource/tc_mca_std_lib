@@ -1370,7 +1370,9 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
 END_IF
 
 fbReadParameter.ReadMode := E_READMODE.READMODE_ONCE;
+{warning disable C0327} // Disable compiler warning 'Implicit conversion from enumeration to another'
 fbReadParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
+{warning restore C0327}
 
 fbReadParameter(Axis := _stAxis.Axis);
 fbReadParameter.Enable := FALSE;
@@ -1530,7 +1532,9 @@ END_IF
     fbWriteParameter.Execute := _stAxis.stControl.bExecute;
 END_IF
 
+{warning disable C0327} // Disable compiler warning 'Implicit conversion from enumeration to another'
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
+{warning restore C0327}
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
 
 fbWriteParameter(Axis := _stAxis.Axis);
