@@ -25,6 +25,8 @@ STRUCT
     bAirpadManualControl: BOOL := FALSE; //Allow manual control airpad
     bAirpadManualPressureOn: BOOL := FALSE; //Pressurize airpad manually
     bReleaseBrake AT %Q*: BOOL; //Output from method controlling brake
+    stExternalSetpoint: ST_ExternalSetpoint; //Input structure mapped to external setpoint feed
+    bEnableSetPointGen: BOOL := FALSE; //Enable external setpoint generator
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -47,6 +47,7 @@ STRUCT
     bCommandHandlerBufferingCommand: BOOL; //True if CommandHandler is waiting on a permit before releasing the command
     bCommandHandlerTimeoutError: BOOL; //True if CommandHandler did not receive a permit in time
     eInternalMotionCommand: E_MotionFunctions;
+    bExternalSetpointGeneratorEnabled: BOOL; //True if external setpoint generator enabled.
 END_STRUCT
 END_TYPE
 ]]></Declaration>

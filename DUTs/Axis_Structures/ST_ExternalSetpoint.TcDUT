@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ExternalSetpoint" Id="{e2ab0bf5-3269-0dc3-1c73-a72e4685c342}">
+    <Declaration><![CDATA[TYPE ST_ExternalSetpoint :
+STRUCT
+    fPosition: LREAL := 0;
+    fVelocity: LREAL := 0;
+    fAcceleration: LREAL := 0;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
