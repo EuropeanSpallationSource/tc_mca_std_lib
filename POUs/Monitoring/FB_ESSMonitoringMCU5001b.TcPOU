@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ESSMonitoringMCU5001b" Id="{6ab08be7-abf3-01b6-1c74-7b22ef617170}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ESSMonitoringMCU5001b EXTENDS FB_ESSMonitoringBase;
+VAR
+    //Outputs
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 1^Output'}
+    bStatusLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bAcknowledgeLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 2^Output'}
+    bEStopLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 4^Output'}
+    bErrorLED AT %Q*: BOOL;
+
+    //Inputs
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 1^Input'}
+    b24VDC1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 2^Input'}
+    b24VDC2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 3^Input'}
+    b24VDC3_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 4^Input'}
+    b48VDC1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF204 (EL1808)^Channel 5^Input'}
+    b48VDC2_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 1^Input'}
+    bFuse1_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 2^Input'}
+    bFuse2_Error AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 3^Input'}
+    bFuse3_Error AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 4^Input'}
+    bFuse4_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
+    bFuse5_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
+    bEStop1Released AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
+    bSTO1Released AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
+    bMCBFan_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
+    bSPD_OK AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
+    bDoorClosed AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 8^Input'}
+    bAcknowledgeButton AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 1^Value'}
+    nTemp1 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 2^Value'}
+    nTemp2 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 3^Value'}
+    nTemp3 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 4^Value'}
+    nTemp4 AT %I*: INT;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
+    nEcMasterDevState AT %I*: UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();
+]]></ST>
+    </Implementation>
+    <Method Name="mLink" Id="{4f9773f3-1545-01f3-2a3f-bf15f0d8e4cb}">
+      <Declaration><![CDATA[METHOD mLink
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Input variables
+AcknowledgeButton := bAcknowledgeButton;
+EStop1Released := bEStop1Released;
+EcMasterDevState := nEcMasterDevState;
+
+// Output variables
+bAcknowledgeLED := AcknowledgeLED;
+bStatusLED := StatusLED;
+bEStopLED := EStopLED;
+bErrorLED := ErrorLED;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetResetAlarmsLeds" Id="{b719bf62-3239-0e9a-1dee-3d271cffebf9}">
+      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
+VAR_INST
+    index: UINT;
+    aDeadBandActive: ARRAY [1..4] OF BOOL;
+    nDeadBandTemperature: INT := 3;
+    aTemperatureAlarm: ARRAY [1..4] OF BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mSetReset(stAlarmList := aAlarmList[1], bOk := b24VDC1_OK);
+mSetReset(stAlarmList := aAlarmList[2], bOk := b24VDC2_OK);
+mSetReset(stAlarmList := aAlarmList[3], bOk := b24VDC3_OK);
+
+mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
+mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
+
+mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
+mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
+mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
+
+mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
+mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
+mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
+mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
+mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
+
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Released);
+mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
+
+mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
+mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
+
+
+aTemperatureAlarm[1] :=
+    nTemp1 > nMAX_TEMP
+    OR (aDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[1] := aTemperatureAlarm[1];
+mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[1]);
+
+aTemperatureAlarm[2] :=
+    nTemp2 > nMAX_TEMP
+    OR (aDeadBandActive[2] AND nTemp2 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[2] := aTemperatureAlarm[2];
+mSetReset(stAlarmList := aAlarmList[24], bOk := NOT aTemperatureAlarm[2]);
+
+aTemperatureAlarm[3] :=
+    nTemp3 > nMAX_TEMP
+    OR (aDeadBandActive[3] AND nTemp3 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[3] := aTemperatureAlarm[3];
+mSetReset(stAlarmList := aAlarmList[25], bOk := NOT aTemperatureAlarm[3]);
+
+aTemperatureAlarm[4] :=
+    nTemp4 > nMAX_TEMP
+    OR (aDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
+aDeadBandActive[4] := aTemperatureAlarm[4];
+mSetReset(stAlarmList := aAlarmList[26], bOk := NOT aTemperatureAlarm[4]);
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
