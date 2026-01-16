@@ -353,6 +353,7 @@ CASE eHomingState OF
 
     eFinishHoming:
         fbFinishHoming.Execute := TRUE;
+        bBusy := fbFinishHoming.Busy;
         IF NOT fbFinishHoming.Busy AND fbFinishHoming.Done THEN
             fbFinishHoming.Execute := FALSE;
             bDelay := FALSE;
@@ -366,6 +367,7 @@ CASE eHomingState OF
 
     eAbortHoming:
         fbAbortHoming.Execute := TRUE;
+        bBusy := fbAbortHoming.Busy;
         bError := bLocalHomingFB_Error;
         nErrorID := nLocalHomingFB_ErrorID;
         IF NOT fbAbortHoming.Busy AND fbAbortHoming.Done THEN
