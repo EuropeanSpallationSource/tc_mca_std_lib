@@ -301,6 +301,20 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mExtendTimeStatus" Id="{684456d9-6481-0894-1ad2-4fe1d1b95577}">
+      <Declaration><![CDATA[METHOD mExtendTimeStatus 
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+	fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
+	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeExtending;
+ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+	fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
+	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeTotalExtended;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mHighAirPressure" Id="{a41851e4-8444-48e2-8f12-5249a689e7bc}">
       <Declaration><![CDATA[METHOD mHighAirPressure : BOOL
 
@@ -615,6 +629,8 @@ END_IF
 
 //Starting the timing of extraction movement
 fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
+//Call method for showing the Elapsed time of fbTimerExtend
+mExtendTimeStatus();
 
 fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
 IF fbTrigExtend.Q THEN
