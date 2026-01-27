@@ -16,6 +16,10 @@ VAR
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
+	fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
+	fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
+	fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
+	fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
     bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
     bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
