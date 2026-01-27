@@ -42,13 +42,13 @@ VAR
     nEcMasterDevState AT %I*: UINT;
 
     //Shutter OP
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 1^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501-0100)^KF02 (EL1808)^Channel 1^Input'}
     bShutterOPFuse1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 2^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501-0100)^KF02 (EL1808)^Channel 2^Input'}
     bShutterOPFuse2_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 3^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501-0100)^KF02 (EL1808)^Channel 3^Input'}
     bShutterOP24VDC1_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501)^KF02 (EL1808)^Channel 4^Input'}
+    {attribute 'TcLinkTo' := 'TIID^Device 1 (EtherCAT)^KF201 (EK1200)^KF217 (EK1521)^KF01 (EK1501-0100)^KF02 (EL1808)^Channel 4^Input'}
     bShutterOPSPD_OK AT %I*: BOOL;
 END_VAR
 ]]></Declaration>
