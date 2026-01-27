@@ -597,7 +597,6 @@ mCheckStatusOfInterlockSignal();
 
 //Starting the retraction movement and retraction timing
 fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
-_stPneumaticAxis.stPneumaticAxisStatus.nTimeElapsedRetract := TIME_TO_INT(fbTimerRetract.ET);
 
 fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
 IF fbTrigRetract.Q THEN
@@ -612,7 +611,6 @@ END_IF
 
 //Starting the timing of extraction movement
 fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
-_stPneumaticAxis.stPneumaticAxisStatus.nTimeElapsedExtend := TIME_TO_INT(fbTimerExtend.ET);
 
 fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
 IF fbTrigExtend.Q THEN
