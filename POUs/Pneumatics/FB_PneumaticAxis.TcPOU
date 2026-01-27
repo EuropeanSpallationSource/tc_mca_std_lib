@@ -16,10 +16,10 @@ VAR
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
-	fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
-	fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
-	fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
-	fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
+    fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
+    fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
+    fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
+    fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
     bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
     bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
@@ -302,17 +302,18 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mExtendTimeStatus" Id="{684456d9-6481-0894-1ad2-4fe1d1b95577}">
-      <Declaration><![CDATA[METHOD mExtendTimeStatus 
+      <Declaration><![CDATA[METHOD mExtendTimeStatus
 
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-	fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeExtending;
+    fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeExtending;
 ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-	fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeTotalExtended;
-END_IF]]></ST>
+    fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeTotalExtended;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mHighAirPressure" Id="{a41851e4-8444-48e2-8f12-5249a689e7bc}">
@@ -521,12 +522,13 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-	fElapsedTimeRetracting := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeRetracting;
+    fElapsedTimeRetracting := TIME_TO_REAL(fbTimerRetract.ET)/1000;
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeRetracting;
 ELSIF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-	fElapsedTimeTotalRetracted := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-	_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeTotalRetracted;
-END_IF]]></ST>
+    fElapsedTimeTotalRetracted := TIME_TO_REAL(fbTimerRetract.ET)/1000;
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeTotalRetracted;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
