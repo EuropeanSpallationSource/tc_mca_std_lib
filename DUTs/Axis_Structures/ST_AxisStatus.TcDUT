@@ -47,6 +47,7 @@ STRUCT
     bCommandHandlerBufferingCommand: BOOL; //True if CommandHandler is waiting on a permit before releasing the command
     bCommandHandlerTimeoutError: BOOL; //True if CommandHandler did not receive a permit in time
     eInternalMotionCommand: E_MotionFunctions;
+    stSwitchInfo: ST_SwitchInfo; //Trigger/Untrigger positions and values of switches
 END_STRUCT
 END_TYPE
 ]]></Declaration>

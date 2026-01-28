@@ -1553,6 +1553,13 @@ END_IF
     </Method>
     <Method Name="mStatus_AxisStatus" Id="{6f0fec7d-27eb-00a8-18ec-af8d2df08244}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_AxisStatus : BOOL
+
+VAR_INST
+    rtrigBwdLimit: R_TRIG;
+    ftrigBwdLimit: F_TRIG;
+    rtrigFwdLimit: R_TRIG;
+    ftrigFwdLimit: F_TRIG;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stAxis.Axis.ReadStatus();
@@ -1596,7 +1603,39 @@ ELSE
     _stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled;
 END_IF
 
+rtrigBwdLimit(CLK := _stAxis.stInputs.bLimitBwd);
+ftrigBwdLimit(CLK := _stAxis.stInputs.bLimitBwd);
+rtrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
+ftrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
+
+//The switch is expected to be true when not engaged.
+IF ftrigBwdLimit.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fLimitBwdTrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nLimitBwdTrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fLimitBwdTrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
+IF rtrigBwdLimit.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fLimitBwdUntrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nLimitBwdUntrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fLimitBwdUntrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
+IF ftrigFwdLimit.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fLimitFwdTrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nLimitFwdTrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fLimitFwdTrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
+IF rtrigFwdLimit.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fLimitFwdUntrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nLimitFwdUntrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fLimitFwdUntrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
+
+
 ]]></ST>
       </Implementation>
     </Method>
