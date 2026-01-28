@@ -3,10 +3,9 @@
   <DUT Name="ST_MonitoringAlarm" Id="{7cf4bf56-9560-4e49-afbe-1511a605e206}">
     <Declaration><![CDATA[TYPE ST_MonitoringAlarm :
 STRUCT
-    bAlarmSet: BOOL;
-    bAlarmReset: BOOL;
-    bLedSet: BOOL;
-    bLedReset: BOOL;
+    bAlarmActive: BOOL;
+    bLedActive: BOOL;
+    bLedAutoReset: BOOL := FALSE;
     eStatusLED: E_MonitorLed;
     eErrorLED: E_MonitorLed;
     eAcknowledgeLED: E_MonitorLed;
@@ -14,9 +13,6 @@ STRUCT
     eWarningLED: E_MonitorLed; //Only used for MCU400x test crates
     nErrorID: INT;
     sErrorMsg: STRING;
-    bAlarmActive: BOOL;
-    bLedActive: BOOL;
-    bLedAutoReset: BOOL := FALSE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
