@@ -526,6 +526,7 @@ CASE eExternalBrake OF
         IF TON_DelayBrakeRelease.Q THEN
             IF NOT _stAxis.stStatus.bEnabled
                 OR _stAxis.stStatus.bError
+                OR NOT _stAxis.stInputs.bBrakeTerminalDiagnosticsOk
                 OR TON_BrakeOpeningTimeoutWhenFeedback.Q THEN
                 _stAxis.stControl.bEnable := FALSE;
                 _stAxis.stControl.bReleaseBrake := FALSE;
@@ -537,6 +538,7 @@ CASE eExternalBrake OF
             END_IF
 
             IF _stAxis.stControl.bReleaseBrake
+                AND _stAxis.stInputs.bBrakeTerminalDiagnosticsOk
                 AND ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
                     AND _stAxis.stInputs.bBrakeReleased)
                 OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected) THEN
@@ -570,9 +572,10 @@ CASE eExternalBrake OF
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
             eExternalBrake := E_ExternalBrake.eBrakeEngaged;
-        ELSIF _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
-            AND _stAxis.stControl.bReleaseBrake
-            AND NOT _stAxis.stInputs.bBrakeReleased THEN
+        ELSIF ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
+                AND NOT _stAxis.stInputs.bBrakeReleased)
+            OR NOT _stAxis.stInputs.bBrakeTerminalDiagnosticsOk)
+            AND _stAxis.stControl.bReleaseBrake THEN
             _stAxis.stControl.bReleaseBrake := FALSE;
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
@@ -606,6 +609,7 @@ END_CASE
 
 bReady :=
     eExternalBrake = E_ExternalBrake.eBrakeReleased
+    AND _stAxis.stInputs.bBrakeTerminalDiagnosticsOk
     AND ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
         AND _stAxis.stInputs.bBrakeReleased)
     OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected);
