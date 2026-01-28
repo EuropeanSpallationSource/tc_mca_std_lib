@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SwitchInfo" Id="{8b691b20-d15e-04fc-085e-324c48490184}">
+    <Declaration><![CDATA[TYPE ST_SwitchInfo :
+STRUCT
+    fLimitBwdTrigPos: LREAL; //Last trigger pos of the bwd limit
+    fLimitBwdUntrigPos: LREAL; //Last untrigger pos of the bwd limit
+    nLimitBwdTrigEncoderRaw: UDINT; //Last trigger encoder raw value of the bwd limit
+    nLimitBwdUntrigEncoderRaw: UDINT; //Last untrigger encoder raw value of the bwd limit
+    fLimitBwdTrigExternalPos: LREAL; //Last trigger external tool pos of the bwd limit
+    fLimitBwdUntrigExternalPos: LREAL; //Last untrigger external tool pos of the bwd limit
+    fLimitFwdTrigPos: LREAL; //Last trigger pos of the fwd limit
+    fLimitFwdUntrigPos: LREAL; //Last untrigger pos of the fwd limit
+    nLimitFwdTrigEncoderRaw: UDINT; //Last trigger encoder raw value of the fwd limit
+    nLimitFwdUntrigEncoderRaw: UDINT; //Last untrigger encoder raw value of the fwd limit
+    fLimitFwdTrigExternalPos: LREAL; //Last trigger external tool pos of the fwd limit
+    fLimitFwdUntrigExternalPos: LREAL; //Last untrigger external tool pos of the fwd limit
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
