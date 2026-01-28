@@ -243,8 +243,7 @@ CASE eAirpad OF
 
     E_Airpad.eDepressurize:
         // No movement requested -> Airpad off
-        _stAxis.stControl.bPressurizeAirpad := TRUE;
-
+        _stAxis.stControl.bPressurizeAirpad := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
             AND NOT _stAxis.stStatus.bAirpadPressureError
@@ -256,7 +255,7 @@ CASE eAirpad OF
 
     E_Airpad.ePressurize:
         // Movement requested -> Pressurize airpad
-        _stAxis.stControl.bPressurizeAirpad := FALSE;
+        _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
             OR NOT bPressureOnRequest THEN
@@ -271,7 +270,7 @@ CASE eAirpad OF
 
     E_Airpad.eReadyToMove:
         // Movement requested -> Airpad inflated
-        _stAxis.stControl.bPressurizeAirpad := FALSE;
+        _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
             OR TON_Depressurize.Q THEN
@@ -1371,7 +1370,9 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
 END_IF
 
 fbReadParameter.ReadMode := E_READMODE.READMODE_ONCE;
+{warning disable C0327} // Disable compiler warning 'Implicit conversion from enumeration to another'
 fbReadParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
+{warning restore C0327}
 
 fbReadParameter(Axis := _stAxis.Axis);
 fbReadParameter.Enable := FALSE;
@@ -1531,7 +1532,9 @@ END_IF
     fbWriteParameter.Execute := _stAxis.stControl.bExecute;
 END_IF
 
+{warning disable C0327} // Disable compiler warning 'Implicit conversion from enumeration to another'
 fbWriteParameter.ParameterNumber := _stAxis.stConfig.eAxisParameters;
+{warning restore C0327}
 fbWriteParameter.Value := _stAxis.stConfig.fWriteAxisParameter;
 
 fbWriteParameter(Axis := _stAxis.Axis);
@@ -1573,7 +1576,7 @@ IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     _stAxis.stStatus.bAxisReadyToMove :=
         _stAxis.stStatus.bEnabled
-        AND NOT _stAxis.stControl.bPressurizeAirpad
+        AND _stAxis.stControl.bPressurizeAirpad
         AND _stAxis.stStatus.bAirpadReady;
 ELSIF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
@@ -1587,7 +1590,7 @@ ELSIF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
         _stAxis.stStatus.bEnabled
         AND _stAxis.stControl.bReleaseBrake
         AND _stAxis.stStatus.bExternalBrakeReady
-        AND NOT _stAxis.stControl.bPressurizeAirpad
+        AND _stAxis.stControl.bPressurizeAirpad
         AND _stAxis.stStatus.bAirpadReady;
 ELSE
     _stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled;

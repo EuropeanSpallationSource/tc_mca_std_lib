@@ -367,6 +367,7 @@ CASE eHomingState OF
 
     eAbortHoming:
         fbAbortHoming.Execute := TRUE;
+        bBusy := fbAbortHoming.Busy;
         bError := bLocalHomingFB_Error;
         nErrorID := nLocalHomingFB_ErrorID;
         bBusy := fbAbortHoming.Busy;
