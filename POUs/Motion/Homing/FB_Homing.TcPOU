@@ -365,26 +365,29 @@ CASE eHomingState OF
         END_IF
 
     eAbortHoming:
-		fbAbortHoming.Execute := TRUE;
+        fbAbortHoming.Execute := TRUE;
         bError := bLocalHomingFB_Error;
         nErrorID := nLocalHomingFB_ErrorID;
-		bBusy := fbAbortHoming.Busy;
+        bBusy := fbAbortHoming.Busy;
         IF NOT fbAbortHoming.Busy AND fbAbortHoming.Done THEN
             bCommandAborted := TRUE;
-			fbAbortHoming.Execute := FALSE;
+            fbAbortHoming.Execute := FALSE;
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
-		ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.CommandAborted THEN
-			bCommandAborted := TRUE;
-			fbAbortHoming.Execute := FALSE;
+        ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.CommandAborted THEN
+            // Sometimes fbAbortHoming.CommandAborted remains TRUE even when the is Execute already FALSE
+            // MEMSET fbAbortHoming.CommandAborted to FALSE
+            MEMSET(ADR(fbAbortHoming.CommandAborted), 0, SIZEOF(fbAbortHoming.CommandAborted));
+            bCommandAborted := TRUE;
+            fbAbortHoming.Execute := FALSE;
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
         ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.Error THEN
-			bError := fbAbortHoming.Error;
-        	nErrorID := fbAbortHoming.ErrorID;
-			fbAbortHoming.Execute := FALSE;
+            bError := fbAbortHoming.Error;
+            nErrorID := fbAbortHoming.ErrorID;
+            fbAbortHoming.Execute := FALSE;
             bFineDetectionDone := FALSE;
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
