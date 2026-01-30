@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Homing" Id="{b95d0b47-1221-0049-3c71-c4df2e544daa}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
-// Tested with Tc3_MC2_AdvancedHoming, 3.0.26.0
+//Tested with Tc3_MC2_AdvancedHoming, 3.0.26.0
 VAR_IN_OUT
     Axis: Axis_Ref;
 END_VAR
@@ -376,8 +376,8 @@ CASE eHomingState OF
             bDelay := FALSE;
             eHomingState := eWaitForRequest;
         ELSIF NOT fbAbortHoming.Busy AND fbAbortHoming.CommandAborted THEN
-            // Sometimes fbAbortHoming.CommandAborted remains TRUE even when the is Execute already FALSE
-            // MEMSET fbAbortHoming.CommandAborted to FALSE
+            //Sometimes fbAbortHoming.CommandAborted remains TRUE even when the Execute is already FALSE
+            //MEMSET fbAbortHoming.CommandAborted to FALSE
             MEMSET(ADR(fbAbortHoming.CommandAborted), 0, SIZEOF(fbAbortHoming.CommandAborted));
             bCommandAborted := TRUE;
             fbAbortHoming.Execute := FALSE;
