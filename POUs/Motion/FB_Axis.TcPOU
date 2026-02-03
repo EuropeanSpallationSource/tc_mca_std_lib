@@ -1603,10 +1603,16 @@ ELSE
     _stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled;
 END_IF
 
+_stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
+
 rtrigBwdLimit(CLK := _stAxis.stInputs.bLimitBwd);
 ftrigBwdLimit(CLK := _stAxis.stInputs.bLimitBwd);
 rtrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
 ftrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
+
+IF NOT _stAxis.stStatus.bAxisInitialized THEN
+    RETURN;
+END_IF
 
 //The switch is expected to be true when not engaged.
 IF ftrigBwdLimit.Q THEN
@@ -1632,10 +1638,6 @@ IF rtrigFwdLimit.Q THEN
     _stAxis.stStatus.stSwitchInfo.nLimitFwdUntrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
     _stAxis.stStatus.stSwitchInfo.fLimitFwdUntrigExternalPos := _stAxis.stInputs.fExternalPos;
 END_IF
-
-_stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
-
-
 ]]></ST>
       </Implementation>
     </Method>
