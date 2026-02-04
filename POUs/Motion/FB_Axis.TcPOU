@@ -19,6 +19,12 @@ VAR
     fbReset: MC_Reset;
     stMcStatusReset: ST_McStatus;
 
+    //SERCOS drive
+    fbSoEReadDiagNumber : FB_SoEReadDiagNumber;
+    fbSoEReset: FB_SoEReset;
+
+    fbReadDriveInfo: FB_ReadDriveInfo;
+
     fbMoveAbsolute: MC_MoveAbsolute;
     fbMoveAbsolute2: MC_MoveAbsolute;
     stMcStatusMoveAbsolute: ST_McStatus;
@@ -814,12 +820,39 @@ END_IF
 VAR
     i: UINT;
 END_VAR
+VAR_INST
+    bSoEReset: BOOL := FALSE;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbReset.Execute := _stAxis.stControl.bReset;
+        <ST><![CDATA[(*The function block MC_Reset is used to reset the NC axis. In many cases this also leads
+to a reset of a connected drive device. Depending on the bus system or drive types,
+in some cases a separate reset may be required for the drive device.*)
+
+IF _stAxis.stControl.bReset
+    AND _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT
+    AND NOT fbReset.Busy THEN
+    bSoEReset := TRUE;
+    fbSoEReset.Execute := bSoEReset;
+END_IF
+
+fbSoEReset(Axis := _stAxis.Axis);
+
+IF bSoEReset
+    AND NOT fbSoEReset.Busy THEN
+    fbSoEReset.Execute := FALSE;
+    bSoEReset := FALSE;
+END_IF
+
+IF NOT fbSoEReset.Busy THEN
+    fbReset.Execute := _stAxis.stControl.bReset;
+END_IF
 
 fbReset(Axis := _stAxis.Axis);
-IF fbReset.Done THEN
+
+IF fbReset.Done
+    AND NOT bSoEReset
+    AND NOT fbSoEReset.Busy THEN
     _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
@@ -847,9 +880,9 @@ IF fbReset.Done THEN
     END_FOR
 END_IF
 
-mControl_Reset.Busy := fbReset.Busy;
-mControl_Reset.Done := fbReset.Done;
-mControl_Reset.Error := fbReset.Error;
+mControl_Reset.Busy := fbReset.Busy OR fbSoEReset.Busy;
+mControl_Reset.Done := fbReset.Done AND NOT fbSoEReset.Busy;
+mControl_Reset.Error := fbReset.Error OR fbSoEReset.Error;
 mControl_Reset.ErrorID := fbReset.ErrorID;
 
 IF fbReset.Error THEN
@@ -1185,18 +1218,48 @@ END_IF
     </Method>
     <Method Name="mParameters_Init" Id="{b94f4f04-02f5-00e2-1b47-81c18323a22e}" FolderPath="Parameter Methods\">
       <Declaration><![CDATA[METHOD mParameters_Init : BOOL
+VAR_INST
+    FTRIG_DriveBusy: F_TRIG;
+    bInitializeDriveInfo: BOOL := TRUE;
+    bInitializeParameters: BOOL := TRUE;
+    nInitializeDriveCounter: UINT := 0;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _stAxis.stConfig.bReadMcParametersValid AND NOT _stAxis.stStatus.bAxisInitialized THEN
+        <ST><![CDATA[IF _stAxis.stConfig.bReadMcParametersValid
+    AND bInitializeParameters THEN
     _stAxis.stControl.fAcceleration := _stAxis.stConfig.fDefaultAcc;
     _stAxis.stControl.fDeceleration := _stAxis.stConfig.fDefaultDec;
     _stAxis.stControl.fVelocity := _stAxis.stConfig.fVelocityDefaultFast;
     _stAxis.stControl.fJogVelocity := _stAxis.stConfig.fVelocityDefaultSlow;
 
-    _stAxis.stStatus.bAxisInitialized := TRUE;
+    bInitializeParameters := FALSE;
 END_IF
 
+IF bInitializeDriveInfo
+    AND NOT bInitializeParameters THEN
+    FTRIG_DriveBusy(CLK := fbReadDriveInfo.Busy);
 
+    IF FTRIG_DriveBusy.Q THEN
+        bInitializeDriveInfo := FALSE;
+    END_IF
+
+    fbReadDriveInfo(
+        Axis := _stAxis.Axis,
+        Execute := bInitializeDriveInfo,
+        DriveInfo => _stAxis.stConfig.stDriveInfo);
+
+    // Retry if error
+    IF NOT bInitializeDriveInfo
+        AND fbReadDriveInfo.Error
+        AND nInitializeDriveCounter < 3 THEN
+        bInitializeDriveInfo := TRUE;
+        nInitializeDriveCounter := nInitializeDriveCounter + 1;
+    END_IF
+END_IF
+
+_stAxis.stStatus.bAxisInitialized :=
+    NOT bInitializeParameters AND NOT bInitializeDriveInfo;
 ]]></ST>
       </Implementation>
     </Method>
@@ -1576,6 +1639,7 @@ _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
 _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
+_stAxis.stStatus.bSoEDriveDeviceError := _stAxis.Axis.Status.DriveDeviceError;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
 {info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
@@ -1708,19 +1772,36 @@ END_FOR
 
 fbErrorRTrig(CLK := tmpError);
 
+IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+    // Read SERCOS drive error information,
+    fbSoEReadDiagNumber(
+        Axis := stAxis.Axis,
+        Execute :=TRUE,
+        Timeout := DEFAULT_ADS_TIMEOUT,
+        SercosErrId => stAxis.stStatus.nSoEErrorID,
+        DiagNumber => stAxis.stStatus.nSoEDiagID);
+
+    IF NOT fbSoEReadDiagNumber.Busy THEN
+        fbSoEReadDiagNumber(Axis := stAxis.Axis, Execute := FALSE);
+    END_IF
+ELSE
+    stAxis.stStatus.nSoEErrorID := 0;
+    stAxis.stStatus.nSoEDiagID := 0;
+END_IF
+
 IF _stAxis.Axis.Status.ErrorStop THEN
     _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
     _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
 ELSIF _stAxis.Axis.Status.Error THEN
     _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
 ELSIF fbErrorRTrig.Q THEN
-        //For each mcStatus
-        FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-            //If there's an error present propagate
-            IF astMcStatus[i]^.ErrorID <> 0 THEN
-                _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
-            END_IF
-        END_FOR
+    //For each mcStatus
+    FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
+        //If there's an error present propagate
+        IF astMcStatus[i]^.ErrorID <> 0 THEN
+            _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
+        END_IF
+    END_FOR
 END_IF
 ]]></ST>
       </Implementation>
