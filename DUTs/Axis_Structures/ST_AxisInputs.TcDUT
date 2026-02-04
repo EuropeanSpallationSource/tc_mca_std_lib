@@ -9,6 +9,7 @@ STRUCT
     nTempPT100 AT %I*: INT; //Temperature sensor input
     bAirpadPressurized AT %I*: BOOL; //Airpad pressurized
     bBrakeReleased AT %I*: BOOL; //External brake released
+    fExternalPos AT %I*: LREAL; //External measurement tool
 END_STRUCT
 END_TYPE
 ]]></Declaration>
