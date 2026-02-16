@@ -8,6 +8,8 @@ STRUCT
     fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
     bOpenManualOP1 AT %I*: BOOL; //Push button input to extend cylinder from Operator Panel 1
     bCloseManualOP1 AT %I*: BOOL; //Push button input to retract the cylinder from Operator Panel 1
+    bOpenManualOP2 AT %I*: BOOL; //Push button input to extend cylinder from Operator Panel 2
+    bCloseManualOP2 AT %I*: BOOL; //Push button input to retract the cylinder from Operator Panel 2
 END_STRUCT
 END_TYPE
 ]]></Declaration>
