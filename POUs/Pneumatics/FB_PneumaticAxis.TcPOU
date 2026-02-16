@@ -639,10 +639,17 @@ IF fbTrigRetract.Q THEN
    bStartRetractPLC := TRUE;
 END_IF
 
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1);
-IF fbTrigRetractManual.Q THEN
-   bStartRetractManual := TRUE;
+//Closing the shutter from the OP
+IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
+ELSE
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the timing of extraction movement
@@ -655,10 +662,17 @@ IF fbTrigExtend.Q THEN
    bStartExtendPLC := TRUE;
 END_IF
 
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1);
-IF fbTrigExtendManual.Q THEN
-   bStartExtendManual := TRUE;
+//Opening the shutter from the OP
+IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
+ELSE
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the extraction movement
