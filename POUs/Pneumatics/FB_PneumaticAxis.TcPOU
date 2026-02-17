@@ -383,6 +383,70 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mParameters_SetAirPressureSensorGroup" Id="{8416effc-de90-0c76-3051-15a05f13b381}" FolderPath="Parameter Methods\">
+      <Declaration><![CDATA[METHOD mParameters_SetAirPressureSensorGroup
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
+
+        E_PneumaticAxisGroup.ePneumaticAxisGroup1:
+            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mParameters_SetScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup1,
+                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+
+        E_PneumaticAxisGroup.ePneumaticAxisGroup2:
+            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mParameters_SetScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup2,
+                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mParameters_SetAllowedMovinglTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}" FolderPath="Parameter Methods\">
+      <Declaration><![CDATA[METHOD PUBLIC mParameters_SetAllowedMovinglTime
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
+fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToExtend)*1000;
+fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToRetract)*1000;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mParameters_SetInputStatuses" Id="{85a914cc-13e6-05a5-383f-5d3b917db237}" FolderPath="Parameter Methods\">
+      <Declaration><![CDATA[METHOD PUBLIC mParameters_SetInputStatuses
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
+//Check if cylinder is moving: extending or retracting
+_stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
+_stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
+_stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mParameters_SetScaledPressureValue" Id="{3012bd32-5e56-08e5-357d-6a59fe398239}" FolderPath="Parameter Methods\">
+      <Declaration><![CDATA[METHOD PUBLIC mParameters_SetScaledPressureValue : REAL
+VAR_INPUT
+    nRawValue: INT; //Raw value from the Terminal
+    fRawHigh: REAL; //Highest value for the Raw value
+    fRawLow: REAL; //Lowest value for the Raw value
+    fScaledHigh: REAL; //Highest value for the Scaled value
+    fScaledLow: REAL; //Lowest value for the Scaled value
+END_VAR
+VAR
+    rGradient: REAL; //Internal variable to calculate gradient of the slope
+    rOffset: REAL; //Internal variable to calculate the offset value
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
+rOffset:= fScaledHigh - rGradient * fRawHigh;
+mParameters_SetScaledPressureValue:= rGradient * nRawValue + rOffset;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mReset" Id="{4721b129-abfa-4113-85bb-a13eb59dedea}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD PUBLIC mReset
 
@@ -431,83 +495,19 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
-mSetInputStatuses();
+mParameters_SetInputStatuses();
 
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-mSetAllowedTravelTime();
+mParameters_SetAllowedMovinglTime();
 
 //Get the value of the air pressure in mb
-mSelectAirPressureSensorGroup();
+mParameters_SetAirPressureSensorGroup();
 
 //Check if air pressure is in range
 mStatus_AirPressureValue();
 
 //Reset Error
 mReset();
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mScaledPressureValue" Id="{3012bd32-5e56-08e5-357d-6a59fe398239}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[METHOD PUBLIC mScaledPressureValue : REAL
-VAR_INPUT
-    nRawValue: INT; //Raw value from the Terminal
-    fRawHigh: REAL; //Highest value for the Raw value
-    fRawLow: REAL; //Lowest value for the Raw value
-    fScaledHigh: REAL; //Highest value for the Scaled value
-    fScaledLow: REAL; //Lowest value for the Scaled value
-END_VAR
-VAR
-    rGradient: REAL; //Internal variable to calculate gradient of the slope
-    rOffset: REAL; //Internal variable to calculate the offset value
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
-rOffset:= fScaledHigh - rGradient * fRawHigh;
-mScaledPressureValue:= rGradient * nRawValue + rOffset;
-
-
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSelectAirPressureSensorGroup" Id="{8416effc-de90-0c76-3051-15a05f13b381}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[METHOD mSelectAirPressureSensorGroup
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
-
-        E_PneumaticAxisGroup.ePneumaticAxisGroup1:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup1,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-
-        E_PneumaticAxisGroup.ePneumaticAxisGroup2:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup2,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-END_CASE
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSetAllowedTravelTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[METHOD PUBLIC mSetAllowedTravelTime
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToExtend)*1000;
-fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToRetract)*1000;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSetInputStatuses" Id="{85a914cc-13e6-05a5-383f-5d3b917db237}" FolderPath="Parameter Methods\">
-      <Declaration><![CDATA[METHOD PUBLIC mSetInputStatuses
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
-//Check if cylinder is moving: extending or retracting
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
 ]]></ST>
       </Implementation>
     </Method>
