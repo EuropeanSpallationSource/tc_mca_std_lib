@@ -271,7 +271,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1) OR bInterlockedExtended THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bInterlockedExtended THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
@@ -286,6 +286,7 @@ END_IF
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
 bInterlockedExtended := TRUE;
 _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
@@ -392,8 +393,9 @@ _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
 IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
  OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2
  OR _stPneumaticAxis.stPneumaticAxisControl.bRetract
- OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1) OR bNoPSSPermitError THEN
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bNoPSSPermitError THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
 END_IF
@@ -485,7 +487,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1) OR bInterlockedRetracted THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2) OR bInterlockedRetracted THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
@@ -500,6 +502,7 @@ END_IF
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bInterlockedRetracted := TRUE;
 _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
