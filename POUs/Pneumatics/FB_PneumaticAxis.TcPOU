@@ -5,21 +5,32 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
+
+    //Init Handshake
+    bStartInitDelay: BOOL := FALSE;
+    tInitializeTimer: TON;
+    bInitialized: BOOL := FALSE;
+
+    //Timers and local timing variables
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
     fbTimerAirPressureErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
     fbTimerAirPressureNoErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
     fbTimerAirPressureNoErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
+    fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
+    fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
+    fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
+    fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
+
+    //Edge detection
     fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
     fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
-    fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
-    fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
-    fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
-    fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
+
+    //Default opening and closing commands. interlocks and error states
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
     bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
     bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
@@ -28,9 +39,7 @@ VAR
     bInterlockedExtended: BOOL := FALSE;
     bInterlockedRetracted: BOOL := FALSE;
     bNoPSSPermitError: BOOL := FALSE;
-    bStartInitDelay: BOOL := FALSE;
-    tInitializeTimer: TON;
-    bInitialized: BOOL := FALSE;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
