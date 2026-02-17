@@ -395,6 +395,77 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mMove_Negative" Id="{29644cb4-36a5-097c-23ea-5714a43f3166}" FolderPath="Move Methods\">
+      <Declaration><![CDATA[METHOD mMove_Negative : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+
+//Check if Ithe PSS signal for shutter is ON
+mCheckStatusOfPermitSignal();
+
+//Check if Interlock signal is ON
+mCheckStatusOfInterlockSignal();
+
+//Check if LimitSwitchBwd signal is ON
+mCheckEndSwitchBwdStatus();
+
+//Starting the retraction movement and retraction timing
+fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
+
+mRetractTimeStatus();
+
+fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
+IF fbTrigRetract.Q THEN
+   bStartRetractPLC := TRUE;
+END_IF
+
+//If the manual momentary push button is used for control of the pneumatic cylinder
+IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
+ELSE
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
+END_IF
+
+IF (bStartRetractPLC OR bStartRetractManual) THEN
+    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
+    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
+       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+        _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
+    END_IF
+END_IF
+
+// Retraction of the cylinder finished, reset timer
+IF  (bStartRetractPLC OR bStartRetractManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+    bStateChange := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+    bStartRetractPLC := FALSE;
+    bStartRetractManual := FALSE;
+END_IF
+
+mCheckForMovingError();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMove_Positive" Id="{a058f28a-4780-08dd-2d3b-825ddda7b3f5}" FolderPath="Move Methods\">
+      <Declaration><![CDATA[METHOD mMove_Positive : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mNoPSSPermit" Id="{992f1dea-d5e2-43e5-8693-024ad7503be1}">
       <Declaration><![CDATA[METHOD mNoPSSPermit
 

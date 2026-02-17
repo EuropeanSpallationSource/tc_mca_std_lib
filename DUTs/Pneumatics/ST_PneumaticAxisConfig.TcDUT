@@ -11,6 +11,7 @@ STRUCT
     tAllowTimePressureOutOfRange: TIME; //User defined allowed time in seconds for the duration of air pressure value fluctuation
     fLowLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
     fHighLimitPressureValue: REAL; //User defined value in bar for low limit air pressure value
+    bSecondOperatorPanel: BOOL := FALSE; //Define if the safety shutter has two operator panels
 END_STRUCT
 END_TYPE
 ]]></Declaration>
