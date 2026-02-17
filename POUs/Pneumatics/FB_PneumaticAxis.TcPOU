@@ -92,6 +92,10 @@ IF bInitialized THEN
 END_IF
 ]]></ST>
     </Implementation>
+    <Folder Name="Control Methods" Id="{cbf20e5b-6698-0e60-2b75-98c2f47260f3}" />
+    <Folder Name="Move Methods" Id="{8fd72251-cf98-016b-3841-a56da5fee1d9}" />
+    <Folder Name="Parameter Methods" Id="{bad8972e-e266-0c83-0541-d43d2ddac2a3}" />
+    <Folder Name="Status Methods" Id="{9bd7927f-09f7-0fc4-04b8-d7fddb6c95f7}" />
     <Method Name="FB_init" Id="{5454029e-f817-018f-32fe-52a7c013d503}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
