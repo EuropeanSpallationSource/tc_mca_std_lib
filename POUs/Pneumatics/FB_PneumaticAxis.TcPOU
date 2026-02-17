@@ -56,7 +56,8 @@ IF bInitialized THEN
         CASE _stPneumaticAxis.ePneumaticAxisMode OF
 
         E_PneumaticMode.eSingleSolenoidControl:
-        mSingleSolenoid();
+        mMove_Negative();
+        mMove_Positive();
 
         E_PneumaticMode.eNoPSSPermit:
         mNoPSSPermit();
@@ -284,7 +285,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManual) OR bInterlockedExtended THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bInterlockedExtended THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
@@ -298,7 +299,8 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
 bInterlockedExtended := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
@@ -475,9 +477,10 @@ END_VAR
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
 IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
- OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManual
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2
  OR _stPneumaticAxis.stPneumaticAxisControl.bRetract
- OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManual) OR bNoPSSPermitError THEN
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bNoPSSPermitError THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
 END_IF
@@ -569,7 +572,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManual) OR bInterlockedRetracted THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2) OR bInterlockedRetracted THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
@@ -583,7 +586,8 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bInterlockedRetracted := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManual := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
@@ -697,109 +701,6 @@ fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeTo
 _stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSingleSolenoid" Id="{7947fd9c-1dec-078f-0fa8-640a9c506249}">
-      <Declaration><![CDATA[METHOD PUBLIC mSingleSolenoid
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-
-//Check if Ithe PSS signal for shutter is ON
-mCheckStatusOfPermitSignal();
-
-//Check if Interlock signal is ON
-mCheckStatusOfInterlockSignal();
-
-//Starting the retraction movement and retraction timing
-fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
-//Set status of the Elapsed time of fbTimerRetract
-mRetractTimeStatus();
-
-fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
-IF fbTrigRetract.Q THEN
-   bStartRetractPLC := TRUE;
-END_IF
-
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual);
-IF fbTrigRetractManual.Q THEN
-   bStartRetractManual := TRUE;
-END_IF
-
-//Starting the timing of extraction movement
-fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
-//Set status of the Elapsed time of fbTimerExtend
-mExtendTimeStatus();
-
-fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
-IF fbTrigExtend.Q THEN
-   bStartExtendPLC := TRUE;
-END_IF
-
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManual);
-IF fbTrigExtendManual.Q THEN
-   bStartExtendManual := TRUE;
-END_IF
-
-//Starting the extraction movement
-IF (bStartExtendPLC OR bStartExtendManual) THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bExtending := TRUE;
-    END_IF
-    //If the command to retract is given after the valve was activated
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
-       OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        IF (bStartRetractPLC OR bStartRetractManual) THEN
-            _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-            _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-            bStartExtendPLC := FALSE;
-            bStartExtendManual := FALSE;
-        END_IF
-    END_IF
-END_IF
-
-// Extraction of the cylinder finished, reset timer
-IF (bStartExtendPLC OR bStartExtendManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    bStateChange := TRUE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-END_IF
-
-//Check if LimitSwitchBwd signal is ON
-mCheckEndSwitchFwdStatus();
-
-IF (bStartRetractPLC OR bStartRetractManual) THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
-    END_IF
-END_IF
-
-// Retraction of the cylinder finished, reset timer
-IF  (bStartRetractPLC OR bStartRetractManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    bStateChange := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-    bStartRetractPLC := FALSE;
-    bStartRetractManual := FALSE;
-END_IF
-//Check if LimitSwitchFwd signal is ON
-mCheckEndSwitchBwdStatus();
-
-
-mCheckForMovingError();
 ]]></ST>
       </Implementation>
     </Method>
