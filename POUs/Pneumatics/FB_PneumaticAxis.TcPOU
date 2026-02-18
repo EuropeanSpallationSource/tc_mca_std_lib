@@ -271,7 +271,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManual) OR bInterlockedExtended THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bInterlockedExtended THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
@@ -285,7 +285,8 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
 bInterlockedExtended := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
@@ -391,9 +392,10 @@ END_IF
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
 IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
- OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManual
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2
  OR _stPneumaticAxis.stPneumaticAxisControl.bRetract
- OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManual) OR bNoPSSPermitError THEN
+ OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2) OR bNoPSSPermitError THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
 END_IF
@@ -485,7 +487,7 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManual) OR bInterlockedRetracted THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2) OR bInterlockedRetracted THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
@@ -499,7 +501,8 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bInterlockedRetracted := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManual := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
@@ -639,10 +642,17 @@ IF fbTrigRetract.Q THEN
    bStartRetractPLC := TRUE;
 END_IF
 
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManual);
-IF fbTrigRetractManual.Q THEN
-   bStartRetractManual := TRUE;
+//Closing the shutter from the OP
+IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
+ELSE
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the timing of extraction movement
@@ -655,10 +665,17 @@ IF fbTrigExtend.Q THEN
    bStartExtendPLC := TRUE;
 END_IF
 
-//If the manual momentary push button is used for control of the pneumatic cylinder
-fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManual);
-IF fbTrigExtendManual.Q THEN
-   bStartExtendManual := TRUE;
+//Opening the shutter from the OP
+IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
+ELSE
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the extraction movement
