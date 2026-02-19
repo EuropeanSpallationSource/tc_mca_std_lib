@@ -3,7 +3,7 @@ Release notes
 In general: update them just before setting a tag:
 git tag -a vx.y.z
 
-Describe the changes (the motivation) which motiviated this tag.
+Describe the changes (the motivation) which motivated this tag.
 The same information should be added into this file, so that
 the tag has the "diff" of ReleaseNotes.txt, kind of.
 
@@ -11,12 +11,28 @@ It is probably a good idea to set a new tag with every new feature.
 The first digit should be increased, when there are non compatible changes:
   Things had been removed, code that had been moved inside the code tree,
   so that a project will not compile without further changes.
-The second digit will be inccreased when a new feature had been added,
+The second digit will be increased when a new feature had been added,
 which will reset the third digit to 0.
 (The word digit is wrong. We can have 2.11.13 or so)
 
 The 3rd digit will be increased, when there is a pure bugfix.
 See v2.0.0 vs 2.0.1
+
+v2.10.0
+- New features:
+  - Display the total opening and closing time for pneumatics (MBP-353).
+  - Save position values every time a limit switch engages and disengages (MBP-356).
+  - Add reset to SoE drives by checking the Drive type (MBP-325).
+  - Add support for second Shutter Operator Panel (MBP-275).
+- Improvements:
+  - Disable Implicit conversion warning for E_Axis_Parameters (MBP-338).
+  - Show micrometer position digits in the MainVisu (MBP-337).
+  - Refactor Cabinet monitoring. All FB's are extension of a based FB and now
+    all the FBs are in a folder structure (MBP-326).
+  - Restructure the variables linked to the status Fwd/BwdEnabled (MBP-333).
+- Bug fix:
+  - Invert Airpad logic. Valve On is Airpads pressurized (MBP-339).
+  - Fix Homing busy staying true after abort homing (MBP-358).
 
 v2.9.1
 - Bug fix:
@@ -25,7 +41,7 @@ v2.9.1
 v2.9.0
 - New features:
   - FB_Monitoring for all cabinet types at ESS (MBP-312).
-  - Add code to handle the temperature sensor hystersis. The motor will be disabled if the temperature
+  - Add code to handle the temperature sensor hysteresis. The motor will be disabled if the temperature
 	surpasses the defined Max Temperature, and it will not be able to be enabled until the value is
 	5 degrees less than the defined Max temperature (MBP-314).
   - Autoreset pneumatic error when Backward limit switch signal is gone and then comes back (MBP-328).
@@ -33,7 +49,7 @@ v2.9.0
   - Autoenable and autodisable features added (MBP-323).
 - Bug fix:
   - Increase the initialization timer in FB_PneumaticAxis to avoid starting in error. Due
-    to the dealy between the Outpust for powering the swithces and running the PLC program
+    to the delay between the Outputs for powering the switches and running the PLC program
 	the Pneumatic axis used to start in error state because the Bwd limit switch was not found.
   - Delete unused stranded grey box in the far right hand side of the MAIN Visu. This was discovered 
     when scaling the MAIN Visu to be used in a web browser.
@@ -59,7 +75,7 @@ v2.8.0
 	- Remove the variable bAirpressurePower from the st_outputs of the pneumatics axis. It will be
       included in the Pneumatic_Box PROG in the application specific section (MBP-310).
 	- Remove bPSSPermit from the st_input. Use the bPSSPermitOK from st_status for the checks. 
-	  The actual PSS permit signals wre moved to the Safey_Shutter program (MBP-310).
+	  The actual PSS permit signals were moved to the Safey_Shutter program (MBP-310).
 	- In GVL delete the initial value of iPneumaticAxis. We are setting it to 1 in the MAIN/AXES (MBP-310).
 	- The variable stPneumaticAxisConfig.nAllowTimePressureOutOfRange will be moved to GVL_APP as 
 	  tTIME_PRESSURE_OUT_OF_RANGE: TIME := T#10S and link to the pneumatic axis in Pneumatics_template (MBP-310).
@@ -93,7 +109,7 @@ v2.6.0
 
 v2.5.0
 - New features:
-  - Autoreset the errors of pneumatic axes when they dissapear (MBP-276).
+  - Autoreset the errors of pneumatic axes when they disappear (MBP-276).
   - Remove from all files the version number. That version number was not 
     related to the TwinCAT version in a documented way (MBP-286).
 - Bug fix:
@@ -107,7 +123,7 @@ v2.4.0
   - Pneumatic axis code was changed to OOP style, with methods instead of actions (MBP-229).
 - New features:
   - A bool variable was added in the stConfig to prevent going full speed to a limit switch 
-    when comissioning (MBP-253)
+    when commissioning (MBP-253)
   - Pneumatic axis has a bool variable to configure if it is a safety shutter or not (MBP-274).
 
 v2.3.0
@@ -143,7 +159,7 @@ v2.1.0
     See MBP-214
 - Cleanup:
     Delete extra ST_AxisError. Keep the one under DUT/Axis_Structures
-    Set the ouput of DC voltage monitoring  to TRUE as default value
+    Set the output of DC voltage monitoring  to TRUE as default value
 
 v2.0.2
   Support automated testing of different versions better:
@@ -158,7 +174,7 @@ v2.0.0
 - OOP implementation of FB_Axis
 - MBP-202 new slit code ess rev
 - Add persistent variable for encoder position BIAS
-- Remove Jog from eMotionCommands and all the refrences of it
+- Remove Jog from eMotionCommands and all the references of it
 - Add bInTargetPosition variable to ST_AxisStatus
 - Remove all LineIDs; Add scripts for bitbucket pipelines
 - Add a filter/ directory to clean up whitespace and more
