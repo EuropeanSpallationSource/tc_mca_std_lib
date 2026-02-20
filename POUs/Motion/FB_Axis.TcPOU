@@ -1677,7 +1677,7 @@ _stAxis.stStatus.bBrakeDiagnosticsOk :=
     AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OVER_CURRENT) = 0
     AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_SHORT_CIRCUIT) = 0;
 
-{info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
+{info 'NOTE: If terminal diagnostics is not used, a risk constitutes for an airpad/brake without feedback.'}
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     _stAxis.stStatus.bAxisReadyToMove :=
