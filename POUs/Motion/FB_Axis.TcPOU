@@ -1640,6 +1640,13 @@ VAR_INST
     rtrigFwdLimit: R_TRIG;
     ftrigFwdLimit: F_TRIG;
 END_VAR
+
+VAR CONSTANT
+    BRAKE_OVER_TEMPERATURE : WORD := 16#0001;
+    BRAKE_OPEN_LOAD : WORD := 16#0002;
+    BRAKE_OVER_CURRENT : WORD := 16#0003;
+    BRAKE_SHORT_CIRCUIT : WORD := 16#0004;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stAxis.Axis.ReadStatus();
@@ -1658,6 +1665,13 @@ _stAxis.stStatus.bMovingBackward := _stAxis.Axis.Status.NegativeDirection;
 _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bSoEDriveDeviceError := _stAxis.Axis.Status.DriveDeviceError;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
+
+_stAxis.stStatus.bBrakeDiagnosticsOverTemperature :=
+    (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OVER_TEMPERATURE) <> 0;
+_stAxis.stStatus.bBrakeDiagnosticsOk :=
+    (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OPEN_LOAD) = 0
+    AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OVER_CURRENT) = 0
+    AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_SHORT_CIRCUIT) = 0;
 
 {info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
