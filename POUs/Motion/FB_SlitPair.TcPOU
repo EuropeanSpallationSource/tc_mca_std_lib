@@ -5,7 +5,7 @@
 For the virtual axis setup, the encoders need their type changed from "simulation encoder" to "Encoder (Universal)".
 In addition the scale factor needs to be changed to a numerator of 1 and denominator of fEncoderScaling which is 10,000 by default)
 Care needs to be taken with scaling and setup of both real and virtual axes to ensure velocities are not too fast and axes have time to settle before they submit a "complete move"
-Link the virtual encoder inputs to the Gap and Center position calculations iGapSizePosition iGapCentrePosition
+Link the virtual encoder inputs to the Gap and Centre position calculations nGapSizePosition and nGapCentrePosition
 Encoder needs to be set as ABSOLUTE
 Encoder Mask has to be set to 0xFFFFFFFF otherwise UDINT will overflow
 NOTES TO FB_SlitPair:
@@ -27,39 +27,36 @@ VAR_OUTPUT
     bHoming: BOOL := FALSE; //TRUE if function is homing axes
 END_VAR
 VAR
-    eSlitPairState: E_SlitPairStates := E_SlitPairStates.INIT; //statemachine index
+	//Internal state machines
+    eSlitPairState: E_SlitPairStates := E_SlitPairStates.INIT; //equence steps for operating the slits
+	eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.START; //Sequence steps for update of soft limits
 
-//Internal statuses for logic
+	//Internal statuses for logic
     bEnable: BOOL; //Enable/disable the slit set
     bReset: BOOL; //Reset the slit set
     bResetting: BOOL := FALSE; //TRUE if axis going through a reset
     bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
-    bSlitsHomed: BOOL := FALSE; //TRUE if all axes Homed after reboot
-    bBladesHomed: BOOL:= FALSE; //TRUE if blade axes are calibrated
-    bGapHomed: BOOL:= FALSE; //TRUE if virtual axes are calibrated
-    bBladesCoupled: BOOL:= FALSE; //TRUE if both blade axes are coupled
+    bBladesHomed: BOOL := FALSE; //TRUE if blade axes are calibrated
+    bGapHomed: BOOL := FALSE; //TRUE if virtual axes are calibrated
+    bBladesCoupled: BOOL := FALSE; //TRUE if both blade axes are coupled
     bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
     bFunctionInErrorState: BOOL := FALSE; //TRUE if function block is in one of the error related states
-    fGapSizePosition: LREAL;
-    iGapSizePosition AT %Q*: UDINT := 0;
-    fGapCentrePosition: LREAL;
-    iGapCentrePosition AT %Q*: UDINT := 0;
-    resetCounterTimeout: UINT :=0;
-    eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.START; //Sequence steps for update of soft limits
-    fbNoMovingRising: R_TRIG;
-    fbInOpRising: R_TRIG;
-    bUpdateSoftLimits: BOOL := FALSE;
-    bHomingRequested: BOOL := FALSE;
-    fbEnableRising: R_TRIG;
-    fbStopRising: R_TRIG;
-    fbDisableRising: R_TRIG;
-    fbDisabledRising: R_TRIG;
-    fbHomingRising: R_TRIG;
+	bUpdateSoftLimits: BOOL := FALSE; //TRUE if update of soft limits are being executed
+    bHomingRequested: BOOL := FALSE; //TRUE if homing is requested for all axis
+    fGapSizePosition: LREAL; //Virtual axis gap size calculated position
+    nGapSizePosition AT %Q*: UDINT := 0; //Virtual axis gap size encoder position/counter
+    fGapCentrePosition: LREAL; //Virtual axis gap centre calculated position
+    nGapCentrePosition AT %Q*: UDINT := 0; //Virtual axis gap centre encoder position/counter
+    nAutoErrorResetCounter: UINT := 0; //Error automatic reset counter
+    rtrigSlitOperational: R_TRIG;
+	rtrigVirtualAxisNotMoving: R_TRIG;
+    rtrigVirtualAxisEnable: R_TRIG;
+    rtrigVirtualAxisDisable: R_TRIG;
 	fbResetCalibrationPositiveBlade: MC_Home;
 	fbResetCalibrationNegativeBlade: MC_Home;
 	fbResetCalibrationGapSize: MC_Home;
-	fbResetCalibrationGapCenter: MC_Home;
+	fbResetCalibrationGapCentre: MC_Home;
 END_VAR
 VAR CONSTANT
 	cSoftLimitDelta: LREAL := 0.05; //Delta between the softlimits of physical and virtual axes
@@ -116,7 +113,7 @@ CASE eSlitPairState OF
         IF bBladesHomed AND NOT GVL.astAxes[iBladeNegative].stStatus.bBusy AND NOT GVL.astAxes[iBladePositive].stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.HOME_GAP;
             bHoming := FALSE;
-        ELSIF (GVL.astAxes[iBladeNegative].stStatus.nErrorID > 0) OR (GVL.astAxes[iBladePositive].stStatus.nErrorID >0) THEN
+        ELSIF (GVL.astAxes[iBladeNegative].stStatus.nErrorID > 0) OR (GVL.astAxes[iBladePositive].stStatus.nErrorID > 0) THEN
             eSlitPairState := E_SlitPairStates.ERROR;
         END_IF
 
@@ -182,7 +179,7 @@ CASE eSlitPairState OF
 		END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
-        resetCounterTimeout := 0;
+        nAutoErrorResetCounter := 0;
         bError := TRUE;
         bEnabled := FALSE;
         actStopAxes();
@@ -205,18 +202,18 @@ CASE eSlitPairState OF
         GVL.astAxes[iBladePositive].stControl.bReset := TRUE;
         GVL.astAxes[iGapSize].stControl.bReset := TRUE;
         GVL.astAxes[iGapCentre].stControl.bReset := TRUE;
-        resetCounterTimeout := resetCounterTimeout + 1;
+        nAutoErrorResetCounter := nAutoErrorResetCounter + 1;
         eSlitPairState := E_SlitPairStates.ERROR_RESET_CHECK;
 
     E_SlitPairStates.ERROR_RESET_CHECK:
         IF bAxisErrorsPresent THEN
 			//If the errors persists after 10 auto reset, then manual intervention is required
-			IF resetCounterTimeout <= 10 THEN
+			IF nAutoErrorResetCounter <= 10 THEN
 				eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;	
 			END_IF
         ELSE
             eSlitPairState := E_SlitPairStates.INIT;
-			resetCounterTimeout := 0;
+			nAutoErrorResetCounter := 0;
             bError := FALSE;
             bResetting := FALSE;
         END_IF
@@ -242,7 +239,7 @@ fbResetCalibrationGapSize(
 	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
 	HomingMode := MC_HomingMode.MC_ResetCalibration);
 
-fbResetCalibrationGapCenter(
+fbResetCalibrationGapCentre(
 	Axis := GVL.astAxes[iGapCentre].Axis,
 	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
 	HomingMode := MC_HomingMode.MC_ResetCalibration);	]]></ST>
@@ -261,9 +258,9 @@ GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
     <Action Name="actEnableAxes" Id="{1879c38a-aecf-0e8c-2a58-959e274ebc63}">
       <Implementation>
         <ST><![CDATA[//Enable all axes when one of the virtual axes is enabled
-fbEnableRising(CLK := GVL.astAxes[iGapSize].stControl.bEnable OR GVL.astAxes[iGapCentre].stControl.bEnable);
+rtrigVirtualAxisEnable(CLK := GVL.astAxes[iGapSize].stControl.bEnable OR GVL.astAxes[iGapCentre].stControl.bEnable);
 
-IF fbEnableRising.Q THEN
+IF rtrigVirtualAxisEnable.Q THEN
     GVL.astAxes[iBladePositive].stControl.bEnable := TRUE;
     GVL.astAxes[iBladeNegative].stControl.bEnable := TRUE;
     GVL.astAxes[iGapSize].stControl.bEnable := TRUE;
@@ -273,9 +270,9 @@ END_IF
 
 
 //Disable blade axes when both the virtuals are disabled
-fbDisableRising(CLK := NOT GVL.astAxes[iGapSize].stControl.bEnable OR NOT GVL.astAxes[iGapCentre].stControl.bEnable);
+rtrigVirtualAxisDisable(CLK := NOT GVL.astAxes[iGapSize].stControl.bEnable OR NOT GVL.astAxes[iGapCentre].stControl.bEnable);
 
-IF fbDisableRising.Q THEN
+IF rtrigVirtualAxisDisable.Q THEN
     GVL.astAxes[iBladePositive].stControl.bEnable := FALSE;
     GVL.astAxes[iBladeNegative].stControl.bEnable := FALSE;
     GVL.astAxes[iGapSize].stControl.bEnable := FALSE;
@@ -285,10 +282,6 @@ END_IF
 //Set Enable flag when all axes are enabled
 bEnable := GVL.astAxes[iBladePositive].stStatus.bEnabled AND GVL.astAxes[iBladeNegative].stStatus.bEnabled
     AND GVL.astAxes[iGapSize].stStatus.bEnabled AND GVL.astAxes[iGapCentre].stStatus.bEnabled;
-
-//Set flag when all axes are disable
-fbDisabledRising(CLK := NOT GVL.astAxes[iBladePositive].stStatus.bEnabled AND GVL.astAxes[iBladeNegative].stStatus.bEnabled
-    AND GVL.astAxes[iGapSize].stStatus.bEnabled AND GVL.astAxes[iGapCentre].stStatus.bEnabled);
 ]]></ST>
       </Implementation>
     </Action>
@@ -501,10 +494,10 @@ fGapCentrePosition := (GVL.astAxes[iBladePositive].stStatus.fActPosition + GVL.a
 
 IF bBladesHomed THEN
     IF ABS(fGapSizePosition) < 100000 THEN
-        iGapSizePosition := LREAL_TO_UDINT(fGapSizePosition*fEncoderScaling);
+        nGapSizePosition := LREAL_TO_UDINT(fGapSizePosition*fEncoderScaling);
     END_IF
     IF ABS(fGapCentrePosition) < 100000 THEN
-        iGapCentrePosition := LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
+        nGapCentrePosition := LREAL_TO_UDINT(fGapCentrePosition*fEncoderScaling);
     END_IF
 END_IF
 ]]></ST>
@@ -646,7 +639,7 @@ END_VAR
         <ST><![CDATA[checkResetCalibrationDone := NOT fbResetCalibrationPositiveBlade.Busy 
 	AND NOT fbResetCalibrationNegativeBlade.Busy
 	AND NOT fbResetCalibrationGapSize.Busy
-	AND NOT fbResetCalibrationGapCenter.Busy
+	AND NOT fbResetCalibrationGapCentre.Busy
 	AND NOT bBladesHomed
 	AND NOT bGapHomed;]]></ST>
       </Implementation>
@@ -660,42 +653,21 @@ END_VAR
         <ST><![CDATA[checkResetCalibrationFailed := fbResetCalibrationPositiveBlade.Error 
 	OR fbResetCalibrationNegativeBlade.Error
 	OR fbResetCalibrationGapSize.Error
-	OR fbResetCalibrationGapCenter.Error
+	OR fbResetCalibrationGapCentre.Error
 	OR fbResetCalibrationPositiveBlade.CommandAborted
 	OR fbResetCalibrationNegativeBlade.CommandAborted
 	OR fbResetCalibrationGapSize.CommandAborted
-	OR fbResetCalibrationGapCenter.CommandAborted;]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="checkSlitsHomed" Id="{79b1cda9-2126-0e81-3df4-233ef39e0b6e}">
-      <Declaration><![CDATA[(*Method to check if blade axes are homed/have the calibration flag.
-Only returns TRUE if BOTH blades are homed*)
-METHOD checkSlitsHomed: BOOL
-VAR_OUTPUT
-    bOutput: BOOL := TRUE;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[fbHomingRising(CLK:=
-    GVL.astAxes[iBladeNegative].stStatus.bHomed
-    AND GVL.astAxes[iBladePositive].stStatus.bHomed
-    AND GVL.astAxes[iGapSize].stStatus.bHomed
-    AND GVL.astAxes[iGapCentre].stStatus.bHomed);
-IF fbHomingRising.Q THEN
-    bOutput := FALSE;
-    bSlitsHomed := TRUE;
-END_IF
-]]></ST>
+	OR fbResetCalibrationGapCentre.CommandAborted;]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkSoftLimits" Id="{7b17dbf3-e1d6-0a6e-1aa4-6cded47f1f4b}">
       <Declaration><![CDATA[METHOD checkSoftLimits : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbNoMovingRising(CLK := NOT GVL.astAxes[iGapCentre].stStatus.bMoving AND NOT GVL.astAxes[iGapSize].stStatus.bMoving);
-fbInOpRising(CLK := eSlitPairState = E_SlitPairStates.SLITS_OPERATIONAL);
+        <ST><![CDATA[rtrigVirtualAxisNotMoving(CLK := NOT GVL.astAxes[iGapCentre].stStatus.bMoving AND NOT GVL.astAxes[iGapSize].stStatus.bMoving);
+rtrigSlitOperational(CLK := eSlitPairState = E_SlitPairStates.SLITS_OPERATIONAL);
 
-IF fbNoMovingRising.Q OR fbInOpRising.Q THEN
+IF rtrigVirtualAxisNotMoving.Q OR rtrigSlitOperational.Q THEN
     bUpdateSoftLimits := TRUE;
 END_IF
 
