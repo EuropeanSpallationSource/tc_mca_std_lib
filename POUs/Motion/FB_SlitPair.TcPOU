@@ -90,26 +90,19 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
-        IF NOT bSlitsHomed THEN
-            //Perform homing
-            eSlitPairState := E_SlitPairStates.HOME_BLADES;
-        ELSIF bBladesHomed THEN
+        IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.HOME_GAP; //Skip to functioning
         ELSIF bAutoHome THEN
             eSlitPairState := E_SlitPairStates.HOME_BLADES; //If autohome enabled, home the blades
         END_IF
 
     E_SlitPairStates.HOME_BLADES: //Initiate homing of blade axes. Homing routine must be pre-configured by user
-        IF (GVL.astAxes[iGapSize].stControl.eCommand = E_MotionFunctions.eHome AND GVL.astAxes[iGapSize].stControl.bExecute) OR
-            (GVL.astAxes[iGapCentre].stControl.eCommand = E_MotionFunctions.eHome AND GVL.astAxes[iGapCentre].stControl.bExecute) OR bHomingRequested THEN
-
             GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
             GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
             GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
             GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
             bHoming := TRUE;
             eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;
-        END_IF
 
     E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE: //Wait for completion of blade homing routines
         IF bBladesHomed AND NOT GVL.astAxes[iBladeNegative].stStatus.bBusy AND NOT GVL.astAxes[iBladePositive].stStatus.bBusy THEN
