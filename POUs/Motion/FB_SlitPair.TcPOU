@@ -320,16 +320,27 @@ checkErrorState(bOutput => bFunctionInErrorState);
     </Action>
     <Action Name="actSetupSlitGearing" Id="{7713a838-7a24-0b22-0e20-e71c745ddc61}">
       <Implementation>
-        <ST><![CDATA[GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
+        <ST><![CDATA[//Setup multimaster gearing of negative blade
+GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[1].fRatio := -0.5;
 GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
-GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[2].fRatio := 1;
+GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
+GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
+GVL.astAxes[iBladeNegative].stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+//Setup multimaster gearing of positive blade
 GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[1].fRatio := 0.5;
 GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
-GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].fRatio := 1;
+GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
+GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
+GVL.astAxes[iBladePositive].stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+//Execute
 GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
 GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
 ]]></ST>
