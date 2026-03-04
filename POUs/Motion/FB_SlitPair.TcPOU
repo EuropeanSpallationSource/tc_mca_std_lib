@@ -1,7 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_SlitPair" Id="{e905bacc-19e9-06c3-04ae-f4fd4f34065e}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPair
+    <Declaration><![CDATA[(*NOTES TO SETUP VIRTUAL AXIS:
+For the virtual axis setup, the encoders need their type changed from "simulation encoder" to "Encoder (Universal)".
+In addition the scale factor needs to be changed to a numerator of 1 and denominator of fEncoderScaling which is 10,000 by default)
+Care needs to be taken with scaling and setup of both real and virtual axes to ensure velocities are not too fast and axes have time to settle before they submit a "complete move"
+Link the virtual encoder inputs to the Gap and Center position calculations iGapSizePosition iGapCentrePosition
+Encoder needs to be set as ABSOLUTE
+Encoder Mask has to be set to 0xFFFFFFFF otherwise UDINT will overflow
+NOTES TO FB_SlitPair:
+The instance of the function block should be called before the call of FB_Axis, so that it gets bExecute before FB_Axis
+*)
+FUNCTION_BLOCK FB_SlitPair
 VAR_INPUT
     iBladeNegative: UINT; //Axis ID for negatively positioned blade
     iBladePositive: UINT; //Axis ID for positively positioned blade
@@ -56,15 +66,7 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(* NOTES
-For the virtual axis setup, the encoders need their type changed from "simulation encoder" to "Encoder (Universal)".
-In addition the scale factor needs to be changed to a numerator of 1 and denominator of fEncoderScaling which is 10,000 by default)
-Care needs to be taken with scaling and setup of both real and virtual axes to ensure velocities are not too fast and axes have time to settle before they submit a "complete move"
-Link the virtual encoder inputs to the Gap and Center position calculations iGapSizePosition iGapCentrePosition
-Encoder needs to be set as ABSOLUTE
-*)
-
-//Configure homing routine of virtual axes
+      <ST><![CDATA[//Configure homing routine of virtual axes
 GVL.astAxes[iGapSize].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
 GVL.astAxes[iGapCentre].stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
 
