@@ -20,6 +20,7 @@ VAR_INPUT
     fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
     bAutoHome: BOOL := TRUE; //Blades homing is automatically done if they are not homed
     bAnticollisionEnable: BOOL := FALSE; //Blades anticollision option, only for when blades are moved independently
+	fCycleTime: LREAL := 0.01; //PlcTask cycle time in seconds
 END_VAR
 VAR_OUTPUT
     bEnabled: BOOL := FALSE; //Enabled status of function
@@ -338,7 +339,7 @@ CASE GVL.astAxes[iBladeNegative].stControl.eCommand OF
 			
 	E_MotionFunctions.eMoveVelocity:
 		GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := 
-			(GVL.astAxes[iBladeNegative].stControl.fVelocity * 0.01 + GVL.astAxes[iBladeNegative].stStatus.fActPosition) >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
+			(GVL.astAxes[iBladeNegative].stControl.fVelocity * fCycleTime + GVL.astAxes[iBladeNegative].stStatus.fActPosition) >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
 
 	E_MotionFunctions.eMoveModulo:
 		; //TODO! Implement logic for modulo movement
@@ -364,7 +365,7 @@ CASE GVL.astAxes[iBladePositive].stControl.eCommand OF
 			
 	E_MotionFunctions.eMoveVelocity:
 		GVL.astAxes[iBladePositive].stControl.bInterlockBwd := 
-			(GVL.astAxes[iBladePositive].stControl.fVelocity * 0.01 + GVL.astAxes[iBladePositive].stStatus.fActPosition) <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+			(GVL.astAxes[iBladePositive].stControl.fVelocity * fCycleTime + GVL.astAxes[iBladePositive].stStatus.fActPosition) <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
 
 	E_MotionFunctions.eMoveModulo:
 		; //TODO! Implement logic for modulo movement
