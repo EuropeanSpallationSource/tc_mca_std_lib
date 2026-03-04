@@ -5,11 +5,11 @@
 {attribute 'strict'}
 TYPE E_SlitSoftLimits :
 (
-    START := 0,
-    WRITE_GAP_CENTRE_FWD,
-    WRITE_GAP_CENTRE_BWD,
-    WRITE_GAP_SIZE_FWD,
-    FINISH
+    eStart := 0,
+    eWriteGapCentreFwd,
+    eWriteGapCentreBwd,
+    eWriteGapSizeFwd,
+    eFinish
     );
 END_TYPE
 ]]></Declaration>
