@@ -97,7 +97,7 @@ CASE eSlitPairState OF
             eSlitPairState := E_SlitPairStates.CHECK_HOME_STATUS;
         END_IF
 
-    E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
+    E_SlitPairStates.CHECK_HOME_STATUS: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed	
         IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.HOME_GAP; //Skip to functioning
         ELSIF bAutoHome THEN
@@ -105,12 +105,12 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.HOME_BLADES: //Initiate homing of blade axes. Homing routine must be pre-configured by user
-            GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
-            GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
-            GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
-            GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
-            bHoming := TRUE;
-            eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;
+		GVL.astAxes[iBladeNegative].stControl.eCommand := E_MotionFunctions.eHome;
+		GVL.astAxes[iBladePositive].stControl.eCommand := E_MotionFunctions.eHome;
+		GVL.astAxes[iBladeNegative].stControl.bExecute := TRUE;
+		GVL.astAxes[iBladePositive].stControl.bExecute := TRUE;
+		bHoming := TRUE;
+		eSlitPairState := E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE;
 
     E_SlitPairStates.CHECK_BLADE_HOME_COMPLETE: //Wait for completion of blade homing routines
         IF bBladesHomed AND NOT GVL.astAxes[iBladeNegative].stStatus.bBusy AND NOT GVL.astAxes[iBladePositive].stStatus.bBusy THEN
@@ -179,7 +179,7 @@ CASE eSlitPairState OF
 			eSlitPairState := E_SlitPairStates.CHECK_HOME_STATUS;
 		ELSIF checkResetCalibrationFailed() THEN
 			eSlitPairState := E_SlitPairStates.ERROR;
-        END_IF
+		END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
         resetCounterTimeout := 0;
@@ -212,7 +212,7 @@ CASE eSlitPairState OF
         IF bAxisErrorsPresent THEN
 			//If the errors persists after 10 auto reset, then manual intervention is required
 			IF resetCounterTimeout <= 10 THEN
-            eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;
+				eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;	
 			END_IF
         ELSE
             eSlitPairState := E_SlitPairStates.INIT;
@@ -441,48 +441,48 @@ GVL.astAxes[iGapCentre].stControl.bStop := TRUE;
 CASE eSoftLimitsUpdate OF
 
 	E_SlitSoftLimits.START:
-    eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD;
-
+		eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD;
+	
 	E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD:
-    IF NOT GVL.astAxes[iGapCentre].stStatus.bBusy AND NOT GVL.astAxes[iGapSize].stStatus.bBusy THEN
-        eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD;
-        GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
-        GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
-        GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
+		IF NOT GVL.astAxes[iGapCentre].stStatus.bBusy AND NOT GVL.astAxes[iGapSize].stStatus.bBusy THEN
+			eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD;
+			GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
+			GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
+			GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
 			GVL.astAxes[iGapCentre].stConfig.fWriteAxisParameter := GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit
 				- ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladePositive].stStatus.fActPosition)
 				- cSoftLimitDelta;
-    END_IF
-
+		END_IF
+	
 	E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD:
-    IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
-        eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_SIZE_FWD;
-        GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
-        GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
-        GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitBackward;
+		IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
+			eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_SIZE_FWD;
+			GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
+			GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
+			GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitBackward;
 			GVL.astAxes[iGapCentre].stConfig.fWriteAxisParameter := GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit
 				+ ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition)
 				+ cSoftLimitDelta;
-    END_IF
-
+		END_IF
+	
 	E_SlitSoftLimits.WRITE_GAP_SIZE_FWD:
-    IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
-        eSoftLimitsUpdate := E_SlitSoftLimits.FINISH;
-        GVL.astAxes[iGapSize].stControl.bExecute := TRUE;
-        GVL.astAxes[iGapSize].stControl.eCommand := E_MotionFunctions.eWriteParameter;
-        GVL.astAxes[iGapSize].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
+		IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
+			eSoftLimitsUpdate := E_SlitSoftLimits.FINISH;
+			GVL.astAxes[iGapSize].stControl.bExecute := TRUE;
+			GVL.astAxes[iGapSize].stControl.eCommand := E_MotionFunctions.eWriteParameter;
+			GVL.astAxes[iGapSize].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
             GVL.astAxes[iGapSize].stConfig.fWriteAxisParameter := 2.0 * MAX(MIN(
 				ABS(GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit - GVL.astAxes[iBladePositive].stStatus.fActPosition),
 				ABS(GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit - GVL.astAxes[iBladeNegative].stStatus.fActPosition))
 				- cSoftLimitDelta, 
 				0.0);
-    END_IF
-
+		END_IF
+	
 	E_SlitSoftLimits.FINISH:
-    IF GVL.astAxes[iGapSize].stStatus.bDone AND NOT GVL.astAxes[iGapSize].stControl.bExecute THEN
-        eSoftLimitsUpdate := E_SlitSoftLimits.START;
-        bUpdateSoftLimits := FALSE;
-    END_IF
+		IF GVL.astAxes[iGapSize].stStatus.bDone AND NOT GVL.astAxes[iGapSize].stControl.bExecute THEN
+			eSoftLimitsUpdate := E_SlitSoftLimits.START;
+			bUpdateSoftLimits := FALSE;
+		END_IF
 
 END_CASE
 ]]></ST>
