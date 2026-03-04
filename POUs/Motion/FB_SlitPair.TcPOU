@@ -10,7 +10,6 @@ VAR_INPUT
     fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
     bAutoHome: BOOL := TRUE; //Blades homing is automatically done if they are not homed
     bAnticollisionEnable: BOOL := FALSE; //Blades anticollision option, only for when blades are moved independently
-
 END_VAR
 VAR_OUTPUT
     bEnabled: BOOL := FALSE; //Enabled status of function
@@ -311,12 +310,6 @@ IF eSlitPairState = E_SlitPairStates.ERROR THEN
     GVL.astAxes[iGapSize].stStatus.bError := TRUE;
 END_IF
 
-//IF eSlitPairState <> E_SlitPairStates.INIT AND NOT bAxesEnabled THEN
-//    eSlitPairState := E_SlitPairStates.ERROR;
-//END_IF
-//IF (eSlitPairState <> E_SlitPairStates.INIT AND NOT bFunctionInErrorState) AND NOT bEnable THEN
-//    eSlitPairState := E_SlitPairStates.ERROR;
-//END_IF
 IF bEnabled AND NOT bBladesHomed THEN
     eSlitPairState := E_SlitPairStates.ERROR;
 END_IF
@@ -445,10 +438,10 @@ GVL.astAxes[iGapCentre].stControl.bStop := TRUE;
 
 CASE eSoftLimitsUpdate OF
 
-E_SlitSoftLimits.START: //START SEQ
+	E_SlitSoftLimits.START:
     eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD;
 
-E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD: //WRITE GAP CENTRE FWD SOFT LIMIT
+	E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD:
     IF NOT GVL.astAxes[iGapCentre].stStatus.bBusy AND NOT GVL.astAxes[iGapSize].stStatus.bBusy THEN
         eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD;
         GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
@@ -459,7 +452,7 @@ E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD: //WRITE GAP CENTRE FWD SOFT LIMIT
 				- cSoftLimitDelta;
     END_IF
 
-E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD: //WRITE GAP CENTRE BWD SOFT LIMIT
+	E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD:
     IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
         eSoftLimitsUpdate := E_SlitSoftLimits.WRITE_GAP_SIZE_FWD;
         GVL.astAxes[iGapCentre].stControl.bExecute := TRUE;
@@ -470,7 +463,7 @@ E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD: //WRITE GAP CENTRE BWD SOFT LIMIT
 				+ cSoftLimitDelta;
     END_IF
 
-E_SlitSoftLimits.WRITE_GAP_SIZE_FWD: //WRITE GAP SIZE FWD SOFT LIMIT
+	E_SlitSoftLimits.WRITE_GAP_SIZE_FWD:
     IF GVL.astAxes[iGapCentre].stStatus.bDone AND NOT GVL.astAxes[iGapCentre].stControl.bExecute THEN
         eSoftLimitsUpdate := E_SlitSoftLimits.FINISH;
         GVL.astAxes[iGapSize].stControl.bExecute := TRUE;
@@ -483,7 +476,7 @@ E_SlitSoftLimits.WRITE_GAP_SIZE_FWD: //WRITE GAP SIZE FWD SOFT LIMIT
 				0.0);
     END_IF
 
-E_SlitSoftLimits.FINISH: //FINISHED WHEN LAST WRITING OF PARAMETERS IS DONE
+	E_SlitSoftLimits.FINISH:
     IF GVL.astAxes[iGapSize].stStatus.bDone AND NOT GVL.astAxes[iGapSize].stControl.bExecute THEN
         eSoftLimitsUpdate := E_SlitSoftLimits.START;
         bUpdateSoftLimits := FALSE;
