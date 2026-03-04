@@ -336,11 +336,56 @@ GVL.astAxes[iGapCentre].stInputs.bLimitFwd := GVL.astAxes[iBladeNegative].stInpu
     <Action Name="actInterlocking" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
       <Implementation>
         <ST><![CDATA[//Blades interlocking for anticollision purposes
-GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := GVL.astAxes[iBladeNegative].stStatus.fActPosition >= GVL.astAxes[iBladePositive].stStatus.fActPosition
-    OR GVL.astAxes[iBladeNegative].stControl.fPosition >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
-GVL.astAxes[iBladePositive].stControl.bInterlockBwd := GVL.astAxes[iBladePositive].stStatus.fActPosition <= GVL.astAxes[iBladeNegative].stStatus.fActPosition
-    OR GVL.astAxes[iBladePositive].stControl.fPosition <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
-]]></ST>
+
+//Forward interlock of negative blade
+CASE GVL.astAxes[iBladeNegative].stControl.eCommand OF
+	
+	E_MotionFunctions.eMoveAbsolute:
+		GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := 
+			GVL.astAxes[iBladeNegative].stControl.fPosition >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
+		
+	E_MotionFunctions.eMoveRelative:
+		GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := 
+			(GVL.astAxes[iBladeNegative].stControl.fPosition + GVL.astAxes[iBladeNegative].stStatus.fActPosition) >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
+			
+	E_MotionFunctions.eMoveVelocity:
+		GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := 
+			(GVL.astAxes[iBladeNegative].stControl.fVelocity * 0.01 + GVL.astAxes[iBladeNegative].stStatus.fActPosition) >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
+
+	E_MotionFunctions.eMoveModulo:
+		; //TODO! Implement logic for modulo movement
+		
+	ELSE
+		GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := FALSE;
+END_CASE
+
+GVL.astAxes[iBladeNegative].stControl.bInterlockFwd := GVL.astAxes[iBladeNegative].stControl.bInterlockFwd 
+	OR GVL.astAxes[iBladeNegative].stStatus.fActPosition >= GVL.astAxes[iBladePositive].stStatus.fActPosition;
+
+//Backward interlock of positive blade
+CASE GVL.astAxes[iBladePositive].stControl.eCommand OF
+	
+	E_MotionFunctions.eMoveAbsolute:
+		GVL.astAxes[iBladePositive].stControl.bInterlockBwd := 
+			GVL.astAxes[iBladePositive].stControl.fPosition <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+		
+	E_MotionFunctions.eMoveRelative:
+		GVL.astAxes[iBladePositive].stControl.bInterlockBwd := 
+			(GVL.astAxes[iBladePositive].stControl.fPosition + GVL.astAxes[iBladePositive].stStatus.fActPosition) <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+			
+	E_MotionFunctions.eMoveVelocity:
+		GVL.astAxes[iBladePositive].stControl.bInterlockBwd := 
+			(GVL.astAxes[iBladePositive].stControl.fVelocity * 0.01 + GVL.astAxes[iBladePositive].stStatus.fActPosition) <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;
+
+	E_MotionFunctions.eMoveModulo:
+		; //TODO! Implement logic for modulo movement
+		
+	ELSE
+		GVL.astAxes[iBladePositive].stControl.bInterlockBwd := FALSE;
+END_CASE
+
+GVL.astAxes[iBladePositive].stControl.bInterlockBwd := GVL.astAxes[iBladePositive].stControl.bInterlockBwd
+	OR GVL.astAxes[iBladePositive].stStatus.fActPosition <= GVL.astAxes[iBladeNegative].stStatus.fActPosition;]]></ST>
       </Implementation>
     </Action>
     <Action Name="actRunMethods" Id="{90ea6783-6879-04c9-30bf-2764a207cd0f}">
