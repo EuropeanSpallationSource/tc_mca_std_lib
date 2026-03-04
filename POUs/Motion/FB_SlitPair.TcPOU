@@ -194,15 +194,14 @@ CASE eSlitPairState OF
         eSlitPairState := E_SlitPairStates.ERROR_RESET_CHECK;
 
     E_SlitPairStates.ERROR_RESET_CHECK:
-        IF resetCounterTimeout > 10 THEN
-            eSlitPairState := E_SlitPairStates.ERROR;
-            bResetting := FALSE;
-            RETURN;
-        END_IF
         IF bAxisErrorsPresent THEN
+			//If the errors persists after 10 auto reset, then manual intervention is required
+			IF resetCounterTimeout <= 10 THEN
             eSlitPairState := E_SlitPairStates.ERROR_RESET_AXES;
+			END_IF
         ELSE
             eSlitPairState := E_SlitPairStates.INIT;
+			resetCounterTimeout := 0;
             bError := FALSE;
             bResetting := FALSE;
         END_IF
