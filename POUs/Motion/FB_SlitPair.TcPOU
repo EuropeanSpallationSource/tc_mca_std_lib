@@ -48,6 +48,9 @@ VAR
     fbDisabledRising: R_TRIG;
     fbHomingRising: R_TRIG;
 END_VAR
+VAR CONSTANT
+	cSoftLimitDelta: LREAL := 0.05; //Delta between the softlimits of physical and virtual axes
+END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[(* NOTES
@@ -373,7 +376,8 @@ E_SlitSoftLimits.WRITE_GAP_CENTRE_FWD: //WRITE GAP CENTRE FWD SOFT LIMIT
         GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
         GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
 			GVL.astAxes[iGapCentre].stConfig.fWriteAxisParameter := GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit
-				- ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladePositive].stStatus.fActPosition);
+				- ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladePositive].stStatus.fActPosition)
+				- cSoftLimitDelta;
     END_IF
 
 E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD: //WRITE GAP CENTRE BWD SOFT LIMIT
@@ -383,7 +387,8 @@ E_SlitSoftLimits.WRITE_GAP_CENTRE_BWD: //WRITE GAP CENTRE BWD SOFT LIMIT
         GVL.astAxes[iGapCentre].stControl.eCommand := E_MotionFunctions.eWriteParameter;
         GVL.astAxes[iGapCentre].stConfig.eAxisParameters := E_AxisParameters.SWLimitBackward;
 			GVL.astAxes[iGapCentre].stConfig.fWriteAxisParameter := GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit
-				+ ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition);
+				+ ABS(GVL.astAxes[iGapCentre].stStatus.fActPosition - GVL.astAxes[iBladeNegative].stStatus.fActPosition)
+				+ cSoftLimitDelta;
     END_IF
 
 E_SlitSoftLimits.WRITE_GAP_SIZE_FWD: //WRITE GAP SIZE FWD SOFT LIMIT
@@ -392,9 +397,11 @@ E_SlitSoftLimits.WRITE_GAP_SIZE_FWD: //WRITE GAP SIZE FWD SOFT LIMIT
         GVL.astAxes[iGapSize].stControl.bExecute := TRUE;
         GVL.astAxes[iGapSize].stControl.eCommand := E_MotionFunctions.eWriteParameter;
         GVL.astAxes[iGapSize].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
-			GVL.astAxes[iGapSize].stConfig.fWriteAxisParameter := 2.0 * MIN(
+            GVL.astAxes[iGapSize].stConfig.fWriteAxisParameter := 2.0 * MAX(MIN(
 				ABS(GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit - GVL.astAxes[iBladePositive].stStatus.fActPosition),
-				ABS(GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit - GVL.astAxes[iBladeNegative].stStatus.fActPosition));
+				ABS(GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit - GVL.astAxes[iBladeNegative].stStatus.fActPosition))
+				- cSoftLimitDelta, 
+				0.0);
     END_IF
 
 E_SlitSoftLimits.FINISH: //FINISHED WHEN LAST WRITING OF PARAMETERS IS DONE
