@@ -468,8 +468,8 @@ CASE eSoftLimitsUpdate OF
 			GVL.astAxes[iGapSize].stControl.eCommand := E_MotionFunctions.eWriteParameter;
 			GVL.astAxes[iGapSize].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
             GVL.astAxes[iGapSize].stConfig.fWriteAxisParameter := 2.0 * MAX(MIN(
-				ABS(GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit - GVL.astAxes[iBladePositive].stStatus.fActPosition),
-				ABS(GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit - GVL.astAxes[iBladeNegative].stStatus.fActPosition))
+				ABS(GVL.astAxes[iBladePositive].stConfig.fMaxSoftPosLimit - GVL.astAxes[iGapCentre].stStatus.fActPosition),
+				ABS(GVL.astAxes[iBladeNegative].stConfig.fMinSoftPosLimit - GVL.astAxes[iGapCentre].stStatus.fActPosition))
 				- cSoftLimitDelta, 
 				0.0);
 		END_IF
