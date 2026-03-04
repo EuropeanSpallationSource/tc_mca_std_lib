@@ -47,6 +47,10 @@ VAR
     fbDisableRising: R_TRIG;
     fbDisabledRising: R_TRIG;
     fbHomingRising: R_TRIG;
+	fbResetCalibrationPositiveBlade: MC_Home;
+	fbResetCalibrationNegativeBlade: MC_Home;
+	fbResetCalibrationGapSize: MC_Home;
+	fbResetCalibrationGapCenter: MC_Home;
 END_VAR
 VAR CONSTANT
 	cSoftLimitDelta: LREAL := 0.05; //Delta between the softlimits of physical and virtual axes
@@ -71,7 +75,7 @@ actGapLimits(); //Set virtual axis limits to TRUE
 actVirtualAxisPositions(); //Virtual axis encoder position subroutine
 actRunMethods(); //Update statuses
 actEnableAxes(); //Enable the axes
-checkSlitsHomed(); //Status of the axes homing
+actClearCalibration(); //Clear calibration flag for all axes
 IF bAnticollisionEnable THEN //Blades anticollision enabled
     actInterlocking();
 END_IF
@@ -162,11 +166,18 @@ CASE eSlitPairState OF
     E_SlitPairStates.CHECK_GEAROUT_COMPLETE: //Check gearing cleared
         IF bBladesUncoupled THEN
             IF bHomingRequested THEN
-                eSlitPairState := E_SlitPairStates.HOME_BLADES;
+                eSlitPairState := E_SlitPairStates.RESET_CALIBRATION;
                 bEnabled := FALSE;
             ELSE
                 eSlitPairState := E_SlitPairStates.INIT;
             END_IF
+        END_IF
+		
+	E_SlitPairStates.RESET_CALIBRATION:
+		IF checkResetCalibrationDone() THEN
+			eSlitPairState := E_SlitPairStates.CHECK_HOME_STATUS;
+		ELSIF checkResetCalibrationFailed() THEN
+			eSlitPairState := E_SlitPairStates.ERROR;
         END_IF
 
     E_SlitPairStates.ERROR: //ERROR STATE
@@ -213,6 +224,29 @@ END_CASE
 bReset := FALSE;
 ]]></ST>
     </Implementation>
+    <Action Name="actClearCalibration" Id="{ebc4e684-09cb-0ff6-2420-a784d5e2b2e0}">
+      <Implementation>
+        <ST><![CDATA[fbResetCalibrationPositiveBlade(
+	Axis := GVL.astAxes[iBladePositive].Axis,
+	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
+	HomingMode := MC_HomingMode.MC_ResetCalibration);
+	
+fbResetCalibrationNegativeBlade(
+	Axis := GVL.astAxes[iBladeNegative].Axis,
+	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
+	HomingMode := MC_HomingMode.MC_ResetCalibration);
+	
+fbResetCalibrationGapSize(
+	Axis := GVL.astAxes[iGapSize].Axis,
+	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
+	HomingMode := MC_HomingMode.MC_ResetCalibration);
+
+fbResetCalibrationGapCenter(
+	Axis := GVL.astAxes[iGapCentre].Axis,
+	Execute := eSlitPairState = E_SlitPairStates.RESET_CALIBRATION,
+	HomingMode := MC_HomingMode.MC_ResetCalibration);	]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actClearSlitGearing" Id="{1b3caf4f-ddef-035c-06c2-b31f09d8bc8e}">
       <Implementation>
         <ST><![CDATA[//Action to send gearOut command to blade axes
@@ -561,6 +595,36 @@ IF eSlitPairState = E_SlitPairStates.ERROR_RESET_CHECK THEN
     bOutput := TRUE;
 END_IF
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkResetCalibrationDone" Id="{c8bd46bd-3fc2-0717-0d3e-69d1ca8c8ae0}">
+      <Declaration><![CDATA[METHOD checkResetCalibrationDone : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[checkResetCalibrationDone := NOT fbResetCalibrationPositiveBlade.Busy 
+	AND NOT fbResetCalibrationNegativeBlade.Busy
+	AND NOT fbResetCalibrationGapSize.Busy
+	AND NOT fbResetCalibrationGapCenter.Busy
+	AND NOT bBladesHomed
+	AND NOT bGapHomed;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkResetCalibrationFailed" Id="{aacfc6b7-b4c3-0651-27cc-e962cf487e92}">
+      <Declaration><![CDATA[METHOD checkResetCalibrationFailed : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[checkResetCalibrationFailed := fbResetCalibrationPositiveBlade.Error 
+	OR fbResetCalibrationNegativeBlade.Error
+	OR fbResetCalibrationGapSize.Error
+	OR fbResetCalibrationGapCenter.Error
+	OR fbResetCalibrationPositiveBlade.CommandAborted
+	OR fbResetCalibrationNegativeBlade.CommandAborted
+	OR fbResetCalibrationGapSize.CommandAborted
+	OR fbResetCalibrationGapCenter.CommandAborted;]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkSlitsHomed" Id="{79b1cda9-2126-0e81-3df4-233ef39e0b6e}">
