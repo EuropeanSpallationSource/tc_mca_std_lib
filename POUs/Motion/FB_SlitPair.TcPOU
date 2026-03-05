@@ -75,9 +75,7 @@ actVirtualAxisPositions(); //Virtual axis encoder position subroutine
 actRunMethods(); //Update statuses
 actEnableAxes(); //Enable the axes
 actClearCalibration(); //Clear calibration flag for all axes
-IF bAnticollisionEnable THEN //Blades anticollision enabled
-    actInterlocking();
-END_IF
+actInterlocking(); //Handle blades anticollision
 
 CASE eSlitPairState OF
     E_SlitPairStates.eInit:
@@ -351,7 +349,8 @@ END_CASE
 
 GVL.astAxes[iBladeNegative].stControl.bInterlockFwd :=
     (GVL.astAxes[iBladeNegative].stControl.bInterlockFwd OR GVL.astAxes[iBladeNegative].stStatus.fActPosition >= GVL.astAxes[iBladePositive].stStatus.fActPosition)
-    AND bBladesHomed;
+    AND bBladesHomed
+    AND bAnticollisionEnable;
 
 //Backward interlock of positive blade
 CASE GVL.astAxes[iBladePositive].stControl.eCommand OF
@@ -377,7 +376,8 @@ END_CASE
 
 GVL.astAxes[iBladePositive].stControl.bInterlockBwd :=
     (GVL.astAxes[iBladePositive].stControl.bInterlockBwd OR GVL.astAxes[iBladePositive].stStatus.fActPosition <= GVL.astAxes[iBladeNegative].stStatus.fActPosition)
-    AND bBladesHomed;
+    AND bBladesHomed
+    AND bAnticollisionEnable;
 ]]></ST>
       </Implementation>
     </Action>
