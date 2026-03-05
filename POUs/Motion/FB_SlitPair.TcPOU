@@ -42,7 +42,6 @@ VAR
     bBladesCoupled: BOOL := FALSE; //TRUE if both blade axes are coupled
     bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
-    bFunctionInErrorState: BOOL := FALSE; //TRUE if function block is in one of the error related states
     bUpdateSoftLimits: BOOL := FALSE; //TRUE if update of soft limits are being executed
     bHomingRequested: BOOL := FALSE; //TRUE if homing is requested for all axis
     fGapSizePosition: LREAL; //Virtual axis gap size calculated position
@@ -389,7 +388,6 @@ checkVirtualHomed(bOutput => bGapHomed);
 checkBladesCoupled(bOutput => bBladesCoupled);
 checkBladesUncoupled(bOutput => bBladesUncoupled);
 checkAllAxisErrors(bOutput => bAxisErrorsPresent);
-checkErrorState(bOutput => bFunctionInErrorState);
 ]]></ST>
       </Implementation>
     </Action>
