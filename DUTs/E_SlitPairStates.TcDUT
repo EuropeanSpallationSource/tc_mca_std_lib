@@ -5,7 +5,8 @@
 {attribute 'strict'}
 TYPE E_SlitPairStates :
 (
-    eInit := 0,
+    eStartup := 0,
+    eInit,
     eInitClearGearing,
     eInitGearOutCheck,
     eCheckHomeStatus,

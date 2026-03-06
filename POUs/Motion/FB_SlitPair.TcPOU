@@ -21,7 +21,7 @@ END_VAR
 VAR_INPUT
     iGapSize: UINT; //Axis ID for the size of gap between slit blades
     iGapCentre: UINT; //Axis ID for the centre position of the gap formed by slit blades
-    fEncoderScaling: LREAL := 10000; //default scaling denominator of 10000
+    fEncoderScaling: LREAL := 10000.0; //default scaling denominator of 10000
     bAutoHome: BOOL := TRUE; //Blades homing is automatically done if they are not homed
     bAnticollisionEnable: BOOL := FALSE; //Blades anticollision option, only for when blades are moved independently
     fCycleTime: LREAL := 0.01; //PlcTask cycle time in seconds
@@ -34,6 +34,7 @@ END_VAR
 VAR
     //Internal state machines
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.eStartup; //Sequence steps for operating the slits
+    eParameterCheck: E_AxisParamCheckState := E_AxisParamCheckState.eInit; //Sequence steps for checking params of virtual axes
     eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits
 
     //Internal statuses for logic
@@ -53,6 +54,7 @@ VAR
     fGapCentrePosition: LREAL; //Virtual axis gap centre calculated position
     nGapCentrePosition AT %Q*: UDINT := 0; //Virtual axis gap centre encoder position/counter
     nAutoErrorResetCounter: UINT := 0; //Error automatic reset counter
+    iParamCheck: USINT := 1; //Index of current parameter to be validated
     rtrigSlitOperational: R_TRIG;
     rtrigVirtualAxisNotMoving: R_TRIG;
     rtrigVirtualAxisEnable: R_TRIG;
@@ -64,6 +66,14 @@ VAR
 END_VAR
 VAR CONSTANT
     cSoftLimitDelta: LREAL := 0.05; //Delta between the softlimits of physical and virtual axes
+    cMaxParams: USINT := 6;
+    cParameters: ARRAY [1..cMaxParams] OF ST_AxisParamSpec := [ //Parameters required to be validated
+        (eParam := E_AxisParameters.AxisEncoderScalingNumerator, fValue := 1.0),
+        (eParam := E_AxisParameters.AxisEncoderScalingDenominator, fValue := 10000.0),
+        (eParam := E_AxisParameters.AxisEncoderMask, fValue := 4294967295.0), //0xFFFFFFF = 4294967295.0
+        (eParam := E_AxisParameters.AxisEncoderReferenceSystem, fValue := 1.0), //0.0 = INCREMENTAL, 1.0 = ABSOLUTE
+        (eParam := E_AxisParameters.EnableLimitBackward, fValue := 1.0), //0.0 = FALSE, 1.0 = TRUE
+        (eParam := E_AxisParameters.EnableLimitForward, fValue := 1.0)]; //0.0 = FALSE, 1.0 = TRUE
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -81,6 +91,14 @@ actClearCalibration(); //Clear calibration flag for all axes
 actInterlocking(); //Handle blades anticollision
 
 CASE eSlitPairState OF
+    E_SlitPairStates.eStartup:
+        checkStartupParams(stGapSize, stGapCentre);
+        IF eParameterCheck = E_AxisParamCheckState.eAllParamValid
+            OR eParameterCheck = E_AxisParamCheckState.eInvalidParam
+        THEN
+            eSlitPairState := E_SlitPairStates.eInit;
+        END_IF
+
     E_SlitPairStates.eInit:
         bEnabled := FALSE;
         IF bAxesEnabled AND bEnable THEN
@@ -654,6 +672,67 @@ END_IF
 IF bUpdateSoftLimits THEN
     actUpdateSoftLimits();
 END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkStartupParams" Id="{0a75b0a0-5874-0b4b-15f1-5347be377ef8}">
+      <Declaration><![CDATA[METHOD PRIVATE checkStartupParams
+VAR_IN_OUT
+    stGapSize: ST_AxisStruct; //Axis data of the gap size
+    stGapCentre: ST_AxisStruct; //Axis data of the gap centre
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eParameterCheck OF
+    E_AxisParamCheckState.eInit:
+        //Wait for axis initialization
+        IF NOT (stGapSize.stStatus.bAxisInitialized AND stGapCentre.stStatus.bAxisInitialized) THEN
+            RETURN;
+        END_IF
+
+        iParamCheck := 1;
+        eParameterCheck := E_AxisParamCheckState.eSelect;
+
+    E_AxisParamCheckState.eSelect:
+        stGapSize.stConfig.eAxisParameters := cParameters[iParamCheck].eParam;
+        stGapSize.stControl.eCommand := E_MotionFunctions.eReadParameter;
+        stGapSize.stControl.bExecute := TRUE;
+
+        stGapCentre.stConfig.eAxisParameters := cParameters[iParamCheck].eParam;
+        stGapCentre.stControl.eCommand := E_MotionFunctions.eReadParameter;
+        stGapCentre.stControl.bExecute := TRUE;
+
+        eParameterCheck := E_AxisParamCheckState.eRead;
+
+    E_AxisParamCheckState.eRead:
+        //Parameter reading still in progress
+        IF stGapSize.stStatus.bBusy OR stGapCentre.stStatus.bBusy THEN
+            RETURN;
+        END_IF
+
+        eParameterCheck := E_AxisParamCheckState.eCheck;
+
+    E_AxisParamCheckState.eCheck:
+        IF stGapSize.stConfig.fReadAxisParameter = cParameters[iParamCheck].fValue
+            AND stGapCentre.stConfig.fReadAxisParameter = cParameters[iParamCheck].fValue
+        THEN
+            IF iParamCheck = cMaxParams THEN
+                eParameterCheck := E_AxisParamCheckState.eAllParamValid;
+            ELSE
+                iParamCheck := iParamCheck + 1;
+                eParameterCheck := E_AxisParamCheckState.eSelect;
+            END_IF
+        ELSE
+            eParameterCheck := E_AxisParamCheckState.eInvalidParam;
+        END_IF
+
+    E_AxisParamCheckState.eAllParamValid:
+        ;
+
+    E_AxisParamCheckState.eInvalidParam:
+        ; //Atleast one invalid parameter found
+
+END_CASE
 ]]></ST>
       </Implementation>
     </Method>
