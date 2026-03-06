@@ -25,7 +25,7 @@ END_VAR
 
 VAR_GLOBAL PERSISTENT
     astAxesPersistent: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisPersistent;
-	timeAtShutdownPersistent : DT; //Date and time when the CPU was powered off
+    timeAtShutdownPersistent: DT; //Date and time when the CPU was powered off
 END_VAR
 ]]></Declaration>
   </GVL>
