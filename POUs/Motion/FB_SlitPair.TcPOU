@@ -33,7 +33,7 @@ VAR_OUTPUT
 END_VAR
 VAR
     //Internal state machines
-    eSlitPairState: E_SlitPairStates := E_SlitPairStates.eInit; //equence steps for operating the slits
+    eSlitPairState: E_SlitPairStates := E_SlitPairStates.eStartup; //Sequence steps for operating the slits
     eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits
 
     //Internal statuses for logic
