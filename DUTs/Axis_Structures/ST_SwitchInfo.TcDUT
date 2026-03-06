@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="ST_SwitchInfo" Id="{8b691b20-d15e-04fc-085e-324c48490184}">
+  <DUT Name="ST_SwitchInfo" Id="{fd2b2bd3-e117-0efc-04d6-132bd855c7c6}">
     <Declaration><![CDATA[TYPE ST_SwitchInfo :
 STRUCT
     fLimitBwdTrigPos: LREAL; //Last trigger pos of the bwd limit
