@@ -117,10 +117,10 @@ CASE eSlitPairState OF
     E_SlitPairStates.eCheckHomeStatus: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
         IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.eHomeGap; //Skip to functioning
-        ELSIF bAutoHome 
-			OR (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute)
-			OR (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute)
-		THEN
+        ELSIF bAutoHome
+            OR (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute)
+            OR (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute)
+        THEN
             eSlitPairState := E_SlitPairStates.eHomeBlades; //If autohome enabled or commanded through one of the virtual axis, home the blades
         END_IF
 
