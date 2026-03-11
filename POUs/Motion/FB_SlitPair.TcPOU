@@ -109,20 +109,20 @@ CASE eSlitPairState OF
         actClearSlitGearing();
         eSlitPairState := E_SlitPairStates.eInitGearOutCheck;
 
-    E_SlitPairStates.eInitGearOutCheck: //Check gearOut completion
+    E_SlitPairStates.eInitGearOutCheck: //Check gearout completion
         IF bBladesUncoupled THEN
             eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
         END_IF
 
-    E_SlitPairStates.eCheckHomeStatus: //If blades are already homed, skip to virtual homing, if blades not homed and autohome enabled then home blades, otherwise wait for blades to be homed
+    E_SlitPairStates.eCheckHomeStatus: //If blades are already homed, skip to virtual homing, otherwise wait for manual/auto homing signal
         IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.eHomeGap; //Skip to functioning
         ELSIF bAutoHome
-			OR bHomingRequested
+            OR bHomingRequested
             OR (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute)
             OR (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute)
         THEN
-			bHomingRequested := FALSE; //If homing fails do not automatically start homing again
+            bHomingRequested := FALSE; //If homing fails do not automatically start homing again
             eSlitPairState := E_SlitPairStates.eHomeBlades;
         END_IF
 
@@ -134,18 +134,18 @@ CASE eSlitPairState OF
         bHoming := TRUE;
         eSlitPairState := E_SlitPairStates.eCheckBladeHomeComplete;
 
-    E_SlitPairStates.eCheckBladeHomeComplete: //Wait for completion of blade homing routines
+    E_SlitPairStates.eCheckBladeHomeComplete: //Wait for completion of blade homing routines or stop/halt command
         IF bBladesHomed AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eHomeGap;
             bHoming := FALSE;
-		ELSIF stGapSize.stControl.bStop OR stGapCentre.stControl.bStop THEN
-			stBladeNegative.stControl.bStop := TRUE;
-			stBladePositive.stControl.bStop := TRUE;
-			eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
-		ELSIF stGapSize.stControl.bHalt OR stGapCentre.stControl.bHalt THEN
-			stBladeNegative.stControl.bHalt := TRUE;
-			stBladePositive.stControl.bHalt := TRUE;
-			eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
+        ELSIF stGapSize.stControl.bStop OR stGapCentre.stControl.bStop THEN
+            stBladeNegative.stControl.bStop := TRUE;
+            stBladePositive.stControl.bStop := TRUE;
+            eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
+        ELSIF stGapSize.stControl.bHalt OR stGapCentre.stControl.bHalt THEN
+            stBladeNegative.stControl.bHalt := TRUE;
+            stBladePositive.stControl.bHalt := TRUE;
+            eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
         ELSIF (stBladeNegative.stStatus.nErrorID > 0) OR (stBladePositive.stStatus.nErrorID > 0) THEN
             eSlitPairState := E_SlitPairStates.eError;
         END_IF
@@ -300,7 +300,6 @@ IF rtrigVirtualAxisEnable.Q THEN
     stGapCentre.stControl.bEnable := TRUE;
     bEnable := TRUE;
 END_IF
-
 
 //Disable blade axes when both the virtuals are disabled
 rtrigVirtualAxisDisable(CLK := NOT stGapSize.stControl.bEnable OR NOT stGapCentre.stControl.bEnable);
