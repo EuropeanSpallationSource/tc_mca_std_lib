@@ -138,6 +138,14 @@ CASE eSlitPairState OF
         IF bBladesHomed AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eHomeGap;
             bHoming := FALSE;
+		ELSIF stGapSize.stControl.bStop OR stGapCentre.stControl.bStop THEN
+			stBladeNegative.stControl.bStop := TRUE;
+			stBladePositive.stControl.bStop := TRUE;
+			eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
+		ELSIF stGapSize.stControl.bHalt OR stGapCentre.stControl.bHalt THEN
+			stBladeNegative.stControl.bHalt := TRUE;
+			stBladePositive.stControl.bHalt := TRUE;
+			eSlitPairState := E_SlitPairStates.eCheckHomeStatus;
         ELSIF (stBladeNegative.stStatus.nErrorID > 0) OR (stBladePositive.stStatus.nErrorID > 0) THEN
             eSlitPairState := E_SlitPairStates.eError;
         END_IF
