@@ -22,7 +22,7 @@ VAR_INPUT
     iGapSize: UINT; //Axis ID for the size of gap between slit blades
     iGapCentre: UINT; //Axis ID for the centre position of the gap formed by slit blades
     fEncoderScaling: LREAL := 10000.0; //default scaling denominator of 10000
-    bAutoHome: BOOL := TRUE; //Blades homing is automatically done if they are not homed
+    bAutoHome: BOOL := FALSE; //Blades homing is automatically done if they are not homed
     bAnticollisionEnable: BOOL := FALSE; //Blades anticollision option, only for when blades are moved independently
     fCycleTime: LREAL := 0.01; //PlcTask cycle time in seconds
 END_VAR
