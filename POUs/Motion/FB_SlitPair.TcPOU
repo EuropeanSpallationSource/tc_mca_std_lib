@@ -118,10 +118,12 @@ CASE eSlitPairState OF
         IF bBladesHomed THEN
             eSlitPairState := E_SlitPairStates.eHomeGap; //Skip to functioning
         ELSIF bAutoHome
+			OR bHomingRequested
             OR (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute)
             OR (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute)
         THEN
-            eSlitPairState := E_SlitPairStates.eHomeBlades; //If autohome enabled or commanded through one of the virtual axis, home the blades
+			bHomingRequested := FALSE; //If homing fails do not automatically start homing again
+            eSlitPairState := E_SlitPairStates.eHomeBlades;
         END_IF
 
     E_SlitPairStates.eHomeBlades: //Initiate homing of blade axes. Homing routine must be pre-configured by user
@@ -154,7 +156,6 @@ CASE eSlitPairState OF
     E_SlitPairStates.eCheckGapHomeComplete: //Wait for virtual homing completion
         IF bGapHomed AND NOT stGapSize.stStatus.bBusy AND NOT stGapCentre.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearInSlits;
-            bHomingRequested := FALSE;
         END_IF
 
     E_SlitPairStates.eGearInSlits: //Setup gearing
