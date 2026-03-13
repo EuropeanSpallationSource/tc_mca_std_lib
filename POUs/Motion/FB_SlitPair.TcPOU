@@ -381,7 +381,7 @@ END_IF
 //RESET - Use the reset from the virtual axes in order to reset the slits
 bReset := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
 
-IF NOT bError AND bAxisErrorsPresent THEN
+IF NOT bError AND bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 
