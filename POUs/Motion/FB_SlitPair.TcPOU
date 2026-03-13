@@ -23,8 +23,8 @@ VAR_INPUT
     iGapCentre: UINT; //Axis ID for the centre position of the gap formed by slit blades
     fEncoderScaling: LREAL := 10000.0; //default scaling denominator of 10000
     bAutoHome: BOOL := FALSE; //Blades homing is automatically done if they are not homed
-    bAnticollisionEnable: BOOL := FALSE; //Blades anticollision option, only for when blades are moved independently
-    fCycleTime: LREAL := 0.01; //PlcTask cycle time in seconds
+    bAnticollisionEnable: BOOL := TRUE; //Blades anticollision option, only for when blades are moved independently
+    fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
 END_VAR
 VAR_OUTPUT
     bEnabled: BOOL := FALSE; //Enabled status of function
@@ -35,7 +35,7 @@ VAR
     //Internal state machines
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.eStartup; //Sequence steps for operating the slits
     eParameterCheck: E_AxisParamCheckState := E_AxisParamCheckState.eInit; //Sequence steps for checking params of virtual axes
-    eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits
+    eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits for virtual axes
 
     //Internal statuses for logic
     bEnable: BOOL; //Enable/disable the slit set
@@ -56,9 +56,9 @@ VAR
     nAutoErrorResetCounter: UINT := 0; //Error automatic reset counter
     iParamCheck: USINT := 1; //Index of current parameter to be validated
     rtrigSlitOperational: R_TRIG;
-    rtrigVirtualAxisNotMoving: R_TRIG;
     rtrigVirtualAxisEnable: R_TRIG;
     rtrigVirtualAxisDisable: R_TRIG;
+    rtrigVirtualAxisNotMoving: R_TRIG;
     fbResetCalibrationPositiveBlade: MC_Home;
     fbResetCalibrationNegativeBlade: MC_Home;
     fbResetCalibrationGapSize: MC_Home;
@@ -88,7 +88,7 @@ actVirtualAxisPositions(); //Virtual axis encoder position subroutine
 actUpdateStatus(); //Update statuses
 actEnableAxes(); //Enable the axes
 actClearCalibration(); //Clear calibration flag for all axes
-actInterlocking(); //Handle blades anticollision
+actAnticollision(); //Handle blades anticollision
 
 CASE eSlitPairState OF
     E_SlitPairStates.eStartup:
@@ -254,6 +254,60 @@ END_CASE
 bReset := FALSE;
 ]]></ST>
     </Implementation>
+    <Action Name="actAnticollision" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
+      <Implementation>
+        <ST><![CDATA[//Negative Blade
+
+//If executing absolute / relative movement commands also check target position
+CASE stBladeNegative.stControl.eCommand OF
+
+    E_MotionFunctions.eMoveAbsolute:
+        stBladeNegative.stControl.bInterlockFwd := stBladeNegative.stControl.bExecute
+            AND stBladeNegative.stControl.fPosition >= (stBladePositive.stStatus.fActPosition - fAnticollisionMargin);
+
+    E_MotionFunctions.eMoveRelative:
+        stBladeNegative.stControl.bInterlockFwd := stBladeNegative.stControl.bExecute
+            AND (stBladeNegative.stControl.fPosition + stBladeNegative.stStatus.fActPosition) >= (stBladePositive.stStatus.fActPosition - fAnticollisionMargin);
+
+    ELSE
+        stBladeNegative.stControl.bInterlockFwd := FALSE;
+
+END_CASE
+
+//Check if current position is outside the anticollision margin
+stBladeNegative.stControl.bInterlockFwd :=
+    (stBladeNegative.stControl.bInterlockFwd OR stBladeNegative.stStatus.fActPosition >= (stBladePositive.stStatus.fActPosition - fAnticollisionMargin))
+    AND bBladesHomed
+    AND bBladesUncoupled
+    AND bAnticollisionEnable;
+
+//Positive Blade
+
+//If executing absolute / relative movement commands also check target position
+CASE stBladePositive.stControl.eCommand OF
+
+    E_MotionFunctions.eMoveAbsolute:
+        stBladePositive.stControl.bInterlockBwd := stBladePositive.stControl.bExecute
+            AND stBladePositive.stControl.fPosition <= (stBladeNegative.stStatus.fActPosition + fAnticollisionMargin);
+
+    E_MotionFunctions.eMoveRelative:
+        stBladePositive.stControl.bInterlockBwd := stBladePositive.stControl.bExecute
+            AND (stBladePositive.stControl.fPosition + stBladePositive.stStatus.fActPosition) <= (stBladeNegative.stStatus.fActPosition + fAnticollisionMargin);
+
+    ELSE
+        stBladePositive.stControl.bInterlockBwd := FALSE;
+
+END_CASE
+
+//Check if current position is outside the anticollision margin
+stBladePositive.stControl.bInterlockBwd :=
+    (stBladePositive.stControl.bInterlockBwd OR stBladePositive.stStatus.fActPosition <= (stBladeNegative.stStatus.fActPosition + fAnticollisionMargin))
+    AND bBladesHomed
+    AND bBladesUncoupled
+    AND bAnticollisionEnable;
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actClearCalibration" Id="{ebc4e684-09cb-0ff6-2420-a784d5e2b2e0}">
       <Implementation>
         <ST><![CDATA[fbResetCalibrationPositiveBlade(
@@ -350,66 +404,6 @@ stGapSize.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitFwd OR stBladePos
 stGapSize.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitBwd OR stBladePositive.stInputs.bLimitFwd;
 stGapCentre.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitFwd OR stBladePositive.stInputs.bLimitBwd;
 stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitBwd OR stBladePositive.stInputs.bLimitFwd;
-]]></ST>
-      </Implementation>
-    </Action>
-    <Action Name="actInterlocking" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
-      <Implementation>
-        <ST><![CDATA[//Blades interlocking for anticollision purposes
-
-//Forward interlock of negative blade
-CASE stBladeNegative.stControl.eCommand OF
-
-    E_MotionFunctions.eMoveAbsolute:
-        stBladeNegative.stControl.bInterlockFwd :=
-            stBladeNegative.stControl.fPosition >= stBladePositive.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveRelative:
-        stBladeNegative.stControl.bInterlockFwd :=
-            (stBladeNegative.stControl.fPosition + stBladeNegative.stStatus.fActPosition) >= stBladePositive.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveVelocity:
-        stBladeNegative.stControl.bInterlockFwd :=
-            (stBladeNegative.stControl.fVelocity * fCycleTime + stBladeNegative.stStatus.fActPosition) >= stBladePositive.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveModulo:
-        ; //TODO! Implement logic for modulo movement
-
-    ELSE
-        stBladeNegative.stControl.bInterlockFwd := FALSE;
-END_CASE
-
-stBladeNegative.stControl.bInterlockFwd :=
-    (stBladeNegative.stControl.bInterlockFwd OR stBladeNegative.stStatus.fActPosition >= stBladePositive.stStatus.fActPosition)
-    AND bBladesHomed
-    AND bAnticollisionEnable;
-
-//Backward interlock of positive blade
-CASE stBladePositive.stControl.eCommand OF
-
-    E_MotionFunctions.eMoveAbsolute:
-        stBladePositive.stControl.bInterlockBwd :=
-            stBladePositive.stControl.fPosition <= stBladeNegative.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveRelative:
-        stBladePositive.stControl.bInterlockBwd :=
-            (stBladePositive.stControl.fPosition + stBladePositive.stStatus.fActPosition) <= stBladeNegative.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveVelocity:
-        stBladePositive.stControl.bInterlockBwd :=
-            (stBladePositive.stControl.fVelocity * fCycleTime + stBladePositive.stStatus.fActPosition) <= stBladeNegative.stStatus.fActPosition;
-
-    E_MotionFunctions.eMoveModulo:
-        ; //TODO! Implement logic for modulo movement
-
-    ELSE
-        stBladePositive.stControl.bInterlockBwd := FALSE;
-END_CASE
-
-stBladePositive.stControl.bInterlockBwd :=
-    (stBladePositive.stControl.bInterlockBwd OR stBladePositive.stStatus.fActPosition <= stBladeNegative.stStatus.fActPosition)
-    AND bBladesHomed
-    AND bAnticollisionEnable;
 ]]></ST>
       </Implementation>
     </Action>
