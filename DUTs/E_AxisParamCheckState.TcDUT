@@ -6,11 +6,13 @@
 TYPE E_AxisParamCheckState :
 (
     eInit,
-    eSelect,
-    eRead,
+    eSelectParam,
+    eWaitRead,
     eCheck,
-    eAllParamValid,
-    eInvalidParam
+    eParamValid,
+    eParamInvalid,
+    eNext,
+    eFinish
 );
 END_TYPE
 ]]></Declaration>

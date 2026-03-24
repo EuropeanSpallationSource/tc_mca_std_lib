@@ -3,6 +3,7 @@
   <EnumerationTextList Name="E_AxisParameters" Id="{9199cc42-106a-4663-aaa5-d49855d9aa9f}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
+{attribute 'to_string'}
 TYPE E_AxisParameters :
 (
 //PLCopen specific parameters Index-Group 0x4000 + ID

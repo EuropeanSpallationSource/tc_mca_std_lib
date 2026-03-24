@@ -49,6 +49,7 @@ VAR
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
     bUpdateSoftLimits: BOOL := FALSE; //TRUE if update of soft limits are being executed
     bHomingRequested: BOOL := FALSE; //TRUE if homing is requested for all axis
+    bInvalidParamFound: BOOL := FALSE; //TRUE if startup finds atleast one invalid parameter
     fGapSizePosition: LREAL; //Virtual axis gap size calculated position
     nGapSizePosition AT %Q*: UDINT := 0; //Virtual axis gap size encoder position/counter
     fGapCentrePosition: LREAL; //Virtual axis gap centre calculated position
@@ -93,9 +94,7 @@ actAnticollision(); //Handle blades anticollision
 CASE eSlitPairState OF
     E_SlitPairStates.eStartup:
         checkStartupParams(stGapSize, stGapCentre);
-        IF eParameterCheck = E_AxisParamCheckState.eAllParamValid
-            OR eParameterCheck = E_AxisParamCheckState.eInvalidParam
-        THEN
+        IF eParameterCheck = E_AxisParamCheckState.eFinish THEN
             eSlitPairState := E_SlitPairStates.eInit;
         END_IF
 
@@ -686,6 +685,9 @@ VAR_IN_OUT
     stGapSize: ST_AxisStruct; //Axis data of the gap size
     stGapCentre: ST_AxisStruct; //Axis data of the gap centre
 END_VAR
+VAR
+    sWarnMsg: T_MaxString;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eParameterCheck OF
@@ -696,9 +698,9 @@ END_VAR
         END_IF
 
         iParamCheck := 1;
-        eParameterCheck := E_AxisParamCheckState.eSelect;
+        eParameterCheck := E_AxisParamCheckState.eSelectParam;
 
-    E_AxisParamCheckState.eSelect:
+    E_AxisParamCheckState.eSelectParam:
         stGapSize.stConfig.eAxisParameters := cParameters[iParamCheck].eParam;
         stGapSize.stControl.eCommand := E_MotionFunctions.eReadParameter;
         stGapSize.stControl.bExecute := TRUE;
@@ -707,9 +709,9 @@ END_VAR
         stGapCentre.stControl.eCommand := E_MotionFunctions.eReadParameter;
         stGapCentre.stControl.bExecute := TRUE;
 
-        eParameterCheck := E_AxisParamCheckState.eRead;
+        eParameterCheck := E_AxisParamCheckState.eWaitRead;
 
-    E_AxisParamCheckState.eRead:
+    E_AxisParamCheckState.eWaitRead:
         //Parameter reading still in progress
         IF stGapSize.stStatus.bBusy OR stGapCentre.stStatus.bBusy THEN
             RETURN;
@@ -721,21 +723,59 @@ END_VAR
         IF stGapSize.stConfig.fReadAxisParameter = cParameters[iParamCheck].fValue
             AND stGapCentre.stConfig.fReadAxisParameter = cParameters[iParamCheck].fValue
         THEN
-            IF iParamCheck = cMaxParams THEN
-                eParameterCheck := E_AxisParamCheckState.eAllParamValid;
-            ELSE
-                iParamCheck := iParamCheck + 1;
-                eParameterCheck := E_AxisParamCheckState.eSelect;
-            END_IF
+            eParameterCheck := E_AxisParamCheckState.eParamValid;
         ELSE
-            eParameterCheck := E_AxisParamCheckState.eInvalidParam;
+            eParameterCheck := E_AxisParamCheckState.eParamInvalid;
         END_IF
 
-    E_AxisParamCheckState.eAllParamValid:
-        ;
+    E_AxisParamCheckState.eParamValid:
+        eParameterCheck := E_AxisParamCheckState.eNext;
 
-    E_AxisParamCheckState.eInvalidParam:
-        ; //Atleast one invalid parameter found
+    E_AxisParamCheckState.eParamInvalid:
+        //Gap Size
+        IF stGapSize.stConfig.fReadAxisParameter <> cParameters[iParamCheck].fValue THEN
+            sWarnMsg := CONCAT(
+                STR1 := 'Slit virtual axis Gap Size (AxisId=%d) has an invalid parameter of ',
+                STR2 := TO_STRING(cParameters[iParamCheck].eParam));
+
+            ADSLOGDINT(
+                msgCtrlMask := ADSLOG_MSGTYPE_WARN,
+                msgFmtStr := sWarnMsg,
+                dintArg := TO_DINT(iGapSize));
+        END_IF
+        //Gap Centre
+        IF stGapCentre.stConfig.fReadAxisParameter <> cParameters[iParamCheck].fValue THEN
+            sWarnMsg := CONCAT(
+                STR1 := 'Slit virtual axis Gap Centre (AxisId=%d) has an invalid parameter of ',
+                STR2 := TO_STRING(cParameters[iParamCheck].eParam));
+
+            ADSLOGDINT(
+                msgCtrlMask := ADSLOG_MSGTYPE_WARN,
+                msgFmtStr := sWarnMsg,
+                dintArg := TO_DINT(iGapCentre));
+        END_IF
+        bInvalidParamFound := TRUE;
+
+        eParameterCheck := E_AxisParamCheckState.eNext;
+
+    E_AxisParamCheckState.eNext:
+        IF iParamCheck = cMaxParams THEN
+            IF NOT bInvalidParamFound THEN
+                ADSLOGSTR(
+                    msgCtrlMask := ADSLOG_MSGTYPE_LOG,
+                    msgFmtStr := 'Slit all parameters of both virtual axes are valid',
+                    strArg := '');
+            END_IF
+            eParameterCheck := E_AxisParamCheckState.eFinish;
+        ELSE
+            ;
+            iParamCheck := iParamCheck + 1;
+            eParameterCheck := E_AxisParamCheckState.eSelectParam;
+        END_IF
+
+
+    E_AxisParamCheckState.eFinish:
+        ;
 
 END_CASE
 ]]></ST>
