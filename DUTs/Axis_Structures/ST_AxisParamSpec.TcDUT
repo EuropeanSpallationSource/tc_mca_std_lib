@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_AxisParamSpec" Id="{786e4eb1-46f0-0178-3b79-82a7fdcac1a2}">
+    <Declaration><![CDATA[TYPE ST_AxisParamSpec :
+STRUCT
+    eParam: E_AxisParameters;
+    fValue: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
