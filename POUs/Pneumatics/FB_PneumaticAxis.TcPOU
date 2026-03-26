@@ -616,6 +616,8 @@ fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeTo
 _stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
 _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
+_stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
+_stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
 ]]></ST>
       </Implementation>
     </Method>
