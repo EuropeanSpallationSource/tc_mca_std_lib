@@ -7,8 +7,8 @@ STRUCT
     bRetract: BOOL; //Variable to control solenoid valve from PLC
     bInterlock: BOOL; //Input interlock signal for the movement
     bReset: BOOL; //Reset signal from EPICS
-	bOpenManual: BOOL; //Variable to control the solenoid valve from the OP
-	bCloseManual: BOOL; //Variable to close the solenoid valve from the OP
+    bOpenManual: BOOL; //Variable to control the solenoid valve from the OP
+    bCloseManual: BOOL; //Variable to close the solenoid valve from the OP
 END_STRUCT
 END_TYPE
 

@@ -271,9 +271,9 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract 
-	OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual) 
-	OR bInterlockedExtended THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract
+    OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual)
+    OR bInterlockedExtended THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
@@ -489,9 +489,9 @@ IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend 
-	OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual) 
-	OR bInterlockedRetracted THEN
+IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
+    OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual)
+    OR bInterlockedRetracted THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
@@ -650,17 +650,17 @@ END_IF
 
 //If the manual momentary push button is used for control of the pneumatic cylinder
 IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-	_stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1;
-	fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
-	IF fbTrigRetractManual.Q THEN
-	   bStartRetractManual := TRUE;
-	END_IF
+    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1;
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
 ELSE
-	_stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
-	fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
-	IF fbTrigRetractManual.Q THEN
-	   bStartRetractManual := TRUE;
-	END_IF
+    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
+    IF fbTrigRetractManual.Q THEN
+       bStartRetractManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the timing of extraction movement
@@ -675,17 +675,17 @@ END_IF
 
 //If the manual momentary push button is used for control of the pneumatic cylinder
 IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-	_stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1;
-	fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
-	IF fbTrigExtendManual.Q THEN
-	   bStartExtendManual := TRUE;
-	END_IF
+    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1;
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
 ELSE
-	_stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
-	fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
-	IF fbTrigExtendManual.Q THEN
-	   bStartExtendManual := TRUE;
-	END_IF	
+    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
+    IF fbTrigExtendManual.Q THEN
+       bStartExtendManual := TRUE;
+    END_IF
 END_IF
 
 //Starting the extraction movement
