@@ -19,6 +19,8 @@ STRUCT
     fAcceleration: LREAL; //Acceleration for the movement command (0 uses the NC default)
     fDeceleration: LREAL; //Deceleration for the movement command
     fPosition: LREAL; //Target position for absolute moves or distance for relative moves
+    fMinSoftLimit: LREAL; //Minimum position soft limit
+    fMaxSoftLimit: LREAL; //Maximum position soft limit
     bHWMaskActive: BOOL := FALSE; //Indicates if hardware masking is active
     fMaskedTemperature: REAL := 0.0; //Temperature value used when the hardware masking is active
     bPressurizeAirpad AT %Q*: BOOL; //Output from method controlling airpad
