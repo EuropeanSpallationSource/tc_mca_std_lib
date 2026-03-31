@@ -34859,7 +34859,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fMinSoftLimit"</v>
+                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMinSoftLimit"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -34889,7 +34889,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fMinSoftLimit"</v>
+                      <v n="InputBoxVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMinSoftLimit"</v>
                       <v n="InputType">"Default"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
@@ -35088,7 +35088,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                   <a cet="STSnippetInputAction">
                     <o>
                       <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stConfig.eAxisParameters := E_AxisParameters.SWLimitBackward;
-GVL.astAxes[Main.hmiAxisSelection].stConfig.fWriteAxisParameter := GVL.astAxes[MAIN.hmiAxisSelection].stControl.fMinSoftLimit;
+GVL.astAxes[Main.hmiAxisSelection].stConfig.fWriteAxisParameter := GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMinSoftLimit;
 GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand := E_MotionFunctions.eWriteParameter;
 GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
@@ -35407,7 +35407,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.fMaxSoftLimit"</v>
+                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMaxSoftLimit"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -35433,18 +35433,18 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                 <v n="VisualElementIdentifier">"GenElemInst_764"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
-                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="IInputAction[]">
+                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
-                      <v n="InputBoxVariable">""</v>
+                      <v n="InputBoxVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMaxSoftLimit"</v>
                       <v n="InputType">"Edit"</v>
                       <v n="InputBoxMin">""</v>
                       <v n="InputBoxMax">""</v>
                       <v n="InputBoxDialogTitle">""</v>
                       <v n="Password">false</v>
-                      <v n="UseTextOutputVariable">true</v>
-                      <v n="TextOutputVariableInitialized">false</v>
+                      <v n="UseTextOutputVariable">false</v>
+                      <v n="TextOutputVariableInitialized">true</v>
                       <v n="OtherVarConversion">""</v>
                       <v n="Format">""</v>
                       <v n="DialogPosition" t="DialogPositionSetting">UseGlobalSetting</v>
@@ -35640,7 +35640,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                   <a cet="STSnippetInputAction">
                     <o>
                       <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stConfig.eAxisParameters := E_AxisParameters.SWLimitForward;
-GVL.astAxes[Main.hmiAxisSelection].stConfig.fWriteAxisParameter := GVL.astAxes[MAIN.hmiAxisSelection].stControl.fMaxSoftLimit;
+GVL.astAxes[Main.hmiAxisSelection].stConfig.fWriteAxisParameter := GVL.astAxes[MAIN.hmiAxisSelection].stConfig.fWriteMaxSoftLimit;
 GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand := E_MotionFunctions.eWriteParameter;
 GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
@@ -36406,7 +36406,6 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
         <Type n="Hotkey">{af56537c-7297-47e7-9c1c-de502e9fb71c}</Type>
         <Type n="HotkeyConfiguration">{6b108d46-58af-4e41-a3f4-174d8f160cc4}</Type>
         <Type n="HotkeyInput">{b36c4830-66bb-4798-aa52-839aa91713f0}</Type>
-        <Type n="IInputAction[]">_3S.CoDeSys.VisualElem.IInputAction[], VisualElem, Version=3.5.13.0, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="InputBoxInputAction">{e8e7e747-f76f-4dee-ab1c-b9637e41ac26}</Type>
         <Type n="InputBoxInputAction[]">_3S.CoDeSys.VisualElem.InputBoxInputAction[], VisualElem.plugin, Version=3.5.13.32, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="Int16">System.Int16</Type>
