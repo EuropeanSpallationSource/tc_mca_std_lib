@@ -532,6 +532,7 @@ CASE eExternalBrake OF
         IF TON_DelayBrakeRelease.Q THEN
             IF NOT _stAxis.stStatus.bEnabled
                 OR _stAxis.stStatus.bError
+                OR NOT _stAxis.stStatus.bBrakeDiagnosticsOk
                 OR TON_BrakeOpeningTimeoutWhenFeedback.Q THEN
                 _stAxis.stControl.bEnable := FALSE;
                 _stAxis.stControl.bReleaseBrake := FALSE;
@@ -543,6 +544,7 @@ CASE eExternalBrake OF
             END_IF
 
             IF _stAxis.stControl.bReleaseBrake
+                AND _stAxis.stStatus.bBrakeDiagnosticsOk
                 AND ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
                     AND _stAxis.stInputs.bBrakeReleased)
                 OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected) THEN
@@ -576,9 +578,10 @@ CASE eExternalBrake OF
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
             eExternalBrake := E_ExternalBrake.eBrakeEngaged;
-        ELSIF _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
-            AND _stAxis.stControl.bReleaseBrake
-            AND NOT _stAxis.stInputs.bBrakeReleased THEN
+        ELSIF ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
+                AND NOT _stAxis.stInputs.bBrakeReleased)
+            OR NOT _stAxis.stStatus.bBrakeDiagnosticsOk)
+            AND _stAxis.stControl.bReleaseBrake THEN
             _stAxis.stControl.bReleaseBrake := FALSE;
             _stAxis.stControl.bEnable := FALSE;
             bEnableAmp := FALSE;
@@ -612,6 +615,7 @@ END_CASE
 
 bReady :=
     eExternalBrake = E_ExternalBrake.eBrakeReleased
+    AND _stAxis.stStatus.bBrakeDiagnosticsOk
     AND ((_stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected
         AND _stAxis.stInputs.bBrakeReleased)
     OR NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeFeedbackConnected);
@@ -1640,6 +1644,13 @@ VAR_INST
     rtrigFwdLimit: R_TRIG;
     ftrigFwdLimit: F_TRIG;
 END_VAR
+
+VAR CONSTANT
+    BRAKE_OVER_TEMPERATURE : WORD := 16#0001;
+    BRAKE_OPEN_LOAD : WORD := 16#0002;
+    BRAKE_OVER_CURRENT : WORD := 16#0003;
+    BRAKE_SHORT_CIRCUIT : WORD := 16#0004;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stAxis.Axis.ReadStatus();
@@ -1659,7 +1670,14 @@ _stAxis.stStatus.bInTargetPosition := _stAxis.Axis.Status.InTargetPosition;
 _stAxis.stStatus.bSoEDriveDeviceError := _stAxis.Axis.Status.DriveDeviceError;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
-{info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
+_stAxis.stStatus.bBrakeDiagnosticsOverTemperature :=
+    (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OVER_TEMPERATURE) <> 0;
+_stAxis.stStatus.bBrakeDiagnosticsOk :=
+    (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OPEN_LOAD) = 0
+    AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_OVER_CURRENT) = 0
+    AND (_stAxis.stInputs.wBrakeTerminalDiagnositics AND BRAKE_SHORT_CIRCUIT) = 0;
+
+{info 'NOTE: If terminal diagnostics is not used, a risk constitutes for an airpad/brake without feedback.'}
 IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
     AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
     _stAxis.stStatus.bAxisReadyToMove :=

@@ -49,6 +49,8 @@ STRUCT
     bCommandHandlerMovePermit: BOOL; // True if command handler has given permit to move
     bCommandHandlerBufferingCommand: BOOL; //True if CommandHandler is waiting on a permit before releasing the command
     bCommandHandlerTimeoutError: BOOL; //True if CommandHandler did not receive a permit in time
+    bBrakeDiagnosticsOk: BOOL; //True if Brake Terminal Diagnostics Ok
+    bBrakeDiagnosticsOverTemperature: BOOL; //True if Brake Terminal has over termperature
     eInternalMotionCommand: E_MotionFunctions;
     stSwitchInfo: ST_SwitchInfo; //Trigger/Untrigger positions and values of switches
 END_STRUCT
