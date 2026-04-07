@@ -8,6 +8,20 @@ STRUCT
     fEncoderBiasAtShutdown: LREAL; //Encoder bias value when the CPU was powered off
     bMovingAtShutdown: BOOL; //Indicates if the axis was moving during the shutdown (True if moving, false otherwise)
     bHomedAtShutdown: BOOL; //Homing status of the axis when the CPU was powered off
+    bInitialized: BOOL; //Initialized status of the axis when the CPU was powered off
+
+    //Axis status variables
+    stMotionState: MC_AXISSTATES;
+    bError: BOOL;
+    nErrorID: UDINT;
+    bErrorStop: BOOL;
+    bStandStill: BOOL;
+    bHasBeenStopped: BOOL;
+    bMoving: BOOL;
+    fPositionDifference: LREAL;
+    bDisabled: BOOL;
+
+    nCycles: ULINT; //Number of PLC cycles executed before shutdown
 END_STRUCT
 END_TYPE
 ]]></Declaration>
