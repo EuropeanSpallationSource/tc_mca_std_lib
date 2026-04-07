@@ -5,9 +5,10 @@
 {attribute 'strict'}
 TYPE E_RestorePosition :
 (
-    eDontRestore :=0,
-    eRestoreWithoutHome := 1, //Restores the position of the axis to that when the power was lost
-    eRestoreWithHome := 2 // Restores the position of the axis to that when the power was lost and sets the home position to the restored position
+    eDontRestore := 0,
+    eRestoreWithoutHome := 1, //Restores the position of the axis to that when the power was lost (incremental)
+    eRestoreWithHome := 2, // Restores the position of the axis to that when the power was lost and sets the home calibration flag (incremental)
+    eRestorePositionBias := 3 //Restores position bias (absolute)
 );
 END_TYPE
 ]]></Declaration>
