@@ -7,7 +7,7 @@
 TYPE E_RestorePosition :
 (
     eDontRestore := 0,
-    eRestorePosition := 1, //Restores the position of the axis to that when the power was lost (this restore mode is only valid for inremental encoders).
+    eRestorePosition := 1, //Restores the position of the axis to that when the power was lost (this restore mode is only valid for incremental encoders).
     eRestorePositionBias := 2 //Restores position bias (this restore mode is only valid for absolute encoders).
 );
 END_TYPE
