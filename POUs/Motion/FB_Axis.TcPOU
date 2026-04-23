@@ -1952,7 +1952,8 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
-    bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove,
+    bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove
+        AND _stAxis.Axis.Status.FeedEnable,
     bPermitRequired :=
         _stAxis.stConfig.bAutoEnable
         OR _stAxis.stConfig.stAirpadBrake.bAirpadConnected
