@@ -359,6 +359,7 @@ VAR_OUTPUT
 END_VAR
 
 VAR_INST
+    eLatchedCommand: E_MotionFunctions;
     bExecuteCmdHandler: BOOL := FALSE;
     bInternalWaitingForMovePermit: BOOL := FALSE;
     bInternalMovePermit: BOOL := FALSE;
@@ -375,14 +376,24 @@ END_VAR
 RTRIG_Execute(CLK :=
     _stAxis.stControl.bExecute);
 IF RTRIG_Execute.Q THEN
-    bExecuteCmdHandler := TRUE;
-    bInternalMovePermit := FALSE;
-    _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+    CASE _stAxis.stControl.eCommand OF
+        E_MotionFunctions.eMoveAbsolute,
+        E_MotionFunctions.eMoveRelative,
+        E_MotionFunctions.eMoveVelocity,
+        E_MotionFunctions.eMoveModulo,
+        E_MotionFunctions.eGearInMultiMaster,
+        E_MotionFunctions.eGearOut,
+        E_MotionFunctions.eHome :
+            eLatchedCommand := _stAxis.stControl.eCommand;
+            bExecuteCmdHandler := TRUE;
+            bInternalMovePermit := FALSE;
+            _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+    END_CASE
 END_IF
 
 
 IF bExecuteCmdHandler THEN
-    CASE _stAxis.stControl.eCommand OF
+    CASE eLatchedCommand OF
         E_MotionFunctions.eMoveAbsolute,
         E_MotionFunctions.eMoveRelative,
         E_MotionFunctions.eMoveVelocity,
@@ -402,7 +413,7 @@ IF bExecuteCmdHandler THEN
                 OR (bPermitRequired
                     AND NOT _stAxis.stConfig.bAutoEnable
                     AND NOT _stAxis.stStatus.bEnabled) THEN
-                _stAxis.stStatus.eInternalMotionCommand := _stAxis.stControl.eCommand;
+                _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
                 bInternalExecute := TRUE;
                 bExecuteCmdHandler := FALSE;
                 bInternalWaitingForMovePermit := FALSE;
@@ -411,12 +422,6 @@ IF bExecuteCmdHandler THEN
                 bInternalWaitingForMovePermit := TRUE;
                 bInternalMovePermit := FALSE;
             END_IF
-
-        E_MotionFunctions.eWriteParameter,
-        E_MotionFunctions.eReadParameter,
-        E_MotionFunctions.eReadCoEParameters,
-        E_MotionFunctions.eWriteCoEParameters:
-            bExecuteCmdHandler := FALSE;
     END_CASE
 END_IF
 
