@@ -5,7 +5,7 @@
 STRUCT
     //Outputs & Status
     bAxisInitialized: BOOL := FALSE; //True when all parameters from actReadMcParameters are valid
-    bAxisHasBeenRestored: BOOL := FALSE;;
+    bAxisHasBeenRestored: BOOL := FALSE;
     bEnabled: BOOL; //Axis drive enabled
     bAxisReadyToMove: BOOL; //Axis enabled and input ok from additional equipment (e.g. airpad, brake).
     bCommandAborted: BOOL; //Command aborted output of the eCommand function blocks
