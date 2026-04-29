@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <EnumerationTextList Name="E_CustomErrorIds" Id="{12174a71-aafc-0e3e-2215-f2defb2a7324}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CustomErrorIds :
+(
+    eNoCustomError := 0,
+    eTemperatureSensorError := 16#10201,
+    eAirPadPressureError := 16#10202,
+    eAirPadTimeoutError := 16#10203,
+    eExternalBrakeError := 16#10204,
+    eExternalBrakeTimeoutError := 16#10205,
+    eCommandHandlerTimeoutError := 16#10206
+) UDINT := eNoCustomError;
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"eNoCustomError"</v>
+              <v n="TextDefault">"0"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eTemperatureSensorError"</v>
+              <v n="TextDefault">"16#10201"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eAirPadPressureError"</v>
+              <v n="TextDefault">"16#10202"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eAirPadTimeoutError"</v>
+              <v n="TextDefault">"16#10203"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eExternalBrakeError"</v>
+              <v n="TextDefault">"16#10204"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eExternalBrakeTimeoutError"</v>
+              <v n="TextDefault">"16#10205"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"eCommandHandlerTimeoutError"</v>
+              <v n="TextDefault">"16#10206"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{22841fa1-9381-4488-87e7-8d1f2393f797}</v>
+          <v n="GuidReInit">{c40c5821-6b03-4689-9f4d-109b451836bc}</v>
+          <v n="GuidExitX">{31ed6579-c9de-4f02-9428-acad3300a517}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>
