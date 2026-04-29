@@ -113,9 +113,8 @@ VAR
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
-    bAxisReadyToMoveDelay: BOOL := FALSE;
-
 END_VAR
+
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
@@ -1937,7 +1936,6 @@ mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
     bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove
-        AND bAxisReadyToMoveDelay
         AND (_stAxis.stStatus.bFwEnabled OR _stAxis.stStatus.bBwEnabled),
     bPermitRequired :=
         _stAxis.stConfig.bAutoEnable
