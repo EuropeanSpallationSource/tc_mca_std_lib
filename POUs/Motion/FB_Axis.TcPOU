@@ -113,6 +113,7 @@ VAR
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
+    bAxisReadyToMoveDelay: BOOL := FALSE;
 
 END_VAR
 VAR CONSTANT
@@ -354,10 +355,11 @@ VAR_OUTPUT
 END_VAR
 
 VAR_INST
+    eState: E_CommandHandlerState := E_CommandHandlerState.eIdle;
     eLatchedCommand: E_MotionFunctions;
-    bExecuteCmdHandler: BOOL := FALSE;
     bInternalWaitingForMovePermit: BOOL := FALSE;
     bInternalMovePermit: BOOL := FALSE;
+    nWaitCounter: UINT := 0;
     RTRIG_Execute: R_TRIG;
     FTRIG_Moving: F_TRIG;
     TON_Timeout: TON;
@@ -366,66 +368,68 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// FIX when Relative Vel = 0 and Move Rel, Command Handler buffering, nothing happens.
+        <ST><![CDATA[// State machine for command handling
+RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
 
-RTRIG_Execute(CLK :=
-    _stAxis.stControl.bExecute);
-IF RTRIG_Execute.Q THEN
-    CASE _stAxis.stControl.eCommand OF
-        E_MotionFunctions.eMoveAbsolute,
-        E_MotionFunctions.eMoveRelative,
-        E_MotionFunctions.eMoveVelocity,
-        E_MotionFunctions.eMoveModulo,
-        E_MotionFunctions.eGearInMultiMaster,
-        E_MotionFunctions.eGearOut,
-        E_MotionFunctions.eHome :
-            eLatchedCommand := _stAxis.stControl.eCommand;
-            bExecuteCmdHandler := TRUE;
-            bInternalMovePermit := FALSE;
-            _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
-    END_CASE
-END_IF
+CASE eState OF
+    E_CommandHandlerState.eIdle:
+        bInternalMovePermit := FALSE;
+        IF RTRIG_Execute.Q THEN
+            CASE _stAxis.stControl.eCommand OF
+                E_MotionFunctions.eMoveAbsolute,
+                E_MotionFunctions.eMoveRelative,
+                E_MotionFunctions.eMoveVelocity,
+                E_MotionFunctions.eMoveModulo,
+                E_MotionFunctions.eGearInMultiMaster,
+                E_MotionFunctions.eGearOut,
+                E_MotionFunctions.eHome :
+                    eLatchedCommand := _stAxis.stControl.eCommand;
+                    nWaitCounter := 0;
+                    _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
 
+                    IF _stAxis.stConfig.bAutoEnable THEN
+                        _stAxis.stControl.bEnable := TRUE;
+                    END_IF
 
-IF bExecuteCmdHandler THEN
-    CASE eLatchedCommand OF
-        E_MotionFunctions.eMoveAbsolute,
-        E_MotionFunctions.eMoveRelative,
-        E_MotionFunctions.eMoveVelocity,
-        E_MotionFunctions.eMoveModulo,
-        E_MotionFunctions.eGearInMultiMaster,
-        E_MotionFunctions.eGearOut,
-        E_MotionFunctions.eHome :
-            IF RTRIG_Execute.Q
-                AND _stAxis.stConfig.bAutoEnable THEN
-                _stAxis.stControl.bEnable := TRUE;
-            END_IF
+                    eState := E_CommandHandlerState.eWaitPermits;
+            END_CASE
+        END_IF
 
-            IF (bPermitRequired AND bAxisPermittedToMove)
-                OR NOT bPermitRequired
-                // If a permit is required, no autoenable configured, and drive disabled when
-                // issuing a move command, let the command through to alarm the operator.
-                OR (bPermitRequired
-                    AND NOT _stAxis.stConfig.bAutoEnable
-                    AND NOT _stAxis.stStatus.bEnabled) THEN
-                _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
-                bInternalExecute := TRUE;
-                bExecuteCmdHandler := FALSE;
-                bInternalWaitingForMovePermit := FALSE;
-                bInternalMovePermit := TRUE;
-            ELSE
-                bInternalWaitingForMovePermit := TRUE;
-                bInternalMovePermit := FALSE;
-            END_IF
-    END_CASE
-END_IF
+    E_CommandHandlerState.eWaitPermits:
+        IF (bPermitRequired AND bAxisPermittedToMove)
+            OR NOT bPermitRequired
+            OR (bPermitRequired AND NOT _stAxis.stConfig.bAutoEnable AND NOT _stAxis.stStatus.bEnabled) THEN
+
+            eState := E_CommandHandlerState.eStabilizeNC;
+        END_IF
+
+    E_CommandHandlerState.eStabilizeNC:
+        // Ensure permits are still valid during stabilization
+        IF (bPermitRequired AND NOT bAxisPermittedToMove) THEN
+             eState := E_CommandHandlerState.eWaitPermits;
+             nWaitCounter := 0;
+        ELSIF nWaitCounter >= _stAxis.stConfig.nCommandHandlerWaitCycles THEN
+            eState := E_CommandHandlerState.eReleaseCommand;
+        ELSE
+            nWaitCounter := nWaitCounter + 1;
+        END_IF
+
+    E_CommandHandlerState.eReleaseCommand:
+        _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
+        bInternalExecute := TRUE;
+        bInternalMovePermit := TRUE;
+        eState := E_CommandHandlerState.eIdle;
+
+END_CASE
+
+bInternalWaitingForMovePermit := (eState = E_CommandHandlerState.eWaitPermits OR eState = E_CommandHandlerState.eStabilizeNC);
 
 TON_Timeout(
     IN := bInternalWaitingForMovePermit,
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
 IF TON_Timeout.Q THEN
-    bExecuteCmdHandler := FALSE;
+    eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
@@ -433,7 +437,7 @@ END_IF
 
 IF _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
-    bExecuteCmdHandler := FALSE;
+    eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
 END_IF
@@ -445,7 +449,7 @@ FTRIG_Moving(CLK :=
 IF FTRIG_Moving.Q
     OR _stAxis.stStatus.nErrorID = 16#4223
     OR _stAxis.stStatus.nErrorID = 16#4460 THEN
-    bExecuteCmdHandler := FALSE;
+    eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
 END_IF
@@ -1933,7 +1937,8 @@ mControl_LimitHitTimer();
 mControl_LimitLinking();
 mControl_CommandHandler(
     bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove
-        AND _stAxis.Axis.Status.FeedEnable,
+        AND bAxisReadyToMoveDelay
+        AND (_stAxis.stStatus.bFwEnabled OR _stAxis.stStatus.bBwEnabled),
     bPermitRequired :=
         _stAxis.stConfig.bAutoEnable
         OR _stAxis.stConfig.stAirpadBrake.bAirpadConnected
