@@ -4,112 +4,112 @@
     <Declaration><![CDATA[//Reads diagnostic data from IPC
 FUNCTION_BLOCK FB_IPCDiag
 VAR_INPUT
-	tDelayTime: TIME := T#1S; //Delay time before starting a new cyclic read
+    tDelayTime: TIME := T#1S; //Delay time before starting a new cyclic read
 END_VAR
 VAR_OUTPUT
-	stIPCDiagData: ST_IPCDiagData; //Diagnostic data read from IPC
+    stIPCDiagData: ST_IPCDiagData; //Diagnostic data read from IPC
 END_VAR
 VAR
-	fbIPCRegister: Tc3_IPCDiag.FB_IPCDiag_Register; //Initializes the PLC API for IPC diagnostics on a specific IPC 
-	fbIPCReadParam: Tc3_IPCDiag.FB_IPCDiag_ReadParameter; //Reads an IPC diagnostic parameter
-	iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
-	eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
-	tonReadDelay: TON; //Delay timer before starting a new cyclic read
-	bMuteWarnings: BOOL := FALSE; //Disable warning messages, e.g. Parameter not supported or unavailable
+    fbIPCRegister: Tc3_IPCDiag.FB_IPCDiag_Register; //Initializes the PLC API for IPC diagnostics on a specific IPC
+    fbIPCReadParam: Tc3_IPCDiag.FB_IPCDiag_ReadParameter; //Reads an IPC diagnostic parameter
+    iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
+    eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
+    tonReadDelay: TON; //Delay timer before starting a new cyclic read
+    bMuteWarnings: BOOL := FALSE; //Disable warning messages, e.g. Parameter not supported or unavailable
 END_VAR
 VAR CONSTANT
-	ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
-	ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
-	MAX_PARAMS: USINT := 77;
-	CYCLIC_READ_PARAM_COUNT: USINT := 16;
-	CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
-	PARAM_LIST: ARRAY [1..MAX_PARAMS] OF ST_IPCDiagParamSpec := [
-	//READ ONCE
-			(eParam := E_IPCDiag_ParameterKey.IPCDeviceName, pData := ADR(stIPCDiagData.sIPCDeviceName), nSize := SIZEOF(stIPCDiagData.sIPCDeviceName)),
-			(eParam := E_IPCDiag_ParameterKey.IPCHardwareVersion, pData := ADR(stIPCDiagData.sIPCHardwareVersion), nSize := SIZEOF(stIPCDiagData.sIPCHardwareVersion)),
-			(eParam := E_IPCDiag_ParameterKey.IPCImageVersion, pData := ADR(stIPCDiagData.sIPCImageVersion), nSize := SIZEOF(stIPCDiagData.sIPCImageVersion)),
-			(eParam := E_IPCDiag_ParameterKey.IPCVendor, pData := ADR(stIPCDiagData.nIPCVendor), nSize := SIZEOF(stIPCDiagData.nIPCVendor)),
-			(eParam := E_IPCDiag_ParameterKey.IPCSerialNumber, pData := ADR(stIPCDiagData.sIPCSerialNumber), nSize := SIZEOF(stIPCDiagData.sIPCSerialNumber)),
-			(eParam := E_IPCDiag_ParameterKey.CPU_Name, pData := ADR(stIPCDiagData.sCPU_Name), nSize := SIZEOF(stIPCDiagData.sCPU_Name)),
-			(eParam := E_IPCDiag_ParameterKey.CPU_Frequency, pData := ADR(stIPCDiagData.nCPU_Frequency), nSize := SIZEOF(stIPCDiagData.nCPU_Frequency)),
-		    (eParam := E_IPCDiag_ParameterKey.Fan_ModuleCnt, pData := ADR(stIPCDiagData.nFan_ModuleCnt), nSize := SIZEOF(stIPCDiagData.nFan_ModuleCnt)),
-		    (eParam := E_IPCDiag_ParameterKey.Fan_Name, pData := ADR(stIPCDiagData.sFan_Name), nSize := SIZEOF(stIPCDiagData.sFan_Name)),
-			(eParam := E_IPCDiag_ParameterKey.MB_Type, pData := ADR(stIPCDiagData.sMB_Type), nSize := SIZEOF(stIPCDiagData.sMB_Type)),
-			(eParam := E_IPCDiag_ParameterKey.MB_SerialNumber, pData := ADR(stIPCDiagData.sMB_SerialNumber), nSize := SIZEOF(stIPCDiagData.sMB_SerialNumber)),
-			(eParam := E_IPCDiag_ParameterKey.MB_ProductionDate, pData := ADR(stIPCDiagData.sMB_ProductionDate), nSize := SIZEOF(stIPCDiagData.sMB_ProductionDate)),
-			(eParam := E_IPCDiag_ParameterKey.MB_BootCnt, pData := ADR(stIPCDiagData.nMB_BootCnt), nSize := SIZEOF(stIPCDiagData.nMB_BootCnt)),
-			(eParam := E_IPCDiag_ParameterKey.MB_MinTemperature, pData := ADR(stIPCDiagData.nMB_MinTemperature), nSize := SIZEOF(stIPCDiagData.nMB_MinTemperature)),
-			(eParam := E_IPCDiag_ParameterKey.MB_MaxTemperature, pData := ADR(stIPCDiagData.nMB_MaxTemperature), nSize := SIZEOF(stIPCDiagData.nMB_MaxTemperature)),
-			(eParam := E_IPCDiag_ParameterKey.MB_MinInputVoltage, pData := ADR(stIPCDiagData.nMB_MinInputVoltage), nSize := SIZEOF(stIPCDiagData.nMB_MinInputVoltage)),
-			(eParam := E_IPCDiag_ParameterKey.MB_MaxInputVoltage, pData := ADR(stIPCDiagData.nMB_MaxInputVoltage), nSize := SIZEOF(stIPCDiagData.nMB_MaxInputVoltage)),
-			(eParam := E_IPCDiag_ParameterKey.MB_Revision, pData := ADR(stIPCDiagData.nMB_Revision), nSize := SIZEOF(stIPCDiagData.nMB_Revision)),
-			(eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMajor, pData := ADR(stIPCDiagData.nMB_BiosVersionMajor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMajor)),
-			(eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMinor, pData := ADR(stIPCDiagData.nMB_BiosVersionMinor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMinor)),
-			(eParam := E_IPCDiag_ParameterKey.MB_NoVoltageMeasurements, pData := ADR(stIPCDiagData.nMB_NoVoltageMeasurements), nSize := SIZEOF(stIPCDiagData.nMB_NoVoltageMeasurements)),
-			(eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAllocated, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAllocated), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAllocated)),
-			(eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAvailable, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAvailable), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAvailable)),
-			(eParam := E_IPCDiag_ParameterKey.Misc_StartupNumLockState, pData := ADR(stIPCDiagData.bMisc_StartupNumLockState), nSize := SIZEOF(stIPCDiagData.bMisc_StartupNumLockState)),
-			(eParam := E_IPCDiag_ParameterKey.Misc_AutoLogonUser, pData := ADR(stIPCDiagData.sMisc_AutoLogonUser), nSize := SIZEOF(stIPCDiagData.sMisc_AutoLogonUser)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_ModuleCnt, pData := ADR(stIPCDiagData.nNIC_ModuleCnt), nSize := SIZEOF(stIPCDiagData.nNIC_ModuleCnt)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_Name, pData := ADR(stIPCDiagData.sNIC_Name), nSize := SIZEOF(stIPCDiagData.sNIC_Name)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_MACAddress, pData := ADR(stIPCDiagData.sNIC_MACAddress), nSize := SIZEOF(stIPCDiagData.sNIC_MACAddress)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_IPv4Address, pData := ADR(stIPCDiagData.sNIC_IPv4Address), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4Address)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_IPv4SubnetMask, pData := ADR(stIPCDiagData.sNIC_IPv4SubnetMask), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4SubnetMask)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_DHCP, pData := ADR(stIPCDiagData.bNIC_DHCP), nSize := SIZEOF(stIPCDiagData.bNIC_DHCP)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_IPv4DefGateway, pData := ADR(stIPCDiagData.sNIC_IPv4DefGateway), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DefGateway)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServers, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServers), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServers)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_VirtualDeviceName, pData := ADR(stIPCDiagData.sNIC_VirtualDeviceName), nSize := SIZEOF(stIPCDiagData.sNIC_VirtualDeviceName)),
-			(eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServersActive, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServersActive), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServersActive)),
-			(eParam := E_IPCDiag_ParameterKey.OS_Name, pData := ADR(stIPCDiagData.sOS_Name), nSize := SIZEOF(stIPCDiagData.sOS_Name)),
-			(eParam := E_IPCDiag_ParameterKey.OS_VersionMajor, pData := ADR(stIPCDiagData.nOS_VersionMajor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMajor)),
-			(eParam := E_IPCDiag_ParameterKey.OS_VersionMinor, pData := ADR(stIPCDiagData.nOS_VersionMinor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMinor)),
-			(eParam := E_IPCDiag_ParameterKey.OS_VersionBuild, pData := ADR(stIPCDiagData.nOS_VersionBuild), nSize := SIZEOF(stIPCDiagData.nOS_VersionBuild)),
-			(eParam := E_IPCDiag_ParameterKey.OS_CSDVersion, pData := ADR(stIPCDiagData.sOS_CSDVersion), nSize := SIZEOF(stIPCDiagData.sOS_CSDVersion)),
-			(eParam := E_IPCDiag_ParameterKey.Software_MDPVersion, pData := ADR(stIPCDiagData.sSoftware_MDPVersion), nSize := SIZEOF(stIPCDiagData.sSoftware_MDPVersion)),
-			(eParam := E_IPCDiag_ParameterKey.Software_NoSoftwares, pData := ADR(stIPCDiagData.nSoftware_NoSoftwares), nSize := SIZEOF(stIPCDiagData.nSoftware_NoSoftwares)),
-			(eParam := E_IPCDiag_ParameterKey.TC_Version, pData := ADR(stIPCDiagData.sTC_Version), nSize := SIZEOF(stIPCDiagData.sTC_Version)),
-			(eParam := E_IPCDiag_ParameterKey.TC_VersionMajor, pData := ADR(stIPCDiagData.nTC_VersionMajor), nSize := SIZEOF(stIPCDiagData.nTC_VersionMajor)),
-			(eParam := E_IPCDiag_ParameterKey.TC_VersionMinor, pData := ADR(stIPCDiagData.nTC_VersionMinor), nSize := SIZEOF(stIPCDiagData.nTC_VersionMinor)),
-			(eParam := E_IPCDiag_ParameterKey.TC_VersionBuild, pData := ADR(stIPCDiagData.nTC_VersionBuild), nSize := SIZEOF(stIPCDiagData.nTC_VersionBuild)),
-			(eParam := E_IPCDiag_ParameterKey.TC_VersionRevision, pData := ADR(stIPCDiagData.nTC_VersionRevision), nSize := SIZEOF(stIPCDiagData.nTC_VersionRevision)),
-			(eParam := E_IPCDiag_ParameterKey.TC_AmsNetID, pData := ADR(stIPCDiagData.sTC_AmsNetID), nSize := SIZEOF(stIPCDiagData.sTC_AmsNetID)),
-			(eParam := E_IPCDiag_ParameterKey.TC_SystemID, pData := ADR(stIPCDiagData.sTC_SystemID), nSize := SIZEOF(stIPCDiagData.sTC_SystemID)),
-			(eParam := E_IPCDiag_ParameterKey.TC_NoRoutes, pData := ADR(stIPCDiagData.nTC_NoRoutes), nSize := SIZEOF(stIPCDiagData.nTC_NoRoutes)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Name, pData := ADR(stIPCDiagData.sUPS_Name), nSize := SIZEOF(stIPCDiagData.sUPS_Name)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Model, pData := ADR(stIPCDiagData.sUPS_Model), nSize := SIZEOF(stIPCDiagData.sUPS_Model)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Vendor, pData := ADR(stIPCDiagData.sUPS_Vendor), nSize := SIZEOF(stIPCDiagData.sUPS_Vendor)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Version, pData := ADR(stIPCDiagData.nUPS_Version), nSize := SIZEOF(stIPCDiagData.nUPS_Version)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Revision, pData := ADR(stIPCDiagData.nUPS_Revision), nSize := SIZEOF(stIPCDiagData.nUPS_Revision)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_Build, pData := ADR(stIPCDiagData.nUPS_Build), nSize := SIZEOF(stIPCDiagData.nUPS_Build)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_SerialNumber, pData := ADR(stIPCDiagData.sUPS_SerialNumber), nSize := SIZEOF(stIPCDiagData.sUPS_SerialNumber)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_ComStatus, pData := ADR(stIPCDiagData.nUPS_ComStatus), nSize := SIZEOF(stIPCDiagData.nUPS_ComStatus)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_PersPowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PersPowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PersPowerFailCnt)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_PowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PowerFailCnt)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_NoBattery, pData := ADR(stIPCDiagData.bUPS_NoBattery), nSize := SIZEOF(stIPCDiagData.bUPS_NoBattery)),
-	//READ CYCLIC
-			(eParam := E_IPCDiag_ParameterKey.CPU_Usage, pData := ADR(stIPCDiagData.nCPU_Usage), nSize := SIZEOF(stIPCDiagData.nCPU_Usage)),
-			(eParam := E_IPCDiag_ParameterKey.CPU_Temp, pData := ADR(stIPCDiagData.nCPU_Temp), nSize := SIZEOF(stIPCDiagData.nCPU_Temp)),
-			(eParam := E_IPCDiag_ParameterKey.Disk_FreeSpaceOfVolumeC, pData := ADR(stIPCDiagData.nDisk_FreeSpaceOfVolumeC), nSize := SIZEOF(stIPCDiagData.nDisk_FreeSpaceOfVolumeC)),
-		    (eParam := E_IPCDiag_ParameterKey.Fan_Speed, pData := ADR(stIPCDiagData.nFan_Speed), nSize := SIZEOF(stIPCDiagData.nFan_Speed)),
-			(eParam := E_IPCDiag_ParameterKey.MB_Temperature, pData := ADR(stIPCDiagData.nMB_Temperature), nSize := SIZEOF(stIPCDiagData.nMB_Temperature)),
-			(eParam := E_IPCDiag_ParameterKey.MB_OperationTime, pData := ADR(stIPCDiagData.nMB_OperationTime), nSize := SIZEOF(stIPCDiagData.nMB_OperationTime)),
-			(eParam := E_IPCDiag_ParameterKey.TC_Status, pData := ADR(stIPCDiagData.nTC_Status), nSize := SIZEOF(stIPCDiagData.nTC_Status)),
-			(eParam := E_IPCDiag_ParameterKey.Time_SecondsSince1970UTC, pData := ADR(stIPCDiagData.nTime_SecondsSince1970UTC), nSize := SIZEOF(stIPCDiagData.nTime_SecondsSince1970UTC)),
-			(eParam := E_IPCDiag_ParameterKey.Time_DateAndTime, pData := ADR(stIPCDiagData.sTime_DateAndTime), nSize := SIZEOF(stIPCDiagData.sTime_DateAndTime)),
-			(eParam := E_IPCDiag_ParameterKey.Time_SNTPServer, pData := ADR(stIPCDiagData.sTime_SNTPServer), nSize := SIZEOF(stIPCDiagData.sTime_SNTPServer)),
-			(eParam := E_IPCDiag_ParameterKey.Time_SNTPRefresh, pData := ADR(stIPCDiagData.nTime_SNTPRefresh), nSize := SIZEOF(stIPCDiagData.nTime_SNTPRefresh)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_PowerStatus, pData := ADR(stIPCDiagData.nUPS_PowerStatus), nSize := SIZEOF(stIPCDiagData.nUPS_PowerStatus)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_BatteryStatus, pData := ADR(stIPCDiagData.nUPS_BatteryStatus), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryStatus)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_BatteryCapacity, pData := ADR(stIPCDiagData.nUPS_BatteryCapacity), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryCapacity)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_FanError, pData := ADR(stIPCDiagData.bUPS_FanError), nSize := SIZEOF(stIPCDiagData.bUPS_FanError))
-		];
+    ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
+    ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
+    MAX_PARAMS: USINT := 77;
+    CYCLIC_READ_PARAM_COUNT: USINT := 16;
+    CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
+    PARAM_LIST: ARRAY [1..MAX_PARAMS] OF ST_IPCDiagParamSpec := [
+    //READ ONCE
+            (eParam := E_IPCDiag_ParameterKey.IPCDeviceName, pData := ADR(stIPCDiagData.sIPCDeviceName), nSize := SIZEOF(stIPCDiagData.sIPCDeviceName)),
+            (eParam := E_IPCDiag_ParameterKey.IPCHardwareVersion, pData := ADR(stIPCDiagData.sIPCHardwareVersion), nSize := SIZEOF(stIPCDiagData.sIPCHardwareVersion)),
+            (eParam := E_IPCDiag_ParameterKey.IPCImageVersion, pData := ADR(stIPCDiagData.sIPCImageVersion), nSize := SIZEOF(stIPCDiagData.sIPCImageVersion)),
+            (eParam := E_IPCDiag_ParameterKey.IPCVendor, pData := ADR(stIPCDiagData.nIPCVendor), nSize := SIZEOF(stIPCDiagData.nIPCVendor)),
+            (eParam := E_IPCDiag_ParameterKey.IPCSerialNumber, pData := ADR(stIPCDiagData.sIPCSerialNumber), nSize := SIZEOF(stIPCDiagData.sIPCSerialNumber)),
+            (eParam := E_IPCDiag_ParameterKey.CPU_Name, pData := ADR(stIPCDiagData.sCPU_Name), nSize := SIZEOF(stIPCDiagData.sCPU_Name)),
+            (eParam := E_IPCDiag_ParameterKey.CPU_Frequency, pData := ADR(stIPCDiagData.nCPU_Frequency), nSize := SIZEOF(stIPCDiagData.nCPU_Frequency)),
+            (eParam := E_IPCDiag_ParameterKey.Fan_ModuleCnt, pData := ADR(stIPCDiagData.nFan_ModuleCnt), nSize := SIZEOF(stIPCDiagData.nFan_ModuleCnt)),
+            (eParam := E_IPCDiag_ParameterKey.Fan_Name, pData := ADR(stIPCDiagData.sFan_Name), nSize := SIZEOF(stIPCDiagData.sFan_Name)),
+            (eParam := E_IPCDiag_ParameterKey.MB_Type, pData := ADR(stIPCDiagData.sMB_Type), nSize := SIZEOF(stIPCDiagData.sMB_Type)),
+            (eParam := E_IPCDiag_ParameterKey.MB_SerialNumber, pData := ADR(stIPCDiagData.sMB_SerialNumber), nSize := SIZEOF(stIPCDiagData.sMB_SerialNumber)),
+            (eParam := E_IPCDiag_ParameterKey.MB_ProductionDate, pData := ADR(stIPCDiagData.sMB_ProductionDate), nSize := SIZEOF(stIPCDiagData.sMB_ProductionDate)),
+            (eParam := E_IPCDiag_ParameterKey.MB_BootCnt, pData := ADR(stIPCDiagData.nMB_BootCnt), nSize := SIZEOF(stIPCDiagData.nMB_BootCnt)),
+            (eParam := E_IPCDiag_ParameterKey.MB_MinTemperature, pData := ADR(stIPCDiagData.nMB_MinTemperature), nSize := SIZEOF(stIPCDiagData.nMB_MinTemperature)),
+            (eParam := E_IPCDiag_ParameterKey.MB_MaxTemperature, pData := ADR(stIPCDiagData.nMB_MaxTemperature), nSize := SIZEOF(stIPCDiagData.nMB_MaxTemperature)),
+            (eParam := E_IPCDiag_ParameterKey.MB_MinInputVoltage, pData := ADR(stIPCDiagData.nMB_MinInputVoltage), nSize := SIZEOF(stIPCDiagData.nMB_MinInputVoltage)),
+            (eParam := E_IPCDiag_ParameterKey.MB_MaxInputVoltage, pData := ADR(stIPCDiagData.nMB_MaxInputVoltage), nSize := SIZEOF(stIPCDiagData.nMB_MaxInputVoltage)),
+            (eParam := E_IPCDiag_ParameterKey.MB_Revision, pData := ADR(stIPCDiagData.nMB_Revision), nSize := SIZEOF(stIPCDiagData.nMB_Revision)),
+            (eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMajor, pData := ADR(stIPCDiagData.nMB_BiosVersionMajor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMajor)),
+            (eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMinor, pData := ADR(stIPCDiagData.nMB_BiosVersionMinor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMinor)),
+            (eParam := E_IPCDiag_ParameterKey.MB_NoVoltageMeasurements, pData := ADR(stIPCDiagData.nMB_NoVoltageMeasurements), nSize := SIZEOF(stIPCDiagData.nMB_NoVoltageMeasurements)),
+            (eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAllocated, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAllocated), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAllocated)),
+            (eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAvailable, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAvailable), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAvailable)),
+            (eParam := E_IPCDiag_ParameterKey.Misc_StartupNumLockState, pData := ADR(stIPCDiagData.bMisc_StartupNumLockState), nSize := SIZEOF(stIPCDiagData.bMisc_StartupNumLockState)),
+            (eParam := E_IPCDiag_ParameterKey.Misc_AutoLogonUser, pData := ADR(stIPCDiagData.sMisc_AutoLogonUser), nSize := SIZEOF(stIPCDiagData.sMisc_AutoLogonUser)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_ModuleCnt, pData := ADR(stIPCDiagData.nNIC_ModuleCnt), nSize := SIZEOF(stIPCDiagData.nNIC_ModuleCnt)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_Name, pData := ADR(stIPCDiagData.sNIC_Name), nSize := SIZEOF(stIPCDiagData.sNIC_Name)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_MACAddress, pData := ADR(stIPCDiagData.sNIC_MACAddress), nSize := SIZEOF(stIPCDiagData.sNIC_MACAddress)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_IPv4Address, pData := ADR(stIPCDiagData.sNIC_IPv4Address), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4Address)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_IPv4SubnetMask, pData := ADR(stIPCDiagData.sNIC_IPv4SubnetMask), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4SubnetMask)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_DHCP, pData := ADR(stIPCDiagData.bNIC_DHCP), nSize := SIZEOF(stIPCDiagData.bNIC_DHCP)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_IPv4DefGateway, pData := ADR(stIPCDiagData.sNIC_IPv4DefGateway), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DefGateway)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServers, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServers), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServers)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_VirtualDeviceName, pData := ADR(stIPCDiagData.sNIC_VirtualDeviceName), nSize := SIZEOF(stIPCDiagData.sNIC_VirtualDeviceName)),
+            (eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServersActive, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServersActive), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServersActive)),
+            (eParam := E_IPCDiag_ParameterKey.OS_Name, pData := ADR(stIPCDiagData.sOS_Name), nSize := SIZEOF(stIPCDiagData.sOS_Name)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionMajor, pData := ADR(stIPCDiagData.nOS_VersionMajor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMajor)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionMinor, pData := ADR(stIPCDiagData.nOS_VersionMinor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMinor)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionBuild, pData := ADR(stIPCDiagData.nOS_VersionBuild), nSize := SIZEOF(stIPCDiagData.nOS_VersionBuild)),
+            (eParam := E_IPCDiag_ParameterKey.OS_CSDVersion, pData := ADR(stIPCDiagData.sOS_CSDVersion), nSize := SIZEOF(stIPCDiagData.sOS_CSDVersion)),
+            (eParam := E_IPCDiag_ParameterKey.Software_MDPVersion, pData := ADR(stIPCDiagData.sSoftware_MDPVersion), nSize := SIZEOF(stIPCDiagData.sSoftware_MDPVersion)),
+            (eParam := E_IPCDiag_ParameterKey.Software_NoSoftwares, pData := ADR(stIPCDiagData.nSoftware_NoSoftwares), nSize := SIZEOF(stIPCDiagData.nSoftware_NoSoftwares)),
+            (eParam := E_IPCDiag_ParameterKey.TC_Version, pData := ADR(stIPCDiagData.sTC_Version), nSize := SIZEOF(stIPCDiagData.sTC_Version)),
+            (eParam := E_IPCDiag_ParameterKey.TC_VersionMajor, pData := ADR(stIPCDiagData.nTC_VersionMajor), nSize := SIZEOF(stIPCDiagData.nTC_VersionMajor)),
+            (eParam := E_IPCDiag_ParameterKey.TC_VersionMinor, pData := ADR(stIPCDiagData.nTC_VersionMinor), nSize := SIZEOF(stIPCDiagData.nTC_VersionMinor)),
+            (eParam := E_IPCDiag_ParameterKey.TC_VersionBuild, pData := ADR(stIPCDiagData.nTC_VersionBuild), nSize := SIZEOF(stIPCDiagData.nTC_VersionBuild)),
+            (eParam := E_IPCDiag_ParameterKey.TC_VersionRevision, pData := ADR(stIPCDiagData.nTC_VersionRevision), nSize := SIZEOF(stIPCDiagData.nTC_VersionRevision)),
+            (eParam := E_IPCDiag_ParameterKey.TC_AmsNetID, pData := ADR(stIPCDiagData.sTC_AmsNetID), nSize := SIZEOF(stIPCDiagData.sTC_AmsNetID)),
+            (eParam := E_IPCDiag_ParameterKey.TC_SystemID, pData := ADR(stIPCDiagData.sTC_SystemID), nSize := SIZEOF(stIPCDiagData.sTC_SystemID)),
+            (eParam := E_IPCDiag_ParameterKey.TC_NoRoutes, pData := ADR(stIPCDiagData.nTC_NoRoutes), nSize := SIZEOF(stIPCDiagData.nTC_NoRoutes)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Name, pData := ADR(stIPCDiagData.sUPS_Name), nSize := SIZEOF(stIPCDiagData.sUPS_Name)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Model, pData := ADR(stIPCDiagData.sUPS_Model), nSize := SIZEOF(stIPCDiagData.sUPS_Model)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Vendor, pData := ADR(stIPCDiagData.sUPS_Vendor), nSize := SIZEOF(stIPCDiagData.sUPS_Vendor)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Version, pData := ADR(stIPCDiagData.nUPS_Version), nSize := SIZEOF(stIPCDiagData.nUPS_Version)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Revision, pData := ADR(stIPCDiagData.nUPS_Revision), nSize := SIZEOF(stIPCDiagData.nUPS_Revision)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_Build, pData := ADR(stIPCDiagData.nUPS_Build), nSize := SIZEOF(stIPCDiagData.nUPS_Build)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_SerialNumber, pData := ADR(stIPCDiagData.sUPS_SerialNumber), nSize := SIZEOF(stIPCDiagData.sUPS_SerialNumber)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_ComStatus, pData := ADR(stIPCDiagData.nUPS_ComStatus), nSize := SIZEOF(stIPCDiagData.nUPS_ComStatus)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_PersPowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PersPowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PersPowerFailCnt)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_PowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PowerFailCnt)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_NoBattery, pData := ADR(stIPCDiagData.bUPS_NoBattery), nSize := SIZEOF(stIPCDiagData.bUPS_NoBattery)),
+    //READ CYCLIC
+            (eParam := E_IPCDiag_ParameterKey.CPU_Usage, pData := ADR(stIPCDiagData.nCPU_Usage), nSize := SIZEOF(stIPCDiagData.nCPU_Usage)),
+            (eParam := E_IPCDiag_ParameterKey.CPU_Temp, pData := ADR(stIPCDiagData.nCPU_Temp), nSize := SIZEOF(stIPCDiagData.nCPU_Temp)),
+            (eParam := E_IPCDiag_ParameterKey.Disk_FreeSpaceOfVolumeC, pData := ADR(stIPCDiagData.nDisk_FreeSpaceOfVolumeC), nSize := SIZEOF(stIPCDiagData.nDisk_FreeSpaceOfVolumeC)),
+            (eParam := E_IPCDiag_ParameterKey.Fan_Speed, pData := ADR(stIPCDiagData.nFan_Speed), nSize := SIZEOF(stIPCDiagData.nFan_Speed)),
+            (eParam := E_IPCDiag_ParameterKey.MB_Temperature, pData := ADR(stIPCDiagData.nMB_Temperature), nSize := SIZEOF(stIPCDiagData.nMB_Temperature)),
+            (eParam := E_IPCDiag_ParameterKey.MB_OperationTime, pData := ADR(stIPCDiagData.nMB_OperationTime), nSize := SIZEOF(stIPCDiagData.nMB_OperationTime)),
+            (eParam := E_IPCDiag_ParameterKey.TC_Status, pData := ADR(stIPCDiagData.nTC_Status), nSize := SIZEOF(stIPCDiagData.nTC_Status)),
+            (eParam := E_IPCDiag_ParameterKey.Time_SecondsSince1970UTC, pData := ADR(stIPCDiagData.nTime_SecondsSince1970UTC), nSize := SIZEOF(stIPCDiagData.nTime_SecondsSince1970UTC)),
+            (eParam := E_IPCDiag_ParameterKey.Time_DateAndTime, pData := ADR(stIPCDiagData.sTime_DateAndTime), nSize := SIZEOF(stIPCDiagData.sTime_DateAndTime)),
+            (eParam := E_IPCDiag_ParameterKey.Time_SNTPServer, pData := ADR(stIPCDiagData.sTime_SNTPServer), nSize := SIZEOF(stIPCDiagData.sTime_SNTPServer)),
+            (eParam := E_IPCDiag_ParameterKey.Time_SNTPRefresh, pData := ADR(stIPCDiagData.nTime_SNTPRefresh), nSize := SIZEOF(stIPCDiagData.nTime_SNTPRefresh)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_PowerStatus, pData := ADR(stIPCDiagData.nUPS_PowerStatus), nSize := SIZEOF(stIPCDiagData.nUPS_PowerStatus)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryStatus, pData := ADR(stIPCDiagData.nUPS_BatteryStatus), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryStatus)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryCapacity, pData := ADR(stIPCDiagData.nUPS_BatteryCapacity), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryCapacity)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime)),
+            (eParam := E_IPCDiag_ParameterKey.UPS_FanError, pData := ADR(stIPCDiagData.bUPS_FanError), nSize := SIZEOF(stIPCDiagData.bUPS_FanError))
+        ];
 END_VAR
-
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[mCallFunctionBlocks();
-mStateMachine();]]></ST>
+mStateMachine();
+]]></ST>
     </Implementation>
     <Method Name="mCallFunctionBlocks" Id="{21987cba-76fc-0e23-395b-d09cef47667e}">
       <Declaration><![CDATA[METHOD mCallFunctionBlocks
@@ -120,14 +120,14 @@ END_VAR
         <ST><![CDATA[fbIPCRegister(bExecute := NOT fbIPCRegister.bError);
 
 fbIPCReadParam(
-	bExecute := NOT fbIPCRegister.bError AND fbIPCRegister.bValid AND (eState = eRead),
-	eParameterKey := PARAM_LIST[iParam].eParam,
-	fbRegister := fbIPCRegister);
-	
+    bExecute := NOT fbIPCRegister.bError AND fbIPCRegister.bValid AND (eState = eRead),
+    eParameterKey := PARAM_LIST[iParam].eParam,
+    fbRegister := fbIPCRegister);
+
 tonReadDelay(
-	IN := (eState = eDelay),
-	PT := tDelayTime);
-	]]></ST>
+    IN := (eState = eDelay),
+    PT := tDelayTime);
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mStateMachine" Id="{4a9ac8ad-eadf-0299-3f8c-08c79007b287}">
@@ -137,59 +137,54 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eState OF
-	eDelay:
-		IF tonReadDelay.Q THEN
-			bMuteWarnings := TRUE;
-			iParam := CYCLIC_READ_INDEX;
-			eState := eRead;		
-		END_IF
-		
-	eNext:
-		IF iParam = MAX_PARAMS THEN
-			eState := eDelay;
-		ELSE
-			iParam := iParam + 1;
-			eState := eRead;
-		END_IF
+    eDelay:
+        IF tonReadDelay.Q THEN
+            bMuteWarnings := TRUE;
+            iParam := CYCLIC_READ_INDEX;
+            eState := eRead;
+        END_IF
 
-	 eRead:
-		IF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bValid THEN;
-			eState := eValid;
-		ELSIF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bError THEN
-			eState := eError;
-		END_IF
-	
-	eValid:
-		fbIPCReadParam.GetParameter(pBuffer := PARAM_LIST[iParam].pData, nBufferSize := PARAM_LIST[iParam].nSize);
-		eState := eNext;
-		
-	eError:
-		CASE fbIPCReadParam.hrErrorCode OF
-			ERR_NOT_SUPPORTED:
-				IF NOT bMuteWarnings THEN
-					ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is not supported: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-				END_IF
-				eState := eNext;
-			ERR_UNAVAILABLE:
-				IF NOT bMuteWarnings THEN
-					ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-				END_IF
-				eState := eNext;
-			ELSE
-				ADSLOGDINT(ADSLOG_MSGTYPE_ERROR,'IPC diag error: %d, stopping...',fbIPCReadParam.hrErrorCode);
-				eState := eStopped;	
-				RETURN;
-		END_CASE
-		
-	eStopped:
-		; //Unknown error encountered
-		
+    eNext:
+        IF iParam = MAX_PARAMS THEN
+            eState := eDelay;
+        ELSE
+            iParam := iParam + 1;
+            eState := eRead;
+        END_IF
+
+     eRead:
+        IF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bValid THEN;
+            eState := eValid;
+        ELSIF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bError THEN
+            eState := eError;
+        END_IF
+
+    eValid:
+        fbIPCReadParam.GetParameter(pBuffer := PARAM_LIST[iParam].pData, nBufferSize := PARAM_LIST[iParam].nSize);
+        eState := eNext;
+
+    eError:
+        CASE fbIPCReadParam.hrErrorCode OF
+            ERR_NOT_SUPPORTED:
+                IF NOT bMuteWarnings THEN
+                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is not supported: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+                END_IF
+                eState := eNext;
+            ERR_UNAVAILABLE:
+                IF NOT bMuteWarnings THEN
+                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+                END_IF
+                eState := eNext;
+            ELSE
+                ADSLOGDINT(ADSLOG_MSGTYPE_ERROR,'IPC diag error: %d, stopping...',fbIPCReadParam.hrErrorCode);
+                eState := eStopped;
+                RETURN;
+        END_CASE
+
+    eStopped:
+        ; //Unknown error encountered
+
 END_CASE
-
-
-
-	
-
 ]]></ST>
       </Implementation>
     </Method>

@@ -3,9 +3,9 @@
   <DUT Name="ST_IPCDiagParamSpec" Id="{9dbf62d2-8c08-037b-139c-5d4fff36e635}">
     <Declaration><![CDATA[TYPE ST_IPCDiagParamSpec :
 STRUCT
-	eParam: E_IPCDiag_ParameterKey;
-	pData: PVOID;
-	nSize: UDINT;
+    eParam: E_IPCDiag_ParameterKey;
+    pData: PVOID;
+    nSize: UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

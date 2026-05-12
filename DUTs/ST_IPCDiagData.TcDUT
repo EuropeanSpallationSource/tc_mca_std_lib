@@ -57,41 +57,41 @@ STRUCT
     nOS_VersionMinor: UDINT; //OS minor version
     nOS_VersionBuild: UDINT; //OS build
     sOS_CSDVersion: T_MaxString; //OS CSD version
-	
-	sSoftware_MDPVersion: STRING; //version of the MDP.exe service
-	nSoftware_NoSoftwares: UINT; //number of software components
 
-	sTC_Version: T_MaxString; //TwinCAT version string
-	nTC_VersionMajor: UINT; //TwinCAT major version
-	nTC_VersionMinor: UINT; //TwinCAT minor version
-	nTC_VersionBuild: UINT; //TwinCAT build number
-	nTC_VersionRevision: UINT; //TwinCAT revision
-	sTC_AmsNetID: T_MaxString; //AMS NetID
-	nTC_Status: UINT; //TwinCAT runtime status
-	sTC_SystemID: T_MaxString; //system ID
-	nTC_NoRoutes: UINT; //number of routes
-	
-	sTime_SNTPServer: T_MaxString; //SNTP server
-	nTime_SNTPRefresh: UDINT; //SNTP refresh interval
-	nTime_SecondsSince1970UTC: UDINT; //seconds since midnight jan 1. 1970 UTC
-	sTime_DateAndTime: T_MaxString; //date and time (ISO 8601) as local time
-	
-	sUPS_Name: T_MaxString; //UPS name
-	sUPS_Model: T_MaxString; //UPS model
-	sUPS_Vendor: T_MaxString; //UPS vendor
-	nUPS_Version: USINT; //UPS version
-	nUPS_Revision: USINT; //UPS revision
-	nUPS_Build: UINT; //UPS build
-	sUPS_SerialNumber: T_MaxString; //UPS serial number
-	nUPS_PowerStatus: USINT; //UPS power status (0=Unknonw,1=Online,2=OnBatteries)
-	nUPS_ComStatus: USINT; //UPS communication status(0=Unknown,1=Ok,2=Error)
-	nUPS_BatteryStatus: USINT; //battery status(0=Unkonw,1=Ok,2=ChangeBattery)
-	nUPS_BatteryCapacity: USINT; //battery capacity %
-	nUPS_BatteryRuntime: UDINT; //battery runtime seconds
-	nUPS_PersPowerFailCnt: USINT; //persistent power fail count
-	nUPS_PowerFailCnt: UINT; //power fail count
-	bUPS_FanError: BOOL; //fan error
-	bUPS_NoBattery: BOOL; //battery missing
+    sSoftware_MDPVersion: STRING; //version of the MDP.exe service
+    nSoftware_NoSoftwares: UINT; //number of software components
+
+    sTC_Version: T_MaxString; //TwinCAT version string
+    nTC_VersionMajor: UINT; //TwinCAT major version
+    nTC_VersionMinor: UINT; //TwinCAT minor version
+    nTC_VersionBuild: UINT; //TwinCAT build number
+    nTC_VersionRevision: UINT; //TwinCAT revision
+    sTC_AmsNetID: T_MaxString; //AMS NetID
+    nTC_Status: UINT; //TwinCAT runtime status
+    sTC_SystemID: T_MaxString; //system ID
+    nTC_NoRoutes: UINT; //number of routes
+
+    sTime_SNTPServer: T_MaxString; //SNTP server
+    nTime_SNTPRefresh: UDINT; //SNTP refresh interval
+    nTime_SecondsSince1970UTC: UDINT; //seconds since midnight jan 1. 1970 UTC
+    sTime_DateAndTime: T_MaxString; //date and time (ISO 8601) as local time
+
+    sUPS_Name: T_MaxString; //UPS name
+    sUPS_Model: T_MaxString; //UPS model
+    sUPS_Vendor: T_MaxString; //UPS vendor
+    nUPS_Version: USINT; //UPS version
+    nUPS_Revision: USINT; //UPS revision
+    nUPS_Build: UINT; //UPS build
+    sUPS_SerialNumber: T_MaxString; //UPS serial number
+    nUPS_PowerStatus: USINT; //UPS power status (0=Unknonw,1=Online,2=OnBatteries)
+    nUPS_ComStatus: USINT; //UPS communication status(0=Unknown,1=Ok,2=Error)
+    nUPS_BatteryStatus: USINT; //battery status(0=Unkonw,1=Ok,2=ChangeBattery)
+    nUPS_BatteryCapacity: USINT; //battery capacity %
+    nUPS_BatteryRuntime: UDINT; //battery runtime seconds
+    nUPS_PersPowerFailCnt: USINT; //persistent power fail count
+    nUPS_PowerFailCnt: UINT; //power fail count
+    bUPS_FanError: BOOL; //fan error
+    bUPS_NoBattery: BOOL; //battery missing
 END_STRUCT
 END_TYPE
 ]]></Declaration>
