@@ -13,11 +13,13 @@ VAR
 	fbIPCRegister: Tc3_IPCDiag.FB_IPCDiag_Register; //Initializes the PLC API for IPC diagnostics on a specific IPC 
 	fbIPCReadParam: Tc3_IPCDiag.FB_IPCDiag_ReadParameter; //Reads an IPC diagnostic parameter
 	iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
-	eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20) := eRead; //State of parameters being read
+	eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
 	tonReadDelay: TON; //Delay timer before starting a new cyclic read
-	bMuteReadWarns: BOOL := FALSE; //Disable warning messages, used to mute after f
+	bMuteWarnings: BOOL := FALSE; //Disable warning messages, e.g. Parameter not supported or unavailable
 END_VAR
 VAR CONSTANT
+	ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
+	ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
 	MAX_PARAMS: USINT := 77;
 	CYCLIC_READ_PARAM_COUNT: USINT := 16;
 	CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
@@ -137,8 +139,7 @@ END_VAR
         <ST><![CDATA[CASE eState OF
 	eDelay:
 		IF tonReadDelay.Q THEN
-			//Mute after first read through and start from cyclic read index
-			bMuteReadWarns := TRUE;
+			bMuteWarnings := TRUE;
 			iParam := CYCLIC_READ_INDEX;
 			eState := eRead;		
 		END_IF
@@ -163,10 +164,25 @@ END_VAR
 		eState := eNext;
 		
 	eError:
-		IF NOT bMuteReadWarns THEN
-			ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diagnotic could not read parameter: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-		END_IF
-		eState := eNext;
+		CASE fbIPCReadParam.hrErrorCode OF
+			ERR_NOT_SUPPORTED:
+				IF NOT bMuteWarnings THEN
+					ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is not supported: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+				END_IF
+				eState := eNext;
+			ERR_UNAVAILABLE:
+				IF NOT bMuteWarnings THEN
+					ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+				END_IF
+				eState := eNext;
+			ELSE
+				ADSLOGDINT(ADSLOG_MSGTYPE_ERROR,'IPC diag error: %d, stopping...',fbIPCReadParam.hrErrorCode);
+				eState := eStopped;	
+				RETURN;
+		END_CASE
+		
+	eStopped:
+		; //Unknown error encountered
 		
 END_CASE
 
