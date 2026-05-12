@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_IPCDiagData" Id="{e883e933-7427-0bb1-3ce6-60b4ebb90547}">
+    <Declaration><![CDATA[TYPE ST_IPCDiagData :
+STRUCT
+    sIPCDeviceName: T_MaxString; //IPC device name
+    sIPCHardwareVersion: T_MaxString; //IPC hardware version
+    sIPCImageVersion: T_MaxString; //IPC image version
+    nIPCVendor: UDINT; //IPC vendor
+    sIPCSerialNumber: T_MaxString; //serial number (or BTN) of Beckhoff IPC
+
+    sCPU_Name: T_MaxString; //CPU name
+    nCPU_Frequency: UDINT; //CPU frequency
+    nCPU_Usage: UINT; //current CPU usage (%)
+    nCPU_Temp: INT; //current CPU temperature (°C)
+
+    nDisk_FreeSpaceOfVolumeC: ULINT; //free space of volume C (bytes)
+
+    nFan_ModuleCnt: USINT; //number of fan modules
+    sFan_Name: T_MaxString; //fan adapter name
+    nFan_Speed: INT; //fan speed (rpm)
+
+    sMB_Type: T_MaxString; //mainboard type
+    sMB_SerialNumber: T_MaxString; //mainboard serial number
+    sMB_ProductionDate: T_MaxString; //production date
+    nMB_BootCnt: UDINT; //boot count
+    nMB_OperationTime: UDINT; //operation time (minutes)
+    nMB_MinTemperature: DINT; //minimum mainboard temperature
+    nMB_MaxTemperature: DINT; //maximum mainboard temperature
+    nMB_MinInputVoltage: DINT; //minimum input voltage (mV)
+    nMB_MaxInputVoltage: DINT; //maximum input voltage (mV)
+    nMB_Temperature: INT; //current mainboard temperature
+    nMB_Revision: USINT; //board revision
+    nMB_BiosVersionMajor: USINT; //BIOS major version
+    nMB_BiosVersionMinor: USINT; //BIOS minor version
+    sMB_BiosVersion: T_MaxString; //BIOS version string
+    nMB_NoVoltageMeasurements: UINT; //number of voltage measurements
+
+    nMemory_ProgramMemoryAllocated: ULINT; //allocated RAM
+    nMemory_ProgramMemoryAvailable: ULINT; //available RAM
+
+    bMisc_StartupNumLockState: BOOL; //NumLock state at startup
+    sMisc_AutoLogonUser: T_MaxString; //auto logon user
+
+    nNIC_ModuleCnt: USINT; //NIC module count
+    sNIC_Name: T_MaxString; //NIC adapter name
+    sNIC_MACAddress: T_MaxString; //MAC address
+    sNIC_IPv4Address: T_MaxString; //IPv4 address
+    sNIC_IPv4SubnetMask: T_MaxString; //subnet mask
+    bNIC_DHCP: BOOL; //DHCP enabled
+    sNIC_IPv4DefGateway: T_MaxString; //default gateway
+    sNIC_IPv4DNSServers: T_MaxString; //DNS servers
+    sNIC_VirtualDeviceName: T_MaxString; //virtual device name
+    sNIC_IPv4DNSServersActive: T_MaxString; //active DNS servers
+
+    sOS_Name: T_MaxString; //OS name
+    nOS_VersionMajor: UDINT; //OS major version
+    nOS_VersionMinor: UDINT; //OS minor version
+    nOS_VersionBuild: UDINT; //OS build
+    sOS_CSDVersion: T_MaxString; //OS CSD version
+	
+	sSoftware_MDPVersion: STRING; //version of the MDP.exe service
+	nSoftware_NoSoftwares: UINT; //number of software components
+
+	sTC_Version: T_MaxString; //TwinCAT version string
+	nTC_VersionMajor: UINT; //TwinCAT major version
+	nTC_VersionMinor: UINT; //TwinCAT minor version
+	nTC_VersionBuild: UINT; //TwinCAT build number
+	nTC_VersionRevision: UINT; //TwinCAT revision
+	sTC_AmsNetID: T_MaxString; //AMS NetID
+	nTC_Status: UINT; //TwinCAT runtime status
+	sTC_SystemID: T_MaxString; //system ID
+	nTC_NoRoutes: UINT; //number of routes
+	
+	sTime_SNTPServer: T_MaxString; //SNTP server
+	nTime_SNTPRefresh: UDINT; //SNTP refresh interval
+	nTime_SecondsSince1970UTC: UDINT; //seconds since midnight jan 1. 1970 UTC
+	sTime_DateAndTime: T_MaxString; //date and time (ISO 8601) as local time
+	
+	sUPS_Name: T_MaxString; //UPS name
+	sUPS_Model: T_MaxString; //UPS model
+	sUPS_Vendor: T_MaxString; //UPS vendor
+	nUPS_Version: USINT; //UPS version
+	nUPS_Revision: USINT; //UPS revision
+	nUPS_Build: UINT; //UPS build
+	sUPS_SerialNumber: T_MaxString; //UPS serial number
+	nUPS_PowerStatus: USINT; //UPS power status (0=Unknonw,1=Online,2=OnBatteries)
+	nUPS_ComStatus: USINT; //UPS communication status(0=Unknown,1=Ok,2=Error)
+	nUPS_BatteryStatus: USINT; //battery status(0=Unkonw,1=Ok,2=ChangeBattery)
+	nUPS_BatteryCapacity: USINT; //battery capacity %
+	nUPS_BatteryRuntime: UDINT; //battery runtime seconds
+	nUPS_PersPowerFailCnt: USINT; //persistent power fail count
+	nUPS_PowerFailCnt: UINT; //power fail count
+	bUPS_FanError: BOOL; //fan error
+	bUPS_NoBattery: BOOL; //battery missing
+	bUPS_TestCapacity: BOOL; //test capacity
+	sUPS_BatteryReplaceDate: T_MaxString; //battery replace date
+	bUPS_IntervalServiceStatus: BOOL; //service interval status
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
