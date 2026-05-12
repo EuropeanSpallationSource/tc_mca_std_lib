@@ -18,7 +18,7 @@ VAR
 	bMuteReadWarns: BOOL := FALSE; //Disable warning messages, used to mute after f
 END_VAR
 VAR CONSTANT
-	MAX_PARAMS: USINT := 81;
+	MAX_PARAMS: USINT := 77;
 	CYCLIC_READ_PARAM_COUNT: USINT := 16;
 	CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
 	PARAM_LIST: ARRAY [1..MAX_PARAMS] OF ST_IPCDiagParamSpec := [
@@ -43,7 +43,6 @@ VAR CONSTANT
 			(eParam := E_IPCDiag_ParameterKey.MB_Revision, pData := ADR(stIPCDiagData.nMB_Revision), nSize := SIZEOF(stIPCDiagData.nMB_Revision)),
 			(eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMajor, pData := ADR(stIPCDiagData.nMB_BiosVersionMajor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMajor)),
 			(eParam := E_IPCDiag_ParameterKey.MB_BiosVersionMinor, pData := ADR(stIPCDiagData.nMB_BiosVersionMinor), nSize := SIZEOF(stIPCDiagData.nMB_BiosVersionMinor)),
-			(eParam := E_IPCDiag_ParameterKey.MB_BiosVersion, pData := ADR(stIPCDiagData.sMB_BiosVersion), nSize := SIZEOF(stIPCDiagData.sMB_BiosVersion)),
 			(eParam := E_IPCDiag_ParameterKey.MB_NoVoltageMeasurements, pData := ADR(stIPCDiagData.nMB_NoVoltageMeasurements), nSize := SIZEOF(stIPCDiagData.nMB_NoVoltageMeasurements)),
 			(eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAllocated, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAllocated), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAllocated)),
 			(eParam := E_IPCDiag_ParameterKey.Memory_ProgramMemoryAvailable, pData := ADR(stIPCDiagData.nMemory_ProgramMemoryAvailable), nSize := SIZEOF(stIPCDiagData.nMemory_ProgramMemoryAvailable)),
@@ -85,9 +84,6 @@ VAR CONSTANT
 			(eParam := E_IPCDiag_ParameterKey.UPS_PersPowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PersPowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PersPowerFailCnt)),
 			(eParam := E_IPCDiag_ParameterKey.UPS_PowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PowerFailCnt)),
 			(eParam := E_IPCDiag_ParameterKey.UPS_NoBattery, pData := ADR(stIPCDiagData.bUPS_NoBattery), nSize := SIZEOF(stIPCDiagData.bUPS_NoBattery)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_TestCapacity, pData := ADR(stIPCDiagData.bUPS_TestCapacity), nSize := SIZEOF(stIPCDiagData.bUPS_TestCapacity)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_BatteryReplaceDate, pData := ADR(stIPCDiagData.sUPS_BatteryReplaceDate), nSize := SIZEOF(stIPCDiagData.sUPS_BatteryReplaceDate)),
-			(eParam := E_IPCDiag_ParameterKey.UPS_IntervalServiceStatus, pData := ADR(stIPCDiagData.bUPS_IntervalServiceStatus), nSize := SIZEOF(stIPCDiagData.bUPS_IntervalServiceStatus)),
 	//READ CYCLIC
 			(eParam := E_IPCDiag_ParameterKey.CPU_Usage, pData := ADR(stIPCDiagData.nCPU_Usage), nSize := SIZEOF(stIPCDiagData.nCPU_Usage)),
 			(eParam := E_IPCDiag_ParameterKey.CPU_Temp, pData := ADR(stIPCDiagData.nCPU_Temp), nSize := SIZEOF(stIPCDiagData.nCPU_Temp)),

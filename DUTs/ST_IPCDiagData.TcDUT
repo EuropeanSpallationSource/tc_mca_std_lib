@@ -33,7 +33,6 @@ STRUCT
     nMB_Revision: USINT; //board revision
     nMB_BiosVersionMajor: USINT; //BIOS major version
     nMB_BiosVersionMinor: USINT; //BIOS minor version
-    sMB_BiosVersion: T_MaxString; //BIOS version string
     nMB_NoVoltageMeasurements: UINT; //number of voltage measurements
 
     nMemory_ProgramMemoryAllocated: ULINT; //allocated RAM
@@ -93,9 +92,6 @@ STRUCT
 	nUPS_PowerFailCnt: UINT; //power fail count
 	bUPS_FanError: BOOL; //fan error
 	bUPS_NoBattery: BOOL; //battery missing
-	bUPS_TestCapacity: BOOL; //test capacity
-	sUPS_BatteryReplaceDate: T_MaxString; //battery replace date
-	bUPS_IntervalServiceStatus: BOOL; //service interval status
 END_STRUCT
 END_TYPE
 ]]></Declaration>
