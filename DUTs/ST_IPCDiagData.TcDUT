@@ -82,16 +82,11 @@ STRUCT
     nUPS_Version: USINT; //UPS version
     nUPS_Revision: USINT; //UPS revision
     nUPS_Build: UINT; //UPS build
-    sUPS_SerialNumber: T_MaxString; //UPS serial number
     nUPS_PowerStatus: USINT; //UPS power status (0=Unknonw,1=Online,2=OnBatteries)
-    nUPS_ComStatus: USINT; //UPS communication status(0=Unknown,1=Ok,2=Error)
-    nUPS_BatteryStatus: USINT; //battery status(0=Unkonw,1=Ok,2=ChangeBattery)
     nUPS_BatteryCapacity: USINT; //battery capacity %
     nUPS_BatteryRuntime: UDINT; //battery runtime seconds
     nUPS_PersPowerFailCnt: USINT; //persistent power fail count
     nUPS_PowerFailCnt: UINT; //power fail count
-    bUPS_FanError: BOOL; //fan error
-    bUPS_NoBattery: BOOL; //battery missing
 END_STRUCT
 END_TYPE
 ]]></Declaration>

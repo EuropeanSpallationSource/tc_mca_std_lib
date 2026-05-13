@@ -21,8 +21,8 @@ VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
     ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
     ERR_NO_DATA: DINT := -324665083; //Error Code: No data available.
-    MAX_PARAMS: USINT := 77;
-    CYCLIC_READ_PARAM_COUNT: USINT := 16;
+    MAX_PARAMS: USINT := 72;
+    CYCLIC_READ_PARAM_COUNT: USINT := 14;
     CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
     PARAM_LIST: ARRAY [1..MAX_PARAMS] OF ST_IPCDiagParamSpec := [
     //READ ONCE
@@ -82,11 +82,8 @@ VAR CONSTANT
             (eParam := E_IPCDiag_ParameterKey.UPS_Version, pData := ADR(stIPCDiagData.nUPS_Version), nSize := SIZEOF(stIPCDiagData.nUPS_Version)),
             (eParam := E_IPCDiag_ParameterKey.UPS_Revision, pData := ADR(stIPCDiagData.nUPS_Revision), nSize := SIZEOF(stIPCDiagData.nUPS_Revision)),
             (eParam := E_IPCDiag_ParameterKey.UPS_Build, pData := ADR(stIPCDiagData.nUPS_Build), nSize := SIZEOF(stIPCDiagData.nUPS_Build)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_SerialNumber, pData := ADR(stIPCDiagData.sUPS_SerialNumber), nSize := SIZEOF(stIPCDiagData.sUPS_SerialNumber)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_ComStatus, pData := ADR(stIPCDiagData.nUPS_ComStatus), nSize := SIZEOF(stIPCDiagData.nUPS_ComStatus)),
             (eParam := E_IPCDiag_ParameterKey.UPS_PersPowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PersPowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PersPowerFailCnt)),
             (eParam := E_IPCDiag_ParameterKey.UPS_PowerFailCnt, pData := ADR(stIPCDiagData.nUPS_PowerFailCnt), nSize := SIZEOF(stIPCDiagData.nUPS_PowerFailCnt)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_NoBattery, pData := ADR(stIPCDiagData.bUPS_NoBattery), nSize := SIZEOF(stIPCDiagData.bUPS_NoBattery)),
     //READ CYCLIC
             (eParam := E_IPCDiag_ParameterKey.CPU_Usage, pData := ADR(stIPCDiagData.nCPU_Usage), nSize := SIZEOF(stIPCDiagData.nCPU_Usage)),
             (eParam := E_IPCDiag_ParameterKey.CPU_Temp, pData := ADR(stIPCDiagData.nCPU_Temp), nSize := SIZEOF(stIPCDiagData.nCPU_Temp)),
@@ -100,11 +97,8 @@ VAR CONSTANT
             (eParam := E_IPCDiag_ParameterKey.Time_SNTPServer, pData := ADR(stIPCDiagData.sTime_SNTPServer), nSize := SIZEOF(stIPCDiagData.sTime_SNTPServer)),
             (eParam := E_IPCDiag_ParameterKey.Time_SNTPRefresh, pData := ADR(stIPCDiagData.nTime_SNTPRefresh), nSize := SIZEOF(stIPCDiagData.nTime_SNTPRefresh)),
             (eParam := E_IPCDiag_ParameterKey.UPS_PowerStatus, pData := ADR(stIPCDiagData.nUPS_PowerStatus), nSize := SIZEOF(stIPCDiagData.nUPS_PowerStatus)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryStatus, pData := ADR(stIPCDiagData.nUPS_BatteryStatus), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryStatus)),
             (eParam := E_IPCDiag_ParameterKey.UPS_BatteryCapacity, pData := ADR(stIPCDiagData.nUPS_BatteryCapacity), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryCapacity)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime)),
-            (eParam := E_IPCDiag_ParameterKey.UPS_FanError, pData := ADR(stIPCDiagData.bUPS_FanError), nSize := SIZEOF(stIPCDiagData.bUPS_FanError))
-        ];
+            (eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime))];
 END_VAR
 ]]></Declaration>
     <Implementation>
