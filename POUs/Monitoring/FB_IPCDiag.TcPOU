@@ -20,6 +20,7 @@ END_VAR
 VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
     ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
+    ERR_NO_DATA: DINT := -324665083; //Error Code: No data available.
     MAX_PARAMS: USINT := 77;
     CYCLIC_READ_PARAM_COUNT: USINT := 16;
     CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
@@ -173,6 +174,11 @@ END_VAR
             ERR_UNAVAILABLE:
                 IF NOT bMuteWarnings THEN
                     ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+                END_IF
+                eState := eNext;
+            ERR_NO_DATA:
+                IF NOT bMuteWarnings THEN
+                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag no data available: %s',TO_STRING(PARAM_LIST[iParam].eParam));
                 END_IF
                 eState := eNext;
             ELSE
