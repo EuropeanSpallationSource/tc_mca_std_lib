@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_MotionSafety" Id="{7b3064f8-b903-069f-071a-ccac4fc5c06c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MotionSafety
+VAR_INPUT
+    bEnable : BOOL;
+    stMCCSafetyFunctions : REFERENCE TO ST_MCCSafetyFunctions;
+END_VAR
+VAR_OUTPUT
+    stECATIn  : ST_PNOZEtherCATIn;
+    stECATOut : ST_PNOZEtherCATOut;
+END_VAR
+VAR
+    stStatus      : ST_SafetyStatus; // Placeholder, WIP
+    stFeedback    : ST_SafetyFeedback; // Placeholder, WIP
+    stDiagnostics : ST_SafetyDiagnostics; // Placeholder, WIP
+
+     i : UINT := 1; //Index for, for loops
+    bRefsLinked : BOOL := FALSE;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT bEnable THEN
+    RETURN;
+END_IF
+
+IF NOT bRefsLinked THEN
+    bRefsLinked := mLinkRefs(); // Link references
+END_IF
+
+mReadECATInput(); // Cyclic status update
+mReadInputBits(); // Read input bits of each byte, each byte represents a safety function from the PNOZmulti 2
+
+
+]]></ST>
+    </Implementation>
+    <Method Name="mLinkRefs" Id="{91eba955-9597-0cb6-2a91-fa72015f687b}">
+      <Declaration><![CDATA[METHOD mLinkRefs : BOOL
+VAR
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// -----------------------------------------------------------------------------
+// Link each MCC safety function to the internal formatted ECAT input/output arrays
+// Thus creating a reference pointer to the ST_SafetyFunctionIn/Out
+// -----------------------------------------------------------------------------
+mLinkRefs := FALSE;
+
+
+IF NOT __ISVALIDREF(stMCCSafetyFunctions) THEN
+    RETURN;
+END_IF
+
+FOR i := 1 TO GVL_SafetyIO.UPPER_BOUND_SF DO
+    stMCCSafetyFunctions.aSafetyFunction[i].pSFIN REF=stECATIn.aSafetyFunctionIn[i];
+    stMCCSafetyFunctions.aSafetyFunction[i].pSFOUT REF=stECATOut.aSafetyFunctionOut[i];
+END_FOR;
+
+mLinkRefs := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mReadECATInput" Id="{69d8418f-42b7-0ba5-1475-019a0d752b26}">
+      <Declaration><![CDATA[METHOD mReadECATInput : BOOL
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// -----------------------------------------------------------------------------
+// Cyclically reads the raw PNOZ EtherCAT input image from GVL_SafetyIO and
+// copies it into the formatted PLC-side input structure stECATIn.
+//
+// Also updates basic EtherCAT diagnostic information from the PNOZ EtherCAT
+// status structure.
+// -----------------------------------------------------------------------------
+
+mReadECATInput := FALSE;
+
+// Copy raw PNOZ EtherCAT safety function input into formatted PLC-side structure
+FOR i := 1 TO GVL_SafetyIO.UPPER_BOUND_SF DO
+    stECATIn.aSafetyFunctionIn[i] := GVL_SafetyIO.stPNOZRawIn.aSafetyFunction[i];
+END_FOR;
+
+// EtherCAT communication diagnostics
+stDiagnostics.bitWcState := GVL_SafetyIO.stPNOZEtherCATStatus.bitWcState;
+stDiagnostics.bitInputToggle := GVL_SafetyIO.stPNOZEtherCATStatus.bitInputToggle;
+stDiagnostics.nEtherCATState := GVL_SafetyIO.stPNOZEtherCATStatus.nState;
+
+// LED State
+stECATIn.stLEDState.usiLEDState := GVL_SafetyIO.stLEDState.usiLEDState;
+
+mReadECATInput := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mReadInputBits" Id="{91aa5d28-1165-0896-000b-3a4564d7aad4}">
+      <Declaration><![CDATA[METHOD mReadInputBits : BOOL;
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mReadInputBits := FALSE;
+stMCCSafetyFunctions.stSF31EStop.bSI_ES_EXP := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].pSFIN.byRaw.0;
+stMCCSafetyFunctions.stSF31EStop.bSI_ES_EXT := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].pSFIN.byRaw.1;
+stMCCSafetyFunctions.stSF31EStop.bSI_ES_OPT := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].pSFIN.byRaw.2;
+mReadInputBits := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
