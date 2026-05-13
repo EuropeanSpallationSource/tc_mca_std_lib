@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATIn" Id="{4d26afb5-ffd0-0d85-0f77-77acb686f585}">
+    <Declaration><![CDATA[TYPE ST_PNOZEtherCATIn :
+STRUCT
+    stStatus : ST_SafetyStatus; // Placeholder, WIP
+    aSafetyFunctionIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF] OF ST_SafetyFunctionIn;
+    aSubSystemIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SS] OF ST_SubSystemIn; // Placeholder, WIP
+    stLEDState : ST_LEDState;
+    stSequenceIn : ST_SequenceIn; // Placeholder, WIP
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

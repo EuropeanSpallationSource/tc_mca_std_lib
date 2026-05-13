@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATStatus" Id="{232260a3-c301-02c2-0c4f-9158c5835dc4}">
+    <Declaration><![CDATA[TYPE ST_PNOZEtherCATStatus :
+STRUCT
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^WcState^WcState'}
+    bitWcState AT %I* : BIT;
+
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^WcState^InputToggle'}
+    bitInputToggle AT %I* : BIT;
+
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^InfoData^State'}
+    nState AT %I* : UINT;
+
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^InfoData^AdsAddr^netId'}
+    amsNetId AT %I* : AMSNETID;
+
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^InfoData^AdsAddr^port'}
+    wPort AT %I* : WORD;
+
+
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyDiagnostics" Id="{5cc4dacf-5e42-0a6f-2af9-92b983426889}">
+    <Declaration><![CDATA[TYPE ST_SafetyDiagnostics :
+STRUCT
+    bitWcState : BIT;
+    bitInputToggle : BIT;
+    nEtherCATState : UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

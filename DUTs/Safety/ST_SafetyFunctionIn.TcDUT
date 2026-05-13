@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyFunctionIn" Id="{8070dc95-c87f-07f6-3fb8-b169434ba19a}">
+    <Declaration><![CDATA[TYPE ST_SafetyFunctionIn :
+STRUCT
+    byRaw : BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

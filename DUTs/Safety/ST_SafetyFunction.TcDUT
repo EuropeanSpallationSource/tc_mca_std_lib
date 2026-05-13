@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyFunction" Id="{58782b85-35f4-479a-95a9-2262a8ca7afe}">
+    <Declaration><![CDATA[TYPE ST_SafetyFunction :
+STRUCT
+    pSFIN : REFERENCE TO ST_SafetyFunctionIn;
+    pSFOUT : REFERENCE TO ST_SafetyFunctionOut;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
