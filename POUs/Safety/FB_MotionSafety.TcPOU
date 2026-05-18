@@ -14,25 +14,26 @@ VAR
     stSafetyStatus      : ST_SafetyStatus; // Placeholder, WIP
     stSafetyFeedback    : ST_SafetyFeedback; // Placeholder, WIP
     stSafetyDiagnostics : ST_SafetyDiagnostics;
-	
+
     i : UINT := 1; //Index for, for loops
     bRefsLinked : BOOL := FALSE;
-	bInputBitsHasBeenRead : BOOL := FALSE;
-	
-END_VAR]]></Declaration>
+    bInputBitsHasBeenRead : BOOL := FALSE;
+
+END_VAR
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[IF NOT bEnableSafety THEN
     RETURN;
 END_IF
 
 IF NOT bRefsLinked THEN
-	bRefsLinked := mLinkRefs(); // Link references, once
+    bRefsLinked := mLinkRefs(); // Link references, once
 END_IF
-	
+
 stSafetyStatus.bValidReference := bRefsLinked;
 
 IF NOT stSafetyStatus.bValidReference THEN
-		RETURN;
+        RETURN;
 END_IF
 
 // EtherCAT communication diagnostics
@@ -41,15 +42,13 @@ stSafetyDiagnostics.bitInputToggle := GVL_SafetyIO.stPNOZEtherCATStatus.bitInput
 stSafetyDiagnostics.nEtherCATState := GVL_SafetyIO.stPNOZEtherCATStatus.nState;
 
 IF stSafetyDiagnostics.bitWcState THEN
-	stSafetyStatus.bPNOZCommunicationError := (stSafetyDiagnostics.bitWcState = 1);
-	RETURN;
+    stSafetyStatus.bPNOZCommunicationError := (stSafetyDiagnostics.bitWcState = 1);
+    RETURN;
 END_IF
-	
+
 
 mReadECATInput(); // Cyclic status update
 mReadInputBits(); // Read input bits of each byte, each byte represents a safety function from the PNOZmulti 2
-
-
 ]]></ST>
     </Implementation>
     <Method Name="mLinkRefs" Id="{91eba955-9597-0cb6-2a91-fa72015f687b}">
@@ -64,7 +63,7 @@ END_VAR
 // -----------------------------------------------------------------------------
 
 IF NOT __ISVALIDREF(stMCCSafetyFunctions) THEN
-	mLinkRefs := FALSE;
+    mLinkRefs := FALSE;
     RETURN;
 END_IF
 
@@ -73,13 +72,15 @@ FOR i := 1 TO GVL_SafetyIO.UPPER_BOUND_SF_INPUT DO
     stMCCSafetyFunctions.aSafetyFunction[i].refSafetyOut REF=stECATOut.aSafetyFunctionOut[i];
 END_FOR;
 
-mLinkRefs := TRUE;]]></ST>
+mLinkRefs := TRUE;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mReadECATInput" Id="{69d8418f-42b7-0ba5-1475-019a0d752b26}">
       <Declaration><![CDATA[METHOD mReadECATInput : BOOL
 VAR
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[// -----------------------------------------------------------------------------
 // Cyclically reads the raw PNOZ EtherCAT input from GVL_SafetyIO and
@@ -94,7 +95,8 @@ END_FOR;
 // LED State
 stECATIn.stLEDState.usiLEDState := GVL_SafetyIO.stLEDState.usiLEDState;
 
-mReadECATInput := TRUE;]]></ST>
+mReadECATInput := TRUE;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mReadInputBits" Id="{91aa5d28-1165-0896-000b-3a4564d7aad4}">
@@ -106,7 +108,6 @@ END_VAR
         <ST><![CDATA[stMCCSafetyFunctions.stSF31EStop.bSI_ES_EXP := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].refSafetyIn.byRaw.0;
 stMCCSafetyFunctions.stSF31EStop.bSI_ES_EXT := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].refSafetyIn.byRaw.1;
 stMCCSafetyFunctions.stSF31EStop.bSI_ES_OPT := stMCCSafetyFunctions.aSafetyFunction[E_MCCSafetyFunctions.SF3_1_EStop].refSafetyIn.byRaw.2;
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -121,7 +122,7 @@ END_VAR
 // raw PNOZ EtherCAT output in GVL_SafetyIO.
 //
 // Includes sending/showcasing variables to EPICS/NICOS. MCC-specific rules
-// should write to stECATOut before this method is called. 
+// should write to stECATOut before this method is called.
 // -----------------------------------------------------------------------------
 
 // Copy formatted safety function output data into raw PNOZ EtherCAT output
@@ -129,8 +130,8 @@ FOR i := 1 TO GVL_SafetyIO.UPPER_BOUND_SF_OUTPUT DO
     GVL_SafetyIO.stPNOZRawOut.aSafetyFunction[i] := stECATOut.aSafetyFunctionOut[i];
 END_FOR;
 
-
-mWriteECATOutput := TRUE;]]></ST>
+mWriteECATOutput := TRUE;
+]]></ST>
       </Implementation>
     </Method>
   </POU>
