@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyStatus" Id="{00ac038e-aa81-4175-9c09-5cd4fbc6f3e8}">
+    <Declaration><![CDATA[TYPE ST_SafetyStatus :
+STRUCT
+    bPNOZCommunicationError : BOOL;
+    bValidReference : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

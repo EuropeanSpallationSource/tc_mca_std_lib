@@ -4,14 +4,6 @@
     <Declaration><![CDATA[//Structure for specific subsystems related to an instrument --> MCC = one or more subysystems
 TYPE ST_SubSystemIn :
 STRUCT
-    bEnabled : BOOL;
-    Done: BOOL;
-    Busy: BOOL;
-    Active: BOOL;
-    InVelocity: BOOL;
-    CommandAborted: BOOL;
-    Error: BOOL;
-    ErrorID: UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

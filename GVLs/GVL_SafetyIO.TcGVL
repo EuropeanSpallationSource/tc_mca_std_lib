@@ -21,8 +21,9 @@ VAR_GLOBAL
 END_VAR
 
 VAR_GLOBAL CONSTANT
-    UPPER_BOUND_SF : UINT := 32; // Number of safety functions
-    UPPER_BOUND_SS : UINT := 2; // Number of subsystems
+    UPPER_BOUND_SF_INPUT : UINT := 32; // Number of input safety functions
+    UPPER_BOUND_SF_OUTPUT : UINT := 19; // Number of output safety functions
+    UPPER_BOUND_SS : UINT := 2; // Number of subsystems, Placeholder, WIP
 END_VAR
 
 

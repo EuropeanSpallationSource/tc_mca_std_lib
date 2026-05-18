@@ -4,9 +4,8 @@
     <Declaration><![CDATA[TYPE ST_PNOZEtherCATOut :
 STRUCT
     stFeedback          : ST_SafetyFeedback;
-    aSafetyFunctionOUT  : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF] OF ST_SafetyFunctionOUT;
+    aSafetyFunctionOut  : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF_OUTPUT] OF ST_SafetyFunctionOut;
     aSubSystemOut       : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SS] OF ST_SubSystemOut;
-    stSequenceOut       : ST_SequenceOut;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

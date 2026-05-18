@@ -3,8 +3,8 @@
   <DUT Name="ST_SafetyFunction" Id="{58782b85-35f4-479a-95a9-2262a8ca7afe}">
     <Declaration><![CDATA[TYPE ST_SafetyFunction :
 STRUCT
-    pSFIN : REFERENCE TO ST_SafetyFunctionIn;
-    pSFOUT : REFERENCE TO ST_SafetyFunctionOut;
+    refSafetyIn : REFERENCE TO ST_SafetyFunctionIn;
+    refSafetyOut : REFERENCE TO ST_SafetyFunctionOut;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -4,10 +4,9 @@
     <Declaration><![CDATA[TYPE ST_PNOZEtherCATIn :
 STRUCT
     stStatus : ST_SafetyStatus; // Placeholder, WIP
-    aSafetyFunctionIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF] OF ST_SafetyFunctionIn;
-    aSubSystemIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SS] OF ST_SubSystemIn; // Placeholder, WIP
     stLEDState : ST_LEDState;
-    stSequenceIn : ST_SequenceIn; // Placeholder, WIP
+    aSafetyFunctionIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF_INPUT] OF ST_SafetyFunctionIn;
+    aSubSystemIn : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SS] OF ST_SubSystemIn; // Placeholder, WIP
 END_STRUCT
 END_TYPE
 ]]></Declaration>

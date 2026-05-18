@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_SubSystemOut" Id="{f647f3e9-2b7d-09a0-3ef9-d87937fd120b}">
-    <Declaration><![CDATA[TYPE ST_SubSystemOut :
+    <Declaration><![CDATA[//Structure for specific subsystems related to an instrument --> MCC = one or more subysystems
+TYPE ST_SubSystemOut :
 STRUCT
 END_STRUCT
 END_TYPE

@@ -3,7 +3,7 @@
   <DUT Name="ST_PNOZRawOut" Id="{f721d84d-ba9b-4caa-9515-51e70651d496}">
     <Declaration><![CDATA[TYPE ST_PNOZRawOut :
 STRUCT
-    aByte : ARRAY[1..19] OF BYTE;
+    aSafetyFunction : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF_OUTPUT] OF ST_SafetyFunctionOut;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -3,9 +3,9 @@
   <DUT Name="ST_SafetyDiagnostics" Id="{5cc4dacf-5e42-0a6f-2af9-92b983426889}">
     <Declaration><![CDATA[TYPE ST_SafetyDiagnostics :
 STRUCT
-    bitWcState : BIT;
-    bitInputToggle : BIT;
-    nEtherCATState : UINT;
+    bitWcState : BIT; // 0 = Valid real-time communication in the last cycle, 1 = Invalid real-time communication
+    bitInputToggle : BIT; // It changes its state 0/1 whenever new data is received.
+    nEtherCATState : UINT; //State of EtherCAT slave
 END_STRUCT
 END_TYPE
 ]]></Declaration>
