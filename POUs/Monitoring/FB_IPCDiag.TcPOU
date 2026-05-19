@@ -178,7 +178,6 @@ END_VAR
             ELSE
                 ADSLOGDINT(ADSLOG_MSGTYPE_ERROR,'IPC diag error: %d, stopping...',fbIPCReadParam.hrErrorCode);
                 eState := eStopped;
-                RETURN;
         END_CASE
 
     eStopped:
