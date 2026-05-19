@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_SafetyIO" Id="{85f956dc-1ecc-0500-3671-d0adf2f0de8d}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+    (*
+    This global variable list maps the PNOZ m ES EtherCAT TxPDO Virtual Outputs and RxPDO Virtual Inputs
+    to TwinCAT PLC input/output variables. Also maps the WcState and InfoData of the PNOZ m ES EtherCAT.
+    *)
+    {attribute 'TcLinkTo' := 'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_3^TxPDO'}
+    stPNOZRawIn AT %I* : ST_PNOZRawIn; // Raw EtherCAT input
+
+    {attribute 'TcLinkTo' := 'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_2^RxPDO'}
+    stPNOZRawOut AT %Q* : ST_PNOZRawOut; // Raw EtherCAT output
+
+    stPNOZEtherCATStatus : ST_PNOZEtherCATStatus; // Status struct for the PNOZ m ES EtherCAT, includes WcState and InfoData
+
+    {attribute 'TcLinkTo' :=  'TIID^PNOZ (EtherCAT)^Box (PNOZ m ES EtherCAT)^TxPDO^LED State'}
+    stLEDState AT %I* : ST_LEDState;
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+    UPPER_BOUND_SF_INPUT : UINT := 32; // Number of input safety functions
+    UPPER_BOUND_SF_OUTPUT : UINT := 19; // Number of output safety functions
+    UPPER_BOUND_SS : UINT := 2; // Number of subsystems, Placeholder, WIP
+END_VAR
+
+
+
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
