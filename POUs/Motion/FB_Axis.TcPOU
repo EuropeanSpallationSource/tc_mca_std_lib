@@ -247,6 +247,7 @@ RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 IF RTRIG_PressureRequest.Q THEN
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
+    _stAxis.stStatus.nErrorID := E_CustomErrorIds.eNoCustomError;
 END_IF
 
 TON_PressurizeAirpad(
