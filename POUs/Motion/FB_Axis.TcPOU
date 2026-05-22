@@ -204,6 +204,9 @@ VAR_INST
     bNotPressurizedInTime: BOOL := FALSE;
     bPressureOnRequest: BOOL := FALSE;
     RTRIG_ManualControl: R_TRIG;
+
+    bAirpadCommandAborted: BOOL;
+    bAirpadError: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -211,20 +214,35 @@ END_VAR
     RETURN;
 END_IF
 
+(*
+Using the snapshot of bMoveRequest when bAirpadManualPressureOn selected,
+on rising edge of manual control copy the current move request once.
+This keeps the airpad pressure state when entering manual mode.
+*)
 RTRIG_ManualControl(CLK := _stAxis.stControl.bAirpadManualControl);
-// Use snapshot of bMoveRequest when bAirpadManualPressureOn selected
+
 IF RTRIG_ManualControl.Q THEN
     _stAxis.stControl.bAirpadManualPressureOn := bMoveRequest;
 ELSIF NOT _stAxis.stControl.bAirpadManualControl THEN
     _stAxis.stControl.bAirpadManualPressureOn := FALSE;
 END_IF
 
+(*
+Automatic mode --> Pressure follows the live MOVE request.
+Manual mode --> Pressure follows the manual pressure request.
+*)
 bPressureOnRequest :=
     (bMoveRequest
         AND NOT bManualControl)
     OR (bManualControl
         AND bManualPressureOn);
 
+
+(*
+New pressure request.
+Clear previous airpad command status and airpad-specific errors,
+when pressure is requested again.
+*)
 RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 IF RTRIG_PressureRequest.Q THEN
