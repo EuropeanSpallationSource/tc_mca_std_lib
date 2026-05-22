@@ -319,6 +319,16 @@ bReady :=
         AND _stAxis.stInputs.bAirpadPressurized)
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 
+// Final state-derived ST_McStatus mapping
+mControl_Airpad.Done := bReady;
+mControl_Airpad.Busy := (eAirpad = E_Airpad.ePressurize);
+mControl_Airpad.Active := bPressureOnRequest OR (eAirpad <> E_Airpad.eDepressurize);
+mControl_Airpad.InVelocity := _stAxis.Axis.Status.Moving;
+mControl_Airpad.CommandAborted := bAirpadCommandAborted;
+mControl_Airpad.Error := _stAxis.stStatus.bError
+                            OR _stAxis.stStatus.bAirpadPressureError
+                            OR  _stAxis.stStatus.bAirpadTimeoutError;
+
 // TODO: Should we check for unexpected pressure when in depressurize state?
 ]]></ST>
       </Implementation>
