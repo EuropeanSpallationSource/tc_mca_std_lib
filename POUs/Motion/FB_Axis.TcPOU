@@ -284,10 +284,12 @@ CASE eAirpad OF
         // Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError
-            OR NOT bPressureOnRequest THEN
+        IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
+            bAirpadCommandAborted := TRUE;
+            bAirpadError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeTimeout.Q THEN
+            bAirpadCommandAborted := TRUE;
             _stAxis.stStatus.bAirpadTimeoutError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeAirpad.Q THEN
@@ -299,12 +301,13 @@ CASE eAirpad OF
         // Movement requested -> Airpad inflated
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError
-            OR TON_Depressurize.Q THEN
+        IF _stAxis.stStatus.bError OR TON_Depressurize.Q THEN
+            bAirpadCommandAborted := TRUE;
             eAirpad := E_Airpad.eDepressurize;
-        ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-            AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
+
+        ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
             _stAxis.stStatus.bAirpadPressureError := TRUE;
+            bAirpadCommandAborted := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         END_IF
 
