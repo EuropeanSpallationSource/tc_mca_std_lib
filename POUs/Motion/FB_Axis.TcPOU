@@ -247,10 +247,10 @@ RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 IF RTRIG_PressureRequest.Q AND _stAxis.Axis.Status.HasJob THEN
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
-	bAirpadCommandAborted := TRUE;
+    bAirpadCommandAborted := TRUE;
     _stAxis.stStatus.nErrorID := E_CustomErrorIds.eNoCustomError;
 ELSE
-	bAirpadCommandAborted := FALSE;
+    bAirpadCommandAborted := FALSE;
 END_IF
 
 TON_PressurizeAirpad(
