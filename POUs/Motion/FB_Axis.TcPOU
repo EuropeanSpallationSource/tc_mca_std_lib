@@ -228,7 +228,7 @@ ELSIF NOT _stAxis.stControl.bAirpadManualControl THEN
 END_IF
 
 (*
-Automatic mode --> Pressure follows the live MOVE request.
+Automatic mode --> Pressure follows the live move request.
 Manual mode --> Pressure follows the manual pressure request.
 *)
 bPressureOnRequest :=
@@ -240,14 +240,17 @@ bPressureOnRequest :=
 
 (*
 New pressure request.
-Clear previous airpad command status and airpad-specific errors,
+Clear previous airpad-specific errors and set command aborted,
 when pressure is requested again.
 *)
 RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
-IF RTRIG_PressureRequest.Q THEN
+IF RTRIG_PressureRequest.Q AND _stAxis.Axis.Status.HasJob THEN
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
+	bAirpadCommandAborted := TRUE;
     _stAxis.stStatus.nErrorID := E_CustomErrorIds.eNoCustomError;
+ELSE
+	bAirpadCommandAborted := FALSE;
 END_IF
 
 TON_PressurizeAirpad(
@@ -285,11 +288,9 @@ CASE eAirpad OF
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
-            bAirpadCommandAborted := TRUE;
             bAirpadError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeTimeout.Q THEN
-            bAirpadCommandAborted := TRUE;
             _stAxis.stStatus.bAirpadTimeoutError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeAirpad.Q THEN
@@ -302,12 +303,10 @@ CASE eAirpad OF
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError OR TON_Depressurize.Q THEN
-            bAirpadCommandAborted := TRUE;
             eAirpad := E_Airpad.eDepressurize;
 
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
             _stAxis.stStatus.bAirpadPressureError := TRUE;
-            bAirpadCommandAborted := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         END_IF
 
