@@ -396,6 +396,7 @@ CASE eHomingState OF
 
 ]]></ST>
     </Implementation>
+    <Folder Name="Initialization" Id="{a4834b0c-5a39-0343-1840-cdfcbbfa1e02}" />
     <Folder Name="StateMachine" Id="{5850658b-ad43-095c-267a-69fea0de8d61}" />
     <Action Name="actHomeDirect" Id="{29103e93-4f6a-001d-162a-15d735c384e0}">
       <Implementation>
@@ -951,6 +952,20 @@ END_CASE
 		END_IF
 	
 END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mInitDirection" Id="{947d22ad-e33a-0079-3517-b304049b5949}" FolderPath="Initialization\">
+      <Declaration><![CDATA[METHOD mInitDirection
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eDirection = E_AxisDirection.eForward THEN
+	eCurrentDirection := MC_Home_Direction.mcPositiveDirection;
+	eCurrentReversedDirection := MC_Home_Direction.mcNegativeDirection;
+ELSE
+	eCurrentDirection := MC_Home_Direction.mcNegativeDirection;
+	eCurrentReversedDirection := MC_Home_Direction.mcPositiveDirection;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
