@@ -638,5 +638,46 @@ stRefSwitchSignal.Level := bHomeSensor;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mOutputs" Id="{e4b80a65-8664-0ade-23e7-571538a05e85}">
+      <Declaration><![CDATA[METHOD mOutputs
+VAR
+	bExecutingDetection: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bBusy := eHomingState <> E_HomeSequenceState.eWaitForExecute
+		AND eHomingState <> E_HomeSequenceState.eDone
+		AND eHomingState <> E_HomeSequenceState.eCommandAborted
+		AND eHomingState <> E_HomeSequenceState.eError;
+
+bDone := eHomingState = E_HomeSequenceState.eDone;
+
+bCommandAborted := eHomingState = E_HomeSequenceState.eCommandAborted;
+
+bActive := fbStepLimitSwitch.Active
+		OR fbStepLimitSwitchDetection.Active
+		OR fbStepAbsoluteSwitchDetection.Active
+		OR fbStepReferencePulse.Active
+		OR fbStepBlockLag.Active
+		OR fbHomeDirect.Active;
+
+bExecutingDetection := (eHomingState >= E_HomeSequenceState.eInitDetetion)
+					AND (eHomingState <= E_HomeSequenceState.eFinishDetection);
+					
+bEnablePositive := bExecutingDetection
+				AND ((bCoarseEnablePositive AND eHomingSpeed = eCOARSE) 
+					OR (bFineEnablePositive AND eHomingSpeed = eFINE));
+					
+bEnableNegative := bExecutingDetection
+				AND ((bCoarseEnableNegative AND eHomingSpeed = eCOARSE) 
+					OR (bFineEnableNegative AND eHomingSpeed = eFINE));
+
+bError := eHomingState = E_HomeSequenceState.eError;
+IF nErrorID <> 0 AND nErrorState = 0 THEN
+	nErrorState := eHomingState;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
