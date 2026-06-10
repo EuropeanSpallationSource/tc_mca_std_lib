@@ -396,6 +396,7 @@ CASE eHomingState OF
 
 ]]></ST>
     </Implementation>
+    <Folder Name="StateMachine" Id="{5850658b-ad43-095c-267a-69fea0de8d61}" />
     <Action Name="actHomeDirect" Id="{29103e93-4f6a-001d-162a-15d735c384e0}">
       <Implementation>
         <ST><![CDATA[bTwoSpeedHoming := FALSE;
@@ -810,6 +811,85 @@ fbHomeDirect(
 	Execute := eHomingState = E_HomeSequenceState.eHomeDirect,
     Parameter := stHomingParameter,
 	SetPosition := fHomePosition);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mFinalizeHoming" Id="{985c602b-5ff8-0a11-0819-2c700cbfd4d4}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD mFinalizeHoming
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eHomingState OF
+
+	E_HomeSequenceState.eHomeDirect:
+		IF fbHomeDirect.Busy THEN
+			RETURN;
+		END_IF
+		
+		IF fbHomeDirect.Error THEN
+			THIS^.nErrorID := fbHomeDirect.ErrorID;
+			THIS^.nErrorState := eHomingState;
+			
+			eHomingState := E_HomeSequenceState.eError;
+		ELSIF fbHomeDirect.CommandAborted THEN
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		ELSIF fbHomeDirect.Done THEN
+			eHomingState := E_HomeSequenceState.eDone;
+		END_IF
+		
+	E_HomeSequenceState.eFinishHoming:
+		IF fbFinishHoming.Busy THEN
+			RETURN;
+		END_IF
+		
+		IF fbFinishHoming.Error THEN
+			THIS^.nErrorID := fbFinishHoming.ErrorID;
+			THIS^.nErrorState := eHomingState;
+			
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		ELSIF fbFinishHoming.CommandAborted THEN
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		ELSIF fbFinishHoming.Done THEN
+			eHomingState := E_HomeSequenceState.eDone;
+		END_IF
+		
+	E_HomeSequenceState.eHomingInterrupted:
+		//Restore the drive state to stored state from before start of homing
+		IF stHomingParameter.Stored THEN
+			eHomingState := E_HomeSequenceState.eAbortHoming;
+		ELSE
+			IF nErrorID <> 0 THEN
+				eHomingState := E_HomeSequenceState.eCommandAborted;
+			ELSE
+				eHomingState := E_HomeSequenceState.eError;
+			END_IF
+		END_IF
+		
+	E_HomeSequenceState.eAbortHoming:
+		IF fbAbortHoming.Busy THEN
+			RETURN;
+		END_IF
+		
+		//Avoid overwriting the previously raised error
+		IF nErrorID <> 0 THEN
+			eHomingState := E_HomeSequenceState.eError;
+		ELSIF fbAbortHoming.Error THEN
+			THIS^.nErrorID := fbAbortHoming.ErrorID;
+			THIS^.nErrorState := eHomingState;
+			
+			eHomingState := E_HomeSequenceState.eError;
+		ELSIF fbAbortHoming.CommandAborted OR fbAbortHoming.Done THEN
+			//In case the drive parameters were not restored
+			IF stHomingParameter.Stored THEN
+				THIS^.nErrorID := nERROR_ABORT_HOMING;
+				THIS^.nErrorState := eHomingState;
+				
+				eHomingState := E_HomeSequenceState.eError;
+			ELSE
+				eHomingState := E_HomeSequenceState.eCommandAborted;
+			END_IF
+		END_IF
+	
+END_CASE
 ]]></ST>
       </Implementation>
     </Method>
