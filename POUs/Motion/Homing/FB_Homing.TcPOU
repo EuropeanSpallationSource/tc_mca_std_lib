@@ -1012,6 +1012,26 @@ END_IF
 	]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mInitHomingSpeed" Id="{00be9f88-6273-09a7-37a4-10ee0f6ecbed}" FolderPath="Initialization\">
+      <Declaration><![CDATA[METHOD mInitHomingSpeed
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eCurrentHomingRoutine OF
+    E_HomingRoutines2.eHomeToLimit,
+    E_HomingRoutines2.eHomeToRef,
+	E_HomingRoutines2.eHomeToEncPulse_viaLimit:
+		eHomingSpeed := eCOARSE;
+	
+    E_HomingRoutines2.eHomeToEncPulse,
+    E_HomingRoutines2.eHomeToBlock:
+		eHomingSpeed := eFINE;
+
+	ELSE
+		eHomingSpeed := eDISABLED; 
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
       <Declaration><![CDATA[METHOD mInputs
 ]]></Declaration>
