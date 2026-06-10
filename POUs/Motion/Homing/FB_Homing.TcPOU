@@ -4,14 +4,16 @@
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Homing
 //Tested with Tc3_MC2_AdvancedHoming, 3.0.26.0
 VAR_IN_OUT
-    Axis: Axis_Ref;
+    Axis: AXIS_REF;
 END_VAR
 VAR_INPUT
     bExecute: BOOL;
     bLimitFwd: BOOL;
     bLimitBwd: BOOL;
     bHomeSensor: BOOL;
-    eHomeSeq: E_HomingRoutines;
+	eDirection: E_AxisDirection := E_AxisDirection.eForward; //Start direction
+	eDetectionMode: E_DetectionMode := E_DetectionMode.eRising; //Detection mode (only valid for routines eHomeToLimit and eHomeToRef)
+    eHomingRoutine: E_HomingRoutines2 := E_HomingRoutines2.eNoHoming;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
     stConfig: ST_AxisConfig;
@@ -19,81 +21,80 @@ END_VAR
 VAR_OUTPUT
     bDone: BOOL;
     bBusy: BOOL;
+	bActive: BOOL;
     bCommandAborted: BOOL;
+	bEnablePositive: BOOL;
+	bEnableNegative: BOOL;
     bError: BOOL;
-    nErrorId: UDINT;
+    nErrorID: UDINT;
+	nErrorState: UINT;
 END_VAR
 
 VAR
-    bHWSignalForHoming: BOOL;
+	eHomingState: E_HomeSequenceState;
+	eHomingSpeed: (eDISABLED, eCOARSE, eFINE); 
+	
+	eCurrentHomingRoutine: E_HomingRoutines2;
+	eCurrentDirection: MC_Home_Direction; //Current direction used during homing execution
+	eCurrentReversedDirection: MC_Home_Direction; //Current reversed direction used during homing execution
+	eCurrentDetectionMode: E_DetectionMode; //Current detection mode used during homing execution
+	
+	eCoarseSwitchMode: MC_Switch_Mode; //Switch mode used for coarse detection
+	eFineSwitchMode: MC_Switch_Mode; //Switch mode used for fine detection
 
     //Hardware Signals
-    stLimitSwitchSignal: MC_Ref_Signal_Ref;
-    stRefSwitchSignal: MC_Ref_Signal_Ref;
-    stEncPulseSignal: MC_Ref_Signal_Ref;
+    stLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
+    stRefSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
+    stEncPulseSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_ZeroPulse, TouchProbe := TouchProbe1);
 
-    //Beckhoff homing function blocks
+    //Step functions
     fbStepLimitSwitch: MC_StepLimitSwitch;
-    fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
+	fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
+	fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulse: MC_StepReferencePulse;
     fbStepBlockLag: MC_StepBlockLagBased;
+	
+	//Fine detection step functions outputs
+    bCoarseDone: BOOL;
+    bCoarseBusy: BOOL;
+    bCoarseCommandAborted: BOOL;
+    bCoarseError: BOOL;
+    nCoarseErrorID: UDINT;
+	
+	//Coarse detection step functions outputs
+    bFineDone: BOOL;
+    bFineBusy: BOOL;
+    bFineCommandAborted: BOOL;
+    bFineError: BOOL;
+    nFineErrorID: UDINT;
+	
+	//Enable override
+    bCoarseEnablePositive: BOOL; //Enable override during coarse stage in positive direction (forward)
+	bCoarseEnableNegative: BOOL; //Enable override during coarse stage in negative direction (backward)
+    bFineEnablePositive: BOOL; //Enable override during fine stage in positive direction (forward)
+    bFineEnableNegative: BOOL; //Enable override during fine stage in negative direction (backward)
+	
+	//Finalizing functions
     fbHomeDirect: MC_HomeDirect;
-    fbSetPos: MC_SetPosition;
     fbFinishHoming: MC_FinishHoming;
     fbAbortHoming: MC_AbortHoming;
-    fbExecute: R_TRIG;
-    fbTimerOnDelay: TON;
-    fbHWHomeSignalRTrig: R_TRIG;
-    fbHWHomeSignalFTrig: F_TRIG;
+    rtrigExecute: R_TRIG;
 
     //Homing parameters
-    stDetectDirection: MC_Home_Direction;
-    stDetectLimitDirection: MC_Home_Direction;
     stHomingParameter: MC_HomingParameter;
     stOptions: ST_Home_Options4;
     stOptions3: ST_Home_Options3;
 
-    fSetHomePosition: LREAL;
-    fHomeRefPosition: LREAL;
-    fActPosition_Done: LREAL;
-
+	//Read velocity parameters
     fbVelocityToCam: MC_ReadParameter;
-    fVelocityToCam: LREAL;
+    fVelocityToCam: LREAL; //Homing velocity towards PLC CAM (or reference switch)
     fbVelocityFromCam: MC_ReadParameter;
-    fVelocityFromCam: LREAL;
-    fDetectionVelocity: LREAL;
-    fDetectionAcceleration: LREAL;
-    fDetectionDeceleration: LREAL;
-
-    //Signals for the Beckhoff homing function blocks
-    bLocalHomingFB_Execute: BOOL;
-    bLocalHomingFB_Done: BOOL;
-    bLocalHomingFB_Busy: BOOL;
-    bLocalHomingFB_CommandAborted: BOOL;
-    bLocalHomingFB_Error: BOOL;
-    nLocalHomingFB_ErrorID: UDINT;
-
-    bRisingEdgeDetectionOn: BOOL;
-    bFallingEdgeDetectionOn: BOOL;
-    fRisingEdgePosition: LREAL;
-    fFallingEdgePosition: LREAL;
-    bDelay: BOOL;
-
-    //State machine
-    eHomingState: (eWaitForRequest := 0, eCoarseDetection := 1, eMoveReverse := 2, eFineDetection := 3, eSetPos := 4, eFinishHoming := 5, eAbortHoming := 20);
-    bHomingToHomeSensor: BOOL;
-    bHomingToLimitSwitch: BOOL;
-    bHomingToEncoderPulse: BOOL;
-
-    bTwoSpeedHoming:BOOL;
-    bReversedDirection: BOOL;
-    bFineDetectionDone: BOOL;
-    bViaLimitCoarseDetect: BOOL;
-    eRefSwitchModeReversed: MC_Switch_Mode;
+    fVelocityFromCam: LREAL; //Homing velocity off PLC CAM (or reference switch)
 END_VAR
 
 VAR CONSTANT
-    tDELAY_TIME: TIME := T#1S0MS; //Delay Time 1sec befor switching the motor direction for mechanical saftey
+	nERROR_ABORT_HOMING: UDINT := 16#E5501; //Drive parameters were not restored aftor homing
+	nERROR_POWER_DISABLED: UDINT := 16#E5502; //Power was disabled during homing procedure
 END_VAR
 ]]></Declaration>
     <Implementation>
