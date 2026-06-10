@@ -969,6 +969,49 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mInitEnable" Id="{d3639741-5d83-088b-3be0-aaffdae6ce64}" FolderPath="Initialization\">
+      <Declaration><![CDATA[METHOD mInitEnable
+VAR
+	bCoarseEnable: BOOL := TRUE;
+	bFineEnable: BOOL := TRUE;
+	bCoarseDirectionReversed: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Disable enable override based on coarse/fine homing speed
+CASE eCurrentHomingRoutine OF
+	//1. During eHomeToRef in fine stage no mechanical limit switches should be hit
+	E_HomingRoutines2.eHomeToRef:
+		bFineEnable := FALSE;
+		
+	//2. No enable override required during execution
+	E_HomingRoutines2.eHomeToEncPulse,
+	E_HomingRoutines2.eHomeToBlock:
+		bCoarseEnable := FALSE;
+		bFineEnable := FALSE;
+		
+	//3. During coarse stage the direction is reversed
+	E_HomingRoutines2.eHomeToEncPulse_viaLimit:
+		bCoarseDirectionReversed := TRUE;
+
+END_CASE
+
+IF eDirection = E_AxisDirection.eForward THEN
+	bCoarseEnablePositive := bCoarseEnable AND NOT bCoarseDirectionReversed;
+	bFineEnablePositive := bFineEnable;
+	
+	bCoarseEnableNegative := bCoarseDirectionReversed;
+	bFineEnableNegative := FALSE;
+ELSE
+	bCoarseEnablePositive := bCoarseDirectionReversed;
+	bFineEnablePositive := FALSE;
+	
+	bCoarseEnableNegative := bCoarseEnable AND NOT bCoarseDirectionReversed;
+	bFineEnableNegative := bFineEnable;
+END_IF
+	]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
       <Declaration><![CDATA[METHOD mInputs
 ]]></Declaration>
