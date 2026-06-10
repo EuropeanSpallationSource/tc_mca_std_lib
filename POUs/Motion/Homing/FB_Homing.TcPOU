@@ -1017,5 +1017,81 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mStateMachine" Id="{5662f5a0-70ad-0d45-1fe3-0f87072de8ff}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD mStateMachine
+VAR_IN_OUT CONSTANT
+	Axis: AXIS_REF;
+END_VAR
+	]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eHomingState OF
+
+    E_HomeSequenceState.eWaitForExecute:
+        IF rtrigExecute.Q THEN
+			eCurrentHomingRoutine := eHomingRoutine;
+			eCurrentDetectionMode := eDetectionMode;
+			
+			mInitEnable();
+			mInitDirection();
+			mInitHomingSpeed();
+			mInitSwitchMode();
+			
+            eHomingState := E_HomeSequenceState.eSelectDetection;
+        END_IF
+		
+	E_HomeSequenceState.eSelectDetection:
+		CASE eCurrentHomingRoutine OF
+			E_HomingRoutines2.eNoHoming:
+				eHomingState := E_HomeSequenceState.eDone;
+			E_HomingRoutines2.eHomeDirect:
+				eHomingState := E_HomeSequenceState.eHomeDirect;
+			ELSE
+				eHomingState := E_HomeSequenceState.eInitDetetion;
+		END_CASE
+		
+	//Execute selected homing routine
+	
+	E_HomeSequenceState.eInitDetetion..E_HomeSequenceState.eFinishDetection:
+		CASE eHomingSpeed OF
+			eCOARSE:
+				mExecuteHoming(
+					Axis := Axis,
+					bBusy := bCoarseBusy,
+					bDone := bCoarseDone,
+					bCommandAborted := bCoarseCommandAborted,
+					bError := bCoarseError,
+					nErrorID := nCoarseErrorID);
+			eFINE:
+				mExecuteHoming(
+					Axis := Axis,
+					bBusy := bFineBusy,
+					bDone := bFineDone,
+					bCommandAborted := bFineCommandAborted,
+					bError := bFineError,
+					nErrorID := nFineErrorID);
+		END_CASE
+			
+	//Finalize homing
+	
+	E_HomeSequenceState.eHomeDirect..E_HomeSequenceState.eAbortHoming:
+		mFinalizeHoming();
+	
+	//Result of homing
+	
+	E_HomeSequenceState.eDone:
+		eHomingState := E_HomeSequenceState.eWaitForExecute;
+		
+	E_HomeSequenceState.eCommandAborted,
+	E_HomeSequenceState.eError:
+		IF NOT bExecute THEN
+			nErrorID := 0;
+			nErrorState := 0;
+			eHomingState := E_HomeSequenceState.eWaitForExecute;
+		END_IF
+		
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
