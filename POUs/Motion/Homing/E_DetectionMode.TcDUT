@@ -5,8 +5,8 @@
 {attribute 'strict'}
 TYPE E_DetectionMode :
 (
-	eRising := 0,
-	eFalling := 1
+    eRising := 0,
+    eFalling := 1
 );
 END_TYPE
 ]]></Declaration>

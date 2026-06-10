@@ -4,24 +4,24 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 TYPE E_HomeSequenceState :
 (
-	eWaitForExecute := 0, 
-	eSelectDetection := 1,
+    eWaitForExecute := 0,
+    eSelectDetection := 1,
 
-	//Execute detection
-	eInitDetetion := 10,
-	eExecuteDetection := 11,
-	eFinishDetection := 12,
-	
-	//Finalize homing
-	eHomeDirect := 20,
-	eFinishHoming := 30,
-	eHomingInterrupted := 40,
-	eAbortHoming := 45,
-	
-	//Result homing
-	eDone := 50,
-	eCommandAborted := 55,
-	eError := 60
+    //Execute detection
+    eInitDetetion := 10,
+    eExecuteDetection := 11,
+    eFinishDetection := 12,
+
+    //Finalize homing
+    eHomeDirect := 20,
+    eFinishHoming := 30,
+    eHomingInterrupted := 40,
+    eAbortHoming := 45,
+
+    //Result homing
+    eDone := 50,
+    eCommandAborted := 55,
+    eError := 60
 ) UINT ;
 END_TYPE
 ]]></Declaration>

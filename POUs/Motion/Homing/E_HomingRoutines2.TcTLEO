@@ -6,23 +6,23 @@
 TYPE E_HomingRoutines2 :
 (
     eNoHoming := 0,
-	
-	//Home to limit switch (bLimitFwd or bLimitBwd)
-    eHomeToLimit := 1, 
-	
-	//Home to home sensor (bHomeSensor)
-    eHomeToRef := 11, 
-	
-	//Home to encoder reference (zero) pulse (used for single turn rotary axis without limit switches)
+
+    //Home to limit switch (bLimitFwd or bLimitBwd)
+    eHomeToLimit := 1,
+
+    //Home to home sensor (bHomeSensor)
+    eHomeToRef := 11,
+
+    //Home to encoder reference (zero) pulse (used for single turn rotary axis without limit switches)
     eHomeToEncPulse := 21,
-	//Home to encoder reference (zero) pulse via limit switch (using towardsCam speed), then reverse direction looking for falling edge on ref pulse (using fromCam speed)
+    //Home to encoder reference (zero) pulse via limit switch (using towardsCam speed), then reverse direction looking for falling edge on ref pulse (using fromCam speed)
     eHomeToEncPulse_viaLimit := 22,
 
     //Home to a mechanical block (lag based  StepBlockDetection)
     eHomeToBlock:= 31,
 
-	//Set position directly to fHomePosition
-    eHomeDirect := 90 
+    //Set position directly to fHomePosition
+    eHomeDirect := 90
 ) := eHomeDirect;
 END_TYPE
 ]]></Declaration>
