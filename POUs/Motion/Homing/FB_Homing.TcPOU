@@ -616,5 +616,27 @@ fbStepAbsoluteSwitch(
 ]]></ST>
       </Implementation>
     </Action>
+    <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
+      <Declaration><![CDATA[METHOD mInputs
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Options for common function blocks used for all routines
+stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
+
+//Options for StepBlockLagDetection
+stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
+
+//Reference signal
+IF eCurrentDirection = MC_Home_Direction.mcPositiveDirection THEN
+	stLimitSwitchSignal.Level := NOT(bLimitFwd);
+ELSE
+	stLimitSwitchSignal.Level := NOT(bLimitBwd);
+END_IF
+stRefSwitchSignal.Level := bHomeSensor;
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
