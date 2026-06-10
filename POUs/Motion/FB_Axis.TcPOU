@@ -720,7 +720,7 @@ IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eHome THEN
 END_IF
 
 
-fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
+fbHome.eHomingRoutine := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
 fbHome(
