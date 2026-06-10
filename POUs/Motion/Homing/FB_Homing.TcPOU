@@ -814,6 +814,67 @@ fbHomeDirect(
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mExecuteHoming" Id="{831d0e15-bd95-07a7-1103-25ddd225f490}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD mExecuteHoming
+VAR_IN_OUT CONSTANT
+	Axis: AXIS_REF;
+	bBusy: BOOL;
+	bDone: BOOL;
+	bCommandAborted: BOOL;
+	bError: BOOL;
+	nErrorID: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eHomingState OF
+	
+	E_HomeSequenceState.eInitDetetion:	
+		IF Axis.Status.StandStill THEN
+			eHomingState := E_HomeSequenceState.eExecuteDetection;
+		ELSIF Axis.Status.Disabled THEN //TODO! How AutoEnable/AutoDisable handles this?
+			THIS^.nErrorID := nERROR_POWER_DISABLED;
+			THIS^.nErrorState := eHomingState;
+			
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		END_IF
+		
+	E_HomeSequenceState.eExecuteDetection:
+		IF bBusy THEN
+			RETURN;
+		END_IF
+		
+		IF bError THEN
+			THIS^.nErrorID := nErrorID;
+			THIS^.nErrorState := eHomingState;
+			
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		ELSIF bCommandAborted THEN
+			eHomingState := E_HomeSequenceState.eHomingInterrupted;
+		ELSIF bDone THEN
+			eHomingState := E_HomeSequenceState.eFinishDetection;
+		END_IF
+	
+	E_HomeSequenceState.eFinishDetection:
+		//Repeat execution with fine detection
+		IF eHomingSpeed = eCOARSE THEN
+			eHomingSpeed := eFINE;
+			eHomingState := E_HomeSequenceState.eInitDetetion;
+			RETURN;
+		END_IF
+		
+		//Repeat fine detection with target switch mode
+		IF (eCurrentDetectionMode = E_DetectionMode.eRising) AND (eFineSwitchMode = MC_Switch_Mode.mcFallingEdge) THEN
+			eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
+			eHomingState := E_HomeSequenceState.eInitDetetion;
+			RETURN;
+		END_IF
+		
+		eHomingState := E_HomeSequenceState.eFinishHoming;
+	
+END_CASE
+	]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mFinalizeHoming" Id="{985c602b-5ff8-0a11-0819-2c700cbfd4d4}" FolderPath="StateMachine\">
       <Declaration><![CDATA[METHOD mFinalizeHoming
 ]]></Declaration>
