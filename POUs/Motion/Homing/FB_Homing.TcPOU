@@ -616,6 +616,203 @@ fbStepAbsoluteSwitch(
 ]]></ST>
       </Implementation>
     </Action>
+    <Method Name="mCallFunctionBlocks" Id="{9a2a738b-1099-0643-0d66-9fbff7e594f9}">
+      <Declaration><![CDATA[METHOD mCallFunctionBlocks
+VAR_IN_OUT
+	Axis: Axis_Ref;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rtrigExecute(CLK := bExecute);
+
+fbVelocityToCam(
+    Axis := Axis,
+    Enable := TRUE,
+    ParameterNumber := E_AxisParameters.AxisVelocityToCam,
+    ReadMode := READMODE_CYCLIC);
+
+fbVelocityFromCam(
+    Axis:= Axis,
+    Enable := TRUE,
+    ParameterNumber := E_AxisParameters.AxisVelocityFromCam,
+    ReadMode := READMODE_CYCLIC);
+
+IF NOT fbVelocityToCam.Error THEN
+    fVelocityToCam := fbVelocityToCam.Value;
+END_IF
+
+IF NOT fbVelocityFromCam.Error THEN
+    fVelocityFromCam := fbVelocityFromCam.Value;
+END_IF
+
+CASE eCurrentHomingRoutine OF
+    E_HomingRoutines2.eHomeToLimit:
+	
+        fbStepLimitSwitchDetection(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+			LimitSwitchMode := eCoarseSwitchMode,
+            LimitSwitchSignal := stLimitSwitchSignal,
+			Velocity := fVelocityToCam,
+            Options := stOptions,
+			Done => bCoarseDone,
+			Busy => bCoarseBusy,
+			CommandAborted => bCoarseCommandAborted,
+			Error => bCoarseError,
+			ErrorID => nCoarseErrorID);
+
+        fbStepLimitSwitch(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+			LimitSwitchMode := eFineSwitchMode,
+            LimitSwitchSignal := stLimitSwitchSignal,
+			Velocity := fVelocityFromCam,
+			SetPosition := fHomePosition,
+            Options := stOptions,
+			Done => bFineDone,
+			Busy => bFineBusy,
+			CommandAborted => bFineCommandAborted,
+			Error => bFineError,
+			ErrorID => nFineErrorID);
+
+    E_HomingRoutines2.eHomeToRef:
+		
+		fbStepAbsoluteSwitchDetection(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+			SwitchMode := eCoarseSwitchMode,
+            ReferenceSignal := stRefSwitchSignal,
+            PositiveLimitSwitch := NOT(bLimitFwd),
+            NegativeLimitSwitch := NOT(bLimitBwd),
+			Velocity := fVelocityToCam,
+            Options := stOptions,
+			Done => bCoarseDone,
+			Busy => bCoarseBusy,
+			CommandAborted => bCoarseCommandAborted,
+			Error => bCoarseError,
+			ErrorID => nCoarseErrorID);
+			
+		//Using StepLimitSwitch over StepAbsoluteSwitch to reduce the movement 
+        fbStepLimitSwitch(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+			LimitSwitchMode := eFineSwitchMode,
+            LimitSwitchSignal := stRefSwitchSignal,
+			Velocity := fVelocityFromCam,
+			SetPosition := fHomePosition,
+            Options := stOptions,
+			Done => bFineDone,
+			Busy => bFineBusy,
+			CommandAborted => bFineCommandAborted,
+			Error => bFineError,
+			ErrorID => nFineErrorID);
+
+    E_HomingRoutines2.eHomeToEncPulse,
+    E_HomingRoutines2.eHomeToEncPulse_viaLimit:
+
+       fbStepLimitSwitchDetection(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentReversedDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+			LimitSwitchMode := eCoarseSwitchMode,
+            LimitSwitchSignal := stLimitSwitchSignal,
+			Velocity := fVelocityToCam,
+            Options := stOptions,
+			Done => bCoarseDone,
+			Busy => bCoarseBusy,
+			CommandAborted => bCoarseCommandAborted,
+			Error => bCoarseError,
+			ErrorID => nCoarseErrorID);
+
+        fbStepReferencePulse(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            ReferenceSignal := stEncPulseSignal,
+			Velocity := fVelocityFromCam,
+			SetPosition := fHomePosition,
+            Options := stOptions,
+			Done => bFineDone,
+			Busy => bFineBusy,
+			CommandAborted => bFineCommandAborted,
+			Error => bFineError,
+			ErrorID => nFineErrorID);
+
+    E_HomingRoutines2.eHomeToBlock:
+
+        fbStepBlockLag(
+            Axis := Axis,
+            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Parameter := stHomingParameter,
+			Direction := eCurrentDirection,
+			Velocity := fVelocityFromCam,
+            DetectionVelocityLimit := stConfig.stHomingConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
+            DetectionVelocityTime := stConfig.stHomingConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
+            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
+            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            LagLimit := stConfig.stHomingConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+			SetPosition := fHomePosition,
+            Options := stOptions3,
+			Done => bFineDone,
+			Busy => bFineBusy,
+			CommandAborted => bFineCommandAborted,
+			Error => bFineError,
+			ErrorID => nFineErrorID);
+
+END_CASE
+
+//Finalizing functions
+
+fbFinishHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbFinishHoming(
+    Axis := Axis,
+	Execute := eHomingState = E_HomeSequenceState.eFinishHoming,
+    Velocity := fVelocityToCam,
+    Distance := fHomeFinishDistance,
+    Parameter := stHomingParameter);
+
+fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
+fbAbortHoming(
+    Axis := Axis,
+	Execute := eHomingState = E_HomeSequenceState.eAbortHoming,
+    Parameter := stHomingParameter);
+
+fbHomeDirect(
+    Axis := Axis,
+	Execute := eHomingState = E_HomeSequenceState.eHomeDirect,
+    Parameter := stHomingParameter,
+	SetPosition := fHomePosition);
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
       <Declaration><![CDATA[METHOD mInputs
 ]]></Declaration>
