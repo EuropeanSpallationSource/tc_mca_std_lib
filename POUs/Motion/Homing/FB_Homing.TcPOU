@@ -1032,6 +1032,28 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mInitSwitchMode" Id="{f50489b4-e430-0f8d-2f89-3046b5b403e8}" FolderPath="Initialization\">
+      <Declaration><![CDATA[METHOD mInitSwitchMode
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//With mcOn no movement will be executed, if the switch already engaged
+eCoarseSwitchMode := MC_Switch_Mode.mcOn;
+
+CASE eCurrentDetectionMode OF
+	E_DetectionMode.eRising:
+		//Reverse switch mode for the first execution of fine detect, if the switch is already engaged
+		IF ((eCurrentHomingRoutine = E_HomingRoutines2.eHomeToLimit) AND stLimitSwitchSignal.Level)
+		OR ((eCurrentHomingRoutine = E_HomingRoutines2.eHomeToRef) AND stRefSwitchSignal.Level) THEN 
+			eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
+		ELSE
+			eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
+		END_IF
+	E_DetectionMode.eFalling:
+		eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
       <Declaration><![CDATA[METHOD mInputs
 ]]></Declaration>
