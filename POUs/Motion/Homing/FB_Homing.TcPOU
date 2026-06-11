@@ -322,7 +322,7 @@ END_VAR
     E_HomeSequenceState.eInitDetetion:
         IF Axis.Status.StandStill THEN
             eHomingState := E_HomeSequenceState.eExecuteDetection;
-        ELSIF Axis.Status.Disabled THEN //TODO! How AutoEnable/AutoDisable handles this?
+        ELSIF Axis.Status.Disabled THEN
             THIS^.nErrorID := nERROR_POWER_DISABLED;
             THIS^.nErrorState := eHomingState;
 
