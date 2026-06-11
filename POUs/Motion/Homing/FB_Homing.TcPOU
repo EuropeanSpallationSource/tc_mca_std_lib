@@ -45,6 +45,7 @@ VAR
 
     //Hardware Signals
     stLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
+    stReversedLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
     stRefSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
     stEncPulseSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_ZeroPulse, TouchProbe := TouchProbe1);
 
@@ -221,6 +222,7 @@ CASE eSelectedHomingRoutine OF
     eTO_ENC_PULSE,
     eTO_ENC_PULSE_VIA_LIMIT:
 
+       //Reversed movement, uses reversed signals (eCurrentReversedDirection and stReversedLimitSwitchSignal)
        fbStepLimitSwitchDetection(
             Axis := Axis,
             Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
@@ -230,7 +232,7 @@ CASE eSelectedHomingRoutine OF
             DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
             TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             LimitSwitchMode := eCoarseSwitchMode,
-            LimitSwitchSignal := stLimitSwitchSignal,
+            LimitSwitchSignal := stReversedLimitSwitchSignal,
             Velocity := fVelocityToCam,
             Options := stOptions,
             Done => bCoarseDone,
@@ -466,9 +468,10 @@ CASE eSelectedHomingRoutine OF
         bCoarseEnable := FALSE;
         bFineEnable := FALSE;
 
-    //3. During coarse stage the direction is reversed
+    //3. During coarse stage the direction is reversed and no enable in fine stage
     eTO_ENC_PULSE_VIA_LIMIT:
         bCoarseDirectionReversed := TRUE;
+        bFineEnable := FALSE;
 
 END_CASE
 
@@ -609,8 +612,10 @@ stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
 //Reference signal
 IF eCurrentDirection = MC_Home_Direction.mcPositiveDirection THEN
     stLimitSwitchSignal.Level := NOT(bLimitFwd);
+    stReversedLimitSwitchSignal.Level := NOT(bLimitBwd);
 ELSE
     stLimitSwitchSignal.Level := NOT(bLimitBwd);
+    stReversedLimitSwitchSignal.Level := NOT(bLimitFwd);
 END_IF
 stRefSwitchSignal.Level := bHomeSensor;
 ]]></ST>
