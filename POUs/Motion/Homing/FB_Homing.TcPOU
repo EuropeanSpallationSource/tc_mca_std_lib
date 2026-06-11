@@ -108,7 +108,7 @@ mOutputs();
     <Folder Name="Initialization" Id="{a4834b0c-5a39-0343-1840-cdfcbbfa1e02}" />
     <Folder Name="StateMachine" Id="{5850658b-ad43-095c-267a-69fea0de8d61}" />
     <Method Name="mCallFunctionBlocks" Id="{9a2a738b-1099-0643-0d66-9fbff7e594f9}">
-      <Declaration><![CDATA[METHOD mCallFunctionBlocks
+      <Declaration><![CDATA[METHOD PRIVATE mCallFunctionBlocks
 VAR_IN_OUT
     Axis: Axis_Ref;
 END_VAR
@@ -306,7 +306,7 @@ fbHomeDirect(
       </Implementation>
     </Method>
     <Method Name="mExecuteHoming" Id="{831d0e15-bd95-07a7-1103-25ddd225f490}" FolderPath="StateMachine\">
-      <Declaration><![CDATA[METHOD mExecuteHoming
+      <Declaration><![CDATA[METHOD PRIVATE mExecuteHoming
 VAR_IN_OUT CONSTANT
     Axis: AXIS_REF;
     bBusy: BOOL;
@@ -367,7 +367,7 @@ END_CASE
       </Implementation>
     </Method>
     <Method Name="mFinalizeHoming" Id="{985c602b-5ff8-0a11-0819-2c700cbfd4d4}" FolderPath="StateMachine\">
-      <Declaration><![CDATA[METHOD mFinalizeHoming
+      <Declaration><![CDATA[METHOD PRIVATE mFinalizeHoming
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eHomingState OF
@@ -446,7 +446,7 @@ END_CASE
       </Implementation>
     </Method>
     <Method Name="mInitEnable" Id="{d3639741-5d83-088b-3be0-aaffdae6ce64}" FolderPath="Initialization\">
-      <Declaration><![CDATA[METHOD mInitEnable
+      <Declaration><![CDATA[METHOD PRIVATE mInitEnable
 VAR
     bCoarseEnable: BOOL := TRUE;
     bFineEnable: BOOL := TRUE;
@@ -489,7 +489,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mInitHomingSpeed" Id="{00be9f88-6273-09a7-37a4-10ee0f6ecbed}" FolderPath="Initialization\">
-      <Declaration><![CDATA[METHOD mInitHomingSpeed
+      <Declaration><![CDATA[METHOD PRIVATE mInitHomingSpeed
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eSelectedHomingRoutine OF
@@ -509,7 +509,7 @@ END_CASE
       </Implementation>
     </Method>
     <Method Name="mInitRoutineWithDirection" Id="{581a285e-7912-066c-0d2f-3ff5fae66c78}" FolderPath="Initialization\">
-      <Declaration><![CDATA[METHOD mInitRoutineWithDirection
+      <Declaration><![CDATA[METHOD PRIVATE mInitRoutineWithDirection
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Splitting directional information and routine state of E_HomingRoutines
@@ -573,7 +573,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mInitSwitchMode" Id="{f50489b4-e430-0f8d-2f89-3046b5b403e8}" FolderPath="Initialization\">
-      <Declaration><![CDATA[METHOD mInitSwitchMode
+      <Declaration><![CDATA[METHOD PRIVATE mInitSwitchMode
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//With mcOn no movement will be executed, if the switch already engaged
@@ -595,7 +595,7 @@ END_CASE
       </Implementation>
     </Method>
     <Method Name="mInputs" Id="{72678a17-6eef-0f45-3b2b-43faae16f2ad}">
-      <Declaration><![CDATA[METHOD mInputs
+      <Declaration><![CDATA[METHOD PRIVATE mInputs
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Options for common function blocks used for all routines
@@ -617,7 +617,7 @@ stRefSwitchSignal.Level := bHomeSensor;
       </Implementation>
     </Method>
     <Method Name="mOutputs" Id="{e4b80a65-8664-0ade-23e7-571538a05e85}">
-      <Declaration><![CDATA[METHOD mOutputs
+      <Declaration><![CDATA[METHOD PRIVATE mOutputs
 VAR
     bExecutingDetection: BOOL;
 END_VAR
@@ -658,7 +658,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mStateMachine" Id="{5662f5a0-70ad-0d45-1fe3-0f87072de8ff}" FolderPath="StateMachine\">
-      <Declaration><![CDATA[METHOD mStateMachine
+      <Declaration><![CDATA[METHOD PRIVATE mStateMachine
 VAR_IN_OUT CONSTANT
     Axis: AXIS_REF;
 END_VAR
