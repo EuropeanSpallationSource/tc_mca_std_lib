@@ -30,7 +30,7 @@ VAR_OUTPUT
 END_VAR
 
 VAR
-    eHomingState: E_HomeSequenceState;
+    eHomingState: E_HomeSequenceState := E_HomeSequenceState.eWaitForExecute;
     eHomingSpeed: (eDISABLED, eCOARSE, eFINE);
 
     eSelectedHomingRoutine: (eNO_HOMING := 0, eTO_LIMIT := 1, eTO_REF := 11, eTO_ENC_PULSE := 21, eTO_ENC_PULSE_VIA_LIMIT := 23, eTO_BLOCK := 30, eDIRECT := 90);
