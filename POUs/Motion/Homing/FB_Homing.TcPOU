@@ -355,7 +355,7 @@ END_VAR
             RETURN;
         END_IF
 
-        //Repeat fine detection with target switch mode
+        //Repeat fine detection with target switch mode (see mInitSwitchMode)
         IF (eCurrentDetectionMode = E_DetectionMode.eRising) AND (eFineSwitchMode = MC_Switch_Mode.mcFallingEdge) THEN
             eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
             eHomingState := E_HomeSequenceState.eInitDetetion;
@@ -458,7 +458,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Disable enable override based on coarse/fine homing speed
 CASE eSelectedHomingRoutine OF
-    //1. During eHomeToRef in fine stage no mechanical limit switches should be hit
+    //1. During eTO_REF in fine stage no mechanical limit switches should be hit
     eTO_REF:
         bFineEnable := FALSE;
 
@@ -584,7 +584,9 @@ eCoarseSwitchMode := MC_Switch_Mode.mcOn;
 
 CASE eCurrentDetectionMode OF
     E_DetectionMode.eRising:
-        //Reverse switch mode for the first execution of fine detect, if the switch is already engaged
+        (*Reverse switch mode for the first execution of fine detect, if the switch is already engaged.
+        This fixes an issue where, when the routine start at the edge of the switch, the Step function
+        starts to oscillate back and forth at the edge because it misses the edge detection.*)
         IF ((eSelectedHomingRoutine = eTO_LIMIT) AND stLimitSwitchSignal.Level)
         OR ((eSelectedHomingRoutine = eTO_REF) AND stRefSwitchSignal.Level) THEN
             eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
