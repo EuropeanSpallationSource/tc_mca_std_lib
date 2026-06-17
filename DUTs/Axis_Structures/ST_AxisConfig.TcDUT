@@ -43,6 +43,8 @@ STRUCT
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
     fWriteAxisParameter: LREAL; //Value to write to the selected axis parameter
     fReadAxisParameter: LREAL; //Current value of the selected axis parameter
+    fWriteMinSoftLimit: LREAL; //Value to write minimum position soft limit
+    fWriteMaxSoftLimit: LREAL; //Value to write maximum position soft limit
 
     //Multi-master axis parameters
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis; //Master axes for multi-master configuration
