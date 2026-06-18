@@ -245,7 +245,7 @@ when pressure is requested again.
 *)
 RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
-IF RTRIG_PressureRequest.Q AND _stAxis.Axis.Status.HasJob THEN
+IF RTRIG_PressureRequest.Q THEN
     _stAxis.stStatus.bAirpadTimeoutError := FALSE;
     bAirpadCommandAborted := TRUE;
     _stAxis.stStatus.nErrorID := E_CustomErrorIds.eNoCustomError;
@@ -287,7 +287,8 @@ CASE eAirpad OF
         // Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
+        IF _stAxis.stStatus.bError
+            OR NOT bPressureOnRequest THEN
             bAirpadError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeTimeout.Q THEN
@@ -305,7 +306,8 @@ CASE eAirpad OF
         IF _stAxis.stStatus.bError OR TON_Depressurize.Q THEN
             eAirpad := E_Airpad.eDepressurize;
 
-        ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
+        ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+            AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
             _stAxis.stStatus.bAirpadPressureError := TRUE;
             eAirpad := E_Airpad.eDepressurize;
         END_IF
@@ -324,9 +326,10 @@ mControl_Airpad.Busy := (eAirpad = E_Airpad.ePressurize);
 mControl_Airpad.Active := bPressureOnRequest OR (eAirpad <> E_Airpad.eDepressurize);
 mControl_Airpad.InVelocity := _stAxis.Axis.Status.Moving;
 mControl_Airpad.CommandAborted := bAirpadCommandAborted;
-mControl_Airpad.Error := _stAxis.stStatus.bError
-                            OR _stAxis.stStatus.bAirpadPressureError
-                            OR  _stAxis.stStatus.bAirpadTimeoutError;
+mControl_Airpad.Error :=
+    _stAxis.stStatus.bError
+    OR _stAxis.stStatus.bAirpadPressureError
+    OR  _stAxis.stStatus.bAirpadTimeoutError;
 
 // TODO: Should we check for unexpected pressure when in depressurize state?
 ]]></ST>
