@@ -477,6 +477,7 @@ bWaitingForMovePermit := bInternalWaitingForMovePermit;
 bMovePermit := bInternalMovePermit;
 
 mControl_CommandHandler.CommandAborted := bCommandAborted;
+mControl_CommandHandler.Done := bInternalExecute;
 mControl_CommandHandler.Busy := (eState <> E_CommandHandlerState.eIdle);
 mControl_CommandHandler.Error := _stAxis.stStatus.bCommandHandlerTimeoutError;
 IF _stAxis.stStatus.bCommandHandlerTimeoutError THEN
@@ -1788,7 +1789,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
-    tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    IF i <> 16 THEN
+        tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    END_IF
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
 fbDoneRTrig(CLK := tmpDone);
