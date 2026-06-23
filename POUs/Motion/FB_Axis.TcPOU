@@ -344,7 +344,7 @@ _stAxis.stStatus.bBacklashCompensating := fbBacklashCompensation.Limiting;
     </Method>
     <Method Name="mControl_CommandHandler" Id="{e4d415b3-33e2-0dab-1c34-04ed19023ade}" FolderPath="Control Methods\">
       <Declaration><![CDATA[// Handles delayed execution of motion commands due to e.g. auto-enable, airpad or external brake
-METHOD mControl_CommandHandler
+METHOD mControl_CommandHandler : ST_McStatus
 
 VAR_INPUT
     bAxisPermittedToMove: BOOL := FALSE;
@@ -354,6 +354,10 @@ END_VAR
 VAR_OUTPUT
     bWaitingForMovePermit: BOOL;
     bMovePermit: BOOL;
+END_VAR
+
+VAR
+    bCommandAborted: BOOL;
 END_VAR
 
 VAR_INST
@@ -439,6 +443,7 @@ END_IF
 
 IF _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
+    bCommandAborted := bInternalWaitingForMovePermit;
     eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
@@ -470,6 +475,13 @@ END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
 bMovePermit := bInternalMovePermit;
+
+mControl_CommandHandler.CommandAborted := bCommandAborted;
+mControl_CommandHandler.Busy := (eState <> E_CommandHandlerState.eIdle);
+mControl_CommandHandler.Error := _stAxis.stStatus.bCommandHandlerTimeoutError;
+IF _stAxis.stStatus.bCommandHandlerTimeoutError THEN
+    mControl_CommandHandler.ErrorID := TO_UDINT(E_CustomErrorIds.eCommandHandlerTimeoutError);
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -1937,7 +1949,7 @@ stMcStatusReadWriteCoE := mParameters_ReadWriteCoE();
 
 mControl_LimitHitTimer();
 mControl_LimitLinking();
-mControl_CommandHandler(
+stMcStatusCommandHandler := mControl_CommandHandler(
     bAxisPermittedToMove := _stAxis.stStatus.bAxisReadyToMove
         AND (_stAxis.stStatus.bFwEnabled OR _stAxis.stStatus.bBwEnabled),
     bPermitRequired :=
