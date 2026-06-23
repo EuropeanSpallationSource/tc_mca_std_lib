@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Axis" Id="{beb60ab5-3bf2-0ae6-2037-f6d7e95a54b2}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
@@ -69,6 +69,8 @@ VAR
     fbGearInMultiMaster: MC_GearInMultiMaster;
     stMcStatusGearInMultiMaster: ST_McStatus;
 
+    stMcStatusCommandHandler: ST_McStatus;
+
     //Variables for holding limits during homing
     bWaitForStopAfterLimitHit: BOOL := FALSE;
     fbRemovePowerTimer: TOF;
@@ -118,7 +120,7 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 15;
+    nMCSTATUS_ARRAY_SIZE: UINT := 16;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -177,6 +179,7 @@ astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
 astMcStatus[14] := ADR(stMcStatusReadWriteCoE);
 astMcStatus[15] := ADR(stMcStatusBacklash);
+astMcStatus[16] := ADR(stMcStatusCommandHandler);
 ]]></ST>
       </Implementation>
     </Method>
