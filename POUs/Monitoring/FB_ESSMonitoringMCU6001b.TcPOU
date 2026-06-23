@@ -61,12 +61,12 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Input variables
-AcknowledgeButton := bAcknowledgeButton;
-EStop1Released := TRUE;
+ErrorAcknowledgeButton := bAcknowledgeButton;
+EStopReleased := TRUE;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
-bAcknowledgeLED := AcknowledgeLED;
+bAcknowledgeLED := ErrorAcknowledgeLED;
 bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
