@@ -7,7 +7,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 1^Output'}
     bStatusLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 4^Output'}
-    bErrorAcknowledgeLED AT %Q*: BOOL;
+    bAcknowledgeLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 2^Output'}
     bEStopLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 4^Output'}
@@ -46,8 +46,8 @@ VAR
     bFuse8_OK AT %I*: BOOL;
 //	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
 //    bEStop1Released AT %I*: BOOL;
-//    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
-//    bSTO1Released AT %I*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
+    bSTO1Released AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
     bMCBFan_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
@@ -55,7 +55,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
     bDoorClosed AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 8^Input'}
-    bErrorAcknowledgeButton AT %I*: BOOL;
+    bAcknowledgeButton AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 2^Value'}
@@ -68,7 +68,7 @@ VAR
     nEcMasterDevState AT %I*: UINT;
 	
 	//Inputs from from the safety controller and the STO drives
-    bEStopReleased: BOOL;
+    bEStop1Released: BOOL;
     bSTOReleased: BOOL := 
 		GVL_SafetyIO.aTechnosoftIn[M01_AnalyzerLift.cAXIS_ID].bit3_STOStatus OR
 		GVL_SafetyIO.aTechnosoftIn[M02_SampleRot.cAXIS_ID].bit3_STOStatus;
@@ -84,12 +84,12 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Input variables
-ErrorAcknowledgeButton := bErrorAcknowledgeButton;
-EStopReleased := GVL_SafetyIO.stPNOZEtherCATIn.stMCCStatusIn.bit1_EStopOK;
+AcknowledgeButton := bAcknowledgeButton;
+EStop1Released := bEStop1Released;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
-bErrorAcknowledgeLED := ErrorAcknowledgeLED;
+bAcknowledgeLED := AcknowledgeLED;
 bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
