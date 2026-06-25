@@ -9,6 +9,7 @@ TYPE E_CommandHandlerState :
     eWaitPermits := 1, //Waiting for Airpad, Brake, Interlocks
     eStabilizeNC := 2, //Waiting for configurable nCommandHandlerWaitCycles
     eReleaseCommand := 3, //Setting bInternalExecute
+    eWaitForMotionStart := 4, //Waiting for bMoving, bDone, or bError
     eError := 99
 );
 END_TYPE

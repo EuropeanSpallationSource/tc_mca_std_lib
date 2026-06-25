@@ -424,7 +424,14 @@ CASE eState OF
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
-        eState := E_CommandHandlerState.eIdle;
+        eState := E_CommandHandlerState.eWaitForMotionStart;
+
+    E_CommandHandlerState.eWaitForMotionStart:
+        IF _stAxis.stStatus.bMoving
+            OR _stAxis.stStatus.bDone
+            OR _stAxis.stStatus.bError THEN
+            eState := E_CommandHandlerState.eIdle;
+        END_IF
 
 END_CASE
 
@@ -1967,7 +1974,8 @@ stMcStatusPower := mControl_Power();
 mControl_Airpad(
     bMoveRequest :=
         (_stAxis.stStatus.bCommandHandlerBufferingCommand
-            OR _stAxis.stStatus.bCommandHandlerMovePermit)
+            OR _stAxis.stStatus.bCommandHandlerMovePermit
+            OR _stAxis.stStatus.bMoving)
         AND _stAxis.stStatus.bEnabled,
     bManualControl := _stAxis.stControl.bAirpadManualControl,
     bManualPressureOn := _stAxis.stControl.bAirpadManualPressureOn,
