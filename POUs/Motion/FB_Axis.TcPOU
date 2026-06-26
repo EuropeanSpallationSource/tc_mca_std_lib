@@ -720,7 +720,7 @@ IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eHome THEN
 END_IF
 
 
-fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
+fbHome.eHomingRoutine := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
 fbHome(
@@ -816,9 +816,9 @@ END_IF
 
 fbPower.Enable := bEnableAmpCmd;
 
-fbPower.Enable_Negative := _stAxis.stStatus.bBwEnabled;
+fbPower.Enable_Negative := _stAxis.stStatus.bBwEnabled OR (bEnableAmpCmd AND fbHome.bEnableNegative);
 
-fbPower.Enable_Positive := _stAxis.stStatus.bFwEnabled;
+fbPower.Enable_Positive := _stAxis.stStatus.bFwEnabled OR (bEnableAmpCmd AND fbHome.bEnablePositive);
 
 fbPower.Override := _stAxis.stConfig.fOverride;
 
