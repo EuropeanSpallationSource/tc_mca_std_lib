@@ -11,7 +11,6 @@ VAR_INPUT
     bLimitFwd: BOOL;
     bLimitBwd: BOOL;
     bHomeSensor: BOOL;
-    eDetectionMode: E_DetectionMode := E_DetectionMode.eRising; //Detection mode (only valid for routines eTO_LIMIT and eTO_REF)
     eHomingRoutine: E_HomingRoutines := E_HomingRoutines.eNoHoming;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
@@ -675,7 +674,7 @@ END_VAR
 
     E_HomeSequenceState.eWaitForExecute:
         IF rtrigExecute.Q THEN
-            eCurrentDetectionMode := eDetectionMode;
+            eCurrentDetectionMode := stConfig.stHomingConfig.eDetectionMode;
 
             mInitRoutineWithDirection();
             mInitEnable();
