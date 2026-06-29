@@ -475,6 +475,13 @@ bSlaveLinkError := FALSE;
 aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
 aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
+IF nActualEcSlaves = 0 THEN
+    IF fbEtherCATAlarmDelayTON.Q THEN
+        ADSLOGSTR(ADSLOG_MSGTYPE_ERROR,'FB_ESSMonitoringBase Error: %s','0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
+    END_IF
+    RETURN;
+END_IF
+
 FOR i:=0 TO nActualEcSlaves-1 DO
     IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
