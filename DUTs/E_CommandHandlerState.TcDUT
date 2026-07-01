@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_CommandHandlerState" Id="{39f37c35-1f9e-4e92-9f3b-59d4c7283626}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CommandHandlerState :
+(
+    eIdle := 0,
+    eWaitPermits := 1, //Waiting for Airpad, Brake, Interlocks
+    eStabilizeNC := 2, //Waiting for configurable nCommandHandlerWaitCycles
+    eReleaseCommand := 3, //Setting bInternalExecute
+    eWaitForMotionStart := 4, //Waiting for bMoving, bDone, or bError
+    eError := 99
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
