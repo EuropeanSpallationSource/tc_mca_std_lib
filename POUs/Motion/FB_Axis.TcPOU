@@ -119,13 +119,12 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 15;
+    nMCSTATUS_ARRAY_SIZE: UINT := 18;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
-
 ]]></ST>
     </Implementation>
     <Folder Name="Control Methods" Id="{c04e3e71-df24-0c4d-24b3-0aa19beb5b98}" />
