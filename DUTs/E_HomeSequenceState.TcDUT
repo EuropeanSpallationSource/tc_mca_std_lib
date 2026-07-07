@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_HomeSequenceState" Id="{189a2f12-d696-0e1d-3afb-39b98121bbcb}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+TYPE E_HomeSequenceState :
+(
+    eWaitForExecute := 0,
+    eSelectDetection := 1,
+
+    //Execute detection
+    eInitDetetion := 10,
+    eExecuteDetection := 11,
+    eFinishDetection := 12,
+
+    //Finalize homing
+    eHomeDirect := 20,
+    eFinishHoming := 30,
+    eHomingInterrupted := 40,
+    eAbortHoming := 45,
+
+    //Result homing
+    eDone := 50,
+    eCommandAborted := 55,
+    eError := 60
+) UINT ;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
