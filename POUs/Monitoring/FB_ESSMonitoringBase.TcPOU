@@ -479,6 +479,8 @@ IF nActualEcSlaves = 0 THEN
     IF fbEtherCATAlarmDelayTON.Q THEN
         ADSLOGSTR(ADSLOG_MSGTYPE_ERROR,'FB_ESSMonitoringBase Error: %s','0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
     END_IF
+    bSlaveLinkError := TRUE;
+    aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
     RETURN;
 END_IF
 
