@@ -425,10 +425,6 @@ fbGetEcConfSlaves(
     pArrEcConfSlaveInfo := ADR(_aSlaveConfig),
     cbBufLen := SIZEOF(_aSlaveConfig),
     bExecute := TON_UpdateGetEcConfSlaves.Q);
-IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
-    aSlaveConfig := _aSlaveConfig;
-END_IF
-
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
@@ -482,6 +478,11 @@ IF nActualEcSlaves = 0 THEN
     bSlaveLinkError := TRUE;
     aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
     RETURN;
+END_IF
+
+//Copy slave config info from temporary container
+IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
+    MEMMOVE(destAddr:=ADR(aSlaveConfig), srcAddr:=ADR(_aSlaveConfig), n:=nActualEcSlaves*SIZEOF(ST_EcSlaveConfigData));
 END_IF
 
 FOR i:=0 TO nActualEcSlaves-1 DO
