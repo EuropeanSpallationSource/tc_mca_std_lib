@@ -482,31 +482,27 @@ END_CASE
     <Method Name="mInitEnable" Id="{d3639741-5d83-088b-3be0-aaffdae6ce64}" FolderPath="Initialization\">
       <Declaration><![CDATA[METHOD PRIVATE mInitEnable
 VAR
-    bCoarseEnable: BOOL := TRUE;
-    bFineEnable: BOOL := TRUE;
+    bCoarseEnable: BOOL := FALSE;
+    bFineEnable: BOOL := FALSE;
     bCoarseDirectionReversed: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Disable enable override based on coarse/fine homing speed
+        <ST><![CDATA[//Request power enable negative/positive, if the selected homing routine uses StepLimitSwitch,
+//otherwise it will result in CommandAborted on hitting the sensor
 CASE eSelectedHomingRoutine OF
-    //1. During eTO_REF in fine stage no mechanical limit switches should be hit
-    eTO_REF:
-        bFineEnable := FALSE;
 
-    //2. No enable override required during execution
-    eTO_ENC_PULSE,
-    eTO_BLOCK:
-        bCoarseEnable := FALSE;
-        bFineEnable := FALSE;
+    eTO_LIMIT:
+        bCoarseEnable := TRUE;
+        bFineEnable := TRUE;
 
-    //3. During coarse stage the direction is reversed and no enable in fine stage
     eTO_ENC_PULSE_VIA_LIMIT:
         bCoarseDirectionReversed := TRUE;
-        bFineEnable := FALSE;
+        bCoarseEnable := TRUE;
 
 END_CASE
 
+//Only enable in the direction of the homing movement
 IF eSelectedDirection = eFORWARD THEN
     bCoarseEnablePositive := bCoarseEnable AND NOT bCoarseDirectionReversed;
     bFineEnablePositive := bFineEnable;
