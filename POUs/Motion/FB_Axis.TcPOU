@@ -728,7 +728,7 @@ fbHome(
     bLimitBwd := _stAxis.stInputs.bLimitBwd,
     bLimitFwd := _stAxis.stInputs.bLimitFwd,
     bHomeSensor := _stAxis.stInputs.bHomeSensor,
-    stConfig := _stAxis.stConfig);
+    stConfig := _stAxis.stConfig.stHomingConfig);
 fbHome.bExecute := FALSE;
 
 mControl_Home.Busy := fbHome.bBusy;
