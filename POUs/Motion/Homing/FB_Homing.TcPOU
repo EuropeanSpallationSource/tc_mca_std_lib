@@ -51,6 +51,7 @@ VAR
     //Step functions
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
+    fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulse: MC_StepReferencePulse;
     fbStepBlockLag: MC_StepBlockLagBased;
@@ -107,6 +108,40 @@ mOutputs();
     </Implementation>
     <Folder Name="Initialization" Id="{a4834b0c-5a39-0343-1840-cdfcbbfa1e02}" />
     <Folder Name="StateMachine" Id="{5850658b-ad43-095c-267a-69fea0de8d61}" />
+    <Method Name="mCalcToRefDirection" Id="{ea329024-e768-02c9-1e7d-fe6d98db5ff1}" FolderPath="Direction\">
+      <Declaration><![CDATA[METHOD PRIVATE mCalcToRefDirection : MC_Home_Direction
+VAR_INPUT
+    eDirection: MC_Home_Direction;
+    eDetection: E_DetectionMode;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eDetection OF
+    //Fastest exection is with using switch direction variant
+    E_DetectionMode.eRising:
+        CASE eDirection OF
+            MC_Home_Direction.mcNegativeDirection:
+                mCalcToRefDirection := MC_Home_Direction.mcSwitchNegative;
+            MC_Home_Direction.mcPositiveDirection:
+                mCalcToRefDirection := MC_Home_Direction.mcSwitchPositive;
+            ELSE
+                mCalcToRefDirection := eDirection;
+        END_CASE
+
+    //Fastest exection is with using normal direction variant
+    E_DetectionMode.eFalling:
+        CASE eDirection OF
+            MC_Home_Direction.mcSwitchNegative:
+                mCalcToRefDirection := MC_Home_Direction.mcNegativeDirection;
+            MC_Home_Direction.mcSwitchPositive:
+                mCalcToRefDirection := MC_Home_Direction.mcPositiveDirection;
+            ELSE
+                mCalcToRefDirection := eDirection;
+        END_CASE
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mCallFunctionBlocks" Id="{9a2a738b-1099-0643-0d66-9fbff7e594f9}">
       <Declaration><![CDATA[METHOD PRIVATE mCallFunctionBlocks
 VAR_IN_OUT
@@ -198,17 +233,18 @@ CASE eSelectedHomingRoutine OF
             Error => bCoarseError,
             ErrorID => nCoarseErrorID);
 
-        //Using StepLimitSwitch over StepAbsoluteSwitch to reduce the movement
-        fbStepLimitSwitch(
+        fbStepAbsoluteSwitch(
             Axis := Axis,
             Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
-            Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-            LimitSwitchMode := eFineSwitchMode,
-            LimitSwitchSignal := stRefSwitchSignal,
+            Direction := mCalcToRefDirection(eCurrentDirection, eCurrentDetectionMode),
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            SwitchMode := eFineSwitchMode,
+            ReferenceSignal := stRefSwitchSignal,
+            PositiveLimitSwitch := bLimitSwitchFwdPressed,
+            NegativeLimitSwitch := bLimitSwitchBwdPressed,
             Velocity := fVelocityFromCam,
             SetPosition := fHomePosition,
             Options := stOptions,
