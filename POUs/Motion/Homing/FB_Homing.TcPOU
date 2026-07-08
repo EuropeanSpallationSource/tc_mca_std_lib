@@ -41,6 +41,10 @@ VAR
     eCoarseSwitchMode: MC_Switch_Mode; //Switch mode used for coarse detection
     eFineSwitchMode: MC_Switch_Mode; //Switch mode used for fine detection
 
+    bLimitSwitchFwdPressed: BOOL; //Forward limit switch signal is actively engaged / pressed
+    bLimitSwitchBwdPressed: BOOL; //Backward limit switch is actively engaged / pressed
+    bHomeSensorEngaged: BOOL; //Homing sensor is actively detects presence / engaged / pressed
+
     //Hardware Signals
     stLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
     stReversedLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
@@ -223,8 +227,8 @@ CASE eSelectedHomingRoutine OF
             TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             SwitchMode := eCoarseSwitchMode,
             ReferenceSignal := stRefSwitchSignal,
-            PositiveLimitSwitch := NOT(bLimitFwd),
-            NegativeLimitSwitch := NOT(bLimitBwd),
+            PositiveLimitSwitch := bLimitSwitchFwdPressed,
+            NegativeLimitSwitch := bLimitSwitchBwdPressed,
             Velocity := fVelocityToCam,
             Options := stOptions,
             Done => bCoarseDone,
@@ -637,22 +641,27 @@ END_CASE
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Options for common function blocks used for all routines
-stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
-stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
+stOptions.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.bEnableLagErrorDetection;
 
 //Options for StepBlockLagDetection
-stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
-stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
+stOptions3.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.bInstantLagReduction;
 
-//Reference signal
+//Check normal closed state of homing signals
+bLimitSwitchFwdPressed := bLimitFwd XOR stConfig.bLimitFwdNormallyClosed;
+bLimitSwitchBwdPressed := bLimitBwd XOR stConfig.bLimitBwdNormallyClosed;
+bHomeSensorEngaged := bHomeSensor XOR stConfig.bHomeSensorNormallyClosed;
+
+//Update signal ref
 IF eCurrentDirection = MC_Home_Direction.mcPositiveDirection THEN
-    stLimitSwitchSignal.Level := NOT(bLimitFwd);
-    stReversedLimitSwitchSignal.Level := NOT(bLimitBwd);
+    stLimitSwitchSignal.Level := bLimitSwitchFwdPressed;
+    stReversedLimitSwitchSignal.Level := bLimitSwitchBwdPressed;
 ELSE
-    stLimitSwitchSignal.Level := NOT(bLimitBwd);
-    stReversedLimitSwitchSignal.Level := NOT(bLimitFwd);
+    stLimitSwitchSignal.Level := bLimitSwitchBwdPressed;
+    stReversedLimitSwitchSignal.Level := bLimitSwitchFwdPressed;
 END_IF
-stRefSwitchSignal.Level := bHomeSensor;
+stRefSwitchSignal.Level := bHomeSensorEngaged;
 ]]></ST>
       </Implementation>
     </Method>

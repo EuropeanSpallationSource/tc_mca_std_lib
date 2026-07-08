@@ -4,16 +4,17 @@
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
-    eDetectionMode: E_DetectionMode := E_DetectionMode.eRising; //Homing signal detection mode (only valid for routines home to limit and ref)
+    bLimitFwdNormallyClosed: BOOL := TRUE; //Forward limit switch is normally closed
+    bLimitBwdNormallyClosed: BOOL := TRUE; //Backward limit switch is normally closed
+    bHomeSensorNormallyClosed: BOOL := FALSE; //Home sensor signal is normally closed
 
     //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. TRUE when using stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
-    bEnableLagErrorDetection :BOOL := TRUE; //Keeps the lag error detection active during homing
-    bInstantLagReduction :BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, the lag error is dissipated abruptly by setting this flag.
+    bEnableLagErrorDetection: BOOL := TRUE; //Keeps the lag error detection active during homing
+    bInstantLagReduction: BOOL := FALSE; //(belongs to Option4) When referencing to a mechanical fixed stop, the lag error is dissipated abruptly by setting this flag.
     tTimeLimit: TIME; //Exceeding this time leads to the search procedure being aborted.
     fDistanceLimit: LREAL; //Distance limit for homing; exceeding this from the start position aborts the procedure
     fTorqueLimit: LREAL; //Torque limit to prevent mechanical damage
-
 
     //Homing Configuration for Step Block
     fDetectionVelocityLimit: LREAL; //Velocity threshold to detect a fixed stop within the specified time
