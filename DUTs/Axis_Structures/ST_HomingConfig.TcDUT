@@ -4,6 +4,7 @@
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
+    eDetectionMode: E_DetectionMode := E_DetectionMode.eFalling; //Homing signal detection mode (only valid for routines home to limit and ref)
     bLimitFwdNormallyClosed: BOOL := TRUE; //Forward limit switch is normally closed
     bLimitBwdNormallyClosed: BOOL := TRUE; //Backward limit switch is normally closed
     bHomeSensorNormallyClosed: BOOL := FALSE; //Home sensor signal is normally closed
