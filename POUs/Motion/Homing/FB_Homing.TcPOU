@@ -394,13 +394,6 @@ END_VAR
             RETURN;
         END_IF
 
-        //Repeat fine detection with target switch mode (see mInitSwitchMode)
-        IF (eCurrentDetectionMode = E_DetectionMode.eRising) AND (eFineSwitchMode = MC_Switch_Mode.mcFallingEdge) THEN
-            eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
-            eHomingState := E_HomeSequenceState.eInitDetetion;
-            RETURN;
-        END_IF
-
         eHomingState := E_HomeSequenceState.eFinishHoming;
 
 END_CASE
@@ -621,15 +614,7 @@ eCoarseSwitchMode := MC_Switch_Mode.mcOn;
 
 CASE eCurrentDetectionMode OF
     E_DetectionMode.eRising:
-        (*Reverse switch mode for the first execution of fine detect, if the switch is already engaged.
-        This fixes an issue where, when the routine start at the edge of the switch, the Step function
-        starts to oscillate back and forth at the edge because it misses the edge detection.*)
-        IF ((eSelectedHomingRoutine = eTO_LIMIT) AND stLimitSwitchSignal.Level)
-        OR ((eSelectedHomingRoutine = eTO_REF) AND stRefSwitchSignal.Level) THEN
-            eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
-        ELSE
-            eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
-        END_IF
+        eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
     E_DetectionMode.eFalling:
         eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
 END_CASE
