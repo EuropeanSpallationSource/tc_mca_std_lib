@@ -8,9 +8,9 @@ VAR_IN_OUT
 END_VAR
 VAR_INPUT
     bExecute: BOOL;
-    bLimitFwd: BOOL;
-    bLimitBwd: BOOL;
-    bHomeSensor: BOOL;
+    bLimitFwd: BOOL; //Forward limit switch
+    bLimitBwd: BOOL; //Backward limit switch
+    bHomeSensor: BOOL; //Home sensor signal
     eHomingRoutine: E_HomingRoutines := E_HomingRoutines.eNoHoming;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
@@ -21,8 +21,8 @@ VAR_OUTPUT
     bBusy: BOOL;
     bActive: BOOL;
     bCommandAborted: BOOL;
-    bEnablePositive: BOOL;
-    bEnableNegative: BOOL;
+    bEnablePositive: BOOL; //Request power enable positive during homing execution
+    bEnableNegative: BOOL; //Request power enable negative during homing execution
     bError: BOOL;
     nErrorID: UDINT;
     nErrorState: UINT;
@@ -74,10 +74,10 @@ VAR
     nFineErrorID: UDINT;
 
     //Enable override
-    bCoarseEnablePositive: BOOL; //Enable override during coarse stage in positive direction (forward)
-    bCoarseEnableNegative: BOOL; //Enable override during coarse stage in negative direction (backward)
-    bFineEnablePositive: BOOL; //Enable override during fine stage in positive direction (forward)
-    bFineEnableNegative: BOOL; //Enable override during fine stage in negative direction (backward)
+    bCoarseEnablePositive: BOOL; //Request power enable positive (forward), during coarse stage
+    bCoarseEnableNegative: BOOL; //Request power enable negative (backward), during coarse stage
+    bFineEnablePositive: BOOL; //Request power enable positive (forward), during fine stage
+    bFineEnableNegative: BOOL; //Request power enable positive (backward), during fine stage
 
     //Finalizing functions
     fbHomeDirect: MC_HomeDirect;
