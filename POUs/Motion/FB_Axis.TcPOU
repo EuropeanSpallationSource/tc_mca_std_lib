@@ -247,7 +247,7 @@ TON_Depressurize(
 CASE eAirpad OF
 
     E_Airpad.eDepressurize:
-        // No movement requested -> Airpad off
+        //No movement requested -> Airpad off
         _stAxis.stControl.bPressurizeAirpad := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
@@ -262,7 +262,7 @@ CASE eAirpad OF
 
 
     E_Airpad.ePressurize:
-        // Movement requested -> Pressurize airpad
+        //Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
@@ -286,7 +286,7 @@ CASE eAirpad OF
 
 
     E_Airpad.eReadyToMove:
-        // Movement requested -> Airpad inflated
+        //Movement requested -> Airpad inflated
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
