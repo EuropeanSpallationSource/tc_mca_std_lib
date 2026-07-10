@@ -308,7 +308,7 @@ bReady :=
         AND _stAxis.stInputs.bAirpadPressurized)
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 
-// ST_McStatus mapping
+//ST_McStatus mapping
 mControl_Airpad.Error := bAirpadError;
 mControl_Airpad.ErrorID := nAirpadErrorId;
 
