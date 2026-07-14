@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZRawOut" Id="{f721d84d-ba9b-4caa-9515-51e70651d496}">
+    <Declaration><![CDATA[TYPE ST_PNOZRawOut :
+STRUCT
+    aSafetyFunction : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF_OUTPUT] OF ST_SafetyFunctionOut;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

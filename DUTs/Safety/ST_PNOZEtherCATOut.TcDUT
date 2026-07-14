@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATOut" Id="{2f65ec2d-5561-0256-2e54-58b3e165bd48}">
+    <Declaration><![CDATA[TYPE ST_PNOZEtherCATOut :
+STRUCT
+    stFeedback          : ST_SafetyFeedback;
+    aSafetyFunctionOut  : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SF_OUTPUT] OF ST_SafetyFunctionOut;
+    aSubSystemOut       : ARRAY[1..GVL_SafetyIO.UPPER_BOUND_SS] OF ST_SubSystemOut;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

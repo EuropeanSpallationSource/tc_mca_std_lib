@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyFeedback" Id="{6e0330ba-8186-0b3e-1827-26396cd792da}">
+    <Declaration><![CDATA[TYPE ST_SafetyFeedback :
+STRUCT
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
