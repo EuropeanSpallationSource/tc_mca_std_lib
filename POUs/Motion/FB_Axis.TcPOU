@@ -71,6 +71,7 @@ VAR
 
     //Custom made methods MC Status
     stMcStatusTempDisable: ST_McStatus;
+    stMcStatusAirpad: ST_McStatus;
 
     //Variables for holding limits during homing
     bWaitForStopAfterLimitHit: BOOL := FALSE;
@@ -121,13 +122,12 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 16;
+    nMCSTATUS_ARRAY_SIZE: UINT := 18;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
-
 ]]></ST>
     </Implementation>
     <Folder Name="Control Methods" Id="{c04e3e71-df24-0c4d-24b3-0aa19beb5b98}" />
@@ -181,12 +181,13 @@ astMcStatus[13] := ADR(stMcStatusWriteParameter);
 astMcStatus[14] := ADR(stMcStatusReadWriteCoE);
 astMcStatus[15] := ADR(stMcStatusBacklash);
 astMcStatus[16] := ADR(stMcStatusTempDisable);
+astMcStatus[18] := ADR(stMcStatusAirpad);
 ]]></ST>
       </Implementation>
     </Method>
     <Method Name="mControl_Airpad" Id="{ec15769e-bbb8-0e4f-2638-9a7ccf63a25a}" FolderPath="Control Methods\">
       <Declaration><![CDATA[// Controls pressure to airpad
-METHOD mControl_Airpad
+METHOD mControl_Airpad: ST_McStatus
 VAR_INPUT
     bMoveRequest: BOOL;
     bManualControl: BOOL;
@@ -206,6 +207,9 @@ VAR_INST
     bNotPressurizedInTime: BOOL := FALSE;
     bPressureOnRequest: BOOL := FALSE;
     RTRIG_ManualControl: R_TRIG;
+
+    bAirpadError: BOOL;
+    nAirpadErrorId: UDINT := 0;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -213,11 +217,11 @@ END_VAR
     RETURN;
 END_IF
 
-RTRIG_ManualControl(CLK := _stAxis.stControl.bAirpadManualControl);
-// Use snapshot of bMoveRequest when bAirpadManualPressureOn selected
+RTRIG_ManualControl(CLK := _stAxis.stConfig.bAirpadManualControl);
+
 IF RTRIG_ManualControl.Q THEN
     _stAxis.stControl.bAirpadManualPressureOn := bMoveRequest;
-ELSIF NOT _stAxis.stControl.bAirpadManualControl THEN
+ELSIF NOT _stAxis.stConfig.bAirpadManualControl THEN
     _stAxis.stControl.bAirpadManualPressureOn := FALSE;
 END_IF
 
@@ -229,14 +233,8 @@ bPressureOnRequest :=
 
 RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
-IF RTRIG_PressureRequest.Q THEN
-    _stAxis.stStatus.bAirpadTimeoutError := FALSE;
-    _stAxis.stStatus.nErrorID := E_CustomErrorIds.eNoCustomError;
-END_IF
-
 TON_PressurizeAirpad(
-    IN :=
-        bPressureOnRequest
+    IN := bPressureOnRequest
         AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND _stAxis.stInputs.bAirpadPressurized)
         OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
@@ -248,39 +246,51 @@ TON_PressurizeTimeout(
 
 TON_Depressurize(
     IN := NOT bPressureOnRequest,
-    PT := _stAxis.stConfig.stAirpadBrake.tAirpadOffHysteresis);
+    PT := _stAxis.stConfig.stAirpadBrake.tAirpadOffDelayTime);
 
 CASE eAirpad OF
 
     E_Airpad.eDepressurize:
-        // No movement requested -> Airpad off
+        //No movement requested -> Airpad off
         _stAxis.stControl.bPressurizeAirpad := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
             AND NOT _stAxis.stStatus.bAirpadPressureError
             AND NOT _stAxis.stStatus.bAirpadTimeoutError THEN
+            bAirpadError := FALSE;
             _stAxis.stStatus.bAirpadTimeoutError := FALSE;
+            _stAxis.stStatus.bAirpadPressureError := FALSE;
+            nAirpadErrorId := 0;
             eAirpad := E_Airpad.ePressurize;
         END_IF
 
 
     E_Airpad.ePressurize:
-        // Movement requested -> Pressurize airpad
+        //Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError
-            OR NOT bPressureOnRequest THEN
+        IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeTimeout.Q THEN
-            _stAxis.stStatus.bAirpadTimeoutError := TRUE;
-            eAirpad := E_Airpad.eDepressurize;
+            IF _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
+                AND NOT _stAxis.stInputs.bAirpadPressurized THEN
+                bAirpadError := TRUE;
+                _stAxis.stStatus.bAirpadPressureError := TRUE;
+                nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
+                eAirpad := E_Airpad.eDepressurize;
+            ELSE
+                bAirpadError := TRUE;
+                _stAxis.stStatus.bAirpadTimeoutError := TRUE;
+                nAirpadErrorId := E_CustomErrorIds.eAirPadTimeoutError;
+                eAirpad := E_Airpad.eDepressurize;
+            END_IF
         ELSIF TON_PressurizeAirpad.Q THEN
             eAirpad := E_Airpad.eReadyToMove;
         END_IF
 
 
     E_Airpad.eReadyToMove:
-        // Movement requested -> Airpad inflated
+        //Movement requested -> Airpad inflated
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
@@ -288,7 +298,9 @@ CASE eAirpad OF
             eAirpad := E_Airpad.eDepressurize;
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
+            bAirpadError := TRUE;
             _stAxis.stStatus.bAirpadPressureError := TRUE;
+            nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
             eAirpad := E_Airpad.eDepressurize;
         END_IF
 
@@ -300,7 +312,11 @@ bReady :=
         AND _stAxis.stInputs.bAirpadPressurized)
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 
-// TODO: Should we check for unexpected pressure when in depressurize state?
+//ST_McStatus mapping
+mControl_Airpad.Error := bAirpadError;
+mControl_Airpad.ErrorID := nAirpadErrorId;
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -725,7 +741,7 @@ IF _stAxis.stStatus.eInternalMotionCommand = E_MotionFunctions.eHome THEN
 END_IF
 
 
-fbHome.eHomeSeq := _stAxis.stConfig.eHomeSeq;
+fbHome.eHomingRoutine := _stAxis.stConfig.eHomeSeq;
 fbHome.fHomePosition := _stAxis.stConfig.fHomePosition;
 fbHome.fHomeFinishDistance := _stAxis.stConfig.fHomeFinishDistance;
 fbHome(
@@ -822,9 +838,9 @@ END_IF
 
 fbPower.Enable := bEnableAmpCmd;
 
-fbPower.Enable_Negative := _stAxis.stStatus.bBwEnabled;
+fbPower.Enable_Negative := _stAxis.stStatus.bBwEnabled OR (bEnableAmpCmd AND fbHome.bEnableNegative);
 
-fbPower.Enable_Positive := _stAxis.stStatus.bFwEnabled;
+fbPower.Enable_Positive := _stAxis.stStatus.bFwEnabled OR (bEnableAmpCmd AND fbHome.bEnablePositive);
 
 fbPower.Override := _stAxis.stConfig.fOverride;
 
@@ -990,14 +1006,14 @@ ELSE
         sErrorMessage := '';
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
-        IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
+        IF fTemperatureValue <= (_stAxis.stConfig.fMaxTemperature - 5.0) THEN
             _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
             bResetErrorMessage := FALSE;
             sErrorMessage := '';
         ELSE
             bResetErrorMessage := TRUE;
         END_IF
-    ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
+    ELSIF fTemperatureValue >= _stAxis.stConfig.fMaxTemperature THEN
         bResetErrorMessage := TRUE;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
         IF fbHighTempDisableTrig.Q THEN
@@ -1950,7 +1966,7 @@ mControl_Airpad(
         (_stAxis.stStatus.bCommandHandlerBufferingCommand
             OR _stAxis.stStatus.bCommandHandlerMovePermit)
         AND _stAxis.stStatus.bEnabled,
-    bManualControl := _stAxis.stControl.bAirpadManualControl,
+    bManualControl := _stAxis.stConfig.bAirpadManualControl,
     bManualPressureOn := _stAxis.stControl.bAirpadManualPressureOn,
     bReady => _stAxis.stStatus.bAirpadReady);
 

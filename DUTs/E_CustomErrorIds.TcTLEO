@@ -5,6 +5,8 @@
 {attribute 'strict'}
 TYPE E_CustomErrorIds :
 (
+    //More information in: https://confluence.ess.eu/spaces/MCAG/pages/968065463/Custom+Error+IDs
+
     eNoCustomError := 0,
     eTemperatureSensorError := 16#10201,
     eAirPadPressureError := 16#10202,
