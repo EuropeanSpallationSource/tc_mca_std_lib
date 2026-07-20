@@ -329,7 +329,6 @@ fbFinishHoming(
     Axis := Axis,
     Execute := eHomingState = E_HomeSequenceState.eFinishHoming,
     Velocity := fVelocityToCam,
-    Distance := fHomeFinishDistance,
     Parameter := stHomingParameter);
 
 fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
@@ -392,6 +391,13 @@ END_VAR
             eHomingSpeed := eFINE;
             eHomingState := E_HomeSequenceState.eInitDetetion;
             RETURN;
+        END_IF
+
+        //Calculate distance for finish homing
+        IF stConfig.bAbsoluteMoveAtFinishHoming THEN
+            fbFinishHoming.Distance := fHomeFinishDistance - Axis.NcToPlc.ActPos;
+        ELSE
+            fbFinishHoming.Distance := fHomeFinishDistance;
         END_IF
 
         eHomingState := E_HomeSequenceState.eFinishHoming;

@@ -21,6 +21,9 @@ STRUCT
     fDetectionVelocityLimit: LREAL; //Velocity threshold to detect a fixed stop within the specified time
     tDetectionVelocityTime: TIME; //Time duration to detect velocity drop at a fixed stop
     fLagLimit: LREAL; //Lag limit value for detecting a fixed stop
+
+    //Finish Homing
+    bAbsoluteMoveAtFinishHoming: BOOL := FALSE; //When set to TRUE the fHomeFinishDistance is used as absolute move
 END_STRUCT
 END_TYPE
 ]]></Declaration>
