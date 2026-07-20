@@ -966,11 +966,13 @@ END_VAR
       <Implementation>
         <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
 sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(nAxisId));
-fbHighTempDisableTrig(CLK:=mControl_TemperatureDisable.Active);
-fbSensorErrorTrig(CLK:=bTempSensorError);
+fbHighTempDisableTrig(CLK := mControl_TemperatureDisable.Active);
+fbSensorErrorTrig(CLK := bTempSensorError);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
-fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorMessageTON(in:=bResetErrorMessage, PT:=T#30M);
+fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,
+    fTemperatureScaledValue,
+    _stAxis.stControl.fMaskedTemperature);
+fbErrorMessageTON(IN := bResetErrorMessage, PT:=T#30M);
 
 _stAxis.stStatus.fActTemperature := fTemperatureValue;
 
@@ -1000,7 +1002,6 @@ IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNE
         bResetErrorMessage := FALSE;
     END_IF
 ELSE
-    _stAxis.stStatus.bTempSensorError := FALSE;
     IF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
         bResetErrorMessage := FALSE;
         sErrorMessage := '';
@@ -1026,6 +1027,8 @@ ELSE
         END_IF
     END_IF
 END_IF
+
+_stAxis.stStatus.bTempSensorError := bTempSensorError;
 
 mControl_TemperatureDisable.Active := bEnableTemperatureDisable;
 mControl_TemperatureDisable.Error := bTempSensorError;
