@@ -98,8 +98,8 @@ VAR
 END_VAR
 
 VAR CONSTANT
-    nERROR_ABORT_HOMING: UDINT := 16#E5501; //Drive parameters were not restored aftor homing
-    nERROR_POWER_DISABLED: UDINT := 16#E5502; //Power was disabled during homing procedure
+    nERROR_ABORT_HOMING: UDINT := 16#4B9F; //The abortion of a homing has failed. https://infosys.beckhoff.com/english.php?content=../content/1033/tcncerrcode2/513151243.html
+    nERROR_POWER_DISABLED: UDINT := 16#4650; //Drive hardware not ready to operate. https://infosys.beckhoff.com/english.php?content=../content/1033/tcncerrcode2/4670612235.html
 END_VAR
 ]]></Declaration>
     <Implementation>
