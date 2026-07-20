@@ -473,6 +473,9 @@ END_CASE
             ELSE
                 eHomingState := E_HomeSequenceState.eCommandAborted;
             END_IF
+
+            //Fix issue CommandAborted output of MC_AbortHoming stays TRUE once its set
+            MEMSET(destAddr:=ADR(fbAbortHoming.CommandAborted), fillByte:=0, n:=SIZEOF(fbAbortHoming.CommandAborted));
         END_IF
 
 END_CASE
