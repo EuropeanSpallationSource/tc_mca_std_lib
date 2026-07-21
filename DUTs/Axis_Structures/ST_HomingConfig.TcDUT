@@ -4,8 +4,7 @@
     <Declaration><![CDATA[TYPE ST_HomingConfig :
 STRUCT
     //Hardware signals
-    eLimitSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the limit switch signal
-    eRefSwitchMode: MC_Switch_Mode := mcRisingEdge; //Mode for detecting the reference/homing switch signal
+    eDetectionMode: E_DetectionMode := E_DetectionMode.eRising; //Homing signal detection mode (only valid for routines home to limit and ref)
 
     //General Advanced Homing Configuration
     bDisableDriveAccess: BOOL := TRUE; //Disables the drive access to drives. TRUE when using stepper motors. If supported in drive, can be set to FALSE, e.g. for AX5106.
