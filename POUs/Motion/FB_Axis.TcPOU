@@ -942,13 +942,11 @@ VAR_INPUT
 END_VAR
 
 VAR
-    nAxisId: UINT;
-    sErrorMessageAxis: STRING;
+    nAxisId: DINT;
 END_VAR
 
 VAR_INST
-    rTrigSensorError: R_TRIG;
-    rTrigHighTempDisable: R_TRIG;
+    rTrigErrorMessage: R_TRIG;
     fbErrorMessageTON: TON;
     fTemperatureScaledValue: REAL;
     fTemperatureValue: REAL;
@@ -963,8 +961,8 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[rTrigHighTempDisable(CLK := mControl_TemperatureDisable.Active);
-rTrigSensorError(CLK := bTempSensorError);
+        <ST><![CDATA[nAxisId := UDINT_TO_DINT(_stAxis.Axis.NcToPlc.AxisId);
+rTrigErrorMessage(CLK := bResetErrorMessage);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,
     fTemperatureScaledValue,
@@ -986,7 +984,7 @@ IF bTempSensorError THEN
     bResetErrorMessage := TRUE;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
 
-    IF rTrigSensorError.Q THEN
+    IF rTrigErrorMessage.Q THEN
         IF fTemperatureValue = fDISCONNECTED_VALUE THEN
             ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
                 msgFmtStr := 'ERROR: Temperature sensor of Axis %d is disconnected.',
@@ -1003,6 +1001,7 @@ IF bTempSensorError THEN
         bResetErrorMessage := FALSE;
     END_IF
 ELSE
+    nErrorID := E_CustomErrorIds.eNoCustomError;
     IF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
         bResetErrorMessage := FALSE;
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
@@ -1016,9 +1015,9 @@ ELSE
     ELSIF fTemperatureValue >= _stAxis.stConfig.fMaxTemperature THEN
         bResetErrorMessage := TRUE;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        IF rTrigHighTempDisable.Q THEN
+        IF rTrigErrorMessage.Q THEN
             ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
-                msgFmtStr := 'ERROR: Axis temperature too hot. Axis %d was disabled',
+                msgFmtStr := 'ERROR: Axis temperature too hot. Axis %d was disabled.',
                 dintArg := nAxisId);
         END_IF
 
