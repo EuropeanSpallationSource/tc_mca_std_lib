@@ -947,12 +947,11 @@ VAR
 END_VAR
 
 VAR_INST
-    fbSensorErrorTrig: R_TRIG;
-    fbHighTempDisableTrig: R_TRIG;
+    rTrigSensorError: R_TRIG;
+    rTrigHighTempDisable: R_TRIG;
     fbErrorMessageTON: TON;
     fTemperatureScaledValue: REAL;
     fTemperatureValue: REAL;
-    sErrorMessage: STRING(255);
     bResetErrorMessage: BOOL;
     bTempSensorError: BOOL := FALSE;
     nErrorID: UDINT := 0;
@@ -964,10 +963,8 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
-sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(nAxisId));
-fbHighTempDisableTrig(CLK := mControl_TemperatureDisable.Active);
-fbSensorErrorTrig(CLK := bTempSensorError);
+        <ST><![CDATA[rTrigHighTempDisable(CLK := mControl_TemperatureDisable.Active);
+rTrigSensorError(CLK := bTempSensorError);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
 fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,
     fTemperatureScaledValue,
@@ -980,20 +977,24 @@ IF NOT bEnableTemperatureDisable THEN
     RETURN;
 END_IF
 
+bTempSensorError := fTemperatureValue >= fDISCONNECTED_VALUE
+    OR fTemperatureValue <= fWRONG_CONNECTION_VALUE;
+
 //Check for disconnection or wrongly connected errors
-IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNECTION_VALUE THEN
-    bTempSensorError := TRUE;
+IF bTempSensorError THEN
     nErrorID := E_CustomErrorIds.eTemperatureSensorError;
     bResetErrorMessage := TRUE;
     _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
 
-    IF fbSensorErrorTrig.Q THEN
+    IF rTrigSensorError.Q THEN
         IF fTemperatureValue = fDISCONNECTED_VALUE THEN
-            sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Temperature sensor of Axis %d is disconnected.',
+                dintArg := nAxisId);
         ELSIF fTemperatureValue = fWRONG_CONNECTION_VALUE THEN
-            sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check pin connections.');
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Temperature sensor of Axis %d is wrongly connected, check pin connections.',
+                dintArg := nAxisId);
         END_IF
     END_IF
 
@@ -1004,22 +1005,21 @@ IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNE
 ELSE
     IF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
         bResetErrorMessage := FALSE;
-        sErrorMessage := '';
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
     ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
         IF fTemperatureValue <= (_stAxis.stConfig.fMaxTemperature - 5.0) THEN
             _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
             bResetErrorMessage := FALSE;
-            sErrorMessage := '';
         ELSE
             bResetErrorMessage := TRUE;
         END_IF
     ELSIF fTemperatureValue >= _stAxis.stConfig.fMaxTemperature THEN
         bResetErrorMessage := TRUE;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-        IF fbHighTempDisableTrig.Q THEN
-            sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+        IF rTrigHighTempDisable.Q THEN
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Axis temperature too hot. Axis %d was disabled',
+                dintArg := nAxisId);
         END_IF
 
         IF fbErrorMessageTON.Q THEN
