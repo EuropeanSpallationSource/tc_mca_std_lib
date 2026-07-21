@@ -4142,7 +4142,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:=TRUE;"</v>
                       <a cet="STSnippetInputAction">
                         <o>
                           <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
-GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=-ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
+GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=-ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity);
 GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                         </o>
                       </a>
@@ -4336,7 +4336,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                       <a cet="STSnippetInputAction">
                         <o>
                           <v n="STSnippet">"GVL.astAxes[Main.hmiAxisSelection].stControl.eCommand:=E_MotionFunctions.eMoveVelocity;
-GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity)
+GVL.astAxes[Main.hmiAxisSelection].stControl.fVelocity:=ABS(GVL.astAxes[Main.hmiAxisSelection].stControl.fJogVelocity);
 GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute:= TRUE;"</v>
                         </o>
                       </a>
@@ -29990,7 +29990,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.bAirpadManualControl"</v>
+                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.bAirpadManualControl"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -30472,7 +30472,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                   <v>OnMouseClick</v>
                   <a cet="ToggleVarInputAction">
                     <o>
-                      <v n="ToggleVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stControl.bAirpadManualControl"</v>
+                      <v n="ToggleVariable">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.bAirpadManualControl"</v>
                       <n n="Error" />
                     </o>
                   </a>
@@ -32585,7 +32585,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"tAirpadOffHysteresis"</v>
+                      <v n="Value">"tAirpadDepressurizeTimeout"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -32609,7 +32609,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">3774423699L</v>
-                      <v n="Value">""tAirpadOffHysteresis""</v>
+                      <v n="Value">""tAirpadOffTimeout""</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -32617,7 +32617,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"217"</v>
+                      <v n="Value">"840"</v>
                     </o>
                   </l>
                 </o>
@@ -32764,7 +32764,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.stAirpadBrake.tAirpadOffHysteresis"</v>
+                      <v n="Value">"GVL.astAxes[MAIN.hmiAxisSelection].stConfig.stAirpadBrake.tAirpadOffDelayTime"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
