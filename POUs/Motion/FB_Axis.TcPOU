@@ -1728,29 +1728,11 @@ _stAxis.stStatus.bSoEDriveDeviceError := _stAxis.Axis.Status.DriveDeviceError;
 _stAxis.stStatus.bEnabled := NOT(_stAxis.Axis.Status.Disabled);
 
 {info 'NOTE: The fuses controlling the outputs are currently not monitored, constituting a risk for an airpad/brake without feedback.'}
-IF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
-    AND NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    _stAxis.stStatus.bAxisReadyToMove :=
-        _stAxis.stStatus.bEnabled
-        AND _stAxis.stControl.bPressurizeAirpad
-        AND _stAxis.stStatus.bAirpadReady;
-ELSIF NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
-    AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    _stAxis.stStatus.bAxisReadyToMove :=
-        _stAxis.stStatus.bEnabled
-        AND _stAxis.stControl.bReleaseBrake
-        AND _stAxis.stStatus.bExternalBrakeReady;
-ELSIF _stAxis.stConfig.stAirpadBrake.bAirpadConnected
-    AND _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected THEN
-    _stAxis.stStatus.bAxisReadyToMove :=
-        _stAxis.stStatus.bEnabled
-        AND _stAxis.stControl.bReleaseBrake
-        AND _stAxis.stStatus.bExternalBrakeReady
-        AND _stAxis.stControl.bPressurizeAirpad
-        AND _stAxis.stStatus.bAirpadReady;
-ELSE
-    _stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled;
-END_IF
+_stAxis.stStatus.bAxisReadyToMove := _stAxis.stStatus.bEnabled
+    AND (NOT _stAxis.stConfig.stAirpadBrake.bAirpadConnected
+        OR (_stAxis.stControl.bPressurizeAirpad AND _stAxis.stStatus.bAirpadReady))
+    AND (NOT _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected
+        OR (_stAxis.stControl.bReleaseBrake AND _stAxis.stStatus.bExternalBrakeReady));
 
 _stAxis.stError.nNCErrorID := _stAxis.Axis.Status.ErrorID;
 
