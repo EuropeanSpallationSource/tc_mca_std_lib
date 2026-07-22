@@ -384,11 +384,13 @@ VAR_INST
     eLatchedCommand: E_MotionFunctions;
     bInternalWaitingForMovePermit: BOOL := FALSE;
     bInternalMovePermit: BOOL := FALSE;
-    bInternalReleaseMoveCmd: BOOL := FALSE;
+    bInternalReleasedMoveCmd: BOOL := FALSE;
     nWaitCounter: UINT := 0;
     RTRIG_Execute: R_TRIG;
     FTRIG_Moving: F_TRIG;
-    TON_Timeout: TON;
+    TON_CommandHandlerTimeout: TON;
+    RTRIG_ReleasedMoveCommand: R_TRIG;
+    TON_LatchReleasedCommandStatus: TON;
     TON_DisableAxis: TON;
     RTRIG_DisableAxis: R_TRIG;
 END_VAR
@@ -399,7 +401,7 @@ RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
 
 CASE eState OF
     E_CommandHandlerState.eIdle:
-        bInternalReleaseMoveCmd := FALSE;
+        bInternalReleasedMoveCmd := FALSE;
         IF RTRIG_Execute.Q THEN
             CASE _stAxis.stControl.eCommand OF
                 E_MotionFunctions.eMoveAbsolute,
@@ -443,7 +445,7 @@ CASE eState OF
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
-        bInternalReleaseMoveCmd := TRUE;
+        bInternalReleasedMoveCmd := TRUE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eWaitForMotionStart:
@@ -457,15 +459,18 @@ END_CASE
 
 bInternalWaitingForMovePermit := (eState = E_CommandHandlerState.eWaitPermits OR eState = E_CommandHandlerState.eStabilizeNC);
 
-TON_Timeout(
+TON_CommandHandlerTimeout(
     IN := bInternalWaitingForMovePermit,
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
-IF TON_Timeout.Q THEN
+RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
+TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
+
+IF TON_CommandHandlerTimeout.Q THEN
     eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
-    bInternalReleaseMoveCmd := FALSE;
+    bInternalReleasedMoveCmd := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
 END_IF
 
@@ -475,7 +480,7 @@ IF _stAxis.stControl.bHalt
     eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
-    bInternalReleaseMoveCmd := FALSE;
+    bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 FTRIG_Moving(CLK :=
@@ -483,12 +488,11 @@ FTRIG_Moving(CLK :=
     OR _stAxis.Axis.Status.HomingBusy);
 
 IF FTRIG_Moving.Q
-    OR _stAxis.stStatus.nErrorID = 16#4223
-    OR _stAxis.stStatus.nErrorID = 16#4460 THEN
+    OR _stAxis.stStatus.bError THEN
     eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
     bInternalMovePermit := FALSE;
-    bInternalReleaseMoveCmd := FALSE;
+    bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 TON_DisableAxis(
@@ -496,7 +500,7 @@ TON_DisableAxis(
         AND _stAxis.stStatus.bEnabled
         AND NOT bInternalWaitingForMovePermit
         AND NOT bInternalMovePermit
-        AND NOT bInternalReleaseMoveCmd,
+        AND NOT bInternalReleasedMoveCmd,
     PT := _stAxis.stConfig.tAutoDisableHysteresis);
 RTRIG_DisableAxis(CLK := TON_DisableAxis.Q);
 IF RTRIG_DisableAxis.Q
@@ -504,9 +508,17 @@ IF RTRIG_DisableAxis.Q
     _stAxis.stControl.bEnable := FALSE;
 END_IF
 
+IF RTRIG_ReleasedMoveCommand.Q THEN
+    bReleaseMoveCmd := TRUE;
+END_IF
+
+IF TON_LatchReleasedCommandStatus.Q THEN
+    bReleaseMoveCmd := bInternalReleasedMoveCmd;
+END_IF
+
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
 bMovePermit := bInternalMovePermit;
-bReleaseMoveCmd := bInternalReleaseMoveCmd;
+//bReleaseMoveCmd := bInternalReleasedMoveCmd;
 
 mControl_CommandHandler.CommandAborted := bCommandAborted;
 mControl_CommandHandler.Done := bInternalExecute;
@@ -1993,7 +2005,7 @@ stMcStatusCommandHandler := mControl_CommandHandler(
         OR _stAxis.stConfig.stAirpadBrake.bExternalBrakeConnected,
     bWaitingForMovePermit => _stAxis.stStatus.bCommandHandlerBufferingCommand,
     bMovePermit => _stAxis.stStatus.bCommandHandlerMovePermit,
-    bReleaseMoveCmd => _stAxis.stStatus.bCommandHandlerReleaseMoveCmd);
+    bReleaseMoveCmd => _stAxis.stStatus.bCommandHandlerReleasedMoveCmd);
 
 stMcStatusPower := mControl_Power();
 
@@ -2001,7 +2013,7 @@ mControl_Airpad(
     bMoveRequest :=
         (_stAxis.stStatus.bCommandHandlerBufferingCommand
             OR _stAxis.stStatus.bCommandHandlerMovePermit
-            OR _stAxis.stStatus.bCommandHandlerReleaseMoveCmd
+            OR _stAxis.stStatus.bCommandHandlerReleasedMoveCmd
             OR _stAxis.stStatus.bMoving)
         AND _stAxis.stStatus.bEnabled,
     bManualControl := _stAxis.stConfig.bAirpadManualControl,
