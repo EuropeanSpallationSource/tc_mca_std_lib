@@ -187,7 +187,7 @@ astMcStatus[18] := ADR(stMcStatusAirpad);
     </Method>
     <Method Name="mControl_Airpad" Id="{ec15769e-bbb8-0e4f-2638-9a7ccf63a25a}" FolderPath="Control Methods\">
       <Declaration><![CDATA[// Controls pressure to airpad
-METHOD mControl_Airpad: ST_McStatus
+METHOD mControl_Airpad : ST_McStatus
 VAR_INPUT
     bMoveRequest: BOOL;
     bManualControl: BOOL;
@@ -398,10 +398,10 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// State machine for command handling
 RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
+RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
 
 CASE eState OF
     E_CommandHandlerState.eIdle:
-        bInternalReleasedMoveCmd := FALSE;
         IF RTRIG_Execute.Q THEN
             CASE _stAxis.stControl.eCommand OF
                 E_MotionFunctions.eMoveAbsolute,
@@ -463,7 +463,6 @@ TON_CommandHandlerTimeout(
     IN := bInternalWaitingForMovePermit,
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
-RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
 TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
 
 IF TON_CommandHandlerTimeout.Q THEN
@@ -509,16 +508,16 @@ IF RTRIG_DisableAxis.Q
 END_IF
 
 IF RTRIG_ReleasedMoveCommand.Q THEN
-    bReleaseMoveCmd := TRUE;
+    bInternalReleasedMoveCmd := TRUE;
 END_IF
 
 IF TON_LatchReleasedCommandStatus.Q THEN
-    bReleaseMoveCmd := bInternalReleasedMoveCmd;
+    bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
 bMovePermit := bInternalMovePermit;
-//bReleaseMoveCmd := bInternalReleasedMoveCmd;
+bReleaseMoveCmd := bInternalReleasedMoveCmd;
 
 mControl_CommandHandler.CommandAborted := bCommandAborted;
 mControl_CommandHandler.Done := bInternalExecute;
@@ -1991,9 +1990,8 @@ stMcStatusCommandHandler := mControl_CommandHandler(
 
 stMcStatusPower := mControl_Power();
 
-mControl_Airpad(
-    bMoveRequest :=
-        (_stAxis.stStatus.bCommandHandlerBufferingCommand
+stMcStatusAirpad := mControl_Airpad(
+    bMoveRequest := (_stAxis.stStatus.bCommandHandlerBufferingCommand
             OR _stAxis.stStatus.bCommandHandlerMovePermit
             OR _stAxis.stStatus.bCommandHandlerReleasedMoveCmd
             OR _stAxis.stStatus.bMoving)
