@@ -450,6 +450,9 @@ fbGetEcSlaveStates(
     pStateBuf:=ADR(stSlaveState),
     cbBufLen:=SIZEOF(stSlaveState),
     bExecute:=fbUpdateEcSlaveStateTON.q);
+IF fbGetEcSlaveStates.nSlaves < nActualEcSlaves THEN
+    MEMSET(destAddr := ADR(aSlaveConfig), fillByte := 0, n := SIZEOF(aSlaveConfig));
+END_IF
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
