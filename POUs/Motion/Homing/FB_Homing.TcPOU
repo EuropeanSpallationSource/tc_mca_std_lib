@@ -30,10 +30,10 @@ END_VAR
 
 VAR
     eHomingState: E_HomeSequenceState := E_HomeSequenceState.eWaitForExecute;
-    eHomingSpeed: (eDISABLED, eCOARSE, eFINE);
+    eHomingSpeed: (eDisabled, eCoarse, eFine);
 
-    eSelectedHomingRoutine: (eNO_HOMING := 0, eTO_LIMIT := 1, eTO_REF := 11, eTO_ENC_PULSE := 21, eTO_ENC_PULSE_VIA_LIMIT := 23, eTO_BLOCK := 30, eDIRECT := 90);
-    eSelectedDirection: (eFORWARD, eBACKWARD);
+    eSelectedHomingRoutine: (eNoHoming := 0, eToLimit := 1, eToRef := 11, eToEncPulse := 21, eToEncPulseViaLimit := 23, eToBlock := 30, eDirect := 90);
+    eSelectedDirection: (eForward, eBackward);
 
     eCurrentDirection: MC_Home_Direction; //Current direction used during homing execution
     eCurrentDetectionMode: E_DetectionMode; //Current detection mode used during homing execution
@@ -176,11 +176,11 @@ IF NOT fbVelocityFromCam.Error THEN
 END_IF
 
 CASE eSelectedHomingRoutine OF
-    eTO_LIMIT:
+    eToLimit:
 
         fbStepLimitSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             TimeLimit :=  stConfig.tTimeLimit,
@@ -198,7 +198,7 @@ CASE eSelectedHomingRoutine OF
 
         fbStepLimitSwitch(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             TimeLimit :=  stConfig.tTimeLimit,
@@ -215,11 +215,11 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_REF:
+    eToRef:
 
         fbStepAbsoluteSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             TimeLimit :=  stConfig.tTimeLimit,
@@ -239,7 +239,7 @@ CASE eSelectedHomingRoutine OF
 
         fbStepAbsoluteSwitch(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := mCalcToRefDirection(eCurrentDirection, eCurrentDetectionMode),
             TimeLimit :=  stConfig.tTimeLimit,
@@ -258,13 +258,13 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_ENC_PULSE,
-    eTO_ENC_PULSE_VIA_LIMIT:
+    eToEncPulse,
+    eToEncPulseViaLimit:
 
        //Reversed movement, uses reversed signals (eCurrentReversedDirection and stReversedLimitSwitchSignal)
        fbStepLimitSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := mReverseDirection(eCurrentDirection),
             TimeLimit :=  stConfig.tTimeLimit,
@@ -282,7 +282,7 @@ CASE eSelectedHomingRoutine OF
 
         fbStepReferencePulse(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             TimeLimit :=  stConfig.tTimeLimit,
@@ -298,11 +298,11 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_BLOCK:
+    eToBlock:
 
         fbStepBlockLag(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             Velocity := fVelocityFromCam,
@@ -387,8 +387,8 @@ END_VAR
 
     E_HomeSequenceState.eFinishDetection:
         //Repeat execution with fine detection
-        IF eHomingSpeed = eCOARSE THEN
-            eHomingSpeed := eFINE;
+        IF eHomingSpeed = eCoarse THEN
+            eHomingSpeed := eFine;
             eHomingState := E_HomeSequenceState.eInitDetetion;
             RETURN;
         END_IF
@@ -501,18 +501,18 @@ END_VAR
 //otherwise it will result in CommandAborted on hitting the sensor
 CASE eSelectedHomingRoutine OF
 
-    eTO_LIMIT:
+    eToLimit:
         bCoarseEnable := TRUE;
         bFineEnable := TRUE;
 
-    eTO_ENC_PULSE_VIA_LIMIT:
+    eToEncPulseViaLimit:
         bCoarseDirectionReversed := TRUE;
         bCoarseEnable := TRUE;
 
 END_CASE
 
 //Only enable in the direction of the homing movement
-IF eSelectedDirection = eFORWARD THEN
+IF eSelectedDirection = eForward THEN
     bCoarseEnablePositive := bCoarseEnable AND NOT bCoarseDirectionReversed;
     bFineEnablePositive := bFineEnable;
 
@@ -533,17 +533,17 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eSelectedHomingRoutine OF
-    eTO_LIMIT,
-    eTO_REF,
-    eTO_ENC_PULSE_VIA_LIMIT:
-        eHomingSpeed := eCOARSE;
+    eToLimit,
+    eToRef,
+    eToEncPulseViaLimit:
+        eHomingSpeed := eCoarse;
 
-    eTO_ENC_PULSE,
-    eTO_BLOCK:
-        eHomingSpeed := eFINE;
+    eToEncPulse,
+    eToBlock:
+        eHomingSpeed := eFine;
 
     ELSE
-        eHomingSpeed := eDISABLED;
+        eHomingSpeed := eDisabled;
 END_CASE
 ]]></ST>
       </Implementation>
@@ -555,54 +555,54 @@ END_CASE
         <ST><![CDATA[//Splitting directional information and routine state of E_HomingRoutines
 CASE eHomingRoutine OF
     E_HomingRoutines.eNoHoming:
-        eSelectedHomingRoutine := eNO_HOMING;
+        eSelectedHomingRoutine := eNoHoming;
 
     E_HomingRoutines.eHomeToLimit_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_LIMIT;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToLimit;
 
     E_HomingRoutines.eHomeToLimit_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_LIMIT;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToLimit;
 
     E_HomingRoutines.eHomeToRef_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_REF;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToRef;
 
     E_HomingRoutines.eHomeToRef_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_REF;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToRef;
 
     E_HomingRoutines.eHomeToEncPulse_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_ENC_PULSE;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToEncPulse;
 
     E_HomingRoutines.eHomeToEncPulse_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_ENC_PULSE;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToEncPulse;
 
     E_HomingRoutines.eHomeToEncPulse_viaBwdLimit:
-        eSelectedDirection := eFORWARD; //Forward Pulse + Backward Limit Touch
-        eSelectedHomingRoutine := eTO_ENC_PULSE_VIA_LIMIT;
+        eSelectedDirection := eForward; //Forward Pulse + Backward Limit Touch
+        eSelectedHomingRoutine := eToEncPulseViaLimit;
 
     E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
-        eSelectedDirection := eBACKWARD; //Backward Pulse + Forward Limit Touch
-        eSelectedHomingRoutine := eTO_ENC_PULSE_VIA_LIMIT;
+        eSelectedDirection := eBackward; //Backward Pulse + Forward Limit Touch
+        eSelectedHomingRoutine := eToEncPulseViaLimit;
 
     E_HomingRoutines.eHomeToBlock_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_BLOCK;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToBlock;
 
     E_HomingRoutines.eHomeToBlock_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_BLOCK;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToBlock;
 
     E_HomingRoutines.eHomeDirect:
-        eSelectedHomingRoutine := eDIRECT;
+        eSelectedHomingRoutine := eDirect;
 END_CASE
 
 //Set current MC_Home_Directions based on selected direction
-IF eSelectedDirection = eFORWARD THEN
+IF eSelectedDirection = eForward THEN
     eCurrentDirection := MC_Home_Direction.mcPositiveDirection;
 ELSE
     eCurrentDirection := MC_Home_Direction.mcNegativeDirection;
@@ -682,12 +682,12 @@ bExecutingDetection := (eHomingState >= E_HomeSequenceState.eInitDetetion)
                     AND (eHomingState <= E_HomeSequenceState.eFinishDetection);
 
 bEnablePositive := bExecutingDetection
-                AND ((bCoarseEnablePositive AND eHomingSpeed = eCOARSE)
-                    OR (bFineEnablePositive AND eHomingSpeed = eFINE));
+                AND ((bCoarseEnablePositive AND eHomingSpeed = eCoarse)
+                    OR (bFineEnablePositive AND eHomingSpeed = eFine));
 
 bEnableNegative := bExecutingDetection
-                AND ((bCoarseEnableNegative AND eHomingSpeed = eCOARSE)
-                    OR (bFineEnableNegative AND eHomingSpeed = eFINE));
+                AND ((bCoarseEnableNegative AND eHomingSpeed = eCoarse)
+                    OR (bFineEnableNegative AND eHomingSpeed = eFine));
 
 bError := eHomingState = E_HomeSequenceState.eError;
 IF nErrorID <> 0 AND nErrorState = 0 THEN
@@ -739,9 +739,9 @@ END_VAR
 
     E_HomeSequenceState.eSelectDetection:
         CASE eSelectedHomingRoutine OF
-            eNO_HOMING:
+            eNoHoming:
                 eHomingState := E_HomeSequenceState.eDone;
-            eDIRECT:
+            eDirect:
                 eHomingState := E_HomeSequenceState.eHomeDirect;
             ELSE
                 eHomingState := E_HomeSequenceState.eInitDetetion;
@@ -751,7 +751,7 @@ END_VAR
 
     E_HomeSequenceState.eInitDetetion..E_HomeSequenceState.eFinishDetection:
         CASE eHomingSpeed OF
-            eCOARSE:
+            eCoarse:
                 mExecuteHoming(
                     Axis := Axis,
                     bBusy := bCoarseBusy,
@@ -759,7 +759,7 @@ END_VAR
                     bCommandAborted := bCoarseCommandAborted,
                     bError := bCoarseError,
                     nErrorID := nCoarseErrorID);
-            eFINE:
+            eFine:
                 mExecuteHoming(
                     Axis := Axis,
                     bBusy := bFineBusy,
