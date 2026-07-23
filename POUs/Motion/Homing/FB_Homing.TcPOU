@@ -8,21 +8,21 @@ VAR_IN_OUT
 END_VAR
 VAR_INPUT
     bExecute: BOOL;
-    bLimitFwd: BOOL;
-    bLimitBwd: BOOL;
-    bHomeSensor: BOOL;
+    bLimitFwd: BOOL; //Forward limit switch
+    bLimitBwd: BOOL; //Backward limit switch
+    bHomeSensor: BOOL; //Home sensor signal
     eHomingRoutine: E_HomingRoutines := E_HomingRoutines.eNoHoming;
     fHomePosition: LREAL;
     fHomeFinishDistance: LREAL;
-    stConfig: ST_AxisConfig;
+    stConfig: ST_HomingConfig;
 END_VAR
 VAR_OUTPUT
     bDone: BOOL;
     bBusy: BOOL;
     bActive: BOOL;
     bCommandAborted: BOOL;
-    bEnablePositive: BOOL;
-    bEnableNegative: BOOL;
+    bEnablePositive: BOOL; //Request power enable positive during homing execution
+    bEnableNegative: BOOL; //Request power enable negative during homing execution
     bError: BOOL;
     nErrorID: UDINT;
     nErrorState: UINT;
@@ -30,17 +30,20 @@ END_VAR
 
 VAR
     eHomingState: E_HomeSequenceState := E_HomeSequenceState.eWaitForExecute;
-    eHomingSpeed: (eDISABLED, eCOARSE, eFINE);
+    eHomingSpeed: (eDisabled, eCoarse, eFine);
 
-    eSelectedHomingRoutine: (eNO_HOMING := 0, eTO_LIMIT := 1, eTO_REF := 11, eTO_ENC_PULSE := 21, eTO_ENC_PULSE_VIA_LIMIT := 23, eTO_BLOCK := 30, eDIRECT := 90);
-    eSelectedDirection: (eFORWARD, eBACKWARD);
+    eSelectedHomingRoutine: (eNoHoming := 0, eToLimit := 1, eToRef := 11, eToEncPulse := 21, eToEncPulseViaLimit := 23, eToBlock := 30, eDirect := 90);
+    eSelectedDirection: (eForward, eBackward);
 
     eCurrentDirection: MC_Home_Direction; //Current direction used during homing execution
-    eCurrentReversedDirection: MC_Home_Direction; //Current reversed direction used during homing execution
     eCurrentDetectionMode: E_DetectionMode; //Current detection mode used during homing execution
 
     eCoarseSwitchMode: MC_Switch_Mode; //Switch mode used for coarse detection
     eFineSwitchMode: MC_Switch_Mode; //Switch mode used for fine detection
+
+    bLimitSwitchFwdPressed: BOOL; //Forward limit switch signal is actively engaged / pressed
+    bLimitSwitchBwdPressed: BOOL; //Backward limit switch is actively engaged / pressed
+    bHomeSensorEngaged: BOOL; //Homing sensor is actively detects presence / engaged / pressed
 
     //Hardware Signals
     stLimitSwitchSignal: MC_Ref_Signal_Ref := (SignalSource := SignalSource_Default, TouchProbe := PlcEvent);
@@ -51,6 +54,7 @@ VAR
     //Step functions
     fbStepLimitSwitch: MC_StepLimitSwitch;
     fbStepLimitSwitchDetection: MC_StepLimitSwitchDetection;
+    fbStepAbsoluteSwitch: MC_StepAbsoluteSwitch;
     fbStepAbsoluteSwitchDetection: MC_StepAbsoluteSwitchDetection;
     fbStepReferencePulse: MC_StepReferencePulse;
     fbStepBlockLag: MC_StepBlockLagBased;
@@ -70,10 +74,10 @@ VAR
     nFineErrorID: UDINT;
 
     //Enable override
-    bCoarseEnablePositive: BOOL; //Enable override during coarse stage in positive direction (forward)
-    bCoarseEnableNegative: BOOL; //Enable override during coarse stage in negative direction (backward)
-    bFineEnablePositive: BOOL; //Enable override during fine stage in positive direction (forward)
-    bFineEnableNegative: BOOL; //Enable override during fine stage in negative direction (backward)
+    bCoarseEnablePositive: BOOL; //Request power enable positive (forward), during coarse stage
+    bCoarseEnableNegative: BOOL; //Request power enable negative (backward), during coarse stage
+    bFineEnablePositive: BOOL; //Request power enable positive (forward), during fine stage
+    bFineEnableNegative: BOOL; //Request power enable positive (backward), during fine stage
 
     //Finalizing functions
     fbHomeDirect: MC_HomeDirect;
@@ -94,8 +98,8 @@ VAR
 END_VAR
 
 VAR CONSTANT
-    nERROR_ABORT_HOMING: UDINT := 16#E5501; //Drive parameters were not restored aftor homing
-    nERROR_POWER_DISABLED: UDINT := 16#E5502; //Power was disabled during homing procedure
+    nERROR_ABORT_HOMING: UDINT := 16#4B9F; //The abortion of a homing has failed. https://infosys.beckhoff.com/english.php?content=../content/1033/tcncerrcode2/513151243.html
+    nERROR_POWER_DISABLED: UDINT := 16#4650; //Drive hardware not ready to operate. https://infosys.beckhoff.com/english.php?content=../content/1033/tcncerrcode2/4670612235.html
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -105,8 +109,43 @@ mStateMachine(Axis := Axis);
 mOutputs();
 ]]></ST>
     </Implementation>
+    <Folder Name="Direction" Id="{cf6380c9-04e0-0f85-0ee0-78c7c4234fb4}" />
     <Folder Name="Initialization" Id="{a4834b0c-5a39-0343-1840-cdfcbbfa1e02}" />
     <Folder Name="StateMachine" Id="{5850658b-ad43-095c-267a-69fea0de8d61}" />
+    <Method Name="mCalcToRefDirection" Id="{ea329024-e768-02c9-1e7d-fe6d98db5ff1}" FolderPath="Direction\">
+      <Declaration><![CDATA[METHOD PRIVATE mCalcToRefDirection : MC_Home_Direction
+VAR_INPUT
+    eDirection: MC_Home_Direction;
+    eDetection: E_DetectionMode;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eDetection OF
+    //Fastest exection is with using switch direction variant
+    E_DetectionMode.eRising:
+        CASE eDirection OF
+            MC_Home_Direction.mcNegativeDirection:
+                mCalcToRefDirection := MC_Home_Direction.mcSwitchNegative;
+            MC_Home_Direction.mcPositiveDirection:
+                mCalcToRefDirection := MC_Home_Direction.mcSwitchPositive;
+            ELSE
+                mCalcToRefDirection := eDirection;
+        END_CASE
+
+    //Fastest exection is with using normal direction variant
+    E_DetectionMode.eFalling:
+        CASE eDirection OF
+            MC_Home_Direction.mcSwitchNegative:
+                mCalcToRefDirection := MC_Home_Direction.mcNegativeDirection;
+            MC_Home_Direction.mcSwitchPositive:
+                mCalcToRefDirection := MC_Home_Direction.mcPositiveDirection;
+            ELSE
+                mCalcToRefDirection := eDirection;
+        END_CASE
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mCallFunctionBlocks" Id="{9a2a738b-1099-0643-0d66-9fbff7e594f9}">
       <Declaration><![CDATA[METHOD PRIVATE mCallFunctionBlocks
 VAR_IN_OUT
@@ -137,16 +176,16 @@ IF NOT fbVelocityFromCam.Error THEN
 END_IF
 
 CASE eSelectedHomingRoutine OF
-    eTO_LIMIT:
+    eToLimit:
 
         fbStepLimitSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             LimitSwitchMode := eCoarseSwitchMode,
             LimitSwitchSignal := stLimitSwitchSignal,
             Velocity := fVelocityToCam,
@@ -159,12 +198,12 @@ CASE eSelectedHomingRoutine OF
 
         fbStepLimitSwitch(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             LimitSwitchMode := eFineSwitchMode,
             LimitSwitchSignal := stLimitSwitchSignal,
             Velocity := fVelocityFromCam,
@@ -176,20 +215,20 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_REF:
+    eToRef:
 
         fbStepAbsoluteSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             SwitchMode := eCoarseSwitchMode,
             ReferenceSignal := stRefSwitchSignal,
-            PositiveLimitSwitch := NOT(bLimitFwd),
-            NegativeLimitSwitch := NOT(bLimitBwd),
+            PositiveLimitSwitch := bLimitSwitchFwdPressed,
+            NegativeLimitSwitch := bLimitSwitchBwdPressed,
             Velocity := fVelocityToCam,
             Options := stOptions,
             Done => bCoarseDone,
@@ -198,17 +237,18 @@ CASE eSelectedHomingRoutine OF
             Error => bCoarseError,
             ErrorID => nCoarseErrorID);
 
-        //Using StepLimitSwitch over StepAbsoluteSwitch to reduce the movement
-        fbStepLimitSwitch(
+        fbStepAbsoluteSwitch(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
-            Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-            LimitSwitchMode := eFineSwitchMode,
-            LimitSwitchSignal := stRefSwitchSignal,
+            Direction := mCalcToRefDirection(eCurrentDirection, eCurrentDetectionMode),
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            SwitchMode := eFineSwitchMode,
+            ReferenceSignal := stRefSwitchSignal,
+            PositiveLimitSwitch := bLimitSwitchFwdPressed,
+            NegativeLimitSwitch := bLimitSwitchBwdPressed,
             Velocity := fVelocityFromCam,
             SetPosition := fHomePosition,
             Options := stOptions,
@@ -218,18 +258,18 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_ENC_PULSE,
-    eTO_ENC_PULSE_VIA_LIMIT:
+    eToEncPulse,
+    eToEncPulseViaLimit:
 
        //Reversed movement, uses reversed signals (eCurrentReversedDirection and stReversedLimitSwitchSignal)
        fbStepLimitSwitchDetection(
             Axis := Axis,
-            Execute := (eHomingSpeed = eCOARSE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eCoarse) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
-            Direction := eCurrentReversedDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            Direction := mReverseDirection(eCurrentDirection),
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             LimitSwitchMode := eCoarseSwitchMode,
             LimitSwitchSignal := stReversedLimitSwitchSignal,
             Velocity := fVelocityToCam,
@@ -242,12 +282,12 @@ CASE eSelectedHomingRoutine OF
 
         fbStepReferencePulse(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit,
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit,
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            TimeLimit :=  stConfig.tTimeLimit,
+            DistanceLimit := stConfig.fDistanceLimit,
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
             ReferenceSignal := stEncPulseSignal,
             Velocity := fVelocityFromCam,
             SetPosition := fHomePosition,
@@ -258,20 +298,20 @@ CASE eSelectedHomingRoutine OF
             Error => bFineError,
             ErrorID => nFineErrorID);
 
-    eTO_BLOCK:
+    eToBlock:
 
         fbStepBlockLag(
             Axis := Axis,
-            Execute := (eHomingSpeed = eFINE) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
+            Execute := (eHomingSpeed = eFine) AND (eHomingState = E_HomeSequenceState.eExecuteDetection),
             Parameter := stHomingParameter,
             Direction := eCurrentDirection,
             Velocity := fVelocityFromCam,
-            DetectionVelocityLimit := stConfig.stHomingConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
-            DetectionVelocityTime := stConfig.stHomingConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
-            TimeLimit :=  stConfig.stHomingConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
-            DistanceLimit := stConfig.stHomingConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
-            TorqueLimit := stConfig.stHomingConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
-            LagLimit := stConfig.stHomingConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
+            DetectionVelocityLimit := stConfig.fDetectionVelocityLimit, //Velocity that must be fallen below for the time DetectionVelocityTime in order to detect driving against the fixed stop.
+            DetectionVelocityTime := stConfig.tDetectionVelocityTime, //Time for detecting the velocity undershoot when driving against the fixed stop.
+            TimeLimit :=  stConfig.tTimeLimit, //Exceeding this time leads to the search procedure being aborted.
+            DistanceLimit := stConfig.fDistanceLimit, //Exceeding this distance in relation to the start position leads to the search procedure being aborted.
+            TorqueLimit := stConfig.fTorqueLimit, //The motor torque is limited to this value (percentage of configured channel peak torque), in relation to the weight counterbalance that is possibly parameterized in the drive, in order to avoid mechanical damage.
+            LagLimit := stConfig.fLagLimit, //Position lag value which, if exceeded, leads to detection of driving against the fixed stop.
             SetPosition := fHomePosition,
             Options := stOptions3,
             Done => bFineDone,
@@ -289,7 +329,6 @@ fbFinishHoming(
     Axis := Axis,
     Execute := eHomingState = E_HomeSequenceState.eFinishHoming,
     Velocity := fVelocityToCam,
-    Distance := fHomeFinishDistance,
     Parameter := stHomingParameter);
 
 fbAbortHoming.Options.DisableDriveAccess := stOptions.DisableDriveAccess;
@@ -348,17 +387,17 @@ END_VAR
 
     E_HomeSequenceState.eFinishDetection:
         //Repeat execution with fine detection
-        IF eHomingSpeed = eCOARSE THEN
-            eHomingSpeed := eFINE;
+        IF eHomingSpeed = eCoarse THEN
+            eHomingSpeed := eFine;
             eHomingState := E_HomeSequenceState.eInitDetetion;
             RETURN;
         END_IF
 
-        //Repeat fine detection with target switch mode (see mInitSwitchMode)
-        IF (eCurrentDetectionMode = E_DetectionMode.eRising) AND (eFineSwitchMode = MC_Switch_Mode.mcFallingEdge) THEN
-            eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
-            eHomingState := E_HomeSequenceState.eInitDetetion;
-            RETURN;
+        //Calculate distance for finish homing
+        IF stConfig.bAbsoluteMoveAtFinishHoming THEN
+            fbFinishHoming.Distance := fHomeFinishDistance - Axis.NcToPlc.ActPos;
+        ELSE
+            fbFinishHoming.Distance := fHomeFinishDistance;
         END_IF
 
         eHomingState := E_HomeSequenceState.eFinishHoming;
@@ -440,6 +479,9 @@ END_CASE
             ELSE
                 eHomingState := E_HomeSequenceState.eCommandAborted;
             END_IF
+
+            //Fix issue CommandAborted output of MC_AbortHoming stays TRUE once its set
+            MEMSET(destAddr:=ADR(fbAbortHoming.CommandAborted), fillByte:=0, n:=SIZEOF(fbAbortHoming.CommandAborted));
         END_IF
 
 END_CASE
@@ -449,32 +491,28 @@ END_CASE
     <Method Name="mInitEnable" Id="{d3639741-5d83-088b-3be0-aaffdae6ce64}" FolderPath="Initialization\">
       <Declaration><![CDATA[METHOD PRIVATE mInitEnable
 VAR
-    bCoarseEnable: BOOL := TRUE;
-    bFineEnable: BOOL := TRUE;
+    bCoarseEnable: BOOL := FALSE;
+    bFineEnable: BOOL := FALSE;
     bCoarseDirectionReversed: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Disable enable override based on coarse/fine homing speed
+        <ST><![CDATA[//Request power enable negative/positive, if the selected homing routine uses StepLimitSwitch,
+//otherwise it will result in CommandAborted on hitting the sensor
 CASE eSelectedHomingRoutine OF
-    //1. During eTO_REF in fine stage no mechanical limit switches should be hit
-    eTO_REF:
-        bFineEnable := FALSE;
 
-    //2. No enable override required during execution
-    eTO_ENC_PULSE,
-    eTO_BLOCK:
-        bCoarseEnable := FALSE;
-        bFineEnable := FALSE;
+    eToLimit:
+        bCoarseEnable := TRUE;
+        bFineEnable := TRUE;
 
-    //3. During coarse stage the direction is reversed and no enable in fine stage
-    eTO_ENC_PULSE_VIA_LIMIT:
+    eToEncPulseViaLimit:
         bCoarseDirectionReversed := TRUE;
-        bFineEnable := FALSE;
+        bCoarseEnable := TRUE;
 
 END_CASE
 
-IF eSelectedDirection = eFORWARD THEN
+//Only enable in the direction of the homing movement
+IF eSelectedDirection = eForward THEN
     bCoarseEnablePositive := bCoarseEnable AND NOT bCoarseDirectionReversed;
     bFineEnablePositive := bFineEnable;
 
@@ -495,17 +533,17 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE eSelectedHomingRoutine OF
-    eTO_LIMIT,
-    eTO_REF,
-    eTO_ENC_PULSE_VIA_LIMIT:
-        eHomingSpeed := eCOARSE;
+    eToLimit,
+    eToRef,
+    eToEncPulseViaLimit:
+        eHomingSpeed := eCoarse;
 
-    eTO_ENC_PULSE,
-    eTO_BLOCK:
-        eHomingSpeed := eFINE;
+    eToEncPulse,
+    eToBlock:
+        eHomingSpeed := eFine;
 
     ELSE
-        eHomingSpeed := eDISABLED;
+        eHomingSpeed := eDisabled;
 END_CASE
 ]]></ST>
       </Implementation>
@@ -517,59 +555,57 @@ END_CASE
         <ST><![CDATA[//Splitting directional information and routine state of E_HomingRoutines
 CASE eHomingRoutine OF
     E_HomingRoutines.eNoHoming:
-        eSelectedHomingRoutine := eNO_HOMING;
+        eSelectedHomingRoutine := eNoHoming;
 
     E_HomingRoutines.eHomeToLimit_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_LIMIT;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToLimit;
 
     E_HomingRoutines.eHomeToLimit_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_LIMIT;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToLimit;
 
     E_HomingRoutines.eHomeToRef_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_REF;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToRef;
 
     E_HomingRoutines.eHomeToRef_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_REF;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToRef;
 
     E_HomingRoutines.eHomeToEncPulse_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_ENC_PULSE;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToEncPulse;
 
     E_HomingRoutines.eHomeToEncPulse_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_ENC_PULSE;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToEncPulse;
 
     E_HomingRoutines.eHomeToEncPulse_viaBwdLimit:
-        eSelectedDirection := eFORWARD; //Forward Pulse + Backward Limit Touch
-        eSelectedHomingRoutine := eTO_ENC_PULSE_VIA_LIMIT;
+        eSelectedDirection := eForward; //Forward Pulse + Backward Limit Touch
+        eSelectedHomingRoutine := eToEncPulseViaLimit;
 
     E_HomingRoutines.eHomeToEncPulse_viaFwdLimit:
-        eSelectedDirection := eBACKWARD; //Backward Pulse + Forward Limit Touch
-        eSelectedHomingRoutine := eTO_ENC_PULSE_VIA_LIMIT;
+        eSelectedDirection := eBackward; //Backward Pulse + Forward Limit Touch
+        eSelectedHomingRoutine := eToEncPulseViaLimit;
 
     E_HomingRoutines.eHomeToBlock_Bwd:
-        eSelectedDirection := eBACKWARD;
-        eSelectedHomingRoutine := eTO_BLOCK;
+        eSelectedDirection := eBackward;
+        eSelectedHomingRoutine := eToBlock;
 
     E_HomingRoutines.eHomeToBlock_Fwd:
-        eSelectedDirection := eFORWARD;
-        eSelectedHomingRoutine := eTO_BLOCK;
+        eSelectedDirection := eForward;
+        eSelectedHomingRoutine := eToBlock;
 
     E_HomingRoutines.eHomeDirect:
-        eSelectedHomingRoutine := eDIRECT;
+        eSelectedHomingRoutine := eDirect;
 END_CASE
 
 //Set current MC_Home_Directions based on selected direction
-IF eSelectedDirection = eFORWARD THEN
+IF eSelectedDirection = eForward THEN
     eCurrentDirection := MC_Home_Direction.mcPositiveDirection;
-    eCurrentReversedDirection := MC_Home_Direction.mcNegativeDirection;
 ELSE
     eCurrentDirection := MC_Home_Direction.mcNegativeDirection;
-    eCurrentReversedDirection := MC_Home_Direction.mcPositiveDirection;
 END_IF
 ]]></ST>
       </Implementation>
@@ -583,15 +619,7 @@ eCoarseSwitchMode := MC_Switch_Mode.mcOn;
 
 CASE eCurrentDetectionMode OF
     E_DetectionMode.eRising:
-        (*Reverse switch mode for the first execution of fine detect, if the switch is already engaged.
-        This fixes an issue where, when the routine start at the edge of the switch, the Step function
-        starts to oscillate back and forth at the edge because it misses the edge detection.*)
-        IF ((eSelectedHomingRoutine = eTO_LIMIT) AND stLimitSwitchSignal.Level)
-        OR ((eSelectedHomingRoutine = eTO_REF) AND stRefSwitchSignal.Level) THEN
-            eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
-        ELSE
-            eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
-        END_IF
+        eFineSwitchMode := MC_Switch_Mode.mcRisingEdge;
     E_DetectionMode.eFalling:
         eFineSwitchMode := MC_Switch_Mode.mcFallingEdge;
 END_CASE
@@ -603,22 +631,27 @@ END_CASE
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Options for common function blocks used for all routines
-stOptions.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
-stOptions.EnableLagErrorDetection := stConfig.stHomingConfig.bEnableLagErrorDetection;
+stOptions.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions.EnableLagErrorDetection := stConfig.bEnableLagErrorDetection;
 
 //Options for StepBlockLagDetection
-stOptions3.DisableDriveAccess := stConfig.stHomingConfig.bDisableDriveAccess;
-stOptions3.InstantLagReduction := stConfig.stHomingConfig.bInstantLagReduction;
+stOptions3.DisableDriveAccess := stConfig.bDisableDriveAccess;
+stOptions3.InstantLagReduction := stConfig.bInstantLagReduction;
 
-//Reference signal
+//Check normal closed state of homing signals
+bLimitSwitchFwdPressed := bLimitFwd XOR stConfig.bLimitFwdNormallyClosed;
+bLimitSwitchBwdPressed := bLimitBwd XOR stConfig.bLimitBwdNormallyClosed;
+bHomeSensorEngaged := bHomeSensor XOR stConfig.bHomeSensorNormallyClosed;
+
+//Update signal ref
 IF eCurrentDirection = MC_Home_Direction.mcPositiveDirection THEN
-    stLimitSwitchSignal.Level := NOT(bLimitFwd);
-    stReversedLimitSwitchSignal.Level := NOT(bLimitBwd);
+    stLimitSwitchSignal.Level := bLimitSwitchFwdPressed;
+    stReversedLimitSwitchSignal.Level := bLimitSwitchBwdPressed;
 ELSE
-    stLimitSwitchSignal.Level := NOT(bLimitBwd);
-    stReversedLimitSwitchSignal.Level := NOT(bLimitFwd);
+    stLimitSwitchSignal.Level := bLimitSwitchBwdPressed;
+    stReversedLimitSwitchSignal.Level := bLimitSwitchFwdPressed;
 END_IF
-stRefSwitchSignal.Level := bHomeSensor;
+stRefSwitchSignal.Level := bHomeSensorEngaged;
 ]]></ST>
       </Implementation>
     </Method>
@@ -649,17 +682,37 @@ bExecutingDetection := (eHomingState >= E_HomeSequenceState.eInitDetetion)
                     AND (eHomingState <= E_HomeSequenceState.eFinishDetection);
 
 bEnablePositive := bExecutingDetection
-                AND ((bCoarseEnablePositive AND eHomingSpeed = eCOARSE)
-                    OR (bFineEnablePositive AND eHomingSpeed = eFINE));
+                AND ((bCoarseEnablePositive AND eHomingSpeed = eCoarse)
+                    OR (bFineEnablePositive AND eHomingSpeed = eFine));
 
 bEnableNegative := bExecutingDetection
-                AND ((bCoarseEnableNegative AND eHomingSpeed = eCOARSE)
-                    OR (bFineEnableNegative AND eHomingSpeed = eFINE));
+                AND ((bCoarseEnableNegative AND eHomingSpeed = eCoarse)
+                    OR (bFineEnableNegative AND eHomingSpeed = eFine));
 
 bError := eHomingState = E_HomeSequenceState.eError;
 IF nErrorID <> 0 AND nErrorState = 0 THEN
     nErrorState := eHomingState;
 END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mReverseDirection" Id="{904e6f2e-c1ef-0e35-10b8-2390dc58726b}" FolderPath="Direction\">
+      <Declaration><![CDATA[METHOD PRIVATE mReverseDirection : MC_Home_Direction
+VAR_INPUT
+    eDirection: MC_Home_Direction;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eDirection OF
+    MC_Home_Direction.mcNegativeDirection:
+        mReverseDirection := MC_Home_Direction.mcPositiveDirection;
+    MC_Home_Direction.mcPositiveDirection:
+        mReverseDirection := MC_Home_Direction.mcNegativeDirection;
+    MC_Home_Direction.mcSwitchNegative:
+        mReverseDirection := MC_Home_Direction.mcSwitchPositive;
+    MC_Home_Direction.mcSwitchPositive:
+        mReverseDirection := MC_Home_Direction.mcSwitchNegative;
+END_CASE
 ]]></ST>
       </Implementation>
     </Method>
@@ -674,7 +727,7 @@ END_VAR
 
     E_HomeSequenceState.eWaitForExecute:
         IF rtrigExecute.Q THEN
-            eCurrentDetectionMode := stConfig.stHomingConfig.eDetectionMode;
+            eCurrentDetectionMode := stConfig.eDetectionMode;
 
             mInitRoutineWithDirection();
             mInitEnable();
@@ -686,9 +739,9 @@ END_VAR
 
     E_HomeSequenceState.eSelectDetection:
         CASE eSelectedHomingRoutine OF
-            eNO_HOMING:
+            eNoHoming:
                 eHomingState := E_HomeSequenceState.eDone;
-            eDIRECT:
+            eDirect:
                 eHomingState := E_HomeSequenceState.eHomeDirect;
             ELSE
                 eHomingState := E_HomeSequenceState.eInitDetetion;
@@ -698,7 +751,7 @@ END_VAR
 
     E_HomeSequenceState.eInitDetetion..E_HomeSequenceState.eFinishDetection:
         CASE eHomingSpeed OF
-            eCOARSE:
+            eCoarse:
                 mExecuteHoming(
                     Axis := Axis,
                     bBusy := bCoarseBusy,
@@ -706,7 +759,7 @@ END_VAR
                     bCommandAborted := bCoarseCommandAborted,
                     bError := bCoarseError,
                     nErrorID := nCoarseErrorID);
-            eFINE:
+            eFine:
                 mExecuteHoming(
                     Axis := Axis,
                     bBusy := bFineBusy,
