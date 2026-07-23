@@ -425,10 +425,6 @@ fbGetEcConfSlaves(
     pArrEcConfSlaveInfo := ADR(_aSlaveConfig),
     cbBufLen := SIZEOF(_aSlaveConfig),
     bExecute := TON_UpdateGetEcConfSlaves.Q);
-IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
-    aSlaveConfig := _aSlaveConfig;
-END_IF
-
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
@@ -454,6 +450,9 @@ fbGetEcSlaveStates(
     pStateBuf:=ADR(stSlaveState),
     cbBufLen:=SIZEOF(stSlaveState),
     bExecute:=fbUpdateEcSlaveStateTON.q);
+IF fbGetEcSlaveStates.nSlaves < nActualEcSlaves THEN
+    MEMSET(destAddr := ADR(aSlaveConfig), fillByte := 0, n := SIZEOF(aSlaveConfig));
+END_IF
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
@@ -474,6 +473,20 @@ bSlaveStateNotOP := FALSE;
 bSlaveLinkError := FALSE;
 aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
 aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
+
+IF nActualEcSlaves = 0 THEN
+    IF fbEtherCATAlarmDelayTON.Q THEN
+        ADSLOGSTR(ADSLOG_MSGTYPE_ERROR,'FB_ESSMonitoringBase Error: %s','0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
+    END_IF
+    bSlaveLinkError := TRUE;
+    aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
+    RETURN;
+END_IF
+
+//Copy slave config info from temporary container
+IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
+    MEMMOVE(destAddr:=ADR(aSlaveConfig), srcAddr:=ADR(_aSlaveConfig), n:=nActualEcSlaves*SIZEOF(ST_EcSlaveConfigData));
+END_IF
 
 FOR i:=0 TO nActualEcSlaves-1 DO
     IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
