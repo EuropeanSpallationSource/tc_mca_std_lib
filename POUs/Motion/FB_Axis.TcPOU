@@ -398,7 +398,7 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// State machine for command handling
+        <ST><![CDATA[//State machine for command handling
 RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
 RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
 
@@ -433,7 +433,7 @@ CASE eState OF
         END_IF
 
     E_CommandHandlerState.eStabilizeNC:
-        // Ensure permits are still valid during stabilization
+        //Ensure permits are still valid during stabilization
         IF (bPermitRequired AND NOT bAxisPermittedToMove) THEN
              eState := E_CommandHandlerState.eWaitPermits;
              nWaitCounter := 0;
