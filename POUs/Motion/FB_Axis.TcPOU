@@ -69,8 +69,9 @@ VAR
     fbGearInMultiMaster: MC_GearInMultiMaster;
     stMcStatusGearInMultiMaster: ST_McStatus;
 
+    //Custom made methods MC Status
+    stMcStatusTempDisable: ST_McStatus;
     stMcStatusCommandHandler: ST_McStatus;
-
     stMcStatusAirpad: ST_McStatus;
 
     //Variables for holding limits during homing
@@ -180,7 +181,8 @@ astMcStatus[12] := ADR(stMcStatusReadParameter);
 astMcStatus[13] := ADR(stMcStatusWriteParameter);
 astMcStatus[14] := ADR(stMcStatusReadWriteCoE);
 astMcStatus[15] := ADR(stMcStatusBacklash);
-astMcStatus[16] := ADR(stMcStatusCommandHandler);
+astMcStatus[16] := ADR(stMcStatusTempDisable);
+astMcStatus[17] := ADR(stMcStatusCommandHandler);
 astMcStatus[18] := ADR(stMcStatusAirpad);
 ]]></ST>
       </Implementation>
@@ -870,7 +872,8 @@ END_FOR
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF mControl_TemperatureDisable(_stAxis.stConfig.bEnableTemperatureDisable) THEN
+        <ST><![CDATA[stMcStatusTempDisable := mControl_TemperatureDisable(_stAxis.stConfig.bEnableTemperatureDisable);
+IF  _stAxis.stStatus.bHighTempAxisDisabled THEN
     _stAxis.stControl.bEnable := FALSE;
 END_IF
 
@@ -981,21 +984,23 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_TemperatureDisable" Id="{a3234b7e-c99d-062f-2bbc-0982ac3ba282}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[METHOD mControl_TemperatureDisable: BOOL
+      <Declaration><![CDATA[METHOD mControl_TemperatureDisable: ST_McStatus
 VAR_INPUT
     bEnableTemperatureDisable: BOOL;
 END_VAR
+
 VAR
-    nAxisId: UINT;
-    sErrorMessageAxis: STRING;
+    nAxisId: DINT;
 END_VAR
+
 VAR_INST
-    fbErrorTrig: R_TRIG;
-    fbErrorTON: TON;
+    rTrigErrorMessage: R_TRIG;
+    fbErrorMessageTON: TON;
     fTemperatureScaledValue: REAL;
     fTemperatureValue: REAL;
-    sErrorMessage: STRING(255);
-    bError: BOOL := FALSE;
+    bResetErrorMessage: BOOL;
+    bTempSensorError: BOOL := FALSE;
+    nErrorID: UDINT := 0;
 END_VAR
 
 VAR CONSTANT
@@ -1004,75 +1009,77 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[nAxisId := DWORD_TO_UINT(_stAxis.Axis.NcToPlc.AxisId);
-sErrorMessageAxis := CONCAT('ERROR: Temperature sensor of axis ',UINT_TO_STRING(nAxisId));
-fbErrorTrig(clk:=bError);
+        <ST><![CDATA[nAxisId := UDINT_TO_DINT(_stAxis.Axis.NcToPlc.AxisId);
+rTrigErrorMessage(CLK := bResetErrorMessage);
 fTemperatureScaledValue := INT_TO_REAL(_stAxis.stInputs.nTempPT100)/_stAxis.stConfig.fTempScalingFactor;
-fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,fTemperatureScaledValue,_stAxis.stControl.fMaskedTemperature);
-fbErrorTON(in:=bError, PT:=T#30M);
+fTemperatureValue := SEL(_stAxis.stControl.bHWMaskActive,
+    fTemperatureScaledValue,
+    _stAxis.stControl.fMaskedTemperature);
+fbErrorMessageTON(IN := bResetErrorMessage, PT:=T#30M);
 
 _stAxis.stStatus.fActTemperature := fTemperatureValue;
 
 IF NOT bEnableTemperatureDisable THEN
-    _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
     RETURN;
 END_IF
 
-//Check for disconnection or wrongly connected errors
-IF fTemperatureValue >= fDISCONNECTED_VALUE OR fTemperatureValue <= fWRONG_CONNECTION_VALUE THEN
-    _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-    _stAxis.stStatus.bTempSensorError := TRUE;
-    bError := TRUE;
+bTempSensorError := fTemperatureValue >= fDISCONNECTED_VALUE
+    OR fTemperatureValue <= fWRONG_CONNECTION_VALUE;
 
-    IF fbErrorTrig.Q THEN
+//Check for disconnection or wrongly connected errors
+IF bTempSensorError THEN
+    nErrorID := E_CustomErrorIds.eTemperatureSensorError;
+    bResetErrorMessage := TRUE;
+    _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
+
+    IF rTrigErrorMessage.Q THEN
         IF fTemperatureValue = fDISCONNECTED_VALUE THEN
-            sErrorMessage := CONCAT(sErrorMessageAxis,' is disconnected.');
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Temperature sensor of Axis %d is disconnected.',
+                dintArg := nAxisId);
         ELSIF fTemperatureValue = fWRONG_CONNECTION_VALUE THEN
-            sErrorMessage := CONCAT(sErrorMessageAxis,' is wrongly connected, check pin connections.');
-            ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Temperature sensor of Axis %d is wrongly connected, check pin connections.',
+                dintArg := nAxisId);
         END_IF
     END_IF
 
     //Reset bError to display Error message every 30 minutes if error is still there
-    IF fbErrorTON.Q THEN
-        bError := FALSE;
+    IF fbErrorMessageTON.Q THEN
+        bResetErrorMessage := FALSE;
     END_IF
-
-    mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
-    RETURN;
 ELSE
-    _stAxis.stStatus.bTempSensorError := FALSE;
-END_IF
-
-//Check scaled temperature value against max. allowed temperature
-IF fTemperatureValue < _stAXis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
-    bError := FALSE;
-    sErrorMessage := '';
-ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
-    IF fTemperatureValue <= (_stAXis.stConfig.fMaxTemperature - 5.0) THEN
-        bError := FALSE;
-        sErrorMessage := '';
+    nErrorID := E_CustomErrorIds.eNoCustomError;
+    IF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND NOT _stAxis.stStatus.bHighTempAxisDisabled THEN
+        bResetErrorMessage := FALSE;
         _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
-    ELSE
-        bError := TRUE;
+    ELSIF fTemperatureValue < _stAxis.stConfig.fMaxTemperature AND _stAxis.stStatus.bHighTempAxisDisabled THEN
+        IF fTemperatureValue <= (_stAxis.stConfig.fMaxTemperature - 5.0) THEN
+            _stAxis.stStatus.bHighTempAxisDisabled := FALSE;
+            bResetErrorMessage := FALSE;
+        ELSE
+            bResetErrorMessage := TRUE;
+        END_IF
+    ELSIF fTemperatureValue >= _stAxis.stConfig.fMaxTemperature THEN
+        bResetErrorMessage := TRUE;
         _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-    END_IF
-ELSIF fTemperatureValue >= _stAXis.stConfig.fMaxTemperature THEN
-    bError := TRUE;
-    _stAxis.stStatus.bHighTempAxisDisabled := TRUE;
-    IF fbErrorTrig.Q THEN
-        sErrorMessage := CONCAT('ERROR: Axis temperature too hot. Cannot enable Axis ',UINT_TO_STRING(nAxisId));
-        ADSLOGSTR( msgCtrlMask := ADSLOG_MSGTYPE_ERROR, msgFmtStr := '%s', strArg := sErrorMessage);
-    END_IF
+        IF rTrigErrorMessage.Q THEN
+            ADSLOGDINT(msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                msgFmtStr := 'ERROR: Axis temperature too hot. Axis %d was disabled.',
+                dintArg := nAxisId);
+        END_IF
 
-    IF fbErrorTON.Q THEN
-        bError := FALSE;
+        IF fbErrorMessageTON.Q THEN
+            bResetErrorMessage := FALSE;
+        END_IF
     END_IF
 END_IF
 
-mControl_TemperatureDisable := _stAxis.stStatus.bHighTempAxisDisabled;
+_stAxis.stStatus.bTempSensorError := bTempSensorError;
+
+mControl_TemperatureDisable.Active := bEnableTemperatureDisable;
+mControl_TemperatureDisable.Error := bTempSensorError;
+mControl_TemperatureDisable.ErrorID := nErrorID;
 ]]></ST>
       </Implementation>
     </Method>
