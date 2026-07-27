@@ -38,7 +38,8 @@ STRUCT
     bAutoDisable: BOOL := FALSE; //Automatically disable an axis when motion completed/stopped
     tAutoDisableHysteresis: TIME := T#3S; //Hystersis before issuing automatic disable command after motion completed/stopped
 
-    tCommandHandlerTimeout: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
+    tCommandHandlerTimeout: TIME := T#15S; //Note: Should be larger than required timeouts for airpad and external brake.
+    nCommandHandlerWaitCycles: UINT := 1; //Number of cycles to wait after permits are ready before releasing command to NC. Prevents 4358/4223 errors.
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
