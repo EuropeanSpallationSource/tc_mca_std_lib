@@ -533,8 +533,10 @@ mControl_CommandHandler.CommandAborted := bCommandAborted;
 mControl_CommandHandler.Done := bInternalExecute;
 mControl_CommandHandler.Busy := (eState <> E_CommandHandlerState.eIdle);
 mControl_CommandHandler.Error := _stAxis.stStatus.bCommandHandlerTimeoutError;
+
 IF _stAxis.stStatus.bCommandHandlerTimeoutError THEN
     mControl_CommandHandler.ErrorID := TO_UDINT(E_CustomErrorIds.eCommandHandlerTimeoutError);
+    _stAxis.stError.nCommandHandlerErrorID := mControl_CommandHandler.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
