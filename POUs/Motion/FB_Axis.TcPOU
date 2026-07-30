@@ -1090,6 +1090,10 @@ _stAxis.stStatus.bTempSensorError := bTempSensorError;
 mControl_TemperatureDisable.Active := bEnableTemperatureDisable;
 mControl_TemperatureDisable.Error := bTempSensorError;
 mControl_TemperatureDisable.ErrorID := nErrorID;
+
+IF bTempSensorError THEN
+    _stAxis.stError.nTempDisableErrorID := nErrorID;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
