@@ -1841,7 +1841,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
-    IF i <> 16 THEN
+    //Ignore Done bits of this methods
+    IF i <> 16 //mControl_TemperatureDisable
+    OR i <> 17 //mControl_CommandHandler
+    OR i <> 18 //mControl_Airpad
+    OR i <> 19 THEN //mControl_ExternalBrake
         tmpDone := astMcStatus[i]^.Done OR tmpDone;
     END_IF
 END_FOR
