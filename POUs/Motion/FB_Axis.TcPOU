@@ -239,6 +239,7 @@ RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 TON_PressurizeAirpad(
     IN := bPressureOnRequest
+        AND NOT _stAxis.stStatus.bError
         AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND _stAxis.stInputs.bAirpadPressurized)
         OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
@@ -257,13 +258,11 @@ CASE eAirpad OF
     E_Airpad.eDepressurize:
         //No movement requested -> Airpad off
         _stAxis.stControl.bPressurizeAirpad := FALSE;
+        bAirpadError := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
             AND NOT _stAxis.stStatus.bAirpadPressureError
             AND NOT _stAxis.stStatus.bAirpadTimeoutError THEN
-            bAirpadError := FALSE;
-            _stAxis.stStatus.bAirpadTimeoutError := FALSE;
-            _stAxis.stStatus.bAirpadPressureError := FALSE;
             nAirpadErrorId := 0;
             eAirpad := E_Airpad.ePressurize;
         END_IF
@@ -273,7 +272,9 @@ CASE eAirpad OF
         //Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
+        IF _stAxis.stStatus.bError
+            OR NOT bPressureOnRequest
+            OR bAirpadError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeTimeout.Q THEN
             IF _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
@@ -298,7 +299,8 @@ CASE eAirpad OF
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
-            OR TON_Depressurize.Q THEN
+            OR TON_Depressurize.Q
+            OR  bAirpadError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
@@ -319,6 +321,10 @@ bReady :=
 //ST_McStatus mapping
 mControl_Airpad.Error := bAirpadError;
 mControl_Airpad.ErrorID := nAirpadErrorId;
+
+IF     bAirpadError THEN
+    _stAxis.stError.nAirpadErrorID := nAirpadErrorId;
+END_IF
 
 
 ]]></ST>
