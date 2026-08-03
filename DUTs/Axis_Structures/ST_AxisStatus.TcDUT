@@ -42,8 +42,7 @@ STRUCT
     nSoEErrorID: UINT;
     nSoEDiagID: UDINT;
     bAirpadReady: BOOL; //True if airpad in ready to move state + feedback ok (if connected)
-    bAirpadPressureError: BOOL; //True if pressure unexpectedly lost
-    bAirpadTimeoutError: BOOL; //True if airpad did not report pressurized in time
+    bAirpadPressureError: BOOL; //True if pressure error
     bExternalBrakeReady: BOOL; //True if brake in ready to move state + feedback ok (if connected)
     bExternalBrakeFailure: BOOL; //True if brake engaged unexpectedly.
     bExternalBrakeTimeoutError: BOOL; //True if external brake id not report released in time
