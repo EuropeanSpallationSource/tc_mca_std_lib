@@ -603,7 +603,7 @@
             </o>
             <o>
               <v n="TextID">"tAirpadOnDelayTime"</v>
-              <v n="TextDefault">"Airpad On Delay"</v>
+              <v n="TextDefault">"Airpad On Delay Time"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -637,15 +637,8 @@
               </l>
             </o>
             <o>
-              <v n="TextID">"tAirpadPressurizeTimeout"</v>
-              <v n="TextDefault">"Timeout Pressurizing Airpad"</v>
-              <l n="LanguageTexts" t="ArrayList" cet="String">
-                <v></v>
-              </l>
-            </o>
-            <o>
-              <v n="TextID">"tAirpadDepressurizeTimeout"</v>
-              <v n="TextDefault">"Timeout Depressurizing Airpad"</v>
+              <v n="TextID">"tAirpadOffDelayTime"</v>
+              <v n="TextDefault">"Airpad Off Delay Time"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -787,9 +780,9 @@
           <l n="Languages" t="ArrayList" cet="String">
             <v>Test</v>
           </l>
-          <v n="GuidInit">{50839f36-fb78-4665-8ac1-4ee407fed637}</v>
-          <v n="GuidReInit">{dfd6d111-24e4-4897-8681-574146be0b0a}</v>
-          <v n="GuidExitX">{c22d6491-0c77-4ac6-a5a3-7665c4e0dfb4}</v>
+          <v n="GuidInit">{e1369380-5441-4e56-92ed-bf94dfd3a0e6}</v>
+          <v n="GuidReInit">{a18b7042-55a9-482c-93bb-6f9cbfae6bfb}</v>
+          <v n="GuidExitX">{7153af29-0312-4dbc-b2ca-763b6008a30c}</v>
         </o>
       </Data>
       <TypeList>
