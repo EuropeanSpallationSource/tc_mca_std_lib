@@ -291,7 +291,7 @@ CASE eAirpad OF
 
         IF _stAxis.stStatus.bError
             OR TON_Depressurize.Q
-            OR  bAirpadError THEN
+            OR bAirpadError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
@@ -312,7 +312,7 @@ bReady := eAirpad = E_Airpad.eReadyToMove
 mControl_Airpad.Error := bAirpadError;
 mControl_Airpad.ErrorID := nAirpadErrorId;
 
-IF     bAirpadError THEN
+IF bAirpadError THEN
     _stAxis.stError.nAirpadErrorID := nAirpadErrorId;
 END_IF
 
