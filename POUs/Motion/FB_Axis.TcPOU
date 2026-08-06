@@ -124,6 +124,8 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
+    nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //USed for the FOR loops for the Busy, Done, Command Aborted Status
+    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //USed for the FOR loops for Done
     nMCSTATUS_ARRAY_SIZE: UINT := 19;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
@@ -1795,7 +1797,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -1810,7 +1812,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -1829,14 +1831,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
-    //Ignore Done bits of this methods
-    IF i <> 16 //mControl_TemperatureDisable
-    OR i <> 17 //mControl_CommandHandler
-    OR i <> 18 //mControl_Airpad
-    OR i <> 19 THEN //mControl_ExternalBrake
-        tmpDone := astMcStatus[i]^.Done OR tmpDone;
-    END_IF
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
+    tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
 fbDoneRTrig(CLK := tmpDone);
@@ -1886,14 +1882,14 @@ ELSIF _stAxis.Axis.Status.Error THEN
 //FBs and custom methods errors
 ELSIF fbErrorRTrig.Q THEN
     //For each mcStatus
-    IF astMcStatus[16]^.Error
-    OR astMcStatus[17]^.Error
-    OR astMcStatus[18]^.Error
-    OR astMcStatus[19]^.Error THEN
-         _stAxis.stStatus.bError := TRUE;
-    ELSE
-        _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
-    END_IF
+    FOR i := nLAST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
+         IF astMcStatus[i]^.Error THEN
+            _stAxis.stStatus.bError := TRUE;
+           ELSE
+                _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
+        END_IF
+    END_FOR
+
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
         //If there's an error present propagate
         IF astMcStatus[i]^.ErrorID <> 0 THEN
