@@ -351,7 +351,7 @@
             </o>
             <o>
               <v n="TextID">"fHomeFinishDistance"</v>
-              <v n="TextDefault">"Relative Move after Homing"</v>
+              <v n="TextDefault">"Move after Homing"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -525,7 +525,7 @@
               </l>
             </o>
             <o>
-              <v n="TextID">"CmdHandler"</v>
+              <v n="TextID">"CommandHandler"</v>
               <v n="TextDefault">"Command Handler"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
@@ -540,14 +540,14 @@
             </o>
             <o>
               <v n="TextID">"bAxisReadyToMove"</v>
-              <v n="TextDefault">"Axis Permit"</v>
+              <v n="TextDefault">"Axis Ready To Move"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
             </o>
             <o>
               <v n="TextID">"bCommandHandlerTimeoutError"</v>
-              <v n="TextDefault">"Timeout Axis Permit"</v>
+              <v n="TextDefault">"Timeout Cmd Handler"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -603,7 +603,7 @@
             </o>
             <o>
               <v n="TextID">"tAirpadOnDelayTime"</v>
-              <v n="TextDefault">"Airpad On Delay"</v>
+              <v n="TextDefault">"Airpad On Delay Time"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -637,15 +637,8 @@
               </l>
             </o>
             <o>
-              <v n="TextID">"tAirpadPressurizeTimeout"</v>
-              <v n="TextDefault">"Timeout Pressurizing Airpad"</v>
-              <l n="LanguageTexts" t="ArrayList" cet="String">
-                <v></v>
-              </l>
-            </o>
-            <o>
-              <v n="TextID">"tAirpadOffHysteresis"</v>
-              <v n="TextDefault">"Hysteresis When Not In Error"</v>
+              <v n="TextID">"tAirpadOffDelayTime"</v>
+              <v n="TextDefault">"Airpad Off Delay Time"</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
                 <v></v>
               </l>
@@ -770,6 +763,13 @@
               </l>
             </o>
             <o>
+              <v n="TextID">"bCommandHandlerReleasedCommand"</v>
+              <v n="TextDefault">"Move Command Released"</v>
+              <l n="LanguageTexts" t="ArrayList" cet="String">
+                <v></v>
+              </l>
+            </o>
+            <o>
               <v n="TextID">""</v>
               <v n="TextDefault">""</v>
               <l n="LanguageTexts" t="ArrayList" cet="String">
@@ -780,9 +780,9 @@
           <l n="Languages" t="ArrayList" cet="String">
             <v>Test</v>
           </l>
-          <v n="GuidInit">{a4579515-5fac-4e80-a8ae-fa31e3dd939e}</v>
-          <v n="GuidReInit">{569c99f6-8b6e-4019-a3fb-21d3bd9f16d9}</v>
-          <v n="GuidExitX">{74cde198-f60f-4764-99a7-fab6d8a4e66b}</v>
+          <v n="GuidInit">{e1369380-5441-4e56-92ed-bf94dfd3a0e6}</v>
+          <v n="GuidReInit">{a18b7042-55a9-482c-93bb-6f9cbfae6bfb}</v>
+          <v n="GuidExitX">{7153af29-0312-4dbc-b2ca-763b6008a30c}</v>
         </o>
       </Data>
       <TypeList>

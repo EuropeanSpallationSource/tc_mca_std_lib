@@ -12,7 +12,7 @@ STRUCT
     fHomePosition: LREAL := 0; //Position to set the axis to after completing the homing sequence
     fHomeFinishDistance: LREAL := 0; //Distance to move back into the working zone after homing is complete
     eHomeSeq: E_HomingRoutines; //Homing sequence routine to execute
-    eRestorePosition: E_RestorePosition; //Option to restore incremental axis position after power loss(0 = No, 1 = Yes)
+    bRestorePosition: BOOL := TRUE; //Option to restore the position or not during a shutdown
     bEnableStopWithAnyLimitSwitch: BOOL := TRUE; //Option to stop the axis when either the forward or backward limit switch is triggered
 
     //Advanced homing parameters
@@ -31,13 +31,15 @@ STRUCT
 
     // Use external brake / airpad
     stAirpadBrake: ST_AirpadBrakeConfig;
+    bAirpadManualControl: BOOL := FALSE; //Allow manual control airpad
 
     // Configure automatic enable / disable
     bAutoEnable: BOOL := FALSE; //Automatically enable an axis when issuing a motion command
     bAutoDisable: BOOL := FALSE; //Automatically disable an axis when motion completed/stopped
     tAutoDisableHysteresis: TIME := T#3S; //Hystersis before issuing automatic disable command after motion completed/stopped
 
-    tCommandHandlerTimeout: TIME := T#15S; // Note: Should be larger than required timeouts for airpad and external brake.
+    tCommandHandlerTimeout: TIME := T#15S; //Note: Should be larger than required timeouts for airpad and external brake.
+    nCommandHandlerWaitCycles: UINT := 1; //Number of cycles to wait after permits are ready before releasing command to NC. Prevents 4358/4223 errors.
 
     //Read and Write parameters
     eAxisParameters: E_AxisParameters; //Enumeration of axis parameters for read/write operations
