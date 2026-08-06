@@ -73,7 +73,7 @@ VAR
     stMcStatusTempDisable: ST_McStatus;
     stMcStatusCommandHandler: ST_McStatus;
     stMcStatusAirpad: ST_McStatus;
-    stMcStatusBrake: ST_McStatus;
+    stMcStatusExternalBrake: ST_McStatus;
 
     //Variables for holding limits during homing
     bWaitForStopAfterLimitHit: BOOL := FALSE;
@@ -185,7 +185,7 @@ astMcStatus[15] := ADR(stMcStatusBacklash);
 astMcStatus[16] := ADR(stMcStatusTempDisable);
 astMcStatus[17] := ADR(stMcStatusCommandHandler);
 astMcStatus[18] := ADR(stMcStatusAirpad);
-astMcStatus[19] := ADR(stMcStatusBrake);
+astMcStatus[19] := ADR(stMcStatusExternalBrake);
 ]]></ST>
       </Implementation>
     </Method>
