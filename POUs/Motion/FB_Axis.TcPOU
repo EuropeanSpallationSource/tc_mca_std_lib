@@ -203,7 +203,6 @@ END_VAR
 VAR_INST
     eAirpad: E_Airpad := E_Airpad.eDepressurize;
     TON_PressurizeAirpad: TON;
-    TON_PressurizeTimeout: TON;
     TON_Depressurize: TON;
     RTRIG_PressureRequest: R_TRIG;
     bNotPressurizedInTime: BOOL := FALSE;
@@ -242,10 +241,6 @@ TON_PressurizeAirpad(
         OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
     PT := _stAxis.stConfig.stAirpadBrake.tAirpadOnDelayTime);
 
-TON_PressurizeTimeout(
-    IN := eAirpad = E_Airpad.ePressurize,
-    PT := _stAxis.stConfig.stAirpadBrake.tAirpadPressurizeTimeout);
-
 TON_Depressurize(
     IN := NOT bPressureOnRequest,
     PT := _stAxis.stConfig.stAirpadBrake.tAirpadOffDelayTime);
@@ -257,10 +252,8 @@ CASE eAirpad OF
         _stAxis.stControl.bPressurizeAirpad := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
-            AND NOT _stAxis.stStatus.bAirpadPressureError
-            AND NOT _stAxis.stStatus.bAirpadTimeoutError THEN
+            AND NOT _stAxis.stStatus.bAirpadPressureError THEN
             bAirpadError := FALSE;
-            _stAxis.stStatus.bAirpadTimeoutError := FALSE;
             _stAxis.stStatus.bAirpadPressureError := FALSE;
             nAirpadErrorId := 0;
             eAirpad := E_Airpad.ePressurize;
@@ -273,7 +266,7 @@ CASE eAirpad OF
 
         IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
             eAirpad := E_Airpad.eDepressurize;
-        ELSIF TON_PressurizeTimeout.Q THEN
+        ELSIF TON_PressurizeAirpad.Q THEN
             IF _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
                 AND NOT _stAxis.stInputs.bAirpadPressurized THEN
                 bAirpadError := TRUE;
@@ -281,13 +274,8 @@ CASE eAirpad OF
                 nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
                 eAirpad := E_Airpad.eDepressurize;
             ELSE
-                bAirpadError := TRUE;
-                _stAxis.stStatus.bAirpadTimeoutError := TRUE;
-                nAirpadErrorId := E_CustomErrorIds.eAirPadTimeoutError;
-                eAirpad := E_Airpad.eDepressurize;
+                eAirpad := E_Airpad.eReadyToMove;
             END_IF
-        ELSIF TON_PressurizeAirpad.Q THEN
-            eAirpad := E_Airpad.eReadyToMove;
         END_IF
 
 
@@ -308,8 +296,7 @@ CASE eAirpad OF
 
 END_CASE
 
-bReady :=
-    eAirpad = E_Airpad.eReadyToMove
+bReady := eAirpad = E_Airpad.eReadyToMove
     AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
         AND _stAxis.stInputs.bAirpadPressurized)
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
@@ -797,7 +784,7 @@ fbHome(
     bLimitBwd := _stAxis.stInputs.bLimitBwd,
     bLimitFwd := _stAxis.stInputs.bLimitFwd,
     bHomeSensor := _stAxis.stInputs.bHomeSensor,
-    stConfig := _stAxis.stConfig);
+    stConfig := _stAxis.stConfig.stHomingConfig);
 fbHome.bExecute := FALSE;
 
 mControl_Home.Busy := fbHome.bBusy;
@@ -942,7 +929,6 @@ IF fbReset.Done
     AND NOT fbSoEReset.Busy THEN
     _stAxis.stStatus.bError := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
-    _stAxis.stStatus.bAirpadTimeoutError := FALSE;
     _stAxis.stStatus.bAirpadPressureError := FALSE;
     _stAxis.stStatus.bExternalBrakeTimeoutError := FALSE;
     _stAxis.stStatus.bExternalBrakeFailure := FALSE;
