@@ -950,9 +950,9 @@ IF fbReset.Done
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
         astMcStatus[i]^.Error := FALSE;
     END_FOR
-        //Reset ST_Status error ID
+    //Reset ST_Status error ID
     _stAxis.stStatus.nErrorID := 0;
-        //Reset St_AxisError error IDs
+    //Reset St_AxisError error IDs
     _stAxis.stError.nPowerErrorID := 0;
     _stAxis.stError.nMoveAbsoluteErrorID := 0;
     _stAxis.stError.nMoveRelativeErrorID := 0;
