@@ -21,6 +21,7 @@ VAR
     tonReadDelay: TON; //Delay timer before starting a new cyclic read
     bFirstReadDone: BOOL := FALSE; //First readout of all parameters is done
 
+    bCPUTypeWarning: BOOL; //Warning set for CPU type mismatch
     bCPUTempWarning: BOOL; //Warning set for CPU temperature is above limit
     bCPUUsageWarning: BOOL; //Warning set for CPU usage is above limit
     nUPSBatteryCapacityWarning: BOOL; //Warning set for UPS battery capacity is below limit
@@ -29,6 +30,8 @@ VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
     ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
     ERR_NO_DATA: DINT := -324665083; //Error Code: No data available.
+    CPU_NAME_LENGTH: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF USINT := [6, 10];
+    CPU_NAME: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF STRING(10) := ['CX5130', 'C6017-0020'];
     MAX_PARAMS: USINT := 72;
     CYCLIC_READ_PARAM_COUNT: USINT := 14;
     CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
@@ -132,7 +135,18 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF bFirstReadDone THEN
+        <ST><![CDATA[IF bFirstReadDone AND eState = eDelay THEN
+    //CPU Type mismatch
+    IF LEFT(stIPCDiagData.sIPCHardwareVersion, CPU_NAME_LENGTH[eCPUType]) <> CPU_NAME[eCPUType] THEN
+        IF NOT bCPUTypeWarning THEN
+            sMessage := CONCAT('IPC diag CPU type mistmatch IPC configured as %s, read:  ', stIPCDiagData.sIPCHardwareVersion);
+            ADSLOGSTR(ADSLOG_MSGTYPE_WARN, sMessage, CPU_NAME[eCPUType]);
+        END_IF
+        bCPUTypeWarning := TRUE;
+    ELSE
+        bCPUTypeWarning := FALSE;
+    END_IF
+
     //CPU Temp above limit
     IF stIPCDiagData.nCPU_Temp > nCPUTempLimit THEN
         IF NOT bCPUTempWarning THEN
