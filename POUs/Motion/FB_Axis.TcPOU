@@ -123,8 +123,8 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //USed for the FOR loops for the Busy, Done, Command Aborted Status
-    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //USed for the FOR loops for Done
+    nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //Used for the FOR loops for the Busy, Done, Command Aborted Status
+    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loops for Done
     nMCSTATUS_ARRAY_SIZE: UINT := 19;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
@@ -951,25 +951,8 @@ IF fbReset.Done
     END_FOR
     //Reset ST_Status error ID
     _stAxis.stStatus.nErrorID := 0;
-    //Reset St_AxisError error IDs
-    _stAxis.stError.nPowerErrorID := 0;
-    _stAxis.stError.nMoveAbsoluteErrorID := 0;
-    _stAxis.stError.nMoveRelativeErrorID := 0;
-    _stAxis.stError.nMoveVelocityErrorID := 0;
-    _stAxis.stError.nMoveModuloErrorID := 0;
-    _stAxis.stError.nHomeErrorID := 0;
-    _stAxis.stError.nHaltErrorID := 0;
-    _stAxis.stError.nResetErrorID := 0;
-    _stAxis.stError.nStopErrorID := 0;
-    _stAxis.stError.nGearInMultiMasterErrorID := 0;
-    _stAxis.stError.nGearOutErrorID := 0;
-    _stAxis.stError.nWriteParameterErrorID := 0;
-    _stAxis.stError.nReadParameterErrorID := 0;
-    _stAxis.stError.nTempDisableErrorID := 0;
-    _stAxis.stError.nCommandHandlerErrorID := 0;
-    _stAxis.stError.nAirpadErrorID := 0;
-    _stAxis.stError.nExternalBrakeErrorID :=0;
-    _stAxis.stError.nNCErrorID := 0;
+    //Reset St_AxisError error IDs (MEMSET ensures future additions are automatically handled)
+    MEMSET(ADR(_stAxis.stError), 0, SIZEOF(_stAxis.stError));
 
 END_IF
 
