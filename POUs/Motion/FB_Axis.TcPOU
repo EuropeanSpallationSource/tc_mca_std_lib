@@ -1873,27 +1873,32 @@ ELSE
     stAxis.stStatus.nSoEDiagID := 0;
 END_IF
 
-//NC Errors
-IF _stAxis.Axis.Status.ErrorStop THEN
-    _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
-    _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
-ELSIF _stAxis.Axis.Status.Error THEN
-    _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
-//FBs and custom methods errors
-ELSIF fbErrorRTrig.Q THEN
-    //For each mcStatus
-    FOR i := nLAST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
-         IF astMcStatus[i]^.Error THEN
-            _stAxis.stStatus.bError := TRUE;
-           ELSE
-                _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
-        END_IF
-    END_FOR
+//Evaluate overall axis error, default to the NC's ErrorStop status
+_stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
 
+//Override with TRUE if any custom method has an error
+FOR i := (nLAST_ARRAY_INDEX_MOVE_COMMANDS + 1) TO nMCSTATUS_ARRAY_SIZE DO
+    IF astMcStatus[i]^.Error THEN
+        _stAxis.stStatus.bError := TRUE;
+    END_IF
+END_FOR
+
+//Only allow nErrorID to be set if it is currently 0 (healthy). 
+//This creates a snapshot of the root cause.
+IF _stAxis.stStatus.nErrorID = 0 THEN
+    //Set the NC Error ID as a baseline fallback
+    IF _stAxis.Axis.Status.ErrorStop THEN
+        _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;
+    ELSIF _stAxis.Axis.Status.Error THEN
+        _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
+    END_IF
+
+    //Overwrite with Function Block / Custom Errors if present.
+    //Because this executes after the NC check, the FB error gets priority.
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        //If there's an error present propagate
         IF astMcStatus[i]^.ErrorID <> 0 THEN
             _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
+            EXIT;
         END_IF
     END_FOR
 END_IF
