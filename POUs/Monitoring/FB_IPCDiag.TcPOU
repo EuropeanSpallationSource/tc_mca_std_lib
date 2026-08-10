@@ -4,6 +4,7 @@
     <Declaration><![CDATA[//Reads diagnostic data from IPC
 FUNCTION_BLOCK FB_IPCDiag
 VAR_INPUT
+	eCPUType: E_CPUType; //Type of the CPU (CX5130 or C6017-0020)
     tDelayTime: TIME := T#1S; //Delay time before starting a new cyclic read
 	nCPUTempLimit: DINT := 80; //Limit of maximum CPU temperature (default = 80°C)
 	nCPUUsageLimit: DINT := 80; //Limit of maximum CPU usage (deafault = 80%)
@@ -16,7 +17,7 @@ VAR
     fbIPCRegister: Tc3_IPCDiag.FB_IPCDiag_Register; //Initializes the PLC API for IPC diagnostics on a specific IPC
     fbIPCReadParam: Tc3_IPCDiag.FB_IPCDiag_ReadParameter; //Reads an IPC diagnostic parameter
     iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
-    eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
+    eState: (eDelay := 1, eNext := 2, eRead := 3, eCheckAvailable := 4, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
     tonReadDelay: TON; //Delay timer before starting a new cyclic read
     bFirstReadDone: BOOL := FALSE; //First readout of all parameters is done
 	
@@ -106,6 +107,16 @@ VAR CONSTANT
             (eParam := E_IPCDiag_ParameterKey.UPS_PowerStatus, pData := ADR(stIPCDiagData.nUPS_PowerStatus), nSize := SIZEOF(stIPCDiagData.nUPS_PowerStatus)),
             (eParam := E_IPCDiag_ParameterKey.UPS_BatteryCapacity, pData := ADR(stIPCDiagData.nUPS_BatteryCapacity), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryCapacity)),
             (eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime))];
+	UNAVAILABLE_PARAMS_COUNT: UINT := 3;
+	UNAVAILABLE_PARAMS: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020, 1..UNAVAILABLE_PARAMS_COUNT] OF E_IPCDiag_ParameterKey := [
+		//CX5130
+		E_IPCDiag_ParameterKey.Fan_ModuleCnt,
+		E_IPCDiag_ParameterKey.Fan_Speed,
+		E_IPCDiag_ParameterKey.Fan_Name,
+		//C6017_0020
+		E_IPCDiag_ParameterKey.Time_SNTPRefresh,
+		E_IPCDiag_ParameterKey.OS_CSDVersion,
+		E_IPCDiag_ParameterKey.UPS_BatteryRuntime];
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -177,7 +188,8 @@ tonReadDelay(
     </Method>
     <Method Name="mStateMachine" Id="{4a9ac8ad-eadf-0299-3f8c-08c79007b287}">
       <Declaration><![CDATA[METHOD mStateMachine
-VAR_INPUT
+VAR
+	iCnt: UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -194,8 +206,19 @@ END_VAR
             eState := eDelay;
         ELSE
             iParam := iParam + 1;
-            eState := eRead;
+            eState := eCheckAvailable;
         END_IF
+		
+	 eCheckAvailable:
+		FOR iCnt := 1 TO UNAVAILABLE_PARAMS_COUNT DO
+			//Paramter is unavailabel in current CPU type, skip to next parameter
+			IF UNAVAILABLE_PARAMS[eCPUType, iCnt] = PARAM_LIST[iParam].eParam THEN
+				eState := eNext;
+				RETURN;
+			END_IF
+		END_FOR
+
+		eState := eRead;
 
      eRead:
         IF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bValid THEN;
