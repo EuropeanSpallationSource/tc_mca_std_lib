@@ -102,7 +102,6 @@ VAR
 
     //Edge detection triggers for statuses
     fbDoneRTrig: R_TRIG;
-    fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
     fbInVelocityRTrig: R_TRIG;
     fbInVelocityFTrig: F_TRIG;
@@ -1846,17 +1845,10 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_Error : BOOL
 VAR
     i: UINT;
-    tmpError: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-    tmpError := astMcStatus[i]^.Error OR tmpError;
-END_FOR
-
-fbErrorRTrig(CLK := tmpError);
-
-IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+        <ST><![CDATA[IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
     // Read SERCOS drive error information,
     fbSoEReadDiagNumber(
         Axis := stAxis.Axis,
@@ -1883,8 +1875,7 @@ FOR i := (nLAST_ARRAY_INDEX_MOVE_COMMANDS + 1) TO nMCSTATUS_ARRAY_SIZE DO
     END_IF
 END_FOR
 
-//Only allow nErrorID to be set if it is currently 0 (healthy). 
-//This creates a snapshot of the root cause.
+//Allow nErrorID to be set only if 0, to create a snapshot of the root cause.
 IF _stAxis.stStatus.nErrorID = 0 THEN
     //Set the NC Error ID as a baseline fallback
     IF _stAxis.Axis.Status.ErrorStop THEN
@@ -1893,7 +1884,7 @@ IF _stAxis.stStatus.nErrorID = 0 THEN
         _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
     END_IF
 
-    //Overwrite with Function Block / Custom Errors if present.
+    //Overwrite with FB/Custom Errors if present.
     //Because this executes after the NC check, the FB error gets priority.
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
         IF astMcStatus[i]^.ErrorID <> 0 THEN
