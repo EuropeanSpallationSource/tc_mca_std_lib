@@ -4,11 +4,11 @@
     <Declaration><![CDATA[//Reads diagnostic data from IPC
 FUNCTION_BLOCK FB_IPCDiag
 VAR_INPUT
-	eCPUType: E_CPUType; //Type of the CPU (CX5130 or C6017-0020)
+    eCPUType: E_CPUType; //Type of the CPU (CX5130 or C6017-0020)
     tDelayTime: TIME := T#1S; //Delay time before starting a new cyclic read
-	nCPUTempLimit: DINT := 80; //Limit of maximum CPU temperature (default = 80°C)
-	nCPUUsageLimit: DINT := 80; //Limit of maximum CPU usage (deafault = 80%)
-	nUPSBatteryCapacityLimit: DINT := 20; //Limit of minimum battery capacity (deafault = 20%)
+    nCPUTempLimit: DINT := 80; //Limit of maximum CPU temperature (default = 80°C)
+    nCPUUsageLimit: DINT := 80; //Limit of maximum CPU usage (deafault = 80%)
+    nUPSBatteryCapacityLimit: DINT := 20; //Limit of minimum battery capacity (deafault = 20%)
 END_VAR
 VAR_OUTPUT
     stIPCDiagData: ST_IPCDiagData; //Diagnostic data read from IPC
@@ -20,10 +20,10 @@ VAR
     eState: (eDelay := 1, eNext := 2, eRead := 3, eCheckAvailable := 4, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
     tonReadDelay: TON; //Delay timer before starting a new cyclic read
     bFirstReadDone: BOOL := FALSE; //First readout of all parameters is done
-	
-	bCPUTempWarning: BOOL; //Warning set for CPU temperature is above limit
-	bCPUUsageWarning: BOOL; //Warning set for CPU usage is above limit
-	nUPSBatteryCapacityWarning: BOOL; //Warning set for UPS battery capacity is below limit
+
+    bCPUTempWarning: BOOL; //Warning set for CPU temperature is above limit
+    bCPUUsageWarning: BOOL; //Warning set for CPU usage is above limit
+    nUPSBatteryCapacityWarning: BOOL; //Warning set for UPS battery capacity is below limit
 END_VAR
 VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
@@ -107,16 +107,16 @@ VAR CONSTANT
             (eParam := E_IPCDiag_ParameterKey.UPS_PowerStatus, pData := ADR(stIPCDiagData.nUPS_PowerStatus), nSize := SIZEOF(stIPCDiagData.nUPS_PowerStatus)),
             (eParam := E_IPCDiag_ParameterKey.UPS_BatteryCapacity, pData := ADR(stIPCDiagData.nUPS_BatteryCapacity), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryCapacity)),
             (eParam := E_IPCDiag_ParameterKey.UPS_BatteryRuntime, pData := ADR(stIPCDiagData.nUPS_BatteryRuntime), nSize := SIZEOF(stIPCDiagData.nUPS_BatteryRuntime))];
-	UNAVAILABLE_PARAMS_COUNT: UINT := 3;
-	UNAVAILABLE_PARAMS: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020, 1..UNAVAILABLE_PARAMS_COUNT] OF E_IPCDiag_ParameterKey := [
-		//CX5130
-		E_IPCDiag_ParameterKey.Fan_ModuleCnt,
-		E_IPCDiag_ParameterKey.Fan_Speed,
-		E_IPCDiag_ParameterKey.Fan_Name,
-		//C6017_0020
-		E_IPCDiag_ParameterKey.Time_SNTPRefresh,
-		E_IPCDiag_ParameterKey.OS_CSDVersion,
-		E_IPCDiag_ParameterKey.UPS_BatteryRuntime];
+    UNAVAILABLE_PARAMS_COUNT: UINT := 3;
+    UNAVAILABLE_PARAMS: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020, 1..UNAVAILABLE_PARAMS_COUNT] OF E_IPCDiag_ParameterKey := [
+        //CX5130
+        E_IPCDiag_ParameterKey.Fan_ModuleCnt,
+        E_IPCDiag_ParameterKey.Fan_Speed,
+        E_IPCDiag_ParameterKey.Fan_Name,
+        //C6017_0020
+        E_IPCDiag_ParameterKey.Time_SNTPRefresh,
+        E_IPCDiag_ParameterKey.OS_CSDVersion,
+        E_IPCDiag_ParameterKey.UPS_BatteryRuntime];
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -128,43 +128,45 @@ mAlarms();
     <Method Name="mAlarms" Id="{c5adea71-97a7-0c89-26cf-65ca37025dd9}">
       <Declaration><![CDATA[METHOD mAlarms
 VAR
-	sMessage: T_MaxString;
-END_VAR]]></Declaration>
+    sMessage: T_MaxString;
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bFirstReadDone THEN
-	//CPU Temp above limit
-	IF stIPCDiagData.nCPU_Temp > nCPUTempLimit THEN
-		IF NOT bCPUTempWarning THEN
-			sMessage := CONCAT('IPC diag CPU temperature is above limit of %d °C, current:  ', TO_STRING(stIPCDiagData.nCPU_Temp));
-			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUTempLimit);
-		END_IF
-		bCPUTempWarning := TRUE;
-	ELSE 
-		bCPUTempWarning := FALSE;
-	END_IF
-	
-	//CPU Usage above limit
-	IF stIPCDiagData.nCPU_Usage > nCPUUsageLimit THEN
-		IF NOT bCPUUsageWarning THEN
-			sMessage := CONCAT('IPC diag CPU usage is above limit of %d %, current:  ', TO_STRING(stIPCDiagData.nCPU_Usage));
-			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUUsageLimit);
-		END_IF
-		bCPUUsageWarning := TRUE;
-	ELSE 
-		bCPUUsageWarning := FALSE;
-	END_IF
-	
-	//UPS Capacity below limit
-	IF stIPCDiagData.nUPS_BatteryCapacity < nUPSBatteryCapacityLimit THEN
-		IF NOT nUPSBatteryCapacityWarning THEN
-			sMessage := CONCAT('IPC diag UPS battery capacity is below limit of %d %, current: ', TO_STRING(stIPCDiagData.nUPS_BatteryCapacity));
-			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage ,nUPSBatteryCapacityLimit);
-		END_IF
-		nUPSBatteryCapacityWarning := TRUE;
-	ELSE 
-		nUPSBatteryCapacityWarning := FALSE;
-	END_IF	
-END_IF]]></ST>
+    //CPU Temp above limit
+    IF stIPCDiagData.nCPU_Temp > nCPUTempLimit THEN
+        IF NOT bCPUTempWarning THEN
+            sMessage := CONCAT('IPC diag CPU temperature is above limit of %d °C, current:  ', TO_STRING(stIPCDiagData.nCPU_Temp));
+            ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUTempLimit);
+        END_IF
+        bCPUTempWarning := TRUE;
+    ELSE
+        bCPUTempWarning := FALSE;
+    END_IF
+
+    //CPU Usage above limit
+    IF stIPCDiagData.nCPU_Usage > nCPUUsageLimit THEN
+        IF NOT bCPUUsageWarning THEN
+            sMessage := CONCAT('IPC diag CPU usage is above limit of %d %, current:  ', TO_STRING(stIPCDiagData.nCPU_Usage));
+            ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUUsageLimit);
+        END_IF
+        bCPUUsageWarning := TRUE;
+    ELSE
+        bCPUUsageWarning := FALSE;
+    END_IF
+
+    //UPS Capacity below limit
+    IF stIPCDiagData.nUPS_BatteryCapacity < nUPSBatteryCapacityLimit THEN
+        IF NOT nUPSBatteryCapacityWarning THEN
+            sMessage := CONCAT('IPC diag UPS battery capacity is below limit of %d %, current: ', TO_STRING(stIPCDiagData.nUPS_BatteryCapacity));
+            ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage ,nUPSBatteryCapacityLimit);
+        END_IF
+        nUPSBatteryCapacityWarning := TRUE;
+    ELSE
+        nUPSBatteryCapacityWarning := FALSE;
+    END_IF
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mCallFunctionBlocks" Id="{21987cba-76fc-0e23-395b-d09cef47667e}">
@@ -189,7 +191,7 @@ tonReadDelay(
     <Method Name="mStateMachine" Id="{4a9ac8ad-eadf-0299-3f8c-08c79007b287}">
       <Declaration><![CDATA[METHOD mStateMachine
 VAR
-	iCnt: UINT;
+    iCnt: UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -208,17 +210,17 @@ END_VAR
             iParam := iParam + 1;
             eState := eCheckAvailable;
         END_IF
-		
-	 eCheckAvailable:
-		FOR iCnt := 1 TO UNAVAILABLE_PARAMS_COUNT DO
-			//Paramter is unavailabel in current CPU type, skip to next parameter
-			IF UNAVAILABLE_PARAMS[eCPUType, iCnt] = PARAM_LIST[iParam].eParam THEN
-				eState := eNext;
-				RETURN;
-			END_IF
-		END_FOR
 
-		eState := eRead;
+     eCheckAvailable:
+        FOR iCnt := 1 TO UNAVAILABLE_PARAMS_COUNT DO
+            //Paramter is unavailabel in current CPU type, skip to next parameter
+            IF UNAVAILABLE_PARAMS[eCPUType, iCnt] = PARAM_LIST[iParam].eParam THEN
+                eState := eNext;
+                RETURN;
+            END_IF
+        END_FOR
+
+        eState := eRead;
 
      eRead:
         IF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bValid THEN;
