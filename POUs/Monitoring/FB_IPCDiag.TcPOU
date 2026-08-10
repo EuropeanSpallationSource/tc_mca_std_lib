@@ -5,6 +5,9 @@
 FUNCTION_BLOCK FB_IPCDiag
 VAR_INPUT
     tDelayTime: TIME := T#1S; //Delay time before starting a new cyclic read
+	nCPUTempLimit: DINT := 80; //Limit of maximum CPU temperature (default = 80°C)
+	nCPUUsageLimit: DINT := 80; //Limit of maximum CPU usage (deafault = 80%)
+	nUPSBatteryCapacityLimit: DINT := 20; //Limit of minimum battery capacity (deafault = 20%)
 END_VAR
 VAR_OUTPUT
     stIPCDiagData: ST_IPCDiagData; //Diagnostic data read from IPC
@@ -15,7 +18,11 @@ VAR
     iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
     eState: (eDelay := 1, eNext := 2, eRead := 3, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
     tonReadDelay: TON; //Delay timer before starting a new cyclic read
-    bMuteWarnings: BOOL := FALSE; //Disable warning messages, e.g. Parameter not supported or unavailable
+    bFirstReadDone: BOOL := FALSE; //First readout of all parameters is done
+	
+	bCPUTempWarning: BOOL; //Warning set for CPU temperature is above limit
+	bCPUUsageWarning: BOOL; //Warning set for CPU usage is above limit
+	nUPSBatteryCapacityWarning: BOOL; //Warning set for UPS battery capacity is below limit
 END_VAR
 VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
@@ -104,8 +111,51 @@ END_VAR
     <Implementation>
       <ST><![CDATA[mCallFunctionBlocks();
 mStateMachine();
+mAlarms();
 ]]></ST>
     </Implementation>
+    <Method Name="mAlarms" Id="{c5adea71-97a7-0c89-26cf-65ca37025dd9}">
+      <Declaration><![CDATA[METHOD mAlarms
+VAR
+	sMessage: T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bFirstReadDone THEN
+	//CPU Temp above limit
+	IF stIPCDiagData.nCPU_Temp > nCPUTempLimit THEN
+		IF NOT bCPUTempWarning THEN
+			sMessage := CONCAT('IPC diag CPU temperature is above limit of %d °C, current:  ', TO_STRING(stIPCDiagData.nCPU_Temp));
+			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUTempLimit);
+		END_IF
+		bCPUTempWarning := TRUE;
+	ELSE 
+		bCPUTempWarning := FALSE;
+	END_IF
+	
+	//CPU Usage above limit
+	IF stIPCDiagData.nCPU_Usage > nCPUUsageLimit THEN
+		IF NOT bCPUUsageWarning THEN
+			sMessage := CONCAT('IPC diag CPU usage is above limit of %d %, current:  ', TO_STRING(stIPCDiagData.nCPU_Usage));
+			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUUsageLimit);
+		END_IF
+		bCPUUsageWarning := TRUE;
+	ELSE 
+		bCPUUsageWarning := FALSE;
+	END_IF
+	
+	//UPS Capacity below limit
+	IF stIPCDiagData.nUPS_BatteryCapacity < nUPSBatteryCapacityLimit THEN
+		IF NOT nUPSBatteryCapacityWarning THEN
+			sMessage := CONCAT('IPC diag UPS battery capacity is below limit of %d %, current: ', TO_STRING(stIPCDiagData.nUPS_BatteryCapacity));
+			ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage ,nUPSBatteryCapacityLimit);
+		END_IF
+		nUPSBatteryCapacityWarning := TRUE;
+	ELSE 
+		nUPSBatteryCapacityWarning := FALSE;
+	END_IF	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mCallFunctionBlocks" Id="{21987cba-76fc-0e23-395b-d09cef47667e}">
       <Declaration><![CDATA[METHOD mCallFunctionBlocks
 VAR_INPUT
@@ -134,7 +184,7 @@ END_VAR
         <ST><![CDATA[CASE eState OF
     eDelay:
         IF tonReadDelay.Q THEN
-            bMuteWarnings := TRUE;
+            bFirstReadDone := TRUE;
             iParam := CYCLIC_READ_INDEX;
             eState := eRead;
         END_IF
@@ -161,17 +211,17 @@ END_VAR
     eError:
         CASE fbIPCReadParam.hrErrorCode OF
             ERR_NOT_SUPPORTED:
-                IF NOT bMuteWarnings THEN
+                IF NOT bFirstReadDone THEN
                     ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is not supported: %s',TO_STRING(PARAM_LIST[iParam].eParam));
                 END_IF
                 eState := eNext;
             ERR_UNAVAILABLE:
-                IF NOT bMuteWarnings THEN
+                IF NOT bFirstReadDone THEN
                     ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
                 END_IF
                 eState := eNext;
             ERR_NO_DATA:
-                IF NOT bMuteWarnings THEN
+                IF NOT bFirstReadDone THEN
                     ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag no data available: %s',TO_STRING(PARAM_LIST[iParam].eParam));
                 END_IF
                 eState := eNext;
