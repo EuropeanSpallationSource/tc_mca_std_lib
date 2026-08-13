@@ -474,6 +474,8 @@ END_IF
 bInterlockedRetracted := TRUE;
 _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
 _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
 _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;

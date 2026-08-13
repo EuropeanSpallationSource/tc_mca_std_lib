@@ -5,8 +5,8 @@
     // Semantic version in machine-readable format.
     // Update it and commit it immediatly before setting a tag
     nVersionMajor: UINT := 2; // Major Version
-    nVersionMinor: UINT := 9; // Minor Version
-    nVersionPatch: UINT := 1; // Patch level
+    nVersionMinor: UINT := 10; // Minor Version
+    nVersionPatch: UINT := 0; // Patch level
 
     //Structure arrays for the axes
     astAxes: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisStruct; //Array of ST_AxisStruct for holding axis parameters and controls
@@ -25,6 +25,7 @@ END_VAR
 
 VAR_GLOBAL PERSISTENT
     astAxesPersistent: ARRAY [1..GVL_APP.nAXIS_NUM] OF ST_AxisPersistent;
+    dtAtShutdownPersistent: DT; //Date and time when the CPU was powered off
 END_VAR
 ]]></Declaration>
   </GVL>

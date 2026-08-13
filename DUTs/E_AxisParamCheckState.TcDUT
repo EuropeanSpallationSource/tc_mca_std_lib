@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_AxisParamCheckState" Id="{1344f39b-70f2-0dc2-3c34-7a926795d442}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_AxisParamCheckState :
+(
+    eInit,
+    eSelectParam,
+    eWaitRead,
+    eCheck,
+    eParamValid,
+    eParamInvalid,
+    eNext,
+    eFinish
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
