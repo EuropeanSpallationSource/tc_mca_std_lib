@@ -730,14 +730,14 @@ END_CASE
     <Method Name="mAntiCollision" Id="{ceddaf27-2734-0a8a-1c66-3bf942e8b7e9}">
       <Declaration><![CDATA[METHOD PRIVATE mAntiCollision
 VAR
-	fNegativeBladePosWithMargin: LREAL;
-	fPositiveBladePosWithMargin: LREAL;
+    fNegativeBladePosWithMargin: LREAL;
+    fPositiveBladePosWithMargin: LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Return early if preconditions are not met
 IF NOT (bBladesHomed OR bBladesUncoupled OR bAnticollisionEnable) THEN
-	RETURN;
+    RETURN;
 END_IF
 
 //Negative Blade
@@ -746,20 +746,20 @@ fPositiveBladePosWithMargin := (stBladePositive.stStatus.fActPosition - fAnticol
 
 //If executing absolute / relative movement commands also check target position
 IF stBladeNegative.stControl.bExecute THEN
-	CASE stBladeNegative.stControl.eCommand OF
-	
-		E_MotionFunctions.eMoveAbsolute:
-			stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stControl.fPosition >= fPositiveBladePosWithMargin;
-	
-		E_MotionFunctions.eMoveRelative:
-			stBladeNegative.stControl.bInterlockFwd S= 
-				(stBladeNegative.stControl.fPosition + stBladeNegative.stStatus.fActPosition) >= fPositiveBladePosWithMargin;
-	
-	END_CASE
+    CASE stBladeNegative.stControl.eCommand OF
+
+        E_MotionFunctions.eMoveAbsolute:
+            stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stControl.fPosition >= fPositiveBladePosWithMargin;
+
+        E_MotionFunctions.eMoveRelative:
+            stBladeNegative.stControl.bInterlockFwd S=
+                (stBladeNegative.stControl.fPosition + stBladeNegative.stStatus.fActPosition) >= fPositiveBladePosWithMargin;
+
+    END_CASE
 END_IF
 
 //Check if current position is outside the anticollision margin
-stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stStatus.fActPosition >= fPositiveBladePosWithMargin; 
+stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stStatus.fActPosition >= fPositiveBladePosWithMargin;
 
 //Positive Blade
 
@@ -767,16 +767,16 @@ fNegativeBladePosWithMargin := (stBladeNegative.stStatus.fActPosition + fAnticol
 
 //If executing absolute / relative movement commands also check target position
 IF stBladePositive.stControl.bExecute THEN
-	CASE stBladePositive.stControl.eCommand OF
-	
-		E_MotionFunctions.eMoveAbsolute:
-			stBladePositive.stControl.bInterlockBwd S= stBladePositive.stControl.fPosition <= fNegativeBladePosWithMargin;
-	
-		E_MotionFunctions.eMoveRelative:
-			stBladePositive.stControl.bInterlockBwd S=
-				(stBladePositive.stControl.fPosition + stBladePositive.stStatus.fActPosition) <= fNegativeBladePosWithMargin;
-	
-	END_CASE
+    CASE stBladePositive.stControl.eCommand OF
+
+        E_MotionFunctions.eMoveAbsolute:
+            stBladePositive.stControl.bInterlockBwd S= stBladePositive.stControl.fPosition <= fNegativeBladePosWithMargin;
+
+        E_MotionFunctions.eMoveRelative:
+            stBladePositive.stControl.bInterlockBwd S=
+                (stBladePositive.stControl.fPosition + stBladePositive.stStatus.fActPosition) <= fNegativeBladePosWithMargin;
+
+    END_CASE
 END_IF
 
 //Check if current position is outside the anticollision margin
