@@ -114,6 +114,8 @@ VAR
     fbModMovDyn1RiseEdge: R_TRIG;
     fbModMovDyn2RiseEdge: R_TRIG;
 
+    fbCommandHistory: FB_CommandHistory;
+
     bInternalExecute: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
@@ -407,6 +409,8 @@ CASE eState OF
                     IF _stAxis.stConfig.bAutoEnable THEN
                         _stAxis.stControl.bEnable := TRUE;
                     END_IF
+
+                    fbCommandHistory.mAdd(eLatchedCommand);
                     eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
         END_IF
