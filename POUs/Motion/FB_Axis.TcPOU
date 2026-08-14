@@ -410,7 +410,7 @@ CASE eState OF
                         _stAxis.stControl.bEnable := TRUE;
                     END_IF
 
-                    fbCommandHistory.mAdd(eLatchedCommand);
+                    fbCommandHistory.mAdd(_stAxis.stControl);
                     eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
         END_IF

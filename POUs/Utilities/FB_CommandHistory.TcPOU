@@ -7,17 +7,17 @@ VAR_OUTPUT
 END_VAR
 VAR CONSTANT
     nMAX_HISTROY_ENTRY: USINT := 10;
-    stEmptyEntry: ST_CommandHistoryEntry := ();
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[
+]]></ST>
     </Implementation>
     <Method Name="mAdd" Id="{814dbda4-eaf2-055a-2536-42e29c3098af}">
       <Declaration><![CDATA[//Shifts the old entries in the history and adds the new command to the top
 METHOD mAdd
-VAR_INPUT
-    eCommand: E_MotionFunctions;
+VAR_IN_OUT CONSTANT
+    stAxisControl: ST_AxisControl;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -29,12 +29,16 @@ IF nMAX_HISTROY_ENTRY > 1 THEN
         n := (nMAX_HISTROY_ENTRY - 1) * SIZEOF(ST_CommandHistoryEntry));
 END_IF
 
-//Clear old entry
-aCommandHistory[1] := stEmptyEntry;
-
 //Add new entry
-aCommandHistory[1].eCommand := eCommand;
 aCommandHistory[1].dtTrigger := FILETIME64_TO_DT(F_GetSystemTime());
+aCommandHistory[1].dtRelease := TO_DT(0);
+aCommandHistory[1].dtFinish := TO_DT(0);
+aCommandHistory[1].fVelocity := stAxisControl.fVelocity;
+aCommandHistory[1].fAcceleration := stAxisControl.fAcceleration;
+aCommandHistory[1].fDeceleration := stAxisControl.fDeceleration;
+aCommandHistory[1].fPosition := stAxisControl.fPosition;
+aCommandHistory[1].eCommand := stAxisControl.eCommand;
+aCommandHistory[1].eResult := E_Result.eNone;
 ]]></ST>
       </Implementation>
     </Method>

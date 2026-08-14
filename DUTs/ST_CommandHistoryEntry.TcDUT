@@ -6,6 +6,10 @@ STRUCT
     dtTrigger: DT;
     dtRelease: DT;
     dtFinish: DT;
+    fVelocity: LREAL;
+    fAcceleration: LREAL;
+    fDeceleration: LREAL;
+    fPosition: LREAL;
     eCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
     eResult: E_Result := E_Result.eNone;
 END_STRUCT
