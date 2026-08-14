@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_CommandHistoryEntry" Id="{b7472ac7-f553-0458-2fb0-2b71a79014f5}">
+    <Declaration><![CDATA[TYPE ST_CommandHistoryEntry :
+STRUCT
+    dtTrigger: DT;
+    dtRelease: DT;
+    dtFinish: DT;
+    eCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
+    eResult: E_Result := E_Result.eNone;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

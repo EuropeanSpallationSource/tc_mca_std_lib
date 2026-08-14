@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_CommandHistory" Id="{39e94074-e42b-0657-2248-14d00ab28c33}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CommandHistory
+VAR_OUTPUT
+    aCommandHistory: ARRAY [1..nMAX_HISTROY_ENTRY] OF ST_CommandHistoryEntry;
+END_VAR
+VAR CONSTANT
+    nMAX_HISTROY_ENTRY: USINT := 10;
+    stEmptyEntry: ST_CommandHistoryEntry := ();
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_Result" Id="{4f73de63-82bb-01cb-3e02-6abfb05c5bcf}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_Result :
+(
+    eNone,
+    eDone,
+    eAborted,
+    eError
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
