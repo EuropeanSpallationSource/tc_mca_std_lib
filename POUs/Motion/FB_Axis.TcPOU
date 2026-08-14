@@ -439,6 +439,7 @@ CASE eState OF
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
+        fbCommandHistory.mSetRelease();
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eWaitForMotionStart:

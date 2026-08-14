@@ -38,5 +38,14 @@ aCommandHistory[1].dtTrigger := FILETIME64_TO_DT(F_GetSystemTime());
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mSetRelease" Id="{340a6c28-35e6-0fbc-3027-e0dab46adcda}">
+      <Declaration><![CDATA[//Sets the release time of the top entry
+METHOD mSetRelease
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aCommandHistory[1].dtRelease := FILETIME64_TO_DT(F_GetSystemTime());
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
