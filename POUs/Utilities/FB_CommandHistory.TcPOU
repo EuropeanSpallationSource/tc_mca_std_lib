@@ -47,5 +47,35 @@ METHOD mSetRelease
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mSetResult" Id="{c37cdde3-a4ed-0365-3874-96cbe0e75c19}">
+      <Declaration><![CDATA[//Sets the command result and finish time, if command matches top entry
+METHOD mSetResult
+VAR_INPUT
+    eCommand: E_MotionFunctions;
+END_VAR
+VAR_IN_OUT CONSTANT
+    stStatus: ST_McStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command or mismatching commands
+IF aCommandHistory[1].eResult <> E_Result.eNone
+    OR aCommandHistory[1].eCommand <> eCommand THEN
+    RETURN;
+END_IF
+
+IF stStatus.Done THEN
+    aCommandHistory[1].eResult := E_Result.eDone;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.CommandAborted THEN
+    aCommandHistory[1].eResult := E_Result.eAborted;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.Error THEN
+    aCommandHistory[1].eResult := E_Result.eError;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
