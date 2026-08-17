@@ -82,6 +82,7 @@ ELSIF stStatus.CommandAborted THEN
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 ELSIF stStatus.Error THEN
     aCommandHistory[1].eResult := E_Result.eError;
+    aCommandHistory[1].nErrorID := stStatus.ErrorID;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 END_IF
 ]]></ST>
