@@ -21,7 +21,13 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Shift old entries
+        <ST><![CDATA[//Set top entry to aborted, if it has no result
+IF aCommandHistory[1].eCommand <> E_MotionFunctions.eWaitingForCommand
+    AND aCommandHistory[1].eResult = E_Result.eNone THEN
+    aCommandHistory[1].eResult := E_Result.eAborted;
+END_IF
+
+//Shift old entries
 IF nMAX_HISTROY_ENTRY > 1 THEN
     MEMMOVE(
         destAddr := ADR(aCommandHistory[2]),
