@@ -57,9 +57,9 @@ METHOD mSetRelease
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetResult" Id="{c37cdde3-a4ed-0365-3874-96cbe0e75c19}">
+    <Method Name="mSetResultOfCommand" Id="{c37cdde3-a4ed-0365-3874-96cbe0e75c19}">
       <Declaration><![CDATA[//Sets the command result and finish time, if command matches top entry
-METHOD mSetResult
+METHOD mSetResultOfCommand
 VAR_INPUT
     eCommand: E_MotionFunctions;
 END_VAR

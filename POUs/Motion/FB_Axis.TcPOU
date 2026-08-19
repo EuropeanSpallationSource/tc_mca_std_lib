@@ -731,7 +731,7 @@ mControl_GearInMultiMaster.Error := fbGearInMultiMaster.Error;
 mControl_GearInMultiMaster.ErrorID := fbGearInMultiMaster.ErrorID;
 mControl_GearInMultiMaster.CommandAborted := fbGearInMultiMaster.CommandAborted;
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eGearInMultiMaster,
     stStatus := mControl_GearInMultiMaster);
 
@@ -766,7 +766,7 @@ mControl_GearOut.Busy := fbGearOut.Busy;
 mControl_GearOut.Error := fbGearOut.Error;
 mControl_GearOut.ErrorID := fbGearOut.ErrorID;
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eGearOut,
     stStatus := mControl_GearOut);
 
@@ -806,7 +806,7 @@ mControl_Home.Done := fbHome.bDone;
 mControl_Home.Error := fbHome.bError;
 mControl_Home.ErrorID := fbHome.nErrorId;
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eHome,
     stStatus := mControl_Home);
 
@@ -1157,7 +1157,7 @@ fbAbsMovDyn2RiseEdge(CLK:= fbMoveAbsolute2.Busy AND fbMoveAbsolute.CommandAborte
 mMove_MoveAbsolute.CommandAborted := (fbMoveAbsolute.CommandAborted AND NOT fbAbsMovDyn2RiseEdge.Q)
                                     OR (fbMoveAbsolute2.CommandAborted AND NOT fbAbsMovDyn1RiseEdge.Q);
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eMoveAbsolute,
     stStatus := mMove_MoveAbsolute);
 
@@ -1213,7 +1213,7 @@ fbModMovDyn2RiseEdge(CLK:= fbMoveModulo2.Busy AND fbMoveModulo.CommandAborted, Q
 mMove_MoveModulo.CommandAborted := (fbMoveModulo.CommandAborted AND NOT fbModMovDyn2RiseEdge.Q)
                                     OR (fbMoveModulo2.CommandAborted AND NOT fbModMovDyn1RiseEdge.Q);
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eMoveModulo,
     stStatus := mMove_MoveModulo);
 
@@ -1253,7 +1253,7 @@ mMove_MoveRelative.Error := fbMoveRelative.Error;
 mMove_MoveRelative.ErrorID := fbMoveRelative.ErrorID;
 mMove_MoveRelative.CommandAborted := fbMoveRelative.CommandAborted;
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eMoveRelative,
     stStatus := mMove_MoveRelative);
 
@@ -1286,7 +1286,7 @@ mMove_MoveVelocity.Error := fbMoveVelocity.Error;
 mMove_MoveVelocity.ErrorID := fbMoveVelocity.ErrorID;
 mMove_MoveVelocity.CommandAborted := fbMoveVelocity.CommandAborted;
 
-fbCommandHistory.mSetResult(
+fbCommandHistory.mSetResultOfCommand(
     eCommand := E_MotionFunctions.eMoveVelocity,
     stStatus := mMove_MoveVelocity);
 
