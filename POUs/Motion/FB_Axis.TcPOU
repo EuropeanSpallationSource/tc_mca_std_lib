@@ -731,13 +731,13 @@ mControl_GearInMultiMaster.Error := fbGearInMultiMaster.Error;
 mControl_GearInMultiMaster.ErrorID := fbGearInMultiMaster.ErrorID;
 mControl_GearInMultiMaster.CommandAborted := fbGearInMultiMaster.CommandAborted;
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eGearInMultiMaster,
-    stStatus := mControl_GearInMultiMaster);
-
 IF fbGearInMultiMaster.Error THEN
     _stAxis.stError.nGearInMultiMasterErrorID := fbGearInMultiMaster.ErrorID; //Set the error
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eGearInMultiMaster,
+    stStatus := mControl_GearInMultiMaster);
 ]]></ST>
       </Implementation>
     </Method>
@@ -766,13 +766,13 @@ mControl_GearOut.Busy := fbGearOut.Busy;
 mControl_GearOut.Error := fbGearOut.Error;
 mControl_GearOut.ErrorID := fbGearOut.ErrorID;
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eGearOut,
-    stStatus := mControl_GearOut);
-
 IF fbGearOut.Error THEN
     _stAxis.stError.nGearOutErrorID := fbGearOut.ErrorID; //Set the error
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eGearOut,
+    stStatus := mControl_GearOut);
 ]]></ST>
       </Implementation>
     </Method>
@@ -806,13 +806,13 @@ mControl_Home.Done := fbHome.bDone;
 mControl_Home.Error := fbHome.bError;
 mControl_Home.ErrorID := fbHome.nErrorId;
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eHome,
-    stStatus := mControl_Home);
-
 IF fbHome.bError THEN
     _stAxis.stError.nHomeErrorID := fbHome.nErrorID; //Set the error
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eHome,
+    stStatus := mControl_Home);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1159,10 +1159,6 @@ fbAbsMovDyn2RiseEdge(CLK:= fbMoveAbsolute2.Busy AND fbMoveAbsolute.CommandAborte
 mMove_MoveAbsolute.CommandAborted := (fbMoveAbsolute.CommandAborted AND NOT fbAbsMovDyn2RiseEdge.Q)
                                     OR (fbMoveAbsolute2.CommandAborted AND NOT fbAbsMovDyn1RiseEdge.Q);
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eMoveAbsolute,
-    stStatus := mMove_MoveAbsolute);
-
 // Error IDs
 IF fbMoveAbsolute.Error THEN
     _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute.ErrorID; //Set the error
@@ -1172,6 +1168,10 @@ IF fbMoveAbsolute2.Error THEN
     _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute2.ErrorID; //Set the error
     mMove_MoveAbsolute.ErrorID := fbMoveAbsolute2.ErrorID;
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eMoveAbsolute,
+    stStatus := mMove_MoveAbsolute);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1215,10 +1215,6 @@ fbModMovDyn2RiseEdge(CLK:= fbMoveModulo2.Busy AND fbMoveModulo.CommandAborted, Q
 mMove_MoveModulo.CommandAborted := (fbMoveModulo.CommandAborted AND NOT fbModMovDyn2RiseEdge.Q)
                                     OR (fbMoveModulo2.CommandAborted AND NOT fbModMovDyn1RiseEdge.Q);
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eMoveModulo,
-    stStatus := mMove_MoveModulo);
-
 // Error IDs
 IF fbMoveModulo.Error THEN
     _stAxis.stError.nMoveModuloErrorID := fbMoveModulo.ErrorID; //Set the error
@@ -1229,6 +1225,10 @@ IF fbMoveModulo2.Error THEN
     _stAxis.stError.nMoveModuloErrorID := fbMoveModulo2.ErrorID; //Set the error
     mMove_MoveModulo.ErrorID := fbMoveModulo2.ErrorID;
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eMoveModulo,
+    stStatus := mMove_MoveModulo);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1255,13 +1255,13 @@ mMove_MoveRelative.Error := fbMoveRelative.Error;
 mMove_MoveRelative.ErrorID := fbMoveRelative.ErrorID;
 mMove_MoveRelative.CommandAborted := fbMoveRelative.CommandAborted;
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eMoveRelative,
-    stStatus := mMove_MoveRelative);
-
 IF fbMoveRelative.Error THEN
     _stAxis.stError.nMoveRelativeErrorID := fbMoveRelative.ErrorID; //Set the error
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eMoveRelative,
+    stStatus := mMove_MoveRelative);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1288,13 +1288,13 @@ mMove_MoveVelocity.Error := fbMoveVelocity.Error;
 mMove_MoveVelocity.ErrorID := fbMoveVelocity.ErrorID;
 mMove_MoveVelocity.CommandAborted := fbMoveVelocity.CommandAborted;
 
-fbCommandHistory.mSetResultOfCommand(
-    eCommand := E_MotionFunctions.eMoveVelocity,
-    stStatus := mMove_MoveVelocity);
-
 IF fbMoveVelocity.Error THEN
     _stAxis.stError.nMoveVelocityErrorID := fbMoveVelocity.ErrorID; //Set the error
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eMoveVelocity,
+    stStatus := mMove_MoveVelocity);
 ]]></ST>
       </Implementation>
     </Method>

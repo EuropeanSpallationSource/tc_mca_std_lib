@@ -45,6 +45,7 @@ aCommandHistory[1].fDeceleration := stAxisControl.fDeceleration;
 aCommandHistory[1].fPosition := stAxisControl.fPosition;
 aCommandHistory[1].eCommand := stAxisControl.eCommand;
 aCommandHistory[1].eResult := E_Result.eNone;
+aCommandHistory[1].nErrorID := 0;
 ]]></ST>
       </Implementation>
     </Method>
