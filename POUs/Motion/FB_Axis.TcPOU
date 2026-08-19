@@ -1102,6 +1102,8 @@ mMove_Halt.ErrorID := fbHalt.ErrorID;
 mMove_Halt.Active := fbHalt.Active;
 mMove_Halt.CommandAborted := fbHalt.CommandAborted;
 
+fbCommandHistory.mSetHalted(bExecute := fbHalt.Execute);
+
 IF fbHalt.Error THEN
     _stAxis.stError.nHaltErrorID := fbHalt.ErrorID; //Set the error
 END_IF
@@ -1311,6 +1313,8 @@ mMove_Stop.Error := fbStop.Error;
 mMove_Stop.ErrorID := fbStop.ErrorID;
 mMove_Stop.Active := fbStop.Active;
 mMove_Stop.CommandAborted := fbStop.CommandAborted;
+
+fbCommandHistory.mSetStopped(bExecute := fbStop.Execute);
 
 IF fbStop.Error THEN
     _stAxis.stError.nStopErrorID := fbStop.ErrorID; //Set the error
