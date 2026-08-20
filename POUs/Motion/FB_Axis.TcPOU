@@ -238,10 +238,7 @@ RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 TON_PressurizeAirpad(
     IN := bPressureOnRequest
-        AND NOT _stAxis.stStatus.bError
-        AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-            AND _stAxis.stInputs.bAirpadPressurized)
-        OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
+        AND NOT _stAxis.stStatus.bError,
     PT := _stAxis.stConfig.stAirpadBrake.tAirpadOnDelayTime);
 
 TON_Depressurize(
