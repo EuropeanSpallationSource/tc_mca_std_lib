@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Axis" Id="{beb60ab5-3bf2-0ae6-2037-f6d7e95a54b2}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
@@ -212,7 +212,6 @@ VAR_INST
     bPressureOnRequest: BOOL := FALSE;
     RTRIG_ManualControl: R_TRIG;
 
-    bAirpadError: BOOL;
     nAirpadErrorId: UDINT := 0;
 END_VAR
 ]]></Declaration>
@@ -254,11 +253,9 @@ CASE eAirpad OF
     E_Airpad.eDepressurize:
         //No movement requested -> Airpad off
         _stAxis.stControl.bPressurizeAirpad := FALSE;
-        bAirpadError := FALSE;
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
             AND NOT _stAxis.stStatus.bAirpadPressureError THEN
-            bAirpadError := FALSE;
             _stAxis.stStatus.bAirpadPressureError := FALSE;
             nAirpadErrorId := 0;
             eAirpad := E_Airpad.ePressurize;
@@ -271,12 +268,11 @@ CASE eAirpad OF
 
         IF _stAxis.stStatus.bError
             OR NOT bPressureOnRequest
-            OR bAirpadError THEN
+            OR _stAxis.stStatus.bAirpadPressureError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeAirpad.Q THEN
             IF _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
                 AND NOT _stAxis.stInputs.bAirpadPressurized THEN
-                bAirpadError := TRUE;
                 _stAxis.stStatus.bAirpadPressureError := TRUE;
                 nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
                 eAirpad := E_Airpad.eDepressurize;
@@ -292,11 +288,10 @@ CASE eAirpad OF
 
         IF _stAxis.stStatus.bError
             OR TON_Depressurize.Q
-            OR bAirpadError THEN
+            OR _stAxis.stStatus.bAirpadPressureError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
-            bAirpadError := TRUE;
             _stAxis.stStatus.bAirpadPressureError := TRUE;
             nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
             eAirpad := E_Airpad.eDepressurize;
@@ -310,10 +305,10 @@ bReady := eAirpad = E_Airpad.eReadyToMove
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 
 //ST_McStatus mapping
-mControl_Airpad.Error := bAirpadError;
+mControl_Airpad.Error := _stAxis.stStatus.bAirpadPressureError;
 mControl_Airpad.ErrorID := nAirpadErrorId;
 
-IF bAirpadError THEN
+IF _stAxis.stStatus.bAirpadPressureError THEN
     _stAxis.stError.nAirpadErrorID := nAirpadErrorId;
 END_IF
 
