@@ -89,7 +89,9 @@ actVirtualAxisPositions(); //Virtual axis encoder position subroutine
 actUpdateStatus(); //Update statuses
 actEnableAxes(); //Enable the axes
 actClearCalibration(); //Clear calibration flag for all axes
-mAnticollision(); //Handle blades anticollision
+mAnticollision(
+	stBladeNegative := stBladeNegative,
+	stBladePositive := stBladePositive); //Handle blades anticollision
 
 CASE eSlitPairState OF
     E_SlitPairStates.eStartup:
@@ -729,6 +731,10 @@ END_CASE
     </Method>
     <Method Name="mAntiCollision" Id="{ceddaf27-2734-0a8a-1c66-3bf942e8b7e9}">
       <Declaration><![CDATA[METHOD PRIVATE mAntiCollision
+VAR_IN_OUT
+    stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
+    stBladePositive: ST_AxisStruct; //Axis data of the positive blade	
+END_VAR
 VAR
     fNegativeBladePosWithMargin: LREAL;
     fPositiveBladePosWithMargin: LREAL;
