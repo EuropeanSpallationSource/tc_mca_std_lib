@@ -90,8 +90,8 @@ actUpdateStatus(); //Update statuses
 actEnableAxes(); //Enable the axes
 actClearCalibration(); //Clear calibration flag for all axes
 mAnticollision(
-	stBladeNegative := stBladeNegative,
-	stBladePositive := stBladePositive); //Handle blades anticollision
+    stBladeNegative := stBladeNegative,
+    stBladePositive := stBladePositive); //Handle blades anticollision
 
 CASE eSlitPairState OF
     E_SlitPairStates.eStartup:
@@ -733,7 +733,7 @@ END_CASE
       <Declaration><![CDATA[METHOD PRIVATE mAntiCollision
 VAR_IN_OUT
     stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
-    stBladePositive: ST_AxisStruct; //Axis data of the positive blade	
+    stBladePositive: ST_AxisStruct; //Axis data of the positive blade
 END_VAR
 VAR
     fNegativeBladePosWithMargin: LREAL;
@@ -742,9 +742,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Return early if preconditions are not met
-IF NOT (bBladesHomed 
-	AND bBladesUncoupled 
-	AND bAnticollisionEnable) 
+IF NOT (bBladesHomed
+    AND bBladesUncoupled
+    AND bAnticollisionEnable)
 THEN
     RETURN;
 END_IF
@@ -758,17 +758,20 @@ IF stBladeNegative.stControl.bExecute THEN
     CASE stBladeNegative.stControl.eCommand OF
 
         E_MotionFunctions.eMoveAbsolute:
-            stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stControl.fPosition >= fPositiveBladePosWithMargin;
+            stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stControl.fPosition
+                >= fPositiveBladePosWithMargin;
 
         E_MotionFunctions.eMoveRelative:
-            stBladeNegative.stControl.bInterlockFwd S=
-                (stBladeNegative.stControl.fPosition + stBladeNegative.stStatus.fActPosition) >= fPositiveBladePosWithMargin;
+            stBladeNegative.stControl.bInterlockFwd S= (stBladeNegative.stControl.fPosition
+                + stBladeNegative.stStatus.fActPosition)
+                >= fPositiveBladePosWithMargin;
 
     END_CASE
 END_IF
 
 //Check if current position is outside the anticollision margin
-stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stStatus.fActPosition >= fPositiveBladePosWithMargin;
+stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stStatus.fActPosition
+    >= fPositiveBladePosWithMargin;
 
 //Positive Blade
 
@@ -779,17 +782,20 @@ IF stBladePositive.stControl.bExecute THEN
     CASE stBladePositive.stControl.eCommand OF
 
         E_MotionFunctions.eMoveAbsolute:
-            stBladePositive.stControl.bInterlockBwd S= stBladePositive.stControl.fPosition <= fNegativeBladePosWithMargin;
+            stBladePositive.stControl.bInterlockBwd S= stBladePositive.stControl.fPosition
+                <= fNegativeBladePosWithMargin;
 
         E_MotionFunctions.eMoveRelative:
-            stBladePositive.stControl.bInterlockBwd S=
-                (stBladePositive.stControl.fPosition + stBladePositive.stStatus.fActPosition) <= fNegativeBladePosWithMargin;
+            stBladePositive.stControl.bInterlockBwd S= (stBladePositive.stControl.fPosition
+                + stBladePositive.stStatus.fActPosition)
+                <= fNegativeBladePosWithMargin;
 
     END_CASE
 END_IF
 
 //Check if current position is outside the anticollision margin
-stBladePositive.stControl.bInterlockBwd S= stBladePositive.stStatus.fActPosition <= fNegativeBladePosWithMargin;
+stBladePositive.stControl.bInterlockBwd S= stBladePositive.stStatus.fActPosition
+    <= fNegativeBladePosWithMargin;
 ]]></ST>
       </Implementation>
     </Method>
