@@ -403,8 +403,11 @@ VAR_INST
     nActualEcSlaves: UINT := 0;
     TON_UpdateGetEcConfSlaves: TON;
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
-    _aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;  // Temporary container
-    aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
+    aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
+    aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
+	pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access 
+	pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
+
 
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
@@ -419,11 +422,22 @@ END_VAR
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
-TON_UpdateGetEcConfSlaves(IN:=NOT TON_UpdateGetEcConfSlaves.Q, PT:=T#100MS);
+
+//Swap buffer if read out is finished
+IF TON_UpdateGetEcConfSlaves.Q THEN
+	IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
+		pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+		pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+	ELSE
+		pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+		pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+	END_IF
+END_IF
+
 fbGetEcConfSlaves(
     sNetId:=nEcMasterNetId,
-    pArrEcConfSlaveInfo := ADR(_aSlaveConfig),
-    cbBufLen := SIZEOF(_aSlaveConfig),
+    pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
+    cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
     bExecute := TON_UpdateGetEcConfSlaves.Q);
 
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
@@ -450,9 +464,6 @@ fbGetEcSlaveStates(
     pStateBuf:=ADR(stSlaveState),
     cbBufLen:=SIZEOF(stSlaveState),
     bExecute:=fbUpdateEcSlaveStateTON.q);
-IF fbGetEcSlaveStates.nSlaves < nActualEcSlaves THEN
-    MEMSET(destAddr := ADR(aSlaveConfig), fillByte := 0, n := SIZEOF(aSlaveConfig));
-END_IF
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
 fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
@@ -483,18 +494,13 @@ IF nActualEcSlaves = 0 THEN
     RETURN;
 END_IF
 
-//Copy slave config info from temporary container
-IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
-    MEMMOVE(destAddr:=ADR(aSlaveConfig), srcAddr:=ADR(_aSlaveConfig), n:=nActualEcSlaves*SIZEOF(ST_EcSlaveConfigData));
-END_IF
-
 FOR i:=0 TO nActualEcSlaves-1 DO
     IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=UINT_TO_STRING(i+1));
         IF NOT bSlaveLinkError THEN
             aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
         END_IF
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=', ');
@@ -508,7 +514,7 @@ FOR i:=0 TO nActualEcSlaves-1 DO
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:= UINT_TO_STRING(i+1));
         IF NOT bSlaveStateNotOP THEN
             aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
         END_IF
         aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=', ');
