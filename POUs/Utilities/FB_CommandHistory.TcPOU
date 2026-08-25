@@ -7,6 +7,7 @@ VAR_OUTPUT
 END_VAR
 VAR CONSTANT
     nMAX_HISTORY_ENTRY: USINT := 10;
+    stEMPTY_ENTRY: ST_CommandHistoryEntry := ();
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -38,16 +39,13 @@ IF nMAX_HISTORY_ENTRY > 1 THEN
 END_IF
 
 //Add new entry
+aCommandHistory[1] := stEMPTY_ENTRY;
 aCommandHistory[1].dtTrigger := FILETIME64_TO_DT(F_GetSystemTime());
-aCommandHistory[1].dtRelease := TO_DT(0);
-aCommandHistory[1].dtFinish := TO_DT(0);
 aCommandHistory[1].fVelocity := stAxisControl.fVelocity;
 aCommandHistory[1].fAcceleration := stAxisControl.fAcceleration;
 aCommandHistory[1].fDeceleration := stAxisControl.fDeceleration;
 aCommandHistory[1].fPosition := stAxisControl.fPosition;
 aCommandHistory[1].eCommand := stAxisControl.eCommand;
-aCommandHistory[1].eResult := E_Result.eNone;
-aCommandHistory[1].nErrorID := 0;
 ]]></ST>
       </Implementation>
     </Method>
