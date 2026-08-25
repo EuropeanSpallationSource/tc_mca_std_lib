@@ -11,7 +11,7 @@ STRUCT
     fDeceleration: LREAL;
     fPosition: LREAL;
     eCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
-    eResult: E_Result := E_Result.eNone;
+    eResult: E_CommandResult := E_CommandResult.eNone;
     nErrorID: UDINT;
 END_STRUCT
 END_TYPE

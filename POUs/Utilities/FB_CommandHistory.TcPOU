@@ -23,8 +23,9 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Set top entry to aborted, if it has no result
 IF aCommandHistory[1].eCommand <> E_MotionFunctions.eWaitingForCommand
-    AND aCommandHistory[1].eResult = E_Result.eNone THEN
-    aCommandHistory[1].eResult := E_Result.eAborted;
+    AND aCommandHistory[1].eResult = E_CommandResult.eNone
+THEN
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
 END_IF
 
 //Shift old entries
@@ -58,12 +59,12 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Check result already set for last command
-IF aCommandHistory[1].eResult <> E_Result.eNone THEN
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
     RETURN;
 END_IF
 
 IF bExecute THEN
-    aCommandHistory[1].eResult := E_Result.eHalted;
+    aCommandHistory[1].eResult := E_CommandResult.eHalted;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 END_IF
 ]]></ST>
@@ -90,19 +91,20 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Check result already set for last command or mismatching commands
-IF aCommandHistory[1].eResult <> E_Result.eNone
-    OR aCommandHistory[1].eCommand <> eCommand THEN
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone
+    OR aCommandHistory[1].eCommand <> eCommand
+THEN
     RETURN;
 END_IF
 
 IF stStatus.Done THEN
-    aCommandHistory[1].eResult := E_Result.eDone;
+    aCommandHistory[1].eResult := E_CommandResult.eDone;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 ELSIF stStatus.CommandAborted THEN
-    aCommandHistory[1].eResult := E_Result.eAborted;
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 ELSIF stStatus.Error THEN
-    aCommandHistory[1].eResult := E_Result.eError;
+    aCommandHistory[1].eResult := E_CommandResult.eError;
     aCommandHistory[1].nErrorID := stStatus.ErrorID;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 END_IF
@@ -118,12 +120,12 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Check result already set for last command
-IF aCommandHistory[1].eResult <> E_Result.eNone THEN
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
     RETURN;
 END_IF
 
 IF bExecute THEN
-    aCommandHistory[1].eResult := E_Result.eStopped;
+    aCommandHistory[1].eResult := E_CommandResult.eStopped;
     aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
 END_IF
 ]]></ST>
