@@ -3,10 +3,10 @@
   <POU Name="FB_CommandHistory" Id="{39e94074-e42b-0657-2248-14d00ab28c33}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CommandHistory
 VAR_OUTPUT
-    aCommandHistory: ARRAY [1..nMAX_HISTROY_ENTRY] OF ST_CommandHistoryEntry;
+    aCommandHistory: ARRAY [1..nMAX_HISTORY_ENTRY] OF ST_CommandHistoryEntry;
 END_VAR
 VAR CONSTANT
-    nMAX_HISTROY_ENTRY: USINT := 10;
+    nMAX_HISTORY_ENTRY: USINT := 10;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -19,6 +19,7 @@ METHOD mAdd
 VAR_IN_OUT CONSTANT
     stAxisControl: ST_AxisControl;
 END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Set top entry to aborted, if it has no result
@@ -29,11 +30,11 @@ THEN
 END_IF
 
 //Shift old entries
-IF nMAX_HISTROY_ENTRY > 1 THEN
+IF nMAX_HISTORY_ENTRY > 1 THEN
     MEMMOVE(
         destAddr := ADR(aCommandHistory[2]),
         srcAddr := ADR(aCommandHistory),
-        n := (nMAX_HISTROY_ENTRY - 1) * SIZEOF(ST_CommandHistoryEntry));
+        n := (nMAX_HISTORY_ENTRY - 1) * SIZEOF(ST_CommandHistoryEntry));
 END_IF
 
 //Add new entry
