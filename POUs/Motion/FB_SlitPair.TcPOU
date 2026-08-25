@@ -742,7 +742,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Return early if preconditions are not met
-IF NOT (bBladesHomed OR bBladesUncoupled OR bAnticollisionEnable) THEN
+IF NOT (bBladesHomed 
+	AND bBladesUncoupled 
+	AND bAnticollisionEnable) 
+THEN
     RETURN;
 END_IF
 
