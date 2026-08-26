@@ -67,12 +67,12 @@ VAR_OUTPUT
 END_VAR
 VAR
     // The high-speed 1ms buffer for ADS extraction or internal analysis
-    aLoadData           : ARRAY[1..5000] OF INT; // InfoData 1 (Current Run)
-    aBestLoadData       : ARRAY[1..5000] OF INT; // InfoData 1 (Best Run Snapshot)
-    aWorstLoadData      : ARRAY[1..5000] OF INT; // InfoData 1 (Worst Run Snapshot)
-    aBaselineLoadData   : ARRAY[1..5000] OF INT; // InfoData 1 (Locked Baseline Snapshot)
+    aLoadData           : ARRAY[1..1000] OF INT; // InfoData 1 (Current Run)
+    aBestLoadData       : ARRAY[1..1000] OF INT; // InfoData 1 (Best Run Snapshot)
+    aWorstLoadData      : ARRAY[1..1000] OF INT; // InfoData 1 (Worst Run Snapshot)
+    aBaselineLoadData   : ARRAY[1..1000] OF INT; // InfoData 1 (Locked Baseline Snapshot)
     
-    aPowerData          : ARRAY[1..5000] OF INT; // InfoData 2
+    aPowerData          : ARRAY[1..1000] OF INT; // InfoData 2
     nSampleCount        : UINT;
     
     // Internal State Machine and Motion Blocks
@@ -332,7 +332,7 @@ CASE eState OF
         
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
-            IF nSampleCount < 5000 THEN
+            IF nSampleCount < 1000 THEN
                 nSampleCount := nSampleCount + 1;
                 aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
                 aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
@@ -370,7 +370,7 @@ CASE eState OF
         
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
-            IF nSampleCount < 5000 THEN
+            IF nSampleCount < 1000 THEN
                 nSampleCount := nSampleCount + 1;
                 aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
                 aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
