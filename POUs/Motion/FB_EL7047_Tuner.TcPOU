@@ -8,6 +8,8 @@ VAR_INPUT
     
     // Intelligent Auto-Tune Parameters
     bExecuteAutoTune    : BOOL;
+    bStepMode           : BOOL; // If TRUE, pauses after each pass
+    bNextStep           : BOOL; // Trigger to proceed to the next pass
     nKpStartOverride    : UINT := 150;    // If > 0, overrides the L calculation (Beckhoff default is 150)
     nMaxCurrent_mA      : UINT := 0;      // 0x8010:01. If 0, the block reads the existing CoE value natively
     
@@ -75,6 +77,7 @@ VAR
     
     // Internal State Machine and Motion Blocks
     eState              : E_TunerState;
+    eNextState          : E_TunerState;
     eErrorSource        : E_TunerState; // Stores where the error occurred for retrying
     fbCoEWrite          : FB_EcCoESdoWrite;
     fbCoERead           : FB_EcCoESdoRead;
@@ -430,16 +433,31 @@ CASE eState OF
         // Loop iteration logic
         nCurrentKi := nCurrentKi + nKiStep;
         IF nCurrentKi <= nKiEnd THEN
-            eState := E_TunerState.eWriteKi;
+            eNextState := E_TunerState.eWriteKi;
         ELSE
             nIteration := nIteration + 1;
             IF nIteration <= nMaxKpIterations THEN
                 nCurrentKp := LREAL_TO_UINT(UINT_TO_LREAL(nCurrentKp) * (1.0 - (fKpReductionPct / 100.0)));
                 nCurrentKi := nKiStart;
-                eState := E_TunerState.eWriteKp;
+                eNextState := E_TunerState.eWriteKp;
             ELSE
-                eState := E_TunerState.eApplyBestParams;
+                eNextState := E_TunerState.eApplyBestParams;
             END_IF
+        END_IF
+        
+        IF bStepMode THEN
+            eState := E_TunerState.eWaitNextStep;
+        ELSE
+            eState := eNextState;
+        END_IF
+        
+    E_TunerState.eWaitNextStep:
+        IF bNextStep THEN
+            bNextStep := FALSE;
+            eState := eNextState;
+        ELSIF bAbortTuning THEN
+            bAbortTuning := FALSE;
+            eState := E_TunerState.eIdle;
         END_IF
         
     E_TunerState.eApplyBestParams:
