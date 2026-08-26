@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_Tuning" Id="{42decf5b-5866-4f05-acc2-24ed83b2f4e4}">
+    <Declaration><![CDATA[TYPE ST_Tuning :
+STRUCT
+    nInfoData1 AT %I*: INT; // Mapped to EL7047 PDO InfoData 1 (e.g. Load)
+    nInfoData2 AT %I*: INT; // Mapped to EL7047 PDO InfoData 2 (e.g. Power)
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
