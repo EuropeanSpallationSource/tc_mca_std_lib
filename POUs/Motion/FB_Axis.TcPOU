@@ -940,6 +940,7 @@ IF fbReset.Done
     _stAxis.stStatus.bExternalBrakeFailure := FALSE;
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
         astMcStatus[i]^.Error := FALSE;
+        astMcStatus[i]^.ErrorID := 0;
     END_FOR
     //Reset ST_Status error ID
     _stAxis.stStatus.nErrorID := 0;
@@ -1862,7 +1863,7 @@ IF _stAxis.stStatus.nErrorID = 0 THEN
     //Overwrite with FB/Custom Errors if present.
     //Because this executes after the NC check, the FB error gets priority.
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        IF astMcStatus[i]^.ErrorID <> 0 THEN
+        IF astMcStatus[i]^.Error AND astMcStatus[i]^.ErrorID <> 0 THEN
             _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
             EXIT;
         END_IF
