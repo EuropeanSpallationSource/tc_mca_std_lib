@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_EL7047_Tuner" Id="{2768c7ae-4a0c-4a4c-8b12-4d3efb5f2e6e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EL7047_Tuner
+VAR_INPUT
+    _stAxis             : REFERENCE TO ST_AxisStruct; 
+    stTuningInputs      : ST_Tuning;
+    
+    // Intelligent Auto-Tune Parameters
+    bExecuteAutoTune    : BOOL;
+    nKpStartOverride    : UINT := 150;    // If > 0, overrides the L calculation (Beckhoff default is 150)
+    nMaxCurrent_mA      : UINT := 0;      // 0x8010:01. If 0, the block reads the existing CoE value natively
+    
+    // Resonance Testing Velocity Range
+    fTestVelocity       : LREAL := 7.5;   // Velocity where resonance occurs
+    fTestDistance       : LREAL := 50.0;  // Distance to travel for measuring
+    
+    // Tuning Constraints
+    fTnMin              : REAL := 0.3;    // ms
+    fTnMax              : REAL := 1.0;    // ms
+    nKiStart            : UINT := 1;
+    nKiEnd              : UINT := 20;
+    nKiStep             : UINT := 1;
+    fKpReductionPct     : LREAL := 10.0;  // Reduce Kp by 10% per major loop
+    nMaxKpIterations    : UINT := 5;      // How many times to reduce Kp
+    
+    // Manual Mode (Python ADS Server)
+    bExecuteSingleTest  : BOOL; // Python triggers this to run just one pass and fill the array
+    
+    // Manual Parameter Application (HMI)
+    bApplyParams        : BOOL; // Trigger to write nApplyKp/nApplyKi to the drive
+    nApplyKp            : UINT; // The Kp to write (auto-filled with BestKp after tuning)
+    nApplyKi            : UINT; // The Ki to write (auto-filled with BestKi after tuning)
+    
+    // Baseline Snapshot (HMI)
+    bSaveBaseline       : BOOL; // Trigger to lock the current Best into the Baseline arrays
+    
+    // Error Handling
+    bContinueAfterError : BOOL; // Retry the failed step from the HMI
+    bAbortTuning        : BOOL; // Abort tuning and return to Idle
+END_VAR
+VAR_OUTPUT
+    bBusy               : BOOL;
+    bDone               : BOOL;
+    bError              : BOOL;
+    nErrorId            : UDINT;
+    
+    // Run Results (Current Sweep)
+    nCurrentRunMaxCurrent: UINT; // Shows what current was actually used for this test
+    nBestKp             : UINT;
+    nBestKi             : UINT;
+    fBestResonanceScore : LREAL;
+    
+    nWorstKp            : UINT;
+    nWorstKi            : UINT;
+    fWorstResonanceScore: LREAL;
+    
+    // Baseline Snapshot (Manually saved)
+    nBaselineMaxCurrent : UINT;
+    nBaselineKp         : UINT;
+    nBaselineKi         : UINT;
+    fBaselineScore      : LREAL;
+END_VAR
+VAR
+    // The high-speed 1ms buffer for ADS extraction or internal analysis
+    aLoadData           : ARRAY[1..5000] OF INT; // InfoData 1 (Current Run)
+    aBestLoadData       : ARRAY[1..5000] OF INT; // InfoData 1 (Best Run Snapshot)
+    aWorstLoadData      : ARRAY[1..5000] OF INT; // InfoData 1 (Worst Run Snapshot)
+    aBaselineLoadData   : ARRAY[1..5000] OF INT; // InfoData 1 (Locked Baseline Snapshot)
+    
+    aPowerData          : ARRAY[1..5000] OF INT; // InfoData 2
+    nSampleCount        : UINT;
+    
+    // Internal State Machine and Motion Blocks
+    eState              : E_TunerState;
+    eErrorSource        : E_TunerState; // Stores where the error occurred for retrying
+    fbCoEWrite          : FB_EcCoESdoWrite;
+    fbCoERead           : FB_EcCoESdoRead;
+    fbMoveRelative      : MC_MoveRelative;
+    fbSettleTimer       : TON;
+    
+    // Loop trackers and internal calculations
+    fMotorInductance    : LREAL; // Fetched natively from CoE
+    nCurrentKp          : UINT;
+    nCurrentKi          : UINT;
+    nIteration          : UINT;
+    fCurrentTn          : REAL;
+    
+    // CoE buffer
+    nCoEWriteBuffer     : UINT;
+    fCoEReadBuffer      : REAL;
+    nCoEInductanceBuf   : UINT;
+    
+    // Math evaluation
+    i                   : UINT;
+    nMaxLoad            : INT;
+    nMinLoad            : INT;
+    fCurrentResonance   : LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Implementation will go here
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
