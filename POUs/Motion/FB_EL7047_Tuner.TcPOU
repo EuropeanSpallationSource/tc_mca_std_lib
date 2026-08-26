@@ -99,7 +99,49 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Implementation will go here
+      <ST><![CDATA[
+// Initialize FB parameters
+fbMoveRelative(Axis := _stAxis.Axis, Velocity := fTestVelocity);
+
+CASE eState OF
+    E_TunerState.eIdle:
+        IF bExecuteAutoTune THEN
+            bBusy := TRUE;
+            eState := E_TunerState.eMoveFwd;
+        END_IF
+        
+    E_TunerState.eMoveFwd:
+        fbMoveRelative.Distance := fTestDistance;
+        fbMoveRelative.Execute := TRUE;
+        IF fbMoveRelative.Done THEN
+            fbMoveRelative.Execute := FALSE;
+            eState := E_TunerState.eWaitMoveFwd;
+        END_IF
+        
+    E_TunerState.eWaitMoveFwd:
+        fbSettleTimer(IN := TRUE, PT := T#500MS);
+        IF fbSettleTimer.Q THEN
+            fbSettleTimer(IN := FALSE);
+            eState := E_TunerState.eMoveBwd;
+        END_IF
+        
+    E_TunerState.eMoveBwd:
+        fbMoveRelative.Distance := -fTestDistance;
+        fbMoveRelative.Execute := TRUE;
+        IF fbMoveRelative.Done THEN
+            fbMoveRelative.Execute := FALSE;
+            eState := E_TunerState.eApplyBestParams;
+        END_IF
+        
+    E_TunerState.eApplyBestParams:
+        bBusy := FALSE;
+        bDone := TRUE;
+        eState := E_TunerState.eIdle;
+        
+    E_TunerState.eError:
+        bBusy := FALSE;
+        bError := TRUE;
+END_CASE
 ]]></ST>
     </Implementation>
   </POU>
