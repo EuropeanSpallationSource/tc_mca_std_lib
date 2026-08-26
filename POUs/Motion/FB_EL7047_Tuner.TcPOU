@@ -93,9 +93,17 @@ VAR
     
     // Math evaluation
     i                   : UINT;
-    nMaxLoad            : INT;
+    nMaxLoad            : INT; // Kept for visual reference if needed
     nMinLoad            : INT;
-    fCurrentResonance   : LREAL;
+    fCurrentResonance   : LREAL; // Will now store Variance instead of Peak-to-Peak
+    
+    nStartIndex         : UINT;
+    nEndIndex           : UINT;
+    nWindowSize         : UINT;
+    fSum                : LREAL;
+    fMean               : LREAL;
+    fVarianceSum        : LREAL;
+    fDiff               : LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -122,7 +130,7 @@ CASE eState OF
             bError := FALSE;
             nErrorId := 0;
             nIteration := 0;
-            fBestResonanceScore := 999999.0; // Initialize high for current run
+            fBestResonanceScore := 999999999.0; // Initialize high for current run (Variance can be large)
             fWorstResonanceScore := 0.0;     // Initialize low for current run
             
             IF nKpStartOverride = 0 THEN
@@ -347,18 +355,31 @@ CASE eState OF
         END_IF
         
     E_TunerState.eEvaluateResonance:
-        // Calculate Peak-to-Peak Load Angle from the buffer
+        // Calculate Windowed Variance of the Load Angle
         fCurrentResonance := 0.0;
-        IF nSampleCount > 0 THEN
-            nMaxLoad := -32768;
-            nMinLoad := 32767;
-            FOR i := 1 TO nSampleCount DO
-                IF aLoadData[i] > nMaxLoad THEN nMaxLoad := aLoadData[i]; END_IF
-                IF aLoadData[i] < nMinLoad THEN nMinLoad := aLoadData[i]; END_IF
-            END_FOR
+        IF nSampleCount >= 4 THEN
+            nStartIndex := nSampleCount / 4; // Ignore first 25% (acceleration)
+            nEndIndex := nSampleCount - nStartIndex; // Ignore last 25% (deceleration)
+            nWindowSize := nEndIndex - nStartIndex + 1;
             
-            // The score is the peak-to-peak deviation. Lower is better (smoother).
-            fCurrentResonance := INT_TO_LREAL(nMaxLoad - nMinLoad);
+            IF nWindowSize > 0 THEN
+                // 1. Calculate the Mean
+                fSum := 0.0;
+                FOR i := nStartIndex TO nEndIndex DO
+                    fSum := fSum + INT_TO_LREAL(aLoadData[i]);
+                END_FOR
+                fMean := fSum / UINT_TO_LREAL(nWindowSize);
+                
+                // 2. Calculate Variance (Sum of Squared Differences)
+                fVarianceSum := 0.0;
+                FOR i := nStartIndex TO nEndIndex DO
+                    fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
+                    fVarianceSum := fVarianceSum + (fDiff * fDiff);
+                END_FOR
+                
+                // The score is the variance. Lower is mathematically smoother.
+                fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nWindowSize);
+            END_IF
             
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
