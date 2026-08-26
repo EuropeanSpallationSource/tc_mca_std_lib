@@ -422,6 +422,7 @@ END_VAR
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
+TON_UpdateGetEcConfSlaves(IN:=NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError), PT:=T#100MS);
 
 //Swap buffer if read out is finished
 IF TON_UpdateGetEcConfSlaves.Q THEN
