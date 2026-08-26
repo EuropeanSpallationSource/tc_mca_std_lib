@@ -94,7 +94,7 @@ VAR
     
     // CoE buffer
     nCoEWriteBuffer     : UINT;
-    fCoEReadBuffer      : REAL;
+    nTnCoEBuffer        : UINT;
     nCoEInductanceBuf   : UINT;
     
     // Math evaluation
@@ -291,13 +291,13 @@ CASE eState OF
     E_TunerState.eReadTn:
         fbCoERead.nIndex := 16#9010;
         fbCoERead.nSubIndex := 16#0E;
-        fbCoERead.pDstBuf := ADR(fCoEReadBuffer);
-        fbCoERead.cbBufLen := SIZEOF(fCoEReadBuffer);
+        fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
+        fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
         fbCoERead.bExecute := TRUE;
         
         IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
-            fCurrentTn := fCoEReadBuffer;
+            fCurrentTn := UINT_TO_REAL(nTnCoEBuffer) * 0.01;
             eState := E_TunerState.eEvaluateTn;
         ELSIF fbCoERead.bError THEN
             nErrorId := fbCoERead.nErrId;
