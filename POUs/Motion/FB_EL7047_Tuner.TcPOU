@@ -27,13 +27,15 @@ VAR_INPUT
     // Manual Mode (Python ADS Server)
     bExecuteSingleTest  : BOOL; // Python triggers this to run just one pass and fill the array
     
-    // Manual Parameter Application (HMI)
-    bApplyParams        : BOOL; // Trigger to write nApplyKp/nApplyKi to the drive
+    // Manual Parameter Application (HMI Staging Area)
+    bApplyParams        : BOOL; // Trigger to write Staging Area to the drive
+    nApplyMaxCurrent    : UINT; // The Current to write (auto-filled with CurrentRun after tuning)
     nApplyKp            : UINT; // The Kp to write (auto-filled with BestKp after tuning)
     nApplyKi            : UINT; // The Ki to write (auto-filled with BestKi after tuning)
     
     // Baseline Snapshot (HMI)
     bSaveBaseline       : BOOL; // Trigger to lock the current Best into the Baseline arrays
+    bLoadBaseline       : BOOL; // Trigger to copy Baseline values into the Staging Area
     
     // Error Handling
     bContinueAfterError : BOOL; // Retry the failed step from the HMI
@@ -124,6 +126,14 @@ IF bSaveBaseline THEN
     MEMCPY(ADR(aBaselineLoadData), ADR(aBestLoadData), SIZEOF(aBestLoadData));
 END_IF
 
+// Load Baseline to Staging Area
+IF bLoadBaseline THEN
+    bLoadBaseline := FALSE;
+    nApplyMaxCurrent := nBaselineMaxCurrent;
+    nApplyKp := nBaselineKp;
+    nApplyKi := nBaselineKi;
+END_IF
+
 CASE eState OF
     E_TunerState.eIdle:
         IF bExecuteAutoTune THEN
@@ -164,7 +174,7 @@ CASE eState OF
             bBusy := TRUE;
             bDone := FALSE;
             bError := FALSE;
-            eState := E_TunerState.eApplyManualKp;
+            eState := E_TunerState.eApplyManualCurrent;
         END_IF
         
     E_TunerState.eReadInductance:
@@ -437,9 +447,27 @@ CASE eState OF
         // We populate the manual apply inputs with the winner, so the user can review and click apply.
         nApplyKp := nBestKp;
         nApplyKi := nBestKi;
+        nApplyMaxCurrent := nCurrentRunMaxCurrent;
         bBusy := FALSE;
         bDone := TRUE;
         eState := E_TunerState.eIdle;
+        
+    E_TunerState.eApplyManualCurrent:
+        fbCoEWrite.nIndex := 16#8010;
+        fbCoEWrite.nSubIndex := 16#01;
+        nCoEWriteBuffer := nApplyMaxCurrent;
+        fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
+        fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
+        fbCoEWrite.bExecute := TRUE;
+        
+        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+            fbCoEWrite.bExecute := FALSE;
+            eState := E_TunerState.eApplyManualKp;
+        ELSIF fbCoEWrite.bError THEN
+            nErrorId := fbCoEWrite.nErrId;
+            eErrorSource := eState;
+            eState := E_TunerState.eError;
+        END_IF
         
     E_TunerState.eApplyManualKp:
         fbCoEWrite.nIndex := 16#8011;
