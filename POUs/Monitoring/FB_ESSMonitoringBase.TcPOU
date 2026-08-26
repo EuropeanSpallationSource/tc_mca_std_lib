@@ -467,7 +467,7 @@ fbGetEcSlaveStates(
     bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
-fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
+fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=MAX(nActualEcSlaves * T#30MS, T#3S));
 IF fbEtherCATAlarmDelayTON.Q THEN
     bStartEtherCATdelayTON := FALSE;
     bEtherCATInitialized := TRUE;
