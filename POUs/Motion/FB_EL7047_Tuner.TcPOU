@@ -308,6 +308,15 @@ CASE eState OF
         END_IF
         
     E_TunerState.eMoveFwd:
+        // Stall Protection
+        IF stTuningInputs.bStall THEN
+            fbMoveRelative.Execute := FALSE;
+            _stAxis.stControl.bStop := TRUE; // Let FB_Axis safely halt the motor
+            nErrorId := 16#7047; // Custom Stall ErrorID
+            eErrorSource := eState;
+            eState := E_TunerState.eError;
+        END_IF
+        
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
             IF nSampleCount < 5000 THEN
@@ -337,6 +346,15 @@ CASE eState OF
         END_IF
         
     E_TunerState.eMoveBwd:
+        // Stall Protection
+        IF stTuningInputs.bStall THEN
+            fbMoveRelative.Execute := FALSE;
+            _stAxis.stControl.bStop := TRUE; // Let FB_Axis safely halt the motor
+            nErrorId := 16#7047; // Custom Stall ErrorID
+            eErrorSource := eState;
+            eState := E_TunerState.eError;
+        END_IF
+        
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
             IF nSampleCount < 5000 THEN

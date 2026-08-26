@@ -5,6 +5,7 @@
 STRUCT
     nInfoData1 AT %I*: INT; // Mapped to EL7047 PDO InfoData 1 (e.g. Load)
     nInfoData2 AT %I*: INT; // Mapped to EL7047 PDO InfoData 2 (e.g. Power)
+    bStall AT %I*: BOOL; // Mapped to EL7047 0x6010:08 (Stall)
 END_STRUCT
 END_TYPE
 ]]></Declaration>
