@@ -405,8 +405,8 @@ VAR_INST
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
     aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
     aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
-	pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access 
-	pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
+    pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
+    pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
 
 
     //Frame statistics
@@ -426,13 +426,13 @@ TON_UpdateGetEcConfSlaves(IN:=NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.
 
 //Swap buffer if read out is finished
 IF TON_UpdateGetEcConfSlaves.Q THEN
-	IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
-		pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
-		pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
-	ELSE
-		pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
-		pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
-	END_IF
+    IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
+        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+    ELSE
+        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+    END_IF
 END_IF
 
 fbGetEcConfSlaves(
@@ -488,7 +488,10 @@ aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
 IF nActualEcSlaves = 0 THEN
     IF fbEtherCATAlarmDelayTON.Q THEN
-        ADSLOGSTR(ADSLOG_MSGTYPE_ERROR,'FB_ESSMonitoringBase Error: %s','0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
+        ADSLOGSTR(
+            msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+            msgFmtStr := 'FB_ESSMonitoringBase Error: %s',
+            strArg := '0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
     END_IF
     bSlaveLinkError := TRUE;
     aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
