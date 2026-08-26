@@ -78,6 +78,7 @@ VAR
     fbCoERead           : FB_EcCoESdoRead;
     fbMoveRelative      : MC_MoveRelative;
     fbSettleTimer       : TON;
+    fbReadStatus        : MC_ReadStatus;
     
     // Loop trackers and internal calculations
     fMotorInductance    : LREAL; // Fetched natively from CoE
@@ -111,6 +112,7 @@ END_VAR
 fbCoEWrite(sNetId := _stAxis.stConfig.stDriveInfo.sNetId, nSlaveAddr := _stAxis.stConfig.stDriveInfo.nSlaveAddr, bCompleteAccess := FALSE);
 fbCoERead(sNetId := _stAxis.stConfig.stDriveInfo.sNetId, nSlaveAddr := _stAxis.stConfig.stDriveInfo.nSlaveAddr, bCompleteAccess := FALSE);
 fbMoveRelative(Axis := _stAxis.Axis, Velocity := fTestVelocity);
+fbReadStatus(Axis := _stAxis.Axis, Enable := TRUE);
 
 // Manual Baseline Trigger
 IF bSaveBaseline THEN
@@ -306,11 +308,13 @@ CASE eState OF
         END_IF
         
     E_TunerState.eMoveFwd:
-        // High-Speed Data Buffer
-        IF nSampleCount < 5000 THEN
-            nSampleCount := nSampleCount + 1;
-            aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
-            aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
+        // Record high-speed arrays only during pure constant velocity
+        IF fbReadStatus.ConstantVelocity THEN
+            IF nSampleCount < 5000 THEN
+                nSampleCount := nSampleCount + 1;
+                aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
+                aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
+            END_IF
         END_IF
         
         IF fbMoveRelative.Done THEN
@@ -333,10 +337,13 @@ CASE eState OF
         END_IF
         
     E_TunerState.eMoveBwd:
-        IF nSampleCount < 5000 THEN
-            nSampleCount := nSampleCount + 1;
-            aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
-            aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
+        // Record high-speed arrays only during pure constant velocity
+        IF fbReadStatus.ConstantVelocity THEN
+            IF nSampleCount < 5000 THEN
+                nSampleCount := nSampleCount + 1;
+                aLoadData[nSampleCount] := stTuningInputs.nInfoData1;
+                aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
+            END_IF
         END_IF
         
         IF fbMoveRelative.Done THEN
@@ -355,31 +362,25 @@ CASE eState OF
         END_IF
         
     E_TunerState.eEvaluateResonance:
-        // Calculate Windowed Variance of the Load Angle
+        // Calculate Variance of the Load Angle (Data is guaranteed to be purely Constant Velocity)
         fCurrentResonance := 0.0;
-        IF nSampleCount >= 4 THEN
-            nStartIndex := nSampleCount / 4; // Ignore first 25% (acceleration)
-            nEndIndex := nSampleCount - nStartIndex; // Ignore last 25% (deceleration)
-            nWindowSize := nEndIndex - nStartIndex + 1;
+        IF nSampleCount > 1 THEN
+            // 1. Calculate the Mean
+            fSum := 0.0;
+            FOR i := 1 TO nSampleCount DO
+                fSum := fSum + INT_TO_LREAL(aLoadData[i]);
+            END_FOR
+            fMean := fSum / UINT_TO_LREAL(nSampleCount);
             
-            IF nWindowSize > 0 THEN
-                // 1. Calculate the Mean
-                fSum := 0.0;
-                FOR i := nStartIndex TO nEndIndex DO
-                    fSum := fSum + INT_TO_LREAL(aLoadData[i]);
-                END_FOR
-                fMean := fSum / UINT_TO_LREAL(nWindowSize);
-                
-                // 2. Calculate Variance (Sum of Squared Differences)
-                fVarianceSum := 0.0;
-                FOR i := nStartIndex TO nEndIndex DO
-                    fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
-                    fVarianceSum := fVarianceSum + (fDiff * fDiff);
-                END_FOR
-                
-                // The score is the variance. Lower is mathematically smoother.
-                fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nWindowSize);
-            END_IF
+            // 2. Calculate Variance (Sum of Squared Differences)
+            fVarianceSum := 0.0;
+            FOR i := 1 TO nSampleCount DO
+                fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
+                fVarianceSum := fVarianceSum + (fDiff * fDiff);
+            END_FOR
+            
+            // The score is the variance. Lower is mathematically smoother.
+            fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
             
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
