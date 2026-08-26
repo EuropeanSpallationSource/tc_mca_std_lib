@@ -114,8 +114,8 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Initialize FB parameters
-fbCoEWrite(sNetId := _stAxis.stConfig.stDriveInfo.sNetId, nSlaveAddr := _stAxis.stConfig.stDriveInfo.nSlaveAddr, bCompleteAccess := FALSE);
-fbCoERead(sNetId := _stAxis.stConfig.stDriveInfo.sNetId, nSlaveAddr := _stAxis.stConfig.stDriveInfo.nSlaveAddr, bCompleteAccess := FALSE);
+fbCoEWrite(sNetId := _stAxis.stConfig.stCoEParameters.sEthCATNetId, nSlaveAddr := _stAxis.stConfig.stCoEParameters.nSlaveAdressDrive);
+fbCoERead(sNetId := _stAxis.stConfig.stCoEParameters.sEthCATNetId, nSlaveAddr := _stAxis.stConfig.stCoEParameters.nSlaveAdressDrive);
 fbMoveRelative(Axis := _stAxis.Axis, Velocity := fTestVelocity);
 fbReadStatus(Axis := _stAxis.Axis, Enable := TRUE);
 
