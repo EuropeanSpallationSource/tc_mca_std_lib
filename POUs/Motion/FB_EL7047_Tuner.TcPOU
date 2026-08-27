@@ -426,14 +426,14 @@ CASE eState OF
             fMean := fSum / UINT_TO_LREAL(nSampleCount);
 
             // 2. Calculate Variance (Sum of Squared Differences)
-            fSumVariance := 0.0;
+            fVarianceSum := 0.0;
             FOR i := 1 TO nSampleCount DO
                 fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
-                fSumVariance := fSumVariance + (fDiff * fDiff);
+                fVarianceSum := fVarianceSum + (fDiff * fDiff);
             END_FOR
 
             // The score is the variance. Lower is mathematically smoother.
-            fCurrentResonance := fSumVariance / UINT_TO_LREAL(nSampleCount);
+            fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
 
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
