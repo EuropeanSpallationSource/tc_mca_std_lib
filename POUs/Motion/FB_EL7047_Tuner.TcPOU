@@ -303,11 +303,19 @@ CASE eState OF
 
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
-            eState := E_TunerState.eReadTn;
+            eState := E_TunerState.eWaitTnCalc;
         ELSIF fbCoEWrite.bError THEN
             nErrorId := fbCoEWrite.nErrId;
             eErrorSource := eState;
             eState := E_TunerState.eError;
+        END_IF
+
+    E_TunerState.eWaitTnCalc:
+        // Give the EL7047 firmware 50ms to recalculate Tn (9010:0E) based on the new Kp/Ki
+        fbSettleTimer(IN := TRUE, PT := T#50MS);
+        IF fbSettleTimer.Q THEN
+            fbSettleTimer(IN := FALSE);
+            eState := E_TunerState.eReadTn;
         END_IF
 
     E_TunerState.eReadTn:
@@ -404,6 +412,7 @@ CASE eState OF
         IF fbMoveRelative.Done THEN
             fbMoveRelative.Execute := FALSE;
             IF bExecuteSingleTest THEN
+                bExecuteSingleTest := FALSE; // Auto-untoggle HMI button
                 eState := E_TunerState.eIdle;
                 bBusy := FALSE;
                 bDone := TRUE;
@@ -493,6 +502,7 @@ CASE eState OF
         nApplyKp := nBestKp;
         nApplyKi := nBestKi;
         nApplyMaxCurrent := nCurrentRunMaxCurrent;
+        bExecuteAutoTune := FALSE; // Auto-untoggle HMI button
         bBusy := FALSE;
         bDone := TRUE;
         eState := E_TunerState.eIdle;
