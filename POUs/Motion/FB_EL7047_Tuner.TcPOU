@@ -237,6 +237,7 @@ CASE eState OF
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eCalcStartKp;
             ELSE
+                nCurrentKp := nKpStartOverride;
                 nCurrentKi := nKiStart;
                 eState := E_TunerState.eWriteKp;
             END_IF
@@ -249,7 +250,7 @@ CASE eState OF
     E_TunerState.eWriteMaxCurrent:
         fbCoEWrite.nIndex := 16#8010;
         fbCoEWrite.nSubIndex := 16#01;
-        nCoEWriteBuffer := nMaxCurrent_mA;
+        nCoEWriteBuffer := nCurrentRunMaxCurrent;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
@@ -259,6 +260,7 @@ CASE eState OF
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eCalcStartKp;
             ELSE
+                nCurrentKp := nKpStartOverride;
                 nCurrentKi := nKiStart;
                 eState := E_TunerState.eWriteKp;
             END_IF
