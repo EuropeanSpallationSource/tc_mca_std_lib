@@ -323,15 +323,57 @@ CASE eState OF
 
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
-            
-            // Hardware writes successful, prepare for move
-            MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
-            MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
-            fbMoveRelative.Distance := fTestDistance;
-            fbMoveRelative.Execute := TRUE;
-            eState := E_TunerState.eMoveFwd;
+            eState := E_TunerState.eReadConfirmKp;
         ELSIF fbCoEWrite.bError THEN
             nErrorId := fbCoEWrite.nErrId;
+            eErrorSource := eState;
+            eState := E_TunerState.eError;
+        END_IF
+
+    E_TunerState.eReadConfirmKp:
+        fbCoERead.nIndex := 16#8011;
+        fbCoERead.nSubIndex := 16#01;
+        fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
+        fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
+        fbCoERead.bExecute := TRUE;
+
+        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+            fbCoERead.bExecute := FALSE;
+            IF nTnCoEBuffer = nCurrentKp THEN
+                eState := E_TunerState.eReadConfirmKi;
+            ELSE
+                nErrorId := 16#8011; // Kp Verification Failed
+                eErrorSource := eState;
+                eState := E_TunerState.eError;
+            END_IF
+        ELSIF fbCoERead.bError THEN
+            nErrorId := fbCoERead.nErrId;
+            eErrorSource := eState;
+            eState := E_TunerState.eError;
+        END_IF
+
+    E_TunerState.eReadConfirmKi:
+        fbCoERead.nIndex := 16#8011;
+        fbCoERead.nSubIndex := 16#02;
+        fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
+        fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
+        fbCoERead.bExecute := TRUE;
+
+        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+            fbCoERead.bExecute := FALSE;
+            IF nTnCoEBuffer = nCurrentKi THEN
+                eState := E_TunerState.eMoveFwd; // Both verified, execute the move!
+                MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
+                MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
+                fbMoveRelative.Distance := fTestDistance;
+                fbMoveRelative.Execute := TRUE;
+            ELSE
+                nErrorId := 16#8012; // Ki Verification Failed
+                eErrorSource := eState;
+                eState := E_TunerState.eError;
+            END_IF
+        ELSIF fbCoERead.bError THEN
+            nErrorId := fbCoERead.nErrId;
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
