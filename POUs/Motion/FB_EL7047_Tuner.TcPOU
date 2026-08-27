@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_EL7047_Tuner" Id="{2768c7ae-4a0c-4a4c-8b12-4d3efb5f2e6e}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_EL7047_Tuner
@@ -326,9 +326,11 @@ CASE eState OF
         END_IF
 
     E_TunerState.eEvaluateTn:
+        // Always reset the sample count for the new iteration
+        nSampleCount := 0;
+
         // Enforce Beckhoff bounds (0.3 to 1.0 ms)
         IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
-            nSampleCount := 0;
             MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
             MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
 
@@ -400,9 +402,9 @@ CASE eState OF
         IF fbMoveRelative.Done THEN
             fbMoveRelative.Execute := FALSE;
             IF bExecuteSingleTest THEN
+                eState := E_TunerState.eIdle;
                 bBusy := FALSE;
                 bDone := TRUE;
-                eState := E_TunerState.eIdle;
             ELSE
                 eState := E_TunerState.eEvaluateResonance;
             END_IF
@@ -424,14 +426,14 @@ CASE eState OF
             fMean := fSum / UINT_TO_LREAL(nSampleCount);
 
             // 2. Calculate Variance (Sum of Squared Differences)
-            fVarianceSum := 0.0;
+            fSumVariance := 0.0;
             FOR i := 1 TO nSampleCount DO
                 fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
-                fVarianceSum := fVarianceSum + (fDiff * fDiff);
+                fSumVariance := fSumVariance + (fDiff * fDiff);
             END_FOR
 
             // The score is the variance. Lower is mathematically smoother.
-            fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
+            fCurrentResonance := fSumVariance / UINT_TO_LREAL(nSampleCount);
 
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
@@ -444,8 +446,6 @@ CASE eState OF
             // Save if it's the worst run
             IF fCurrentResonance > fWorstResonanceScore THEN
                 fWorstResonanceScore := fCurrentResonance;
-                nWorstKp := nCurrentKp;
-                nWorstKi := nCurrentKi;
                 MEMCPY(ADR(aWorstLoadData), ADR(aLoadData), SIZEOF(aLoadData));
             END_IF
         END_IF
@@ -465,7 +465,8 @@ CASE eState OF
             END_IF
         END_IF
 
-        IF bStepMode THEN
+        // Only pause in Step Mode if we actually recorded real physical data
+        IF bStepMode AND nSampleCount > 1 THEN
             eState := E_TunerState.eWaitNextStep;
         ELSE
             eState := eNextState;
