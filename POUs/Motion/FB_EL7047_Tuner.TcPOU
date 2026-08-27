@@ -201,24 +201,24 @@ CASE eState OF
         END_IF
 
     E_TunerState.eReadInductance:
-        fbCoERead.nIndex := 16#8010;
-        fbCoERead.nSubIndex := 16#0A; // Assumed Inductance sub-index (Check EL7047 Manual)
+        fbCoERead.nIndex := 16#8011;
+        fbCoERead.nSubIndex := 16#1C;
         fbCoERead.pDstBuf := ADR(nCoEInductanceBuf);
         fbCoERead.cbBufLen := SIZEOF(nCoEInductanceBuf);
-        fbCoERead.bExecute := TRUE;
-
-        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+        
+        IF NOT fbCoERead.bExecute THEN
+            fbCoERead.bExecute := TRUE;
+        ELSIF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
-            // Assumes value is in 0.01 mH resolution. Convert to Henry.
-            fMotorInductance := UINT_TO_LREAL(nCoEInductanceBuf) * 0.00001;
-
+            // Inductance is given in 0.01 mH resolution. Convert to Henries.
+            fMotorInductance := UINT_TO_REAL(nCoEInductanceBuf) * 0.00001;
+            
             IF nMaxCurrent_mA = 0 THEN
                 eState := E_TunerState.eReadMaxCurrent;
             ELSE
                 nCurrentRunMaxCurrent := nMaxCurrent_mA;
                 eState := E_TunerState.eWriteMaxCurrent;
             END_IF
-
         ELSIF fbCoERead.bError THEN
             eErrorSource := eState;
             nErrorId := fbCoERead.nErrId;
@@ -230,9 +230,9 @@ CASE eState OF
         fbCoERead.nSubIndex := 16#01;
         fbCoERead.pDstBuf := ADR(nCurrentRunMaxCurrent);
         fbCoERead.cbBufLen := SIZEOF(nCurrentRunMaxCurrent);
-        fbCoERead.bExecute := TRUE;
-
-        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+        IF NOT fbCoERead.bExecute THEN
+            fbCoERead.bExecute := TRUE;
+        ELSIF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eCalcStartKp;
@@ -253,9 +253,9 @@ CASE eState OF
         nCoEWriteBuffer := nCurrentRunMaxCurrent;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eCalcStartKp;
@@ -302,9 +302,9 @@ CASE eState OF
         nCoEWriteBuffer := nCurrentKp;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eWriteKi;
         ELSIF fbCoEWrite.bError THEN
@@ -319,9 +319,9 @@ CASE eState OF
         nCoEWriteBuffer := nCurrentKi;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eReadConfirmKp;
         ELSIF fbCoEWrite.bError THEN
@@ -335,9 +335,9 @@ CASE eState OF
         fbCoERead.nSubIndex := 16#01;
         fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
         fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
-        fbCoERead.bExecute := TRUE;
-
-        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+        IF NOT fbCoERead.bExecute THEN
+            fbCoERead.bExecute := TRUE;
+        ELSIF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             IF nTnCoEBuffer = nCurrentKp THEN
                 eState := E_TunerState.eReadConfirmKi;
@@ -357,9 +357,9 @@ CASE eState OF
         fbCoERead.nSubIndex := 16#02;
         fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
         fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
-        fbCoERead.bExecute := TRUE;
-
-        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
+        IF NOT fbCoERead.bExecute THEN
+            fbCoERead.bExecute := TRUE;
+        ELSIF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             IF nTnCoEBuffer = nCurrentKi THEN
                 eState := E_TunerState.eMoveFwd; // Both verified, execute the move!
@@ -539,9 +539,9 @@ CASE eState OF
         nCoEWriteBuffer := nApplyMaxCurrent;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eApplyManualKp;
         ELSIF fbCoEWrite.bError THEN
@@ -556,9 +556,9 @@ CASE eState OF
         nCoEWriteBuffer := nApplyKp;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eApplyManualKi;
         ELSIF fbCoEWrite.bError THEN
@@ -573,9 +573,9 @@ CASE eState OF
         nCoEWriteBuffer := nApplyKi;
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
-        fbCoEWrite.bExecute := TRUE;
-
-        IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
+        IF NOT fbCoEWrite.bExecute THEN
+            fbCoEWrite.bExecute := TRUE;
+        ELSIF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             bApplyParams := FALSE; // Reset trigger
             bBusy := FALSE;
