@@ -137,6 +137,23 @@ IF bLoadBaseline THEN
     nApplyKi := nBaselineKi;
 END_IF
 
+// Global Abort Override
+IF bAbortTuning THEN
+    bAbortTuning := FALSE;
+    bBusy := FALSE;
+    bError := FALSE;
+    fbCoERead.bExecute := FALSE;
+    fbCoEWrite.bExecute := FALSE;
+    fbMoveRelative.Execute := FALSE;
+    
+    // If we are actively testing and moving, halt the motor instantly
+    IF eState >= E_TunerState.eMoveFwd AND eState <= E_TunerState.eWaitMoveBwd THEN
+        _stAxis.stControl.bStop := TRUE;
+    END_IF
+    
+    eState := E_TunerState.eIdle;
+END_IF
+
 CASE eState OF
     E_TunerState.eIdle:
         IF bExecuteAutoTune THEN
