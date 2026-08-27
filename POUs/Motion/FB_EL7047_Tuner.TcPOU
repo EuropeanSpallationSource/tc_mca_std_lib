@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_EL7047_Tuner" Id="{2768c7ae-4a0c-4a4c-8b12-4d3efb5f2e6e}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_EL7047_Tuner
 VAR_INPUT
-    _stAxis             : REFERENCE TO ST_AxisStruct; 
+    _stAxis             : REFERENCE TO ST_AxisStruct;
     stTuningInputs      : ST_Tuning;
-    
+
     // Intelligent Auto-Tune Parameters
     bExecuteAutoTune    : BOOL;
     bStepMode           : BOOL; // If TRUE, pauses after each pass
     bNextStep           : BOOL; // Trigger to proceed to the next pass
     nKpStartOverride    : UINT := 150;    // If > 0, overrides the L calculation (Beckhoff default is 150)
     nMaxCurrent_mA      : UINT := 0;      // 0x8010:01. If 0, the block reads the existing CoE value natively
-    
+
     // Resonance Testing Velocity Range
     fTestVelocity       : LREAL := 7.5;   // Velocity where resonance occurs
     fTestDistance       : LREAL := 50.0;  // Distance to travel for measuring
-    
+
     // Tuning Constraints
     fTnMin              : REAL := 0.3;    // ms
     fTnMax              : REAL := 1.0;    // ms
@@ -25,20 +25,20 @@ VAR_INPUT
     nKiStep             : UINT := 1;
     fKpReductionPct     : LREAL := 10.0;  // Reduce Kp by 10% per major loop
     nMaxKpIterations    : UINT := 5;      // How many times to reduce Kp
-    
+
     // Manual Mode (Python ADS Server)
     bExecuteSingleTest  : BOOL; // Python triggers this to run just one pass and fill the array
-    
+
     // Manual Parameter Application (HMI Staging Area)
     bApplyParams        : BOOL; // Trigger to write Staging Area to the drive
     nApplyMaxCurrent    : UINT; // The Current to write (auto-filled with CurrentRun after tuning)
     nApplyKp            : UINT; // The Kp to write (auto-filled with BestKp after tuning)
     nApplyKi            : UINT; // The Ki to write (auto-filled with BestKi after tuning)
-    
+
     // Baseline Snapshot (HMI)
     bSaveBaseline       : BOOL; // Trigger to lock the current Best into the Baseline arrays
     bLoadBaseline       : BOOL; // Trigger to copy Baseline values into the Staging Area
-    
+
     // Error Handling
     bContinueAfterError : BOOL; // Retry the failed step from the HMI
     bAbortTuning        : BOOL; // Abort tuning and return to Idle
@@ -46,19 +46,20 @@ END_VAR
 VAR_OUTPUT
     bBusy               : BOOL;
     bDone               : BOOL;
+    bIterationReady     : BOOL; // Handshake: TRUE when waiting for Python to read data
     bError              : BOOL;
     nErrorId            : UDINT;
-    
+
     // Run Results (Current Sweep)
     nCurrentRunMaxCurrent: UINT; // Shows what current was actually used for this test
     nBestKp             : UINT;
     nBestKi             : UINT;
     fBestResonanceScore : LREAL;
-    
+
     nWorstKp            : UINT;
     nWorstKi            : UINT;
     fWorstResonanceScore: LREAL;
-    
+
     // Baseline Snapshot (Manually saved)
     nBaselineMaxCurrent : UINT;
     nBaselineKp         : UINT;
@@ -71,10 +72,10 @@ VAR
     aBestLoadData       : ARRAY[1..1000] OF INT; // InfoData 1 (Best Run Snapshot)
     aWorstLoadData      : ARRAY[1..1000] OF INT; // InfoData 1 (Worst Run Snapshot)
     aBaselineLoadData   : ARRAY[1..1000] OF INT; // InfoData 1 (Locked Baseline Snapshot)
-    
+
     aPowerData          : ARRAY[1..1000] OF INT; // InfoData 2
     nSampleCount        : UINT;
-    
+
     // Internal State Machine and Motion Blocks
     eState              : E_TunerState;
     eNextState          : E_TunerState;
@@ -84,25 +85,25 @@ VAR
     fbMoveRelative      : MC_MoveRelative;
     fbSettleTimer       : TON;
     fbReadStatus        : MC_ReadStatus;
-    
+
     // Loop trackers and internal calculations
     fMotorInductance    : LREAL; // Fetched natively from CoE
     nCurrentKp          : UINT;
     nCurrentKi          : UINT;
     nIteration          : UINT;
     fCurrentTn          : REAL;
-    
+
     // CoE buffer
     nCoEWriteBuffer     : UINT;
     nTnCoEBuffer        : UINT;
     nCoEInductanceBuf   : UINT;
-    
+
     // Math evaluation
     i                   : UINT;
     nMaxLoad            : INT; // Kept for visual reference if needed
     nMinLoad            : INT;
     fCurrentResonance   : LREAL; // Will now store Variance instead of Peak-to-Peak
-    
+
     nStartIndex         : UINT;
     nEndIndex           : UINT;
     nWindowSize         : UINT;
@@ -142,15 +143,16 @@ IF bAbortTuning THEN
     bAbortTuning := FALSE;
     bBusy := FALSE;
     bError := FALSE;
+    bIterationReady := FALSE;
     fbCoERead.bExecute := FALSE;
     fbCoEWrite.bExecute := FALSE;
     fbMoveRelative.Execute := FALSE;
-    
+
     // If we are actively testing and moving, halt the motor instantly
     IF eState >= E_TunerState.eMoveFwd AND eState <= E_TunerState.eWaitMoveBwd THEN
         _stAxis.stControl.bStop := TRUE;
     END_IF
-    
+
     eState := E_TunerState.eIdle;
 END_IF
 
@@ -160,11 +162,12 @@ CASE eState OF
             bBusy := TRUE;
             bDone := FALSE;
             bError := FALSE;
+            bIterationReady := FALSE;
             nErrorId := 0;
             nIteration := 0;
             fBestResonanceScore := 999999999.0; // Initialize high for current run (Variance can be large)
             fWorstResonanceScore := 0.0;     // Initialize low for current run
-            
+
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eReadInductance;
             ELSE
@@ -175,7 +178,7 @@ CASE eState OF
                     eState := E_TunerState.eWriteMaxCurrent;
                 END_IF
             END_IF
-            
+
         ELSIF bExecuteSingleTest THEN
             // Manual single-shot mode (for Python plotting)
             bBusy := TRUE;
@@ -184,11 +187,11 @@ CASE eState OF
             nSampleCount := 0;
             MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
             MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
-            
+
             fbMoveRelative.Distance := fTestDistance;
             fbMoveRelative.Execute := TRUE;
             eState := E_TunerState.eMoveFwd;
-            
+
         ELSIF bApplyParams THEN
             // HMI Manual Application of Params
             bBusy := TRUE;
@@ -196,39 +199,39 @@ CASE eState OF
             bError := FALSE;
             eState := E_TunerState.eApplyManualCurrent;
         END_IF
-        
+
     E_TunerState.eReadInductance:
         fbCoERead.nIndex := 16#8010;
         fbCoERead.nSubIndex := 16#0A; // Assumed Inductance sub-index (Check EL7047 Manual)
         fbCoERead.pDstBuf := ADR(nCoEInductanceBuf);
         fbCoERead.cbBufLen := SIZEOF(nCoEInductanceBuf);
         fbCoERead.bExecute := TRUE;
-        
+
         IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             // Assumes value is in 0.01 mH resolution. Convert to Henry.
-            fMotorInductance := UINT_TO_LREAL(nCoEInductanceBuf) * 0.00001; 
-            
+            fMotorInductance := UINT_TO_LREAL(nCoEInductanceBuf) * 0.00001;
+
             IF nMaxCurrent_mA = 0 THEN
                 eState := E_TunerState.eReadMaxCurrent;
             ELSE
                 nCurrentRunMaxCurrent := nMaxCurrent_mA;
                 eState := E_TunerState.eWriteMaxCurrent;
             END_IF
-            
+
         ELSIF fbCoERead.bError THEN
             eErrorSource := eState;
             nErrorId := fbCoERead.nErrId;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eReadMaxCurrent:
         fbCoERead.nIndex := 16#8010;
-        fbCoERead.nSubIndex := 16#01; 
+        fbCoERead.nSubIndex := 16#01;
         fbCoERead.pDstBuf := ADR(nCurrentRunMaxCurrent);
         fbCoERead.cbBufLen := SIZEOF(nCurrentRunMaxCurrent);
         fbCoERead.bExecute := TRUE;
-        
+
         IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             IF nKpStartOverride = 0 THEN
@@ -242,7 +245,7 @@ CASE eState OF
             nErrorId := fbCoERead.nErrId;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eWriteMaxCurrent:
         fbCoEWrite.nIndex := 16#8010;
         fbCoEWrite.nSubIndex := 16#01;
@@ -250,7 +253,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             IF nKpStartOverride = 0 THEN
@@ -264,13 +267,13 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eCalcStartKp:
         // Kp = 10000 * 2pi * L
         nCurrentKp := LREAL_TO_UINT(10000.0 * 2.0 * 3.14159265359 * fMotorInductance);
         nCurrentKi := nKiStart;
         eState := E_TunerState.eWriteKp;
-        
+
     E_TunerState.eWriteKp:
         fbCoEWrite.nIndex := 16#8011;
         fbCoEWrite.nSubIndex := 16#01;
@@ -278,7 +281,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eWriteKi;
@@ -287,7 +290,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eWriteKi:
         fbCoEWrite.nIndex := 16#8011;
         fbCoEWrite.nSubIndex := 16#02;
@@ -295,7 +298,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eReadTn;
@@ -304,14 +307,14 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eReadTn:
         fbCoERead.nIndex := 16#9010;
         fbCoERead.nSubIndex := 16#0E;
         fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
         fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
         fbCoERead.bExecute := TRUE;
-        
+
         IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             fCurrentTn := UINT_TO_REAL(nTnCoEBuffer) * 0.01;
@@ -321,22 +324,22 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eEvaluateTn:
         // Enforce Beckhoff bounds (0.3 to 1.0 ms)
         IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
             nSampleCount := 0;
             MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
             MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
-            
+
             fbMoveRelative.Distance := fTestDistance;
             fbMoveRelative.Execute := TRUE;
             eState := E_TunerState.eMoveFwd;
         ELSE
             // Skip this Ki since Tn is out of bounds
-            eState := E_TunerState.eEvaluateResonance; 
+            eState := E_TunerState.eEvaluateResonance;
         END_IF
-        
+
     E_TunerState.eMoveFwd:
         // Stall Protection
         IF stTuningInputs.bStall THEN
@@ -346,7 +349,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
             IF nSampleCount < 1000 THEN
@@ -355,7 +358,7 @@ CASE eState OF
                 aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
             END_IF
         END_IF
-        
+
         IF fbMoveRelative.Done THEN
             fbMoveRelative.Execute := FALSE;
             eState := E_TunerState.eWaitMoveFwd;
@@ -364,7 +367,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eWaitMoveFwd:
         // Delay before returning
         fbSettleTimer(IN := TRUE, PT := T#500MS);
@@ -374,7 +377,7 @@ CASE eState OF
             fbMoveRelative.Execute := TRUE;
             eState := E_TunerState.eMoveBwd;
         END_IF
-        
+
     E_TunerState.eMoveBwd:
         // Stall Protection
         IF stTuningInputs.bStall THEN
@@ -384,7 +387,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
         // Record high-speed arrays only during pure constant velocity
         IF fbReadStatus.ConstantVelocity THEN
             IF nSampleCount < 1000 THEN
@@ -393,7 +396,7 @@ CASE eState OF
                 aPowerData[nSampleCount] := stTuningInputs.nInfoData2;
             END_IF
         END_IF
-        
+
         IF fbMoveRelative.Done THEN
             fbMoveRelative.Execute := FALSE;
             IF bExecuteSingleTest THEN
@@ -408,7 +411,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eEvaluateResonance:
         // Calculate Variance of the Load Angle (Data is guaranteed to be purely Constant Velocity)
         fCurrentResonance := 0.0;
@@ -419,17 +422,17 @@ CASE eState OF
                 fSum := fSum + INT_TO_LREAL(aLoadData[i]);
             END_FOR
             fMean := fSum / UINT_TO_LREAL(nSampleCount);
-            
+
             // 2. Calculate Variance (Sum of Squared Differences)
             fVarianceSum := 0.0;
             FOR i := 1 TO nSampleCount DO
                 fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
                 fVarianceSum := fVarianceSum + (fDiff * fDiff);
             END_FOR
-            
+
             // The score is the variance. Lower is mathematically smoother.
             fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
-            
+
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
                 fBestResonanceScore := fCurrentResonance;
@@ -437,7 +440,7 @@ CASE eState OF
                 nBestKi := nCurrentKi;
                 MEMCPY(ADR(aBestLoadData), ADR(aLoadData), SIZEOF(aLoadData));
             END_IF
-            
+
             // Save if it's the worst run
             IF fCurrentResonance > fWorstResonanceScore THEN
                 fWorstResonanceScore := fCurrentResonance;
@@ -446,7 +449,7 @@ CASE eState OF
                 MEMCPY(ADR(aWorstLoadData), ADR(aLoadData), SIZEOF(aLoadData));
             END_IF
         END_IF
-        
+
         // Loop iteration logic
         nCurrentKi := nCurrentKi + nKiStep;
         IF nCurrentKi <= nKiEnd THEN
@@ -461,24 +464,28 @@ CASE eState OF
                 eNextState := E_TunerState.eApplyBestParams;
             END_IF
         END_IF
-        
+
         IF bStepMode THEN
             eState := E_TunerState.eWaitNextStep;
         ELSE
             eState := eNextState;
         END_IF
-        
+
     E_TunerState.eWaitNextStep:
+        bIterationReady := TRUE;
+
         IF bNextStep THEN
             bNextStep := FALSE;
+            bIterationReady := FALSE;
             eState := eNextState;
         ELSIF bAbortTuning THEN
             bAbortTuning := FALSE;
+            bIterationReady := FALSE;
             eState := E_TunerState.eIdle;
         END_IF
-        
+
     E_TunerState.eApplyBestParams:
-        // Optimization complete. 
+        // Optimization complete.
         // We populate the manual apply inputs with the winner, so the user can review and click apply.
         nApplyKp := nBestKp;
         nApplyKi := nBestKi;
@@ -486,7 +493,7 @@ CASE eState OF
         bBusy := FALSE;
         bDone := TRUE;
         eState := E_TunerState.eIdle;
-        
+
     E_TunerState.eApplyManualCurrent:
         fbCoEWrite.nIndex := 16#8010;
         fbCoEWrite.nSubIndex := 16#01;
@@ -494,7 +501,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eApplyManualKp;
@@ -503,7 +510,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eApplyManualKp:
         fbCoEWrite.nIndex := 16#8011;
         fbCoEWrite.nSubIndex := 16#01;
@@ -511,7 +518,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             eState := E_TunerState.eApplyManualKi;
@@ -520,7 +527,7 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eApplyManualKi:
         fbCoEWrite.nIndex := 16#8011;
         fbCoEWrite.nSubIndex := 16#02;
@@ -528,7 +535,7 @@ CASE eState OF
         fbCoEWrite.pSrcBuf := ADR(nCoEWriteBuffer);
         fbCoEWrite.cbBufLen := SIZEOF(nCoEWriteBuffer);
         fbCoEWrite.bExecute := TRUE;
-        
+
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
             bApplyParams := FALSE; // Reset trigger
@@ -540,14 +547,14 @@ CASE eState OF
             eErrorSource := eState;
             eState := E_TunerState.eError;
         END_IF
-        
+
     E_TunerState.eError:
         bBusy := FALSE;
         bError := TRUE;
         fbCoERead.bExecute := FALSE;
         fbCoEWrite.bExecute := FALSE;
         fbMoveRelative.Execute := FALSE;
-        
+
         IF bAbortTuning THEN
             bAbortTuning := FALSE;
             bError := FALSE;
