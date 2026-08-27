@@ -262,7 +262,7 @@ CASE eState OF
             ELSE
                 nCurrentKp := nKpStartOverride;
                 nCurrentKi := nKiStart;
-                eState := E_TunerState.eWriteKp;
+                eState := E_TunerState.eEvaluateTn;
             END_IF
         ELSIF fbCoEWrite.bError THEN
             nErrorId := fbCoEWrite.nErrId;
@@ -274,7 +274,27 @@ CASE eState OF
         // Kp = 10000 * 2pi * L
         nCurrentKp := LREAL_TO_UINT(10000.0 * 2.0 * 3.14159265359 * fMotorInductance);
         nCurrentKi := nKiStart;
-        eState := E_TunerState.eWriteKp;
+        eState := E_TunerState.eEvaluateTn;
+
+    E_TunerState.eEvaluateTn:
+        // Always reset the sample count for the new iteration
+        nSampleCount := 0;
+
+        // Calculate Tn directly in the PLC instead of waiting for the drive firmware!
+        // EL7047 Math: Tn (ms) = (Kp / Ki) * 0.294
+        IF nCurrentKi > 0 THEN
+            fCurrentTn := (UINT_TO_REAL(nCurrentKp) / UINT_TO_REAL(nCurrentKi)) * 0.294;
+        ELSE
+            fCurrentTn := 0.0;
+        END_IF
+
+        // Enforce Beckhoff bounds (0.3 to 1.0 ms)
+        IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
+            eState := E_TunerState.eWriteKp; // Start hardware write sequence
+        ELSE
+            // Skip this Ki since Tn is mathematically out of bounds
+            eState := E_TunerState.eEvaluateResonance;
+        END_IF
 
     E_TunerState.eWriteKp:
         fbCoEWrite.nIndex := 16#8011;
@@ -303,53 +323,17 @@ CASE eState OF
 
         IF NOT fbCoEWrite.bBusy AND NOT fbCoEWrite.bError THEN
             fbCoEWrite.bExecute := FALSE;
-            eState := E_TunerState.eWaitTnCalc;
+            
+            // Hardware writes successful, prepare for move
+            MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
+            MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
+            fbMoveRelative.Distance := fTestDistance;
+            fbMoveRelative.Execute := TRUE;
+            eState := E_TunerState.eMoveFwd;
         ELSIF fbCoEWrite.bError THEN
             nErrorId := fbCoEWrite.nErrId;
             eErrorSource := eState;
             eState := E_TunerState.eError;
-        END_IF
-
-    E_TunerState.eWaitTnCalc:
-        // Give the EL7047 firmware 50ms to recalculate Tn (9010:0E) based on the new Kp/Ki
-        fbSettleTimer(IN := TRUE, PT := T#50MS);
-        IF fbSettleTimer.Q THEN
-            fbSettleTimer(IN := FALSE);
-            eState := E_TunerState.eReadTn;
-        END_IF
-
-    E_TunerState.eReadTn:
-        fbCoERead.nIndex := 16#9010;
-        fbCoERead.nSubIndex := 16#0E;
-        fbCoERead.pDstBuf := ADR(nTnCoEBuffer);
-        fbCoERead.cbBufLen := SIZEOF(nTnCoEBuffer);
-        fbCoERead.bExecute := TRUE;
-
-        IF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
-            fbCoERead.bExecute := FALSE;
-            fCurrentTn := UINT_TO_REAL(nTnCoEBuffer) * 0.01;
-            eState := E_TunerState.eEvaluateTn;
-        ELSIF fbCoERead.bError THEN
-            nErrorId := fbCoERead.nErrId;
-            eErrorSource := eState;
-            eState := E_TunerState.eError;
-        END_IF
-
-    E_TunerState.eEvaluateTn:
-        // Always reset the sample count for the new iteration
-        nSampleCount := 0;
-
-        // Enforce Beckhoff bounds (0.3 to 1.0 ms)
-        IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
-            MEMSET(ADR(aLoadData), 0, SIZEOF(aLoadData));
-            MEMSET(ADR(aPowerData), 0, SIZEOF(aPowerData));
-
-            fbMoveRelative.Distance := fTestDistance;
-            fbMoveRelative.Execute := TRUE;
-            eState := E_TunerState.eMoveFwd;
-        ELSE
-            // Skip this Ki since Tn is out of bounds
-            eState := E_TunerState.eEvaluateResonance;
         END_IF
 
     E_TunerState.eMoveFwd:
