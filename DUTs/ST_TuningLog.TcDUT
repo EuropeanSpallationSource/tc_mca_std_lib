@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_TuningLog" Id="{2B9FE107-1F4F-4C49-B944-7B03C36C383C}">
+    <Declaration><![CDATA[TYPE ST_TuningLog :
+STRUCT
+    nKp             : UINT;
+    nKi             : UINT;
+    fCalculatedTn   : REAL;
+    bRejected       : BOOL;
+    fResonanceScore : LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

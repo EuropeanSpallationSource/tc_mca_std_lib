@@ -92,6 +92,11 @@ VAR
     nCurrentKi          : UINT;
     nIteration          : UINT;
     fCurrentTn          : REAL;
+    fCurrentResonance   : LREAL; // Will now store Variance instead of Peak-to-Peak
+
+    // Diagnostic History Log
+    aTuningHistory      : ARRAY[1..500] OF ST_TuningLog;
+    nLogCount           : UINT;
 
     // CoE buffer
     nCoEWriteBuffer     : UINT;
@@ -168,6 +173,9 @@ CASE eState OF
             fBestResonanceScore := 999999999.0;
             fWorstResonanceScore := 0.0;
             bNextStep := FALSE;
+            
+            nLogCount := 0;
+            MEMSET(ADR(aTuningHistory), 0, SIZEOF(aTuningHistory));
 
             // Prevent infinite scan loops if user sets step to 0
             IF nKiStep < 1 THEN
@@ -293,11 +301,26 @@ CASE eState OF
         ELSE
             fCurrentTn := 0.0;
         END_IF
+        
+        // Create a new Log Entry
+        IF nLogCount < 500 THEN
+            nLogCount := nLogCount + 1;
+            aTuningHistory[nLogCount].nKp := nCurrentKp;
+            aTuningHistory[nLogCount].nKi := nCurrentKi;
+            aTuningHistory[nLogCount].fCalculatedTn := fCurrentTn;
+            aTuningHistory[nLogCount].fResonanceScore := 0.0; // Reset score
+        END_IF
 
         // Enforce Beckhoff bounds (0.3 to 1.0 ms)
         IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
+            IF nLogCount > 0 AND nLogCount <= 500 THEN
+                aTuningHistory[nLogCount].bRejected := FALSE;
+            END_IF
             eState := E_TunerState.eWriteKp; // Start hardware write sequence
         ELSE
+            IF nLogCount > 0 AND nLogCount <= 500 THEN
+                aTuningHistory[nLogCount].bRejected := TRUE;
+            END_IF
             // Skip this Ki since Tn is mathematically out of bounds
             eState := E_TunerState.eEvaluateResonance;
         END_IF
@@ -477,6 +500,11 @@ CASE eState OF
 
             // The score is the variance. Lower is mathematically smoother.
             fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
+
+            // Save the physical score to the log history
+            IF nLogCount > 0 AND nLogCount <= 500 THEN
+                aTuningHistory[nLogCount].fResonanceScore := fCurrentResonance;
+            END_IF
 
             // Save if it's the smoothest run yet
             IF fCurrentResonance < fBestResonanceScore THEN
