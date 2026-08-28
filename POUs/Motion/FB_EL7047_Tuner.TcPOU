@@ -490,13 +490,13 @@ CASE eState OF
         // Loop iteration logic
         nCurrentKi := nCurrentKi + nKiStep;
         IF nCurrentKi <= nKiEnd THEN
-            eNextState := E_TunerState.eWriteKi;
+            eNextState := E_TunerState.eEvaluateTn; // Re-evaluate Tn for the new Ki
         ELSE
             nIteration := nIteration + 1;
             IF nIteration <= nMaxKpIterations THEN
                 nCurrentKp := LREAL_TO_UINT(UINT_TO_LREAL(nCurrentKp) * (1.0 - (fKpReductionPct / 100.0)));
                 nCurrentKi := nKiStart;
-                eNextState := E_TunerState.eWriteKp;
+                eNextState := E_TunerState.eEvaluateTn; // Re-evaluate Tn for the new Kp/Ki
             ELSE
                 eNextState := E_TunerState.eApplyBestParams;
             END_IF
