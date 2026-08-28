@@ -108,7 +108,6 @@ VAR
     i                   : UINT;
     nMaxLoad            : INT; // Kept for visual reference if needed
     nMinLoad            : INT;
-    fCurrentResonance   : LREAL; // Will now store Variance instead of Peak-to-Peak
 
     nStartIndex         : UINT;
     nEndIndex           : UINT;
@@ -174,7 +173,7 @@ CASE eState OF
             fBestResonanceScore := 999999999.0;
             fWorstResonanceScore := 0.0;
             bNextStep := FALSE;
-            
+
             fbSettleTimer(IN := FALSE); // Flush timer from any previous aborts
             nLogCount := 0;
             MEMSET(ADR(aTuningHistory), 0, SIZEOF(aTuningHistory));
@@ -221,14 +220,14 @@ CASE eState OF
         fbCoERead.nSubIndex := 16#1C;
         fbCoERead.pDstBuf := ADR(nCoEInductanceBuf);
         fbCoERead.cbBufLen := SIZEOF(nCoEInductanceBuf);
-        
+
         IF NOT fbCoERead.bExecute THEN
             fbCoERead.bExecute := TRUE;
         ELSIF NOT fbCoERead.bBusy AND NOT fbCoERead.bError THEN
             fbCoERead.bExecute := FALSE;
             // Inductance is given in 0.01 mH resolution. Convert to Henries.
             fMotorInductance := UINT_TO_REAL(nCoEInductanceBuf) * 0.00001;
-            
+
             IF nMaxCurrent_mA = 0 THEN
                 eState := E_TunerState.eReadMaxCurrent;
             ELSE
@@ -303,7 +302,7 @@ CASE eState OF
         ELSE
             fCurrentTn := 0.0;
         END_IF
-        
+
         // Create a new Log Entry if there is space
         IF nLogCount < 500 THEN
             nLogCount := nLogCount + 1;
@@ -311,7 +310,7 @@ CASE eState OF
             aTuningHistory[nLogCount].nKi := nCurrentKi;
             aTuningHistory[nLogCount].fCalculatedTn := fCurrentTn;
             aTuningHistory[nLogCount].fResonanceScore := 0.0;
-            
+
             // Enforce Beckhoff bounds (0.3 to 1.0 ms)
             IF fCurrentTn >= fTnMin AND fCurrentTn <= fTnMax THEN
                 aTuningHistory[nLogCount].bRejected := FALSE;
@@ -488,7 +487,7 @@ CASE eState OF
     E_TunerState.eEvaluateResonance:
         // Calculate Variance of the Load Angle (Data is guaranteed to be purely Constant Velocity)
         fCurrentResonance := 0.0;
-        
+
         // Determine if we actually executed a physical move for this iteration
         bWasRejected := TRUE; // Default to true if array is full, to be safe
         IF nLogCount > 0 AND nLogCount <= 500 THEN
@@ -509,7 +508,7 @@ CASE eState OF
                 FOR i := 1 TO nSampleCount DO
                     fVarianceSum := fVarianceSum + EXPT((INT_TO_LREAL(aLoadData[i]) - fMean), 2);
                 END_FOR
-                
+
                 // The score is the variance. Lower is mathematically smoother.
                 fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
 
@@ -529,7 +528,7 @@ CASE eState OF
                     MEMCPY(ADR(aBestPowerData), ADR(aPowerData), SIZEOF(aPowerData));
                 END_IF
             ELSE
-                // The motor physically moved, but zero samples were collected! 
+                // The motor physically moved, but zero samples were collected!
                 // This means the distance was too short for the velocity, creating a triangular profile.
                 nErrorId := 16#7048; // Custom ErrorID: No Constant Velocity achieved
                 eErrorSource := eState;
