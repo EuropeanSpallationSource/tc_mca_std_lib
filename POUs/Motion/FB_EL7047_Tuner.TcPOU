@@ -74,6 +74,7 @@ VAR
     aBaselineLoadData   : ARRAY[1..1000] OF INT; // InfoData 1 (Locked Baseline Snapshot)
 
     aPowerData          : ARRAY[1..1000] OF INT; // InfoData 2
+    aBestPowerData      : ARRAY[1..1000] OF INT; // InfoData 2 (Best Run Snapshot)
     nSampleCount        : UINT;
 
     // Internal State Machine and Motion Blocks
