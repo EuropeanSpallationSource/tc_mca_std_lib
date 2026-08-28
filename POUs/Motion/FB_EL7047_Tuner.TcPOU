@@ -165,8 +165,14 @@ CASE eState OF
             bIterationReady := FALSE;
             nErrorId := 0;
             nIteration := 0;
-            fBestResonanceScore := 999999999.0; // Initialize high for current run (Variance can be large)
-            fWorstResonanceScore := 0.0;     // Initialize low for current run
+            fBestResonanceScore := 999999999.0;
+            fWorstResonanceScore := 0.0;
+            bNextStep := FALSE;
+
+            // Prevent infinite scan loops if user sets step to 0
+            IF nKiStep < 1 THEN
+                nKiStep := 1;
+            END_IF
 
             IF nKpStartOverride = 0 THEN
                 eState := E_TunerState.eReadInductance;
@@ -596,6 +602,9 @@ CASE eState OF
 
         IF bAbortTuning THEN
             bAbortTuning := FALSE;
+            bExecuteAutoTune := FALSE; // Prevent runaway restarts
+            bExecuteSingleTest := FALSE;
+            bApplyParams := FALSE;
             bError := FALSE;
             nErrorId := 0;
             eState := E_TunerState.eIdle;
