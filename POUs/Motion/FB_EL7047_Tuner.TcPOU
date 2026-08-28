@@ -498,16 +498,16 @@ CASE eState OF
         IF NOT bWasRejected THEN
             IF nSampleCount > 1 THEN
                 fSum := 0.0;
-                // Calculate Mean
+                // Calculate Mean based on Power Data (Current fluctuation)
                 FOR i := 1 TO nSampleCount DO
-                    fSum := fSum + INT_TO_LREAL(aLoadData[i]);
+                    fSum := fSum + INT_TO_LREAL(aPowerData[i]);
                 END_FOR
                 fMean := fSum / UINT_TO_LREAL(nSampleCount);
 
                 // Calculate Variance
                 fVarianceSum := 0.0;
                 FOR i := 1 TO nSampleCount DO
-                    fVarianceSum := fVarianceSum + EXPT((INT_TO_LREAL(aLoadData[i]) - fMean), 2);
+                    fVarianceSum := fVarianceSum + EXPT((INT_TO_LREAL(aPowerData[i]) - fMean), 2);
                 END_FOR
 
                 // The score is the variance. Lower is mathematically smoother.
