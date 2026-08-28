@@ -97,6 +97,7 @@ VAR
     // Diagnostic History Log
     aTuningHistory      : ARRAY[1..500] OF ST_TuningLog;
     nLogCount           : UINT;
+    bWasRejected        : BOOL;
 
     // CoE buffer
     nCoEWriteBuffer     : UINT;
@@ -487,44 +488,60 @@ CASE eState OF
     E_TunerState.eEvaluateResonance:
         // Calculate Variance of the Load Angle (Data is guaranteed to be purely Constant Velocity)
         fCurrentResonance := 0.0;
-        IF nSampleCount > 1 THEN
-            // 1. Calculate the Mean
-            fSum := 0.0;
-            FOR i := 1 TO nSampleCount DO
-                fSum := fSum + INT_TO_LREAL(aLoadData[i]);
-            END_FOR
-            fMean := fSum / UINT_TO_LREAL(nSampleCount);
+        
+        // Determine if we actually executed a physical move for this iteration
+        bWasRejected := TRUE; // Default to true if array is full, to be safe
+        IF nLogCount > 0 AND nLogCount <= 500 THEN
+            bWasRejected := aTuningHistory[nLogCount].bRejected;
+        END_IF
 
-            // 2. Calculate Variance (Sum of Squared Differences)
-            fVarianceSum := 0.0;
-            FOR i := 1 TO nSampleCount DO
-                fDiff := INT_TO_LREAL(aLoadData[i]) - fMean;
-                fVarianceSum := fVarianceSum + (fDiff * fDiff);
-            END_FOR
+        IF NOT bWasRejected THEN
+            IF nSampleCount > 1 THEN
+                fSum := 0.0;
+                // Calculate Mean
+                FOR i := 1 TO nSampleCount DO
+                    fSum := fSum + INT_TO_LREAL(aLoadData[i]);
+                END_FOR
+                fMean := fSum / UINT_TO_LREAL(nSampleCount);
 
-            // The score is the variance. Lower is mathematically smoother.
-            fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
+                // Calculate Variance
+                fVarianceSum := 0.0;
+                FOR i := 1 TO nSampleCount DO
+                    fVarianceSum := fVarianceSum + EXPT((INT_TO_LREAL(aLoadData[i]) - fMean), 2);
+                END_FOR
+                
+                // The score is the variance. Lower is mathematically smoother.
+                fCurrentResonance := fVarianceSum / UINT_TO_LREAL(nSampleCount);
 
-            // Save the physical score to the log history
-            IF nLogCount > 0 AND nLogCount <= 500 THEN
-                IF aTuningHistory[nLogCount].nKp = nCurrentKp AND aTuningHistory[nLogCount].nKi = nCurrentKi THEN
-                    aTuningHistory[nLogCount].fResonanceScore := fCurrentResonance;
+                // Save the physical score to the log history
+                IF nLogCount > 0 AND nLogCount <= 500 THEN
+                    IF aTuningHistory[nLogCount].nKp = nCurrentKp AND aTuningHistory[nLogCount].nKi = nCurrentKi THEN
+                        aTuningHistory[nLogCount].fResonanceScore := fCurrentResonance;
+                    END_IF
                 END_IF
-            END_IF
 
-            // Save if it's the smoothest run yet
-            IF fCurrentResonance < fBestResonanceScore THEN
-                fBestResonanceScore := fCurrentResonance;
-                nBestKp := nCurrentKp;
-                nBestKi := nCurrentKi;
-                MEMCPY(ADR(aBestLoadData), ADR(aLoadData), SIZEOF(aLoadData));
+                // Save if it's the smoothest run yet
+                IF fCurrentResonance < fBestResonanceScore THEN
+                    fBestResonanceScore := fCurrentResonance;
+                    nBestKp := nCurrentKp;
+                    nBestKi := nCurrentKi;
+                    MEMCPY(ADR(aBestLoadData), ADR(aLoadData), SIZEOF(aLoadData));
+                    MEMCPY(ADR(aBestPowerData), ADR(aPowerData), SIZEOF(aPowerData));
+                END_IF
+            ELSE
+                // The motor physically moved, but zero samples were collected! 
+                // This means the distance was too short for the velocity, creating a triangular profile.
+                nErrorId := 16#7048; // Custom ErrorID: No Constant Velocity achieved
+                eErrorSource := eState;
+                eState := E_TunerState.eError;
+                RETURN; // Halt state machine logic
             END_IF
+        END_IF
 
-            // Save if it's the worst run
-            IF fCurrentResonance > fWorstResonanceScore THEN
-                fWorstResonanceScore := fCurrentResonance;
-                MEMCPY(ADR(aWorstLoadData), ADR(aLoadData), SIZEOF(aLoadData));
-            END_IF
+        // Save if it's the worst run
+        IF fCurrentResonance > fWorstResonanceScore THEN
+            fWorstResonanceScore := fCurrentResonance;
+            MEMCPY(ADR(aWorstLoadData), ADR(aLoadData), SIZEOF(aLoadData));
         END_IF
 
         // Loop iteration logic
