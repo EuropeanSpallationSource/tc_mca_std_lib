@@ -26,9 +26,6 @@ VAR_INPUT
     bAnticollisionEnable: BOOL := TRUE; //Blades anticollision option, only for when blades are moved independently
     fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
 END_VAR
-VAR_OUTPUT
-    bHomingSlitPair: BOOL := FALSE; //TRUE if function is homing axes
-END_VAR
 VAR
     //Internal state machines
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.eStartup; //Sequence steps for operating the slits
@@ -127,13 +124,11 @@ CASE eSlitPairState OF
         stBladePositive.stControl.eCommand := E_MotionFunctions.eHome;
         stBladeNegative.stControl.bExecute := TRUE;
         stBladePositive.stControl.bExecute := TRUE;
-        bHomingSlitPair := TRUE;
         eSlitPairState := E_SlitPairStates.eCheckBladeHomeComplete;
 
     E_SlitPairStates.eCheckBladeHomeComplete: //Wait for completion of blade homing routines or stop/halt command
         IF bBladesHomed AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eHomeGap;
-            bHomingSlitPair := FALSE;
         ELSIF stGapSize.stControl.bStop OR stGapCentre.stControl.bStop THEN
             stBladeNegative.stControl.bStop := TRUE;
             stBladePositive.stControl.bStop := TRUE;
