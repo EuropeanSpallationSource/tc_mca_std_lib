@@ -27,7 +27,6 @@ VAR_INPUT
     fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
 END_VAR
 VAR_OUTPUT
-    bEnabledSlitPair: BOOL := FALSE; //Enabled status of function
     bErrorSlipPair: BOOL; //Error status of function
     bHomingSlitPair: BOOL := FALSE; //TRUE if function is homing axes
 END_VAR
@@ -99,7 +98,6 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.eInit:
-        bEnabledSlitPair := FALSE;
         IF bAxesEnabled AND bEnable THEN
             eSlitPairState := E_SlitPairStates.eInitClearGearing;
         END_IF
@@ -177,7 +175,6 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.eSlitsOperational: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
-        bEnabledSlitPair := TRUE;
         checkSoftLimits(stGapSize, stGapCentre); //Soft limits are updated when axes are stopped
         IF (NOT bBladesCoupled OR NOT bEnable) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearOutBlades;
@@ -196,7 +193,6 @@ CASE eSlitPairState OF
         IF bBladesUncoupled THEN
             IF bHomingRequested THEN
                 eSlitPairState := E_SlitPairStates.eResetCalibration;
-                bEnabledSlitPair := FALSE;
             ELSE
                 eSlitPairState := E_SlitPairStates.eInit;
             END_IF
@@ -212,7 +208,6 @@ CASE eSlitPairState OF
     E_SlitPairStates.eError: //ERROR STATE
         nAutoErrorResetCounter := 0;
         bErrorSlipPair := TRUE;
-        bEnabledSlitPair := FALSE;
         actStopAxes();
         IF bReset THEN
             bResetting := TRUE;
@@ -390,7 +385,7 @@ IF eSlitPairState = E_SlitPairStates.eError THEN
     stGapSize.stStatus.bError := TRUE;
 END_IF
 
-IF bEnabledSlitPair AND NOT bBladesHomed THEN
+IF eSlitPairState = E_SlitPairStates.eSlitsOperational AND NOT bBladesHomed THEN
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 ]]></ST>
