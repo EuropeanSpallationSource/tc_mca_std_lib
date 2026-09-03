@@ -62,7 +62,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Input variables
 AcknowledgeButton := bAcknowledgeButton;
-EStop1Released := TRUE;
+EStopReleased := TRUE;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables

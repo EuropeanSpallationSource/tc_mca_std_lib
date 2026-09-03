@@ -4,6 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_ESSMonitoringBase
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
+	iSafetyProvider: I_SafetyProvider;
 END_VAR
 VAR_OUTPUT
     aErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
@@ -14,12 +15,12 @@ VAR_OUTPUT
     nAlarmGrpBitNumber: UDINT;
 END_VAR
 VAR
-    _bAcknowledgeButton: BOOL;
-    _bAcknowledgeLED: BOOL;
+    _bErrorAcknowledgeButton: BOOL;
+    _bErrorAcknowledgeLED: BOOL;
     _bStatusLED: BOOL;
     _bEStopLED: BOOL;
     _bErrorLED: BOOL;
-    _bEStop1Released: BOOL;
+    _bEStopReleased: BOOL;
     _nEcMasterDevState: UINT;
 
     aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
@@ -41,7 +42,7 @@ VAR
 (*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
 (*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
 (*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop 1 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
 (*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
 (*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
 (*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
@@ -94,6 +95,10 @@ VAR
     bEcSlaveSafeOP: BOOL;
     bEcSlaveError: BOOL;
     bEcDCnotInSync: BOOL;
+	
+	//Data from the safety controller
+	bEStopReleased: BOOL;
+	bSTOReleased: BOOL;
 
     fbAcknowledgeButtonTrig: R_TRIG;
 END_VAR
@@ -122,20 +127,20 @@ mLink();
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_bAcknowledgeButton := AcknowledgeButton;
+          <ST><![CDATA[_bErrorAcknowledgeButton := AcknowledgeButton;
 ]]></ST>
         </Implementation>
       </Set>
     </Property>
     <Property Name="AcknowledgeLED" Id="{87e182de-d7eb-0e63-0a1a-4287ee4dac3d}">
-      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeLED : BOOL
+      <Declaration><![CDATA[PROPERTY AcknowledgeLED : BOOL
 ]]></Declaration>
       <Get Name="Get" Id="{c85992ab-d415-0e8f-2295-5c0c5b4bcb43}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[AcknowledgeLED := _bAcknowledgeLED;
+          <ST><![CDATA[AcknowledgeLED := _bErrorAcknowledgeLED;
 ]]></ST>
         </Implementation>
       </Get>
@@ -166,19 +171,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="EStop1Released" Id="{0f76b944-cd05-0d53-20d1-3839916d7d3a}">
-      <Declaration><![CDATA[PROPERTY PROTECTED EStop1Released : BOOL
-]]></Declaration>
-      <Set Name="Set" Id="{2d659b6b-6763-0d53-355a-5af1c0fcb381}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[_bEStop1Released := EStop1Released;
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
     <Property Name="EStopLED" Id="{11c0d295-1ba3-0cb3-34ae-5cedaebe894d}">
       <Declaration><![CDATA[PROPERTY PROTECTED EStopLED : BOOL
 ]]></Declaration>
@@ -191,6 +183,26 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+    </Property>
+    <Property Name="EStopReleased" Id="{0f76b944-cd05-0d53-20d1-3839916d7d3a}">
+      <Declaration><![CDATA[PROPERTY PUBLIC EStopReleased : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{a27c5f82-1830-0be3-27f0-6e9ced4ccd5e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EStopReleased := _bEStopReleased;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{2d659b6b-6763-0d53-355a-5af1c0fcb381}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_bEStopReleased := EStopReleased;]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Method Name="FB_init" Id="{fbc6fe99-d298-01aa-2f2e-75ad59229db1}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
@@ -206,9 +218,9 @@ END_VAR
       <Implementation>
         <ST><![CDATA[FOR i := 1 TO THIS^.nMAX_ALARMS DO
     IF THIS^.aAlarmList[i].bLedAutoReset THEN
-        THIS^.aAlarmList[i].eAcknowledgeLED := E_MonitorLed.eUndefined;
+        THIS^.aAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eUndefined;
     ELSE
-        THIS^.aAlarmList[i].eAcknowledgeLED := E_MonitorLed.eSteady;
+        THIS^.aAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eSteady;
     END_IF
 END_FOR
 ]]></ST>
@@ -309,7 +321,7 @@ VAR_INST
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=_bAcknowledgeButton);
+        <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=_bErrorAcknowledgeButton);
 mSetResetAlarmsLeds();
 
 // Reset before loop
@@ -333,7 +345,7 @@ FOR i:=1 TO nMAX_ALARMS DO
 
     // If any error exists requiring an acknowledge, highlight Acknowledge LED.
     IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
-        stMonitorLed.eAcknowledgeLED := aAlarmList[i].eAcknowledgeLED;
+        stMonitorLed.eErrorAcknowledgeLED := aAlarmList[i].eErrorAcknowledgeLED;
     END_IF
 END_FOR
 
@@ -360,11 +372,11 @@ _bStatusLED :=
     (stMonitorLed.eStatusLED = E_MonitorLed.eSteady)
     OR (stMonitorLed.eStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (stMonitorLed.eStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
-_bAcknowledgeLED :=
-    (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSteady)
-    OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (stMonitorLed.eAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
-_bEStopLED := NOT _bEStop1Released;
+_bErrorAcknowledgeLED :=
+    (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSteady)
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+_bEStopLED := NOT _bEStopReleased;
 ]]></ST>
       </Implementation>
     </Method>

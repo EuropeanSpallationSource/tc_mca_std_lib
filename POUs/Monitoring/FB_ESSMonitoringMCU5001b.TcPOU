@@ -34,7 +34,7 @@ VAR
     bFuse4_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF203 (EL1808)^Channel 5^Input'}
     bFuse5_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
+	{attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
     bEStop1Released AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
     bSTO1Released AT %I*: BOOL;
@@ -57,6 +57,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^Inputs^DevState'}
     nEcMasterDevState AT %I*: UINT;
 END_VAR
+
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[SUPER^();
@@ -68,7 +69,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Input variables
 AcknowledgeButton := bAcknowledgeButton;
-EStop1Released := bEStop1Released;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
@@ -76,6 +76,14 @@ bAcknowledgeLED := AcknowledgeLED;
 bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
+
+IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.P_ReadFromSafetyController THEN
+    bEStopReleased := iSafetyProvider.P_EStopOK;
+ELSE
+    bEStopReleased := bEStop1Released;
+END_IF;
+
+EStopReleased := bEStopReleased;
 ]]></ST>
       </Implementation>
     </Method>
@@ -106,8 +114,7 @@ mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
 mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
 mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
 
-mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Released);
-mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStopReleased);
 
 mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);

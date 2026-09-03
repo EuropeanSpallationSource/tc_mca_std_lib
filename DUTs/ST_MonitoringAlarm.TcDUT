@@ -8,11 +8,14 @@ STRUCT
     bLedAutoReset: BOOL := FALSE;
     eStatusLED: E_MonitorLed;
     eErrorLED: E_MonitorLed;
-    eAcknowledgeLED: E_MonitorLed;
+    eErrorAcknowledgeLED: E_MonitorLed;
     eEStopLED: E_MonitorLed := E_MonitorLed.eUndefined;
     eWarningLED: E_MonitorLed; //Only used for MCU400x test crates
     nErrorID: INT;
     sErrorMsg: STRING;
+	
+	//Motion Safety
+	eSafetyAcknowledgeLED: E_MonitorLed;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

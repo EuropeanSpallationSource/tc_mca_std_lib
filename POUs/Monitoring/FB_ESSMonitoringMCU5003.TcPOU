@@ -64,7 +64,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Input variables
 AcknowledgeButton := bAcknowledgeButton;
-EStop1Released := bEStop1Released;
+EStopReleased := bEStop1Released;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
@@ -100,7 +100,7 @@ mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
 mSetReset(stAlarmList := aAlarmList[13], bOk := bFuse3_OK);
 
 mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Released);
-mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
+//mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
 
 mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);

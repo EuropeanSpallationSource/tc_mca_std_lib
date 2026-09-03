@@ -78,7 +78,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Input variables
 AcknowledgeButton := bAcknowledgeButton;
-EStop1Released := bEStop1Released;
 EcMasterDevState := nEcMasterDevState;
 
 // Output variables
@@ -86,6 +85,16 @@ bAcknowledgeLED := AcknowledgeLED;
 bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
+
+IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.P_ReadFromSafetyController THEN
+    bEStopReleased := iSafetyProvider.P_EStopOK;
+	bSTOReleased := iSafetyProvider.P_STO_OK;
+ELSE
+    bEStopReleased := bEStop1Released;
+	bSTOReleased := bSTO1Released;
+END_IF;
+
+EStopReleased := bEStopReleased;
 ]]></ST>
       </Implementation>
     </Method>
@@ -121,8 +130,8 @@ mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
 mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
 mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
 
-mSetReset(stAlarmList := aAlarmList[19], bOk := bEStop1Released);
-mSetReset(stAlarmList := aAlarmList[20], bOk := bSTO1Released);
+mSetReset(stAlarmList := aAlarmList[19], bOk := bEStopReleased);
+mSetReset(stAlarmList := aAlarmList[20], bOk := NOT bSTOReleased);
 
 mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
