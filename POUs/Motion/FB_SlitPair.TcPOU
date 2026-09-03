@@ -38,7 +38,6 @@ VAR
     bResetting: BOOL := FALSE; //TRUE if axis going through a reset
     bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
     bBladesHomed: BOOL := FALSE; //TRUE if blade axes are calibrated
-    bGapHomed: BOOL := FALSE; //TRUE if virtual axes are calibrated
     bBladesCoupled: BOOL := FALSE; //TRUE if both blade axes are coupled
     bBladesUncoupled: BOOL := FALSE; //TRUE if both blade axes are uncoupled
     bAxisErrorsPresent: BOOL := FALSE; //TRUE if error present on any real or virtual axis
@@ -153,7 +152,8 @@ CASE eSlitPairState OF
         eSlitPairState := E_SlitPairStates.eCheckGapHomeComplete;
 
     E_SlitPairStates.eCheckGapHomeComplete: //Wait for virtual homing completion
-        IF bGapHomed AND NOT stGapSize.stStatus.bBusy AND NOT stGapCentre.stStatus.bBusy THEN
+        IF ((stGapSize.stStatus.bHomed AND stGapCentre.stStatus.bHomed)) 
+          AND NOT stGapSize.stStatus.bBusy AND NOT stGapCentre.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearInSlits;
         END_IF
 
@@ -490,7 +490,6 @@ END_CASE
       <Implementation>
         <ST><![CDATA[bAxesEnabled := checkAllAxesEnabled(stBladeNegative, stBladePositive, stGapSize, stGapCentre);
 bBladesHomed := checkBladesHomed(stBladeNegative, stBladePositive);
-bGapHomed := checkGapHomed(stGapSize, stGapCentre);
 bBladesCoupled := checkBladesCoupled(stBladeNegative, stBladePositive);
 bBladesUncoupled := checkBladesUncoupled(stBladeNegative, stBladePositive);
 bAxisErrorsPresent := checkAnyAxisHasError(stBladeNegative, stBladePositive, stGapSize, stGapCentre);
@@ -599,20 +598,6 @@ END_VAR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="checkGapHomed" Id="{4449923d-b61f-063b-337f-e765d5643490}">
-      <Declaration><![CDATA[(*Method to check if the virtual axes for gap size and gap centre are homed/the calibration flag is present.
-Only returns TRUE if BOTH virtual axes are homed *)
-METHOD PRIVATE checkGapHomed: BOOL
-VAR_IN_OUT
-    stGapSize: ST_AxisStruct; //Axis data of the gap size
-    stGapCentre: ST_AxisStruct; //Axis data of the gap size
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[checkGapHomed := stGapSize.stStatus.bHomed AND stGapCentre.stStatus.bHomed;
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="checkResetCalibrationDone" Id="{c8bd46bd-3fc2-0717-0d3e-69d1ca8c8ae0}">
       <Declaration><![CDATA[METHOD PRIVATE checkResetCalibrationDone : BOOL
 VAR_INPUT
@@ -624,7 +609,7 @@ END_VAR
     AND NOT fbResetCalibrationGapSize.Busy
     AND NOT fbResetCalibrationGapCentre.Busy
     AND NOT bBladesHomed
-    AND NOT bGapHomed;
+    AND NOT (stGapSize.stStatus.bHomed AND stGapCentre.stStatus.bHomed);
 ]]></ST>
       </Implementation>
     </Method>
