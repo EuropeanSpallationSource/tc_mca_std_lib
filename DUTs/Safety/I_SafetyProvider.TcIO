@@ -13,14 +13,6 @@
 ]]></Declaration>
       </Get>
     </Property>
-    <Property Name="ReadFromSafetyController" Id="{168846af-f985-0ee8-3e0d-dcdf7288878f}">
-      <Declaration><![CDATA[PROPERTY ReadFromSafetyController : BOOL
-]]></Declaration>
-      <Get Name="Get" Id="{eafce056-75cc-0208-2233-eff73018b5e1}">
-        <Declaration><![CDATA[
-]]></Declaration>
-      </Get>
-    </Property>
     <Property Name="STO_OK" Id="{dd0f65fe-28b6-029c-3b57-94670f527634}">
       <Declaration><![CDATA[PROPERTY STO_OK : BOOL
 ]]></Declaration>
