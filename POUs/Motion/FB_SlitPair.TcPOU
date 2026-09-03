@@ -152,7 +152,7 @@ CASE eSlitPairState OF
         eSlitPairState := E_SlitPairStates.eCheckGapHomeComplete;
 
     E_SlitPairStates.eCheckGapHomeComplete: //Wait for virtual homing completion
-        IF ((stGapSize.stStatus.bHomed AND stGapCentre.stStatus.bHomed)) 
+        IF ((stGapSize.stStatus.bHomed AND stGapCentre.stStatus.bHomed))
           AND NOT stGapSize.stStatus.bBusy AND NOT stGapCentre.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearInSlits;
         END_IF
