@@ -27,7 +27,6 @@ VAR_INPUT
     fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
 END_VAR
 VAR_OUTPUT
-    bErrorSlipPair: BOOL; //Error status of function
     bHomingSlitPair: BOOL := FALSE; //TRUE if function is homing axes
 END_VAR
 VAR
@@ -207,7 +206,6 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.eError: //ERROR STATE
         nAutoErrorResetCounter := 0;
-        bErrorSlipPair := TRUE;
         actStopAxes();
         IF bReset THEN
             bResetting := TRUE;
@@ -240,7 +238,6 @@ CASE eSlitPairState OF
         ELSE
             eSlitPairState := E_SlitPairStates.eInit;
             nAutoErrorResetCounter := 0;
-            bErrorSlipPair := FALSE;
             bResetting := FALSE;
         END_IF
 END_CASE
@@ -375,7 +372,7 @@ END_IF
 //RESET - Use the reset from the virtual axes in order to reset the slits
 bReset := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
 
-IF NOT bErrorSlipPair AND bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
+IF bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 
