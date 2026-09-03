@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Axis" Id="{beb60ab5-3bf2-0ae6-2037-f6d7e95a54b2}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
@@ -73,6 +73,7 @@ VAR
     stMcStatusTempDisable: ST_McStatus;
     stMcStatusCommandHandler: ST_McStatus;
     stMcStatusAirpad: ST_McStatus;
+    stMcStatusExternalBrake: ST_McStatus;
 
     //Variables for holding limits during homing
     bWaitForStopAfterLimitHit: BOOL := FALSE;
@@ -101,7 +102,6 @@ VAR
 
     //Edge detection triggers for statuses
     fbDoneRTrig: R_TRIG;
-    fbErrorRTrig: R_TRIG;
     fbCommandAbortedRTrig: R_TRIG;
     fbInVelocityRTrig: R_TRIG;
     fbInVelocityFTrig: F_TRIG;
@@ -123,7 +123,9 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nMCSTATUS_ARRAY_SIZE: UINT := 18;
+    nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //Used for the FOR loops for the Busy, Done, Command Aborted Status
+    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loops for Done
+    nMCSTATUS_ARRAY_SIZE: UINT := 19;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -184,6 +186,7 @@ astMcStatus[15] := ADR(stMcStatusBacklash);
 astMcStatus[16] := ADR(stMcStatusTempDisable);
 astMcStatus[17] := ADR(stMcStatusCommandHandler);
 astMcStatus[18] := ADR(stMcStatusAirpad);
+astMcStatus[19] := ADR(stMcStatusExternalBrake);
 ]]></ST>
       </Implementation>
     </Method>
@@ -209,7 +212,6 @@ VAR_INST
     bPressureOnRequest: BOOL := FALSE;
     RTRIG_ManualControl: R_TRIG;
 
-    bAirpadError: BOOL;
     nAirpadErrorId: UDINT := 0;
 END_VAR
 ]]></Declaration>
@@ -236,9 +238,7 @@ RTRIG_PressureRequest(CLK := bPressureOnRequest);
 
 TON_PressurizeAirpad(
     IN := bPressureOnRequest
-        AND ((_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
-            AND _stAxis.stInputs.bAirpadPressurized)
-        OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected),
+        AND NOT _stAxis.stStatus.bError,
     PT := _stAxis.stConfig.stAirpadBrake.tAirpadOnDelayTime);
 
 TON_Depressurize(
@@ -253,7 +253,6 @@ CASE eAirpad OF
         IF bPressureOnRequest
             AND NOT _stAxis.stStatus.bError
             AND NOT _stAxis.stStatus.bAirpadPressureError THEN
-            bAirpadError := FALSE;
             _stAxis.stStatus.bAirpadPressureError := FALSE;
             nAirpadErrorId := 0;
             eAirpad := E_Airpad.ePressurize;
@@ -264,12 +263,13 @@ CASE eAirpad OF
         //Movement requested -> Pressurize airpad
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
-        IF _stAxis.stStatus.bError OR NOT bPressureOnRequest THEN
+        IF _stAxis.stStatus.bError
+            OR NOT bPressureOnRequest
+            OR _stAxis.stStatus.bAirpadPressureError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF TON_PressurizeAirpad.Q THEN
             IF _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
                 AND NOT _stAxis.stInputs.bAirpadPressurized THEN
-                bAirpadError := TRUE;
                 _stAxis.stStatus.bAirpadPressureError := TRUE;
                 nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
                 eAirpad := E_Airpad.eDepressurize;
@@ -284,11 +284,11 @@ CASE eAirpad OF
         _stAxis.stControl.bPressurizeAirpad := TRUE;
 
         IF _stAxis.stStatus.bError
-            OR TON_Depressurize.Q THEN
+            OR TON_Depressurize.Q
+            OR _stAxis.stStatus.bAirpadPressureError THEN
             eAirpad := E_Airpad.eDepressurize;
         ELSIF (_stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected
             AND NOT _stAxis.stInputs.bAirpadPressurized) THEN
-            bAirpadError := TRUE;
             _stAxis.stStatus.bAirpadPressureError := TRUE;
             nAirpadErrorId := E_CustomErrorIds.eAirPadPressureError;
             eAirpad := E_Airpad.eDepressurize;
@@ -302,8 +302,12 @@ bReady := eAirpad = E_Airpad.eReadyToMove
     OR NOT _stAxis.stConfig.stAirpadBrake.bAirpadFeedbackConnected);
 
 //ST_McStatus mapping
-mControl_Airpad.Error := bAirpadError;
+mControl_Airpad.Error := _stAxis.stStatus.bAirpadPressureError;
 mControl_Airpad.ErrorID := nAirpadErrorId;
+
+IF _stAxis.stStatus.bAirpadPressureError THEN
+    _stAxis.stError.nAirpadErrorID := nAirpadErrorId;
+END_IF
 
 
 ]]></ST>
@@ -512,8 +516,10 @@ mControl_CommandHandler.CommandAborted := bCommandAborted;
 mControl_CommandHandler.Done := bInternalExecute;
 mControl_CommandHandler.Busy := (eState <> E_CommandHandlerState.eIdle);
 mControl_CommandHandler.Error := _stAxis.stStatus.bCommandHandlerTimeoutError;
+
 IF _stAxis.stStatus.bCommandHandlerTimeoutError THEN
     mControl_CommandHandler.ErrorID := TO_UDINT(E_CustomErrorIds.eCommandHandlerTimeoutError);
+    _stAxis.stError.nCommandHandlerErrorID := mControl_CommandHandler.ErrorID;
 END_IF
 ]]></ST>
       </Implementation>
@@ -933,24 +939,14 @@ IF fbReset.Done
     _stAxis.stStatus.bExternalBrakeTimeoutError := FALSE;
     _stAxis.stStatus.bExternalBrakeFailure := FALSE;
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        //Reset ST_Status error ID
-        _stAxis.stStatus.nErrorID := 0;
-        //Reset St_AxisError error IDs
-        _stAxis.stError.nPowerErrorID := 0;
-        _stAxis.stError.nMoveAbsoluteErrorID := 0;
-        _stAxis.stError.nMoveRelativeErrorID := 0;
-        _stAxis.stError.nMoveVelocityErrorID := 0;
-        _stAxis.stError.nMoveModuloErrorID := 0;
-        _stAxis.stError.nHomeErrorID := 0;
-        _stAxis.stError.nHaltErrorID := 0;
-        _stAxis.stError.nResetErrorID := 0;
-        _stAxis.stError.nStopErrorID := 0;
-        _stAxis.stError.nGearInMultiMasterErrorID := 0;
-        _stAxis.stError.nGearOutErrorID := 0;
-        _stAxis.stError.nWriteParameterErrorId := 0;
-        _stAxis.stError.nReadParameterErrorId := 0;
-        _stAxis.stError.nNCErrorID := 0;
+        astMcStatus[i]^.Error := FALSE;
+        astMcStatus[i]^.ErrorID := 0;
     END_FOR
+    //Reset ST_Status error ID
+    _stAxis.stStatus.nErrorID := 0;
+    //Reset St_AxisError error IDs (MEMSET ensures future additions are automatically handled)
+    MEMSET(ADR(_stAxis.stError), 0, SIZEOF(_stAxis.stError));
+
 END_IF
 
 mControl_Reset.Busy := fbReset.Busy OR fbSoEReset.Busy;
@@ -1066,6 +1062,10 @@ _stAxis.stStatus.bTempSensorError := bTempSensorError;
 mControl_TemperatureDisable.Active := bEnableTemperatureDisable;
 mControl_TemperatureDisable.Error := bTempSensorError;
 mControl_TemperatureDisable.ErrorID := nErrorID;
+
+IF bTempSensorError THEN
+    _stAxis.stError.nTempDisableErrorID := nErrorID;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -1772,7 +1772,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -1787,7 +1787,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -1806,10 +1806,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 5 TO nMCSTATUS_ARRAY_SIZE DO
-    IF i <> 16 THEN
-        tmpDone := astMcStatus[i]^.Done OR tmpDone;
-    END_IF
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
+    tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
 fbDoneRTrig(CLK := tmpDone);
@@ -1823,17 +1821,10 @@ END_IF
       <Declaration><![CDATA[METHOD mStatus_Error : BOOL
 VAR
     i: UINT;
-    tmpError: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-    tmpError := astMcStatus[i]^.Error OR tmpError;
-END_FOR
-
-fbErrorRTrig(CLK := tmpError);
-
-IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
+        <ST><![CDATA[IF _stAxis.stConfig.stDriveInfo.DeviceType = E_DeviceType.DEVICETYPE_SOE_DEFAULT THEN
     // Read SERCOS drive error information,
     fbSoEReadDiagNumber(
         Axis := stAxis.Axis,
@@ -1850,17 +1841,31 @@ ELSE
     stAxis.stStatus.nSoEDiagID := 0;
 END_IF
 
-IF _stAxis.Axis.Status.ErrorStop THEN
-    _stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
-    _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;//NC Error ID
-ELSIF _stAxis.Axis.Status.Error THEN
-    _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
-ELSIF fbErrorRTrig.Q THEN
-    //For each mcStatus
+//Evaluate overall axis error, default to the NC's ErrorStop status
+_stAxis.stStatus.bError := _stAxis.Axis.Status.ErrorStop;
+
+//Override with TRUE if any custom method has an error
+FOR i := (nLAST_ARRAY_INDEX_MOVE_COMMANDS + 1) TO nMCSTATUS_ARRAY_SIZE DO
+    IF astMcStatus[i]^.Error THEN
+        _stAxis.stStatus.bError := TRUE;
+    END_IF
+END_FOR
+
+//Allow nErrorID to be set only if 0, to create a snapshot of the root cause.
+IF _stAxis.stStatus.nErrorID = 0 THEN
+    //Set the NC Error ID as a baseline fallback
+    IF _stAxis.Axis.Status.ErrorStop THEN
+        _stAxis.stStatus.nErrorID := _stAxis.Axis.Status.ErrorID;
+    ELSIF _stAxis.Axis.Status.Error THEN
+        _stAxis.stStatus.nErrorID := _stAxis.stError.nNCErrorID;
+    END_IF
+
+    //Overwrite with FB/Custom Errors if present.
+    //Because this executes after the NC check, the FB error gets priority.
     FOR i := 1 TO nMCSTATUS_ARRAY_SIZE DO
-        //If there's an error present propagate
-        IF astMcStatus[i]^.ErrorID <> 0 THEN
+        IF astMcStatus[i]^.Error AND astMcStatus[i]^.ErrorID <> 0 THEN
             _stAxis.stStatus.nErrorID := astMcStatus[i]^.ErrorID;
+            EXIT;
         END_IF
     END_FOR
 END_IF

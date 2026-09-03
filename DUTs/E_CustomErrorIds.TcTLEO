@@ -10,10 +10,9 @@ TYPE E_CustomErrorIds :
     eNoCustomError := 0,
     eTemperatureSensorError := 16#10201,
     eAirPadPressureError := 16#10202,
-    eAirPadTimeoutError := 16#10203,
-    eExternalBrakeError := 16#10204,
-    eExternalBrakeTimeoutError := 16#10205,
-    eCommandHandlerTimeoutError := 16#10206
+    eExternalBrakeError := 16#10203,
+    eExternalBrakeTimeoutError := 16#10204,
+    eCommandHandlerTimeoutError := 16#10205
 ) UDINT := eNoCustomError;
 END_TYPE
 ]]></Declaration>
@@ -37,23 +36,18 @@ END_TYPE
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eAirPadTimeoutError"</v>
+              <v n="TextID">"eExternalBrakeError"</v>
               <v n="TextDefault">"16#10203"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eExternalBrakeError"</v>
+              <v n="TextID">"eExternalBrakeTimeoutError"</v>
               <v n="TextDefault">"16#10204"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
-              <v n="TextID">"eExternalBrakeTimeoutError"</v>
-              <v n="TextDefault">"16#10205"</v>
-              <l n="LanguageTexts" t="ArrayList" />
-            </o>
-            <o>
               <v n="TextID">"eCommandHandlerTimeoutError"</v>
-              <v n="TextDefault">"16#10206"</v>
+              <v n="TextDefault">"16#10205"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

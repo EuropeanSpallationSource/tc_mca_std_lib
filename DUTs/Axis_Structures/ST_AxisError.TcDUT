@@ -15,9 +15,13 @@ STRUCT
     nStopErrorID: UDINT;//Error ID for MC_Stop function block
     nGearInMultiMasterErrorID: UDINT; //Error ID for MC_GearInMultiMaster function block
     nGearOutErrorID: UDINT; //Error ID for MC_GearOut function block
-    nWriteParameterErrorId: UDINT; //Error ID for writing parameters function block
-    nReadParameterErrorId: UDINT; //Error ID for MC_ReadParameter function block
+    nWriteParameterErrorID: UDINT; //Error ID for writing parameters function block
+    nReadParameterErrorID: UDINT; //Error ID for MC_ReadParameter function block
     nBacklashErrorID: UDINT; //Error ID for MC_BacklashCompensation function block
+    nTempDisableErrorID: UDINT; //Error ID for mControl_TemperatureDisable method
+    nCommandHandlerErrorID: UDINT; //Error ID for mControl_CommandHandler method
+    nAirpadErrorID: UDINT; //Error ID for mControl_Airpad method
+    nExternalBrakeErrorID: UDINT; //Error ID for mControl_ExternalBrake method
 //Error from the NC
     nNCErrorID: UDINT; //Error ID from the NC Axis_Ref Axis Status
 END_STRUCT
