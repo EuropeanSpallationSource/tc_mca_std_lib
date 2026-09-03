@@ -33,8 +33,8 @@ VAR
     eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits for virtual axes
 
     //Internal statuses for logic
-    bEnable: BOOL; //Enable/disable the slit set
-    bReset: BOOL; //Reset the slit set
+    bEnableSlitPair: BOOL; //Enable/disable the slit set
+    bResetSlitPair: BOOL; //Reset the slit set
     bResetting: BOOL := FALSE; //TRUE if axis going through a reset
     bAxesEnabled: BOOL := FALSE; //TRUE if all axes enabled
     bBladesHomed: BOOL := FALSE; //TRUE if blade axes are calibrated
@@ -94,7 +94,7 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.eInit:
-        IF bAxesEnabled AND bEnable THEN
+        IF bAxesEnabled AND bEnableSlitPair THEN
             eSlitPairState := E_SlitPairStates.eInitClearGearing;
         END_IF
 
@@ -170,7 +170,7 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.eSlitsOperational: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
         checkSoftLimits(stGapSize, stGapCentre); //Soft limits are updated when axes are stopped
-        IF (NOT bBladesCoupled OR NOT bEnable) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
+        IF (NOT bBladesCoupled OR NOT bEnableSlitPair) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearOutBlades;
         END_IF
         IF (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute) OR
@@ -202,7 +202,7 @@ CASE eSlitPairState OF
     E_SlitPairStates.eError: //ERROR STATE
         nAutoErrorResetCounter := 0;
         actStopAxes();
-        IF bReset THEN
+        IF bResetSlitPair THEN
             bResetting := TRUE;
             eSlitPairState := E_SlitPairStates.eErrorGearOut;
         END_IF
@@ -237,7 +237,7 @@ CASE eSlitPairState OF
         END_IF
 END_CASE
 
-bReset := FALSE;
+bResetSlitPair := FALSE;
 ]]></ST>
     </Implementation>
     <Action Name="actAnticollision" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
@@ -338,7 +338,7 @@ IF rtrigVirtualAxisEnable.Q THEN
     stBladeNegative.stControl.bEnable := TRUE;
     stGapSize.stControl.bEnable := TRUE;
     stGapCentre.stControl.bEnable := TRUE;
-    bEnable := TRUE;
+    bEnableSlitPair := TRUE;
 END_IF
 
 //Disable blade axes when both the virtuals are disabled
@@ -352,7 +352,7 @@ IF rtrigVirtualAxisDisable.Q THEN
 END_IF
 
 //Set Enable flag when all axes are enabled
-bEnable := stBladePositive.stStatus.bEnabled AND stBladeNegative.stStatus.bEnabled
+bEnableSlitPair := stBladePositive.stStatus.bEnabled AND stBladeNegative.stStatus.bEnabled
     AND stGapSize.stStatus.bEnabled AND stGapCentre.stStatus.bEnabled;
 ]]></ST>
       </Implementation>
@@ -365,7 +365,7 @@ IF bResetting THEN //ignore setting in error state if FB going through a reset
 END_IF
 
 //RESET - Use the reset from the virtual axes in order to reset the slits
-bReset := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
+bResetSlitPair := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
 
 IF bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
     eSlitPairState := E_SlitPairStates.eError;
