@@ -27,9 +27,9 @@ VAR_INPUT
     fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
 END_VAR
 VAR_OUTPUT
-    bEnabled: BOOL := FALSE; //Enabled status of function
-    bError: BOOL; //Error status of function
-    bHoming: BOOL := FALSE; //TRUE if function is homing axes
+    bEnabledSlitPair: BOOL := FALSE; //Enabled status of function
+    bErrorSlipPair: BOOL; //Error status of function
+    bHomingSlitPair: BOOL := FALSE; //TRUE if function is homing axes
 END_VAR
 VAR
     //Internal state machines
@@ -99,7 +99,7 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.eInit:
-        bEnabled := FALSE;
+        bEnabledSlitPair := FALSE;
         IF bAxesEnabled AND bEnable THEN
             eSlitPairState := E_SlitPairStates.eInitClearGearing;
         END_IF
@@ -130,13 +130,13 @@ CASE eSlitPairState OF
         stBladePositive.stControl.eCommand := E_MotionFunctions.eHome;
         stBladeNegative.stControl.bExecute := TRUE;
         stBladePositive.stControl.bExecute := TRUE;
-        bHoming := TRUE;
+        bHomingSlitPair := TRUE;
         eSlitPairState := E_SlitPairStates.eCheckBladeHomeComplete;
 
     E_SlitPairStates.eCheckBladeHomeComplete: //Wait for completion of blade homing routines or stop/halt command
         IF bBladesHomed AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eHomeGap;
-            bHoming := FALSE;
+            bHomingSlitPair := FALSE;
         ELSIF stGapSize.stControl.bStop OR stGapCentre.stControl.bStop THEN
             stBladeNegative.stControl.bStop := TRUE;
             stBladePositive.stControl.bStop := TRUE;
@@ -177,7 +177,7 @@ CASE eSlitPairState OF
         END_IF
 
     E_SlitPairStates.eSlitsOperational: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
-        bEnabled := TRUE;
+        bEnabledSlitPair := TRUE;
         checkSoftLimits(stGapSize, stGapCentre); //Soft limits are updated when axes are stopped
         IF (NOT bBladesCoupled OR NOT bEnable) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             eSlitPairState := E_SlitPairStates.eGearOutBlades;
@@ -196,7 +196,7 @@ CASE eSlitPairState OF
         IF bBladesUncoupled THEN
             IF bHomingRequested THEN
                 eSlitPairState := E_SlitPairStates.eResetCalibration;
-                bEnabled := FALSE;
+                bEnabledSlitPair := FALSE;
             ELSE
                 eSlitPairState := E_SlitPairStates.eInit;
             END_IF
@@ -211,8 +211,8 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.eError: //ERROR STATE
         nAutoErrorResetCounter := 0;
-        bError := TRUE;
-        bEnabled := FALSE;
+        bErrorSlipPair := TRUE;
+        bEnabledSlitPair := FALSE;
         actStopAxes();
         IF bReset THEN
             bResetting := TRUE;
@@ -245,7 +245,7 @@ CASE eSlitPairState OF
         ELSE
             eSlitPairState := E_SlitPairStates.eInit;
             nAutoErrorResetCounter := 0;
-            bError := FALSE;
+            bErrorSlipPair := FALSE;
             bResetting := FALSE;
         END_IF
 END_CASE
@@ -380,7 +380,7 @@ END_IF
 //RESET - Use the reset from the virtual axes in order to reset the slits
 bReset := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
 
-IF NOT bError AND bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
+IF NOT bErrorSlipPair AND bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 
@@ -390,7 +390,7 @@ IF eSlitPairState = E_SlitPairStates.eError THEN
     stGapSize.stStatus.bError := TRUE;
 END_IF
 
-IF bEnabled AND NOT bBladesHomed THEN
+IF bEnabledSlitPair AND NOT bBladesHomed THEN
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 ]]></ST>
