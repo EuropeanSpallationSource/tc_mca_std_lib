@@ -249,7 +249,8 @@ CASE eSlitPairState OF
             bResetting := FALSE;
         END_IF
 END_CASE
-
+// At the end of the day: Which axes can not be moved indidually ?
+updateModeLocked();
 bReset := FALSE;
 ]]></ST>
     </Implementation>
@@ -781,5 +782,34 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
+    <Action Name="updateModeLocked" Id="{7ef63f9e-bcbb-0fb1-1be4-e204b646744c}">
+      <Implementation>
+        <ST><![CDATA[// Update the grouped status: An axis is not movable on its own
+
+IF NOT stGapSize.stStatus.bEnabled AND NOT stGapCentre.stStatus.bEnabled AND NOT stBladeNegative.stStatus.bEnabled AND NOT stBladePositive.stStatus.bEnabled THEN
+    stGapSize.stStatus.bModeLocked := FALSE;
+    stGapCentre.stStatus.bModeLocked := FALSE;
+    stBladeNegative.stStatus.bModeLocked := FALSE;
+    stBladePositive.stStatus.bModeLocked := FALSE;
+ELSIF bBladesCoupled THEN
+    stGapSize.stStatus.bModeLocked := FALSE;
+    stGapCentre.stStatus.bModeLocked := FALSE;
+    stBladeNegative.stStatus.bModeLocked := TRUE;
+    stBladePositive.stStatus.bModeLocked := TRUE;
+ELSIF bBladesUnCoupled THEN
+    stGapSize.stStatus.bModeLocked := TRUE;
+    stGapCentre.stStatus.bModeLocked := TRUE;
+    stBladeNegative.stStatus.bModeLocked := FALSE;
+    stBladePositive.stStatus.bModeLocked := FALSE;
+ELSE
+    stGapSize.stStatus.bModeLocked := TRUE;
+    stGapCentre.stStatus.bModeLocked := TRUE;
+    stBladeNegative.stStatus.bModeLocked := TRUE;
+    stBladePositive.stStatus.bModeLocked := TRUE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Action>
   </POU>
 </TcPlcObject>
