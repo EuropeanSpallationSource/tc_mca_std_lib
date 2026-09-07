@@ -93,41 +93,41 @@ mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
 mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
 mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
 
-mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bEcMasterError);
-mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bSlaveStateNotOP);
-mSetReset(stAlarmList := aAlarmList[29], bOk := NOT bSlaveLinkError);
-mSetReset(stAlarmList := aAlarmList[30], bOk := NOT bCycleTimeExceeded);
-mSetReset(stAlarmList := aAlarmList[31], bOk := NOT bCPUOverloaded);
+mSetReset(stAlarmList := aAlarmList[24], bOk := NOT bEcMasterError);
+mSetReset(stAlarmList := aAlarmList[25], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmList := aAlarmList[26], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bCPUOverloaded);
 
-mSetReset(stAlarmList := aAlarmList[34], bOk := bShutterOPFuse1_OK);
-mSetReset(stAlarmList := aAlarmList[35], bOk := bShutterOPFuse2_OK);
-mSetReset(stAlarmList := aAlarmList[36], bOk := bShutterOP24VDC1_OK);
-mSetReset(stAlarmList := aAlarmList[37], bOk := bShutterOPSPD_OK);
+mSetReset(stAlarmList := aAlarmList[31], bOk := bShutterOPFuse1_OK);
+mSetReset(stAlarmList := aAlarmList[32], bOk := bShutterOPFuse2_OK);
+mSetReset(stAlarmList := aAlarmList[33], bOk := bShutterOP24VDC1_OK);
+mSetReset(stAlarmList := aAlarmList[34], bOk := bShutterOPSPD_OK);
 
 
 aTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
     OR (aDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
 aDeadBandActive[1] := aTemperatureAlarm[1];
-mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[1]);
+mSetReset(stAlarmList := aAlarmList[20], bOk := NOT aTemperatureAlarm[1]);
 
 aTemperatureAlarm[2] :=
     nTemp2 > nMAX_TEMP
     OR (aDeadBandActive[2] AND nTemp2 > (nMAX_TEMP - nDeadBandTemperature));
 aDeadBandActive[2] := aTemperatureAlarm[2];
-mSetReset(stAlarmList := aAlarmList[24], bOk := NOT aTemperatureAlarm[2]);
+mSetReset(stAlarmList := aAlarmList[21], bOk := NOT aTemperatureAlarm[2]);
 
 aTemperatureAlarm[3] :=
     nTemp3 > nMAX_TEMP
     OR (aDeadBandActive[3] AND nTemp3 > (nMAX_TEMP - nDeadBandTemperature));
 aDeadBandActive[3] := aTemperatureAlarm[3];
-mSetReset(stAlarmList := aAlarmList[25], bOk := NOT aTemperatureAlarm[3]);
+mSetReset(stAlarmList := aAlarmList[22], bOk := NOT aTemperatureAlarm[3]);
 
 aTemperatureAlarm[4] :=
     nTemp4 > nMAX_TEMP
     OR (aDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
 aDeadBandActive[4] := aTemperatureAlarm[4];
-mSetReset(stAlarmList := aAlarmList[26], bOk := NOT aTemperatureAlarm[4]);
+mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[4]);
 ]]></ST>
       </Implementation>
     </Method>
