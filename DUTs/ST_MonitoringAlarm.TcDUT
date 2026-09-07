@@ -13,9 +13,9 @@ STRUCT
     eWarningLED: E_MonitorLed; //Only used for MCU400x test crates
     nErrorID: INT;
     sErrorMsg: STRING;
-	
-	//Motion Safety
-	eSafetyAcknowledgeLED: E_MonitorLed;
+
+    //Motion Safety
+    eSafetyAcknowledgeLED: E_MonitorLed;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
