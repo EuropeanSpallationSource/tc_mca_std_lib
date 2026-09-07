@@ -7,7 +7,6 @@ TYPE E_SlitPairStates :
 (
     eStartup := 0,
     eInit,
-    eInitClearGearing,
     eInitGearOutCheck,
     eCheckHomeStatus,
     eHomeBlades,

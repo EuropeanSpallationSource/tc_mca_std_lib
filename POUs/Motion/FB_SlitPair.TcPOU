@@ -94,12 +94,9 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.eInit:
         IF bAxesEnabled AND bEnableSlitPair THEN
-            eSlitPairState := E_SlitPairStates.eInitClearGearing;
+            actClearSlitGearing();
+            eSlitPairState := E_SlitPairStates.eInitGearOutCheck;
         END_IF
-
-    E_SlitPairStates.eInitClearGearing:
-        actClearSlitGearing();
-        eSlitPairState := E_SlitPairStates.eInitGearOutCheck;
 
     E_SlitPairStates.eInitGearOutCheck: //Check gearout completion
         IF bBladesUncoupled THEN
