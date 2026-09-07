@@ -4,7 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_ESSMonitoringBase
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
-	iSafetyProvider: I_SafetyProvider;
+    iSafetyProvider: I_SafetyProvider;
 END_VAR
 VAR_OUTPUT
     aErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
@@ -43,29 +43,26 @@ VAR
 (*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
 (*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
 (*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[20]*)(nErrorID:=511, sErrorMsg:='STO axis 1 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[21]*)(nErrorID:=502, sErrorMsg:='E-Stop 2 active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[22]*)(nErrorID:=512, sErrorMsg:='STO axis 2 active', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[23]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[24]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[25]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[26]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[27]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[28]*)(nErrorID:=102, sErrorMsg:='EtherCAT slave(s) not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
-(*[29]*)(nErrorID:=103, sErrorMsg:='EtherCAT slave(s) link fault', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
-(*[30]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[31]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[32]*)(nErrorID:=18, sErrorMsg:='MCB Piezo Controller Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[33]*)(nErrorID:=19, sErrorMsg:='MCB VFD Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[34]*)(nErrorID:=601, sErrorMsg:='Shutter OP Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[35]*)(nErrorID:=602, sErrorMsg:='Shutter OP Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[36]*)(nErrorID:=603, sErrorMsg:='Shutter OP DC OK Status from PS 24V is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[37]*)(nErrorID:=604, sErrorMsg:='Shutter OP SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[38]*)(nErrorID:=701, sErrorMsg:='EC Nodebox Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[39]*)(nErrorID:=702, sErrorMsg:='EC Nodebox Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[40]*)(nErrorID:=703, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[41]*)(nErrorID:=704, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[42]*)(nErrorID:=705, sErrorMsg:='EC Nodebox SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE)];
+(*[20]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
+(*[21]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
+(*[22]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
+(*[23]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
+(*[24]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
+(*[25]*)(nErrorID:=102, sErrorMsg:='EtherCAT slave(s) not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
+(*[26]*)(nErrorID:=103, sErrorMsg:='EtherCAT slave(s) link fault', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
+(*[27]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
+(*[28]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
+(*[29]*)(nErrorID:=18, sErrorMsg:='MCB Piezo Controller Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
+(*[30]*)(nErrorID:=19, sErrorMsg:='MCB VFD Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
+(*[31]*)(nErrorID:=601, sErrorMsg:='Shutter OP Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[32]*)(nErrorID:=602, sErrorMsg:='Shutter OP Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[33]*)(nErrorID:=603, sErrorMsg:='Shutter OP DC OK Status from PS 24V is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[34]*)(nErrorID:=604, sErrorMsg:='Shutter OP SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[35]*)(nErrorID:=701, sErrorMsg:='EC Nodebox Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[36]*)(nErrorID:=702, sErrorMsg:='EC Nodebox Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
+(*[37]*)(nErrorID:=703, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[38]*)(nErrorID:=704, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
+(*[39]*)(nErrorID:=705, sErrorMsg:='EC Nodebox SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE)];
 
 
     aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
@@ -95,10 +92,10 @@ VAR
     bEcSlaveSafeOP: BOOL;
     bEcSlaveError: BOOL;
     bEcDCnotInSync: BOOL;
-	
-	//Data from the safety controller
-	bEStopReleased: BOOL;
-	bSTOReleased: BOOL;
+
+    //Data from the safety controller
+    _EStopReleased: BOOL;
+    _STOReleased: BOOL;
 
     fbAcknowledgeButtonTrig: R_TRIG;
 END_VAR
@@ -192,7 +189,8 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[EStopReleased := _bEStopReleased;]]></ST>
+          <ST><![CDATA[EStopReleased := _bEStopReleased;
+]]></ST>
         </Implementation>
       </Get>
       <Set Name="Set" Id="{2d659b6b-6763-0d53-355a-5af1c0fcb381}">
@@ -200,7 +198,8 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_bEStopReleased := EStopReleased;]]></ST>
+          <ST><![CDATA[_bEStopReleased := EStopReleased;
+]]></ST>
         </Implementation>
       </Set>
     </Property>
