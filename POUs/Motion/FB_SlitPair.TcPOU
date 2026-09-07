@@ -24,7 +24,7 @@ VAR_INPUT
     fEncoderScaling: LREAL := 10000.0; //default scaling denominator of 10000
     bAutoHome: BOOL := FALSE; //Blades homing is automatically done if they are not homed
     bAnticollisionEnable: BOOL := TRUE; //Blades anticollision option, only for when blades are moved independently
-    fAnticollisionMargin: LREAL := 5.0; //Margin between the the blades for anticollision
+    fAnticollisionMargin: LREAL := 0.0; //Margin between the the blades for anticollision
 END_VAR
 VAR
     //Internal state machines
@@ -110,6 +110,8 @@ CASE eSlitPairState OF
             OR bHomingRequested
             OR (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute)
             OR (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute)
+            OR (stBladeNegative.stControl.eCommand = E_MotionFunctions.eHome AND stBladeNegative.stControl.bExecute)
+            OR (stBladePositive.stControl.eCommand = E_MotionFunctions.eHome AND stBladePositive.stControl.bExecute)
         THEN
             bHomingRequested := FALSE; //If homing fails do not automatically start homing again
             eSlitPairState := E_SlitPairStates.eHomeBlades;
@@ -171,7 +173,9 @@ CASE eSlitPairState OF
             eSlitPairState := E_SlitPairStates.eGearOutBlades;
         END_IF
         IF (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute) OR
-            (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute) THEN
+            (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute) OR
+            (stBladeNegative.stControl.eCommand = E_MotionFunctions.eHome AND stBladeNegative.stControl.bExecute) OR
+            (stBladePositive.stControl.eCommand = E_MotionFunctions.eHome AND stBladePositive.stControl.bExecute) THEN
             eSlitPairState := E_SlitPairStates.eGearOutBlades;
             bHomingRequested := TRUE;
         END_IF
