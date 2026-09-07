@@ -24,7 +24,7 @@ TYPE E_SlitPairStates :
     eErrorGearOutCheck,
     eErrorResetAxes,
     eErrorResetCheck
-);
+) UDINT;
 END_TYPE
 ]]></Declaration>
   </DUT>

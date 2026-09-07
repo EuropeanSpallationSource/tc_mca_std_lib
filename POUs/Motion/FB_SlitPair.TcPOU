@@ -29,6 +29,7 @@ END_VAR
 VAR
     //Internal state machines
     eSlitPairState: E_SlitPairStates := E_SlitPairStates.eStartup; //Sequence steps for operating the slits
+    nSlitPairState: UDINT := 0;
     eParameterCheck: E_AxisParamCheckState := E_AxisParamCheckState.eInit; //Sequence steps for checking params of virtual axes
     eSoftLimitsUpdate: E_SlitSoftLimits := E_SlitSoftLimits.eStart; //Sequence steps for update of soft limits for virtual axes
 
@@ -239,6 +240,8 @@ CASE eSlitPairState OF
 END_CASE
 
 bResetSlitPair := FALSE;
+nSlitPairState := eSlitPairState; // nSlitPairState is a copy for py-ads-monitor
+    
 ]]></ST>
     </Implementation>
     <Action Name="actAnticollision" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
