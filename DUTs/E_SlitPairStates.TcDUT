@@ -6,24 +6,25 @@
 TYPE E_SlitPairStates :
 (
     eStartup := 0,
-    eInit,
-    eInitGearOutCheck,
-    eCheckHomeStatus,
-    eHomeBlades,
-    eCheckBladeHomeComplete,
-    eHomeGap,
-    eCheckGapHomeComplete,
-    eGearInSlits,
-    eCheckGearInSlitsComplete,
-    eSlitsOperational,
-    eGearOutBlades,
-    eCheckGearOutComplete,
-    eResetCalibration,
-    eError,
-    eErrorGearOut,
-    eErrorGearOutCheck,
-    eErrorResetAxes,
-    eErrorResetCheck
+    eInit := 1,
+    //eInitClearGearing,
+    eInitGearOutCheck := 3,
+    eCheckHomeStatus := 4,
+    eHomeBlades := 5,
+    eCheckBladeHomeComplete := 6,
+    eHomeGap := 7,
+    eCheckGapHomeComplete := 8,
+    eGearInSlits := 9,
+    eCheckGearInSlitsComplete := 10,
+    eSlitsOperational := 11,
+    eGearOutBlades := 12,
+    eCheckGearOutComplete := 13,
+    eResetCalibration := 14,
+    eError := 15,
+    eErrorGearOut := 16,
+    eErrorGearOutCheck := 17,
+    eErrorResetAxes := 18,
+    eErrorResetCheck := 19
 ) UDINT;
 END_TYPE
 ]]></Declaration>
