@@ -88,6 +88,7 @@ actAnticollision(); //Handle blades anticollision
 
 CASE eSlitPairState OF
     E_SlitPairStates.eStartup:
+        actConfigSlitGearing();
         checkStartupParams(stGapSize, stGapCentre);
         IF eParameterCheck = E_AxisParamCheckState.eFinish THEN
             eSlitPairState := E_SlitPairStates.eInit;
@@ -332,6 +333,29 @@ stBladePositive.stControl.bExecute := TRUE;
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="actConfigSlitGearing" Id="{d886bc57-953c-0a77-023f-4c29a1eeeb1e}">
+      <Implementation>
+        <ST><![CDATA[//Setup multimaster gearing of negative blade
+stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
+stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
+stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
+stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
+stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
+stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+//Setup multimaster gearing of positive blade
+stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
+stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
+stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
+stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
+stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
+stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actEnableAxes" Id="{1879c38a-aecf-0e8c-2a58-959e274ebc63}">
       <Implementation>
         <ST><![CDATA[//Enable all axes when one of the virtual axes is enabled
@@ -401,24 +425,8 @@ stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitBwd OR stBladeP
       <Implementation>
         <ST><![CDATA[//Setup multimaster gearing of negative blade
 stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
-stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
-stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
-stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
-stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
-stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
-stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
-stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
-stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
 //Setup multimaster gearing of positive blade
 stBladePositive.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
-stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
-stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
-stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := iGapCentre;
-stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
-stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
-stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
-stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
-stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
 //Execute
 stBladeNegative.stControl.bExecute := TRUE;
 stBladePositive.stControl.bExecute := TRUE;
