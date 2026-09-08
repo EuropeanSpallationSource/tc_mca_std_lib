@@ -61,7 +61,7 @@ VAR
     fbGearOut: MC_GearOut;
     stMcStatusGearOut: ST_McStatus;
 
-    stMasterAxis: ST_GearAxis := (nIndex := 1, fRatio := 0);
+    stMasterAxis: ST_GearAxis := (nIndex := 0, fRatio := 0);
     nSlaveAxesIndex: UINT;
     nAxisIndex: UINT;
     nMultiMastersAxesIndex: UINT;
@@ -1651,6 +1651,22 @@ END_IF
 
 _stAxis.stStatus.bGeared := _stAxis.Axis.Status.Coupled;
 _stAxis.stStatus.bHomed := _stAxis.Axis.Status.Homed;
+FOR nAxisIndex := 1 TO GVL_APP.nAXIS_NUM DO
+    // Check if we are a possible master: our slaves must be homed
+    IF _stAxis.stStatus.bHomed THEN
+        // Check the first 2 axes only
+        // TODO 1..nMULTI_MASTER_MAX_AXES
+        IF GVL.astAxes[nAxisIndex].stConfig.astMultiMasterAxis[1].nIndex = GVL.iAxis AND
+           NOT GVL.astAxes[nAxisIndex].stStatus.bHomed THEN
+            _stAxis.stStatus.bHomed := FALSE;
+        END_IF
+        IF GVL.astAxes[nAxisIndex].stConfig.astMultiMasterAxis[2].nIndex = GVL.iAxis AND
+           NOT GVL.astAxes[nAxisIndex].stStatus.bHomed THEN
+            _stAxis.stStatus.bHomed := FALSE;
+        END_IF
+    END_IF
+END_FOR
+
 _stAxis.stStatus.bMoving := _stAxis.Axis.Status.Moving;
 _stAxis.stStatus.fActVelocity := _stAxis.Axis.NcToPlc.ActVelo;
 _stAxis.stStatus.bMovingForward := _stAxis.Axis.Status.PositiveDirection;
