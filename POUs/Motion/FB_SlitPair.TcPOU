@@ -242,7 +242,7 @@ END_CASE
 
 bResetSlitPair := FALSE;
 nSlitPairState := eSlitPairState; // nSlitPairState is a copy for py-ads-monitor
-    
+
 ]]></ST>
     </Implementation>
     <Action Name="actAnticollision" Id="{64063538-5b16-04d7-1d46-c493a7cc7a35}">
@@ -344,6 +344,8 @@ stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
 stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
 stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
 stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+stBladeNegative.stConfig.anSlaveAxisBusyMoving[1] := iGapSize;
+stBladeNegative.stConfig.anSlaveAxisBusyMoving[2] := iGapCentre;
 //Setup multimaster gearing of positive blade
 stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := iGapSize;
 stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
@@ -353,6 +355,8 @@ stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := iGapCentre;
 stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
 stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := iGapCentre;
 stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+stBladePositive.stConfig.anSlaveAxisBusyMoving[1] := iGapSize;
+stBladePositive.stConfig.anSlaveAxisBusyMoving[2] := iGapCentre;
 ]]></ST>
       </Implementation>
     </Action>

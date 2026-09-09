@@ -50,6 +50,7 @@ STRUCT
     astMultiMasterAxis: ARRAY [1..4] OF ST_GearAxis; //Master axes for multi-master configuration
     astMultiMasterAxisLatched: ARRAY [1..4] OF ST_GearAxis; //A kind of readback since one doesn't exist in AXIS_REF
     afMultiSlaveAxisRatio: ARRAY [1..GVL_APP.nAXIS_NUM] OF LREAL; //Slave axis ratios for multi-master setup
+    anSlaveAxisBusyMoving: ARRAY [1..GVL_APP.nAXIS_NUM] OF UINT; // Possible slave axes: When they are busy/moving, I am
 
     // Read only MC parameters
     bReadMcParametersValid: BOOL:= FALSE; //Indicates validity of MC parameter readings
