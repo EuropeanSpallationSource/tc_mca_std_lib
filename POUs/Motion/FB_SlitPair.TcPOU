@@ -172,19 +172,17 @@ CASE eSlitPairState OF
     E_SlitPairStates.eSlitsOperational: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
         checkSoftLimits(stGapSize, stGapCentre); //Soft limits are updated when axes are stopped
         IF (NOT bBladesCoupled OR NOT bEnableSlitPair) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
-            eSlitPairState := E_SlitPairStates.eGearOutBlades;
+            actClearSlitGearing();
+            eSlitPairState := E_SlitPairStates.eCheckGearOutComplete;
         END_IF
         IF (stGapSize.stControl.eCommand = E_MotionFunctions.eHome AND stGapSize.stControl.bExecute) OR
             (stGapCentre.stControl.eCommand = E_MotionFunctions.eHome AND stGapCentre.stControl.bExecute) OR
             (stBladeNegative.stControl.eCommand = E_MotionFunctions.eHome AND stBladeNegative.stControl.bExecute) OR
             (stBladePositive.stControl.eCommand = E_MotionFunctions.eHome AND stBladePositive.stControl.bExecute) THEN
-            eSlitPairState := E_SlitPairStates.eGearOutBlades;
+            actClearSlitGearing();
+            eSlitPairState := E_SlitPairStates.eCheckGearOutComplete;
             bHomingRequested := TRUE;
         END_IF
-
-    E_SlitPairStates.eGearOutBlades: //Clear any residual gearing
-        actClearSlitGearing();
-        eSlitPairState := E_SlitPairStates.eCheckGearOutComplete;
 
     E_SlitPairStates.eCheckGearOutComplete: //Check gearing cleared
         IF bBladesUncoupled THEN
