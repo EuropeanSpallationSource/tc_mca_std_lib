@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_Safety" Id="{a52cb188-5548-0f30-0b0b-19989305c2e3}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 2^Output'}
+    bOpticalCaveLED AT %Q*: BOOL; //Optical Cave
+
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 3^Output'}
+    bExperimentCaveLED AT %Q*: BOOL; //Expirement Cave
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

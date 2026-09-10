@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_PulseGenerator" Id="{ecd95264-9cbb-04ca-0c29-fab3421e79eb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PulseGenerator
+VAR_INPUT
+    bEnable: BOOL; //Enables custom flash sequence
+    tFlashPeriod: TIME := T#1S; //Total time for one complete flash group
+    tOffTime: TIME := T#100MS; //Time lamp stays OFF between flashes
+    tOnTime: TIME := T#100MS; //Time lamp stays ON for each flash
+    nFlashCount: UINT := 1; //Number of flashes per flash group
+END_VAR
+
+VAR_OUTPUT
+    bOut: BOOL; //Flash lamp output
+END_VAR
+
+VAR
+    fbTimer: TON; //Internal flash timer
+    bTimerRun: BOOL; //Timer phase active
+    bInGap: BOOL; //Currently in gap after flash group
+    nFlashCounter: UINT; //Completed flashes in current group
+    tActiveTime: TIME; //Current active timer preset
+    tUsedFlashTime: TIME; //Total ON/OFF time used by flash group
+    tGapTime: TIME; //Remaining time between flash groups
+    nIndex: UINT; //Loop index
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Reset when disabled
+IF NOT bEnable OR nFlashCount = 0 THEN
+    fbTimer(IN := FALSE, PT := T#0MS);
+    bOut := FALSE;
+    bTimerRun := FALSE;
+    bInGap := FALSE;
+    nFlashCounter := 0;
+    RETURN;
+END_IF
+
+//Calculate total time used by the configured flash group
+tUsedFlashTime := T#0MS;
+
+FOR nIndex := 1 TO nFlashCount DO
+    tUsedFlashTime := tUsedFlashTime + tOnTime + tOffTime;
+END_FOR
+
+//Calculate gap time after the flash group
+IF tFlashPeriod > tUsedFlashTime THEN
+    tGapTime := tFlashPeriod - tUsedFlashTime;
+ELSE
+    tGapTime := tOffTime; //Fallback gap if configured period is too short
+END_IF
+
+//Select active timer phase
+IF bInGap THEN
+    tActiveTime := tGapTime;
+    bOut := FALSE;
+ELSIF bOut THEN
+    tActiveTime := tOnTime;
+ELSE
+    tActiveTime := tOffTime;
+END_IF
+
+//Start new timer phase
+IF NOT bTimerRun THEN
+    bTimerRun := TRUE;
+    fbTimer(IN := FALSE, PT := tActiveTime);
+END_IF
+
+//Run timer
+fbTimer(IN := TRUE, PT := tActiveTime);
+
+//Phase complete
+IF fbTimer.Q THEN
+    fbTimer(IN := FALSE, PT := tActiveTime);
+    bTimerRun := FALSE;
+
+    IF bInGap THEN
+        bInGap := FALSE;
+        nFlashCounter := 0;
+        bOut := TRUE; //Start next flash group directly after gap
+    ELSE
+        IF bOut THEN
+            bOut := FALSE;
+            nFlashCounter := nFlashCounter + 1;
+
+            IF nFlashCounter >= nFlashCount THEN
+                bInGap := TRUE;
+            END_IF
+        ELSE
+            bOut := TRUE;
+        END_IF
+    END_IF
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="I_SafetyProvider" Id="{75cc1dc0-1fe0-0a83-16f9-f86bc902e86f}">
+    <Declaration><![CDATA[INTERFACE I_SafetyProvider
+
+
+]]></Declaration>
+    <Property Name="P_EStopOK" Id="{2f4df65d-4a99-0047-0aa9-2b7b567f1a9c}">
+      <Declaration><![CDATA[PROPERTY P_EStopOK : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{f3af02b7-4557-0a7f-3fff-5ff38992b042}">
+        <Declaration><![CDATA[
+]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="P_ReadFromSafetyController" Id="{168846af-f985-0ee8-3e0d-dcdf7288878f}">
+      <Declaration><![CDATA[PROPERTY P_ReadFromSafetyController : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{eafce056-75cc-0208-2233-eff73018b5e1}">
+        <Declaration><![CDATA[
+]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="P_STO_OK" Id="{dd0f65fe-28b6-029c-3b57-94670f527634}">
+      <Declaration><![CDATA[PROPERTY P_STO_OK : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{238f8237-b7a4-0e8b-1037-652a99d7db86}">
+        <Declaration><![CDATA[
+]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

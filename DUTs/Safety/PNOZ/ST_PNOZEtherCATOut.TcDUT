@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATOut" Id="{2f65ec2d-5561-0256-2e54-58b3e165bd48}">
+    <Declaration><![CDATA[//Formatted PLC -> PNOZ EtherCAT output data mapped to the raw %Q* process image.
+TYPE ST_PNOZEtherCATOut :
+STRUCT
+    stMCCStatusOut: ST_MCCStatusOut; //Output Byte 00..01
+    stMCC_CustomStatusOut: ST_MCC_CustomStatusOut; //Output Byte 02..03
+    aSafetyFunctionOut: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut; //Output Byte 04..15
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

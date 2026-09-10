@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyIn" Id="{0d1123b7-648b-0e04-09b5-2fa227393647}">
+    <Declaration><![CDATA[TYPE ST_SafetyIn :
+STRUCT
+    stMCCStatusIn: ST_MCCStatusIn;
+    stMCC_CustomStatusIn: ST_MCC_CustomStatusIn;
+    astSafetyFunctionIn: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn;
+    stLEDState: ST_LEDState;
+    stPNOZCommDiag: ST_PNOZCommDiag;
+    astTechnosoftMotionError: ARRAY[1..GVL_APP.cNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

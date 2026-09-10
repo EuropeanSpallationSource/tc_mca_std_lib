@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyFunctionOut" Id="{d225f0e9-f4be-0268-2036-d232ca0275b9}">
+    <Declaration><![CDATA[TYPE ST_SafetyFunctionOut :
+STRUCT
+    bitDiagOk: BIT; //OK (Where diagnostics need TO be checked, i.e. drive errors)
+    bitOutput: BIT; //Where PLC checks consistency (i.e. STO)
+    bitRequest: BIT;
+    bitDummy: BIT; //Not in use
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
