@@ -4,7 +4,8 @@
     <Declaration><![CDATA[FUNCTION F_TechnosoftErrorActive : BOOL
 VAR_INPUT
      stError: ST_TechnosoftMotionError;
-END_VAR]]></Declaration>
+END_VAR
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[F_TechnosoftErrorActive :=
     stError.bit0_EtherCATCommunicationError
