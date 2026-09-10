@@ -59,6 +59,14 @@ VAR
     fbResetCalibrationNegativeBlade: MC_Home;
     fbResetCalibrationGapSize: MC_Home;
     fbResetCalibrationGapCentre: MC_Home;
+    bSavedExecuteBladeNegative: BOOL := FALSE;
+    bSavedExecuteBladePositive: BOOL := FALSE;
+    bSavedExecuteGapSize: BOOL := FALSE;
+    bSavedExecuteGapCentre: BOOL := FALSE;
+    eSavedCommandBladeNegative: E_MotionFunctions;
+    eSavedCommandBladePositive: E_MotionFunctions;
+    eSavedCommandGapSize: E_MotionFunctions;
+    eSavedCommandGapCentre: E_MotionFunctions;
 END_VAR
 VAR CONSTANT
     cSoftLimitDelta: LREAL := 0.05; //Delta between the softlimits of physical and virtual axes
@@ -171,6 +179,30 @@ CASE eSlitPairState OF
 
     E_SlitPairStates.eSlitsOperational: //SLITS OPERATIONAL - Monitor for any gear outs and re-gear when no busy blades
         checkSoftLimits(stGapSize, stGapCentre); //Soft limits are updated when axes are stopped
+        IF stBladeNegative.stControl.bExecute THEN
+            IF NOT bSavedExecuteBladeNegative THEN
+                bSavedExecuteBladeNegative := TRUE;
+                eSavedCommandBladeNegative := stBladeNegative.stControl.eCommand;
+                stBladeNegative.stControl.bExecute := FALSE;
+            END_IF
+            stGapSize.stControl.bExecute := FALSE;
+            stGapSize.stControl.bEnable := FALSE;
+            stGapCentre.stControl.bExecute := FALSE;
+            stGapCentre.stControl.bEnable := FALSE;
+            bEnableSlitPair := FALSE;
+        END_IF
+        IF stBladePositive.stControl.bExecute THEN
+            IF NOT bSavedExecuteBladePositive THEN
+                bSavedExecuteBladePositive := TRUE;
+                eSavedCommandBladePositive := stBladePositive.stControl.eCommand;
+                stBladePositive.stControl.bExecute := FALSE;
+            END_IF
+            stGapSize.stControl.bExecute := FALSE;
+            stGapSize.stControl.bEnable := FALSE;
+            stGapCentre.stControl.bExecute := FALSE;
+            stGapCentre.stControl.bEnable := FALSE;
+            bEnableSlitPair := FALSE;
+        END_IF
         IF (NOT bBladesCoupled OR NOT bEnableSlitPair) AND NOT stBladeNegative.stStatus.bBusy AND NOT stBladePositive.stStatus.bBusy THEN
             actClearSlitGearing();
             eSlitPairState := E_SlitPairStates.eCheckGearOutComplete;
@@ -190,6 +222,16 @@ CASE eSlitPairState OF
                 eSlitPairState := E_SlitPairStates.eResetCalibration;
             ELSE
                 eSlitPairState := E_SlitPairStates.eInit;
+                IF bSavedExecuteBladeNegative THEN
+                    bSavedExecuteBladeNegative := FALSE;
+                    stBladeNegative.stControl.eCommand := eSavedCommandBladeNegative;
+                    stBladeNegative.stControl.bExecute := TRUE;
+                END_IF
+                IF bSavedExecuteBladePositive THEN
+                    bSavedExecuteBladePositive := FALSE;
+                    stBladePositive.stControl.eCommand := eSavedCommandBladePositive;
+                    stBladePositive.stControl.bExecute := TRUE;
+                END_IF
             END_IF
         END_IF
 
@@ -375,8 +417,10 @@ END_IF
 rtrigVirtualAxisDisable(CLK := NOT stGapSize.stControl.bEnable OR NOT stGapCentre.stControl.bEnable);
 
 IF rtrigVirtualAxisDisable.Q THEN
-    stBladePositive.stControl.bEnable := FALSE;
-    stBladeNegative.stControl.bEnable := FALSE;
+    IF NOT bSavedExecuteBladeNegative AND NOT bSavedExecuteBladePositive THEN
+        stBladePositive.stControl.bEnable := FALSE;
+        stBladeNegative.stControl.bEnable := FALSE;
+    END_IF
     stGapSize.stControl.bEnable := FALSE;
     stGapCentre.stControl.bEnable := FALSE;
 END_IF
