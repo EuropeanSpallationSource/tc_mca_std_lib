@@ -408,24 +408,28 @@ VAR_INST
     pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
     pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
 
-
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
-
-    fbEtherCATAlarmDelayTON: TON;
-    bStartEtherCATdelayTON: BOOL := FALSE;
-    bEtherCATInitialized: BOOL := FALSE;
+    bFirstReadSlaveConfigDone: BOOL := FALSE;
+    bErrorZeroEcSlavesFound: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
-TON_UpdateGetEcConfSlaves(IN:=NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError), PT:=T#100MS);
+
+fbGetEcConfSlaves(
+    sNetId:=nEcMasterNetId,
+    pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
+    cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
+    bExecute := NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError));
+nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Swap buffer if read out is finished
-IF TON_UpdateGetEcConfSlaves.Q THEN
+IF NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError) THEN
+    bFirstReadSlaveConfigDone := TRUE;
     IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
         pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
         pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
@@ -434,14 +438,6 @@ IF TON_UpdateGetEcConfSlaves.Q THEN
         pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
     END_IF
 END_IF
-
-fbGetEcConfSlaves(
-    sNetId:=nEcMasterNetId,
-    pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
-    cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
-    bExecute := TON_UpdateGetEcConfSlaves.Q);
-
-nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Check ethercat master device state
 bEcLinkError := _nEcMasterDevState.0;
@@ -467,14 +463,7 @@ fbGetEcSlaveStates(
     bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
-fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=MAX(nActualEcSlaves * T#30MS, T#3S));
-IF fbEtherCATAlarmDelayTON.Q THEN
-    bStartEtherCATdelayTON := FALSE;
-    bEtherCATInitialized := TRUE;
-END_IF
-
-IF NOT bEtherCATInitialized THEN
-    bStartEtherCATdelayTON := TRUE;
+IF NOT bFirstReadSlaveConfigDone THEN
     RETURN;
 END_IF
 
@@ -487,7 +476,8 @@ aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
 aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
 IF nActualEcSlaves = 0 THEN
-    IF fbEtherCATAlarmDelayTON.Q THEN
+    IF NOT bErrorZeroEcSlavesFound THEN
+        bErrorZeroEcSlavesFound := TRUE;
         ADSLOGSTR(
             msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
             msgFmtStr := 'FB_ESSMonitoringBase Error: %s',
