@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_LEDState" Id="{f261f142-fde3-0208-2395-07dc6293304d}">
+    <Declaration><![CDATA[//LED state of the safety controller PNOZmulti 2 B0
+TYPE ST_LEDState :
+STRUCT
+    bLED_OFAULT: BIT; //OFAULT LED is lit or flashing, bit 1
+    bLED_IFAULT: BIT; //IFAULT LED is lit or flashing, bit 2
+    bLED_FAULT: BIT; //FAULT LED is lit or flashing, bit 3
+    bLED_DIAG: BIT; //DIAG LED is lit or flashing, bit 4
+    bLED_RUN: BIT; //RUN LED is lit, bit 5
+    bReserved6: BIT; //Reserved
+    bReserved7: BIT; //Reserved
+    bReserved8: BIT; //Reserved
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
