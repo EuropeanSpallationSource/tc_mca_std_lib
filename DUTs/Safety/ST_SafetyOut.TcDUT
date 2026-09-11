@@ -5,7 +5,7 @@
 STRUCT
     stMCCStatusOut: ST_MCCStatusOut;
     stMCC_CustomStatusOut: ST_MCC_CustomStatusOut;
-    astSafetyFunctionOut: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut;
+    astSafetyFunctionOut: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut;
 
     bSTOActive: BOOL;
     bTechnosoftMotionErrors: BOOL;

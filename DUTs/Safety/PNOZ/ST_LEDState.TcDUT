@@ -4,14 +4,14 @@
     <Declaration><![CDATA[//LED state of the safety controller PNOZmulti 2 B0
 TYPE ST_LEDState :
 STRUCT
-    bit0_LED_OFAULT: BIT; //OFAULT LED is lit or flashing
-    bit1_LED_IFAULT: BIT; //IFAULT LED is lit or flashing
-    bit2_LED_FAULT: BIT; //FAULT LED is lit or flashing
-    bit3_LED_DIAG: BIT; //DIAG LED is lit or flashing
-    bit4_LED_RUN: BIT; //RUN LED is lit
-    bit5_Reserved: BIT; //Reserved
-    bit6_Reserved: BIT; //Reserved
-    bit7_Reserved: BIT; //Reserved
+    bLED_OFAULT: BIT; //OFAULT LED is lit or flashing, bit 1
+    bLED_IFAULT: BIT; //IFAULT LED is lit or flashing, bit 2
+    bLED_FAULT: BIT; //FAULT LED is lit or flashing, bit 3
+    bLED_DIAG: BIT; //DIAG LED is lit or flashing, bit 4
+    bLED_RUN: BIT; //RUN LED is lit, bit 5
+    bReserved6: BIT; //Reserved
+    bReserved7: BIT; //Reserved
+    bReserved8: BIT; //Reserved
 END_STRUCT
 END_TYPE
 ]]></Declaration>

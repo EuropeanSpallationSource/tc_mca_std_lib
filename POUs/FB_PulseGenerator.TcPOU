@@ -15,7 +15,7 @@ VAR_OUTPUT
 END_VAR
 
 VAR
-    fbTimer: TON; //Internal flash timer
+    tonTimer: TON; //Internal flash timer
     bTimerRun: BOOL; //Timer phase active
     bInGap: BOOL; //Currently in gap after flash group
     nFlashCounter: UINT; //Completed flashes in current group
@@ -28,7 +28,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[//Reset when disabled
 IF NOT bEnable OR nFlashCount = 0 THEN
-    fbTimer(IN := FALSE, PT := T#0MS);
+    tonTimer(IN := FALSE, PT := T#0MS);
     bOut := FALSE;
     bTimerRun := FALSE;
     bInGap := FALSE;
@@ -63,15 +63,15 @@ END_IF
 //Start new timer phase
 IF NOT bTimerRun THEN
     bTimerRun := TRUE;
-    fbTimer(IN := FALSE, PT := tActiveTime);
+    tonTimer(IN := FALSE, PT := tActiveTime);
 END_IF
 
 //Run timer
-fbTimer(IN := TRUE, PT := tActiveTime);
+tonTimer(IN := TRUE, PT := tActiveTime);
 
 //Phase complete
-IF fbTimer.Q THEN
-    fbTimer(IN := FALSE, PT := tActiveTime);
+IF tonTimer.Q THEN
+    tonTimer(IN := FALSE, PT := tActiveTime);
     bTimerRun := FALSE;
 
     IF bInGap THEN

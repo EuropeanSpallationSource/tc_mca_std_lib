@@ -6,7 +6,7 @@ TYPE ST_PNOZEtherCATIn :
 STRUCT
     stMCCStatusIn: ST_MCCStatusIn; //Input Byte 00..01
     stMCC_CustomStatusIn: ST_MCC_CustomStatusIn; //Input Byte 02..03
-    astSafetyFunctionIn: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn; //Input Byte 04..15
+    astSafetyFunctionIn: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn; //Input Byte 04..15
     stLEDState: ST_LEDState; //Input Byte 16
 END_STRUCT
 END_TYPE

@@ -6,7 +6,7 @@ TYPE ST_PNOZEtherCATOut :
 STRUCT
     stMCCStatusOut: ST_MCCStatusOut; //Output Byte 00..01
     stMCC_CustomStatusOut: ST_MCC_CustomStatusOut; //Output Byte 02..03
-    aSafetyFunctionOut: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut; //Output Byte 04..15
+    astSafetyFunctionOut: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut; //Output Byte 04..15
 END_STRUCT
 END_TYPE
 ]]></Declaration>

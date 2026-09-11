@@ -40,7 +40,7 @@ VAR
     //Motion error registers from the Technosoft drives
     {attribute 'TcLinkTo' := '[1] := TIID^Device 2 (EtherCAT)^TA701 (iPOS8020 BX-CAT)^Transmit PDO 3 mapping parameters^Motion Error Register;
                               [2] := TIID^Device 2 (EtherCAT)^TA702 (iPOS8020 BX-CAT)^Transmit PDO 3 mapping parameters^Motion Error Register'}
-    astTechnosoftMotionError AT %I*: ARRAY[1..GVL_APP.cNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
+    astTechnosoftMotionError AT %I*: ARRAY[1..GVL_APP.nNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
 
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 3^Output'}
     bSafetyAcknowledgeLED AT %Q*: BOOL;
@@ -73,11 +73,11 @@ IF NOT bEnable OR bWcState THEN
         tHeartbeatPeriod := tHEARTBEAT_PERIOD,
         fHeartbeatPW := cHEARTBEAT_PW,
         tWatchdogTime := tMCC_WATCHDOG_TIME,
-        bHeartbeatOut => stSafety.stSafetyOut.stMCCStatusOut.bit0_Heartbeat,
+        bHeartbeatOut => stSafety.stSafetyOut.stMCCStatusOut.bHeartbeat,
         bWatchdogFault => bMCCWatchdogFault
     ); //Reset heartbeat generation and watchdog memory
 
-    stSafety.stSafetyOut.stMCCStatusOut.bit3_ErrAck := FALSE; //Clear fault-acknowledge command
+    stSafety.stSafetyOut.stMCCStatusOut.bErrAck := FALSE; //Clear fault-acknowledge command
 
     fbSafetyAckLedPulse(
         bEnable := FALSE,
@@ -99,6 +99,19 @@ mHandleMotionPermission();
 
 ]]></ST>
     </Implementation>
+    <Property Name="EStopOK" Id="{091ff546-d8eb-0d5e-357d-a3cab02108c2}">
+      <Declaration><![CDATA[PROPERTY EStopOK : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{2846d572-a688-01b9-3c1a-4bb8c129c7da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EStopOK := _bEStopOK;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="mCheckMCCHeartbeat" Id="{92bf9997-b495-087d-1b0e-cb488d1974e1}">
       <Declaration><![CDATA[METHOD mCheckMCCHeartbeat : BOOL
 VAR_INPUT
@@ -202,17 +215,17 @@ END_VAR
       <Implementation>
         <ST><![CDATA[bMCC_OK := mCheckMCCHeartbeat(
     bEnable := TRUE,
-    bHeartbeatIn := stSafetyData.stSafetyIn.stMCCStatusIn.bit0_Heartbeat,
+    bHeartbeatIn := stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat,
     tTaskCycleTime := tPLC_CYCLE_TIME,
     tHeartbeatPeriod := tHEARTBEAT_PERIOD,
     fHeartbeatPW := cHEARTBEAT_PW,
     tWatchdogTime := tMCC_WATCHDOG_TIME,
-    bHeartbeatOut => stSafetyData.stSafetyOut.stMCCStatusOut.bit0_Heartbeat,
+    bHeartbeatOut => stSafetyData.stSafetyOut.stMCCStatusOut.bHeartbeat,
     bWatchdogFault => bMCCWatchdogFault
 );
 
 bAxisEnableAllowed :=
-    stSafetyData.stSafetyIn.stMCCStatusIn.bit1_EStopOK
+    stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK
     AND bMCC_OK;
 ]]></ST>
       </Implementation>
@@ -228,18 +241,18 @@ END_VAR
 stSafetyData.stSafetyIn.stMCC_CustomStatusIn := stPNOZEtherCATIn.stMCC_CustomStatusIn;
 stSafetyData.stSafetyIn.stLEDState := stPNOZEtherCATIn.stLEDState;
 
-FOR i := 1 TO GVL_APP.cNUM_OF_SAFETY_FUNCTIONS DO
+FOR i := 1 TO GVL_APP.nNUM_OF_SAFETY_FUNCTIONS DO
     stSafetyData.stSafetyIn.astSafetyFunctionIn[i] := stPNOZEtherCATIn.astSafetyFunctionIn[i];
 END_FOR
 
-IF GVL_APP.cNUM_OF_TECHNOSOFT <> 0 THEN
-    FOR i := 1 TO GVL_APP.cNUM_OF_TECHNOSOFT DO
+IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
+    FOR i := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
         stSafetyData.stSafetyIn.astTechnosoftMotionError[i] :=
             astTechnosoftMotionError[i];
     END_FOR
 END_IF
 
-_bEStopOK := stSafetyData.stSafetyIn.stMCCStatusIn.bit1_EStopOK;
+_bEStopOK := stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK;
 
 ]]></ST>
       </Implementation>
@@ -252,21 +265,21 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[mTechnosoftErrorActive :=
-    stError.bit0_EtherCATCommunicationError
-    OR stError.bit1_ShortCircuit
-    OR stError.bit2_InvalidSetupData
-    OR stError.bit3_ControlError
-    OR stError.bit4_CommunicationError
-    OR stError.bit5_FeedbackError
-    OR stError.bit6_PositiveLimitSwitchActive
-    OR stError.bit7_NegativeLimitSwitchActive
-    OR stError.bit8_OverCurrent
-    OR stError.bit9_I2TProtection
-    OR stError.bit10_MotorOverTemperature
-    OR stError.bit11_DriveOverTemperature
-    OR stError.bit12_OverVoltage
-    OR stError.bit13_UnderVoltage
-    OR stError.bit14_CommandError;
+    stError.bEtherCATCommunicationError
+    OR stError.bShortCircuit
+    OR stError.bInvalidSetupData
+    OR stError.bControlError
+    OR stError.bCommunicationError
+    OR stError.bFeedbackError
+    OR stError.bPositiveLimitSwitchActive
+    OR stError.bNegativeLimitSwitchActive
+    OR stError.bOverCurrent
+    OR stError.bI2TProtection
+    OR stError.bMotorOverTemperature
+    OR stError.bDriveOverTemperature
+    OR stError.bOverVoltage
+    OR stError.bUnderVoltage
+    OR stError.bCommandError;
 ]]></ST>
       </Implementation>
     </Method>
@@ -286,11 +299,11 @@ END_VAR
 stSafetyData.stSafetyOut.bSTOActive := FALSE;
 stSafetyData.stSafetyOut.bTechnosoftMotionErrors := FALSE;
 
-IF GVL_APP.cNUM_OF_TECHNOSOFT <> 0 THEN
-    FOR nAxes := 1 TO GVL_APP.cNUM_OF_TECHNOSOFT DO
+IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
+    FOR nAxes := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
         stSafetyData.stSafetyOut.bSTOActive :=
             stSafetyData.stSafetyOut.bSTOActive
-            OR stSafetyData.stSafetyIn.astTechnosoftMotionError[nAxes].bit15_STOActive;
+            OR stSafetyData.stSafetyIn.astTechnosoftMotionError[nAxes].bSTOActive;
 
         stSafetyData.stSafetyOut.bTechnosoftMotionErrors :=
             stSafetyData.stSafetyOut.bTechnosoftMotionErrors
@@ -298,11 +311,11 @@ IF GVL_APP.cNUM_OF_TECHNOSOFT <> 0 THEN
     END_FOR
 END_IF
 
-IF GVL_APP.cNUM_OF_TECHNOSOFT <> 0 THEN
-    stSafetyData.stSafetyOut.stMCCStatusOut.bit6_STOFbk :=
+IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
+    stSafetyData.stSafetyOut.stMCCStatusOut.bSTOFbk :=
         stSafetyData.stSafetyOut.bSTOActive; //TRUE when any Technosoft drive reports STO active
 
-    stSafetyData.stSafetyOut.stMCCStatusOut.bit7_STO_OK :=
+    stSafetyData.stSafetyOut.stMCCStatusOut.bSTO_OK :=
         NOT stSafetyData.stSafetyOut.bTechnosoftMotionErrors; //Preserve the existing no-motion-error feedback
 END_IF
 ]]></ST>
@@ -316,11 +329,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Fault feedback to safety controller
-stSafety.stSafetyOut.stMCCStatusOut.bit3_ErrAck :=
-    stSafety.stSafetyIn.stMCCStatusIn.bit3_Fault;
+stSafety.stSafetyOut.stMCCStatusOut.bErrAck :=
+    stSafety.stSafetyIn.stMCCStatusIn.bFault;
 
 fbSafetyAckLedPulse(
-    bEnable := stSafety.stSafetyIn.stMCCStatusIn.bit3_Fault,
+    bEnable := stSafety.stSafetyIn.stMCCStatusIn.bFault,
     tFlashPeriod := T#1S,
     tOffTime := T#500MS,
     tOnTime := T#500MS,
@@ -339,7 +352,7 @@ END_VAR
         <ST><![CDATA[stPNOZEtherCATOut.stMCCStatusOut := stSafetyData.stSafetyOut.stMCCStatusOut;
 stPNOZEtherCATOut.stMCC_CustomStatusOut := stSafetyData.stSafetyOut.stMCC_CustomStatusOut;
 
-FOR i := 1 TO GVL_APP.cNUM_OF_SAFETY_FUNCTIONS DO
+FOR i := 1 TO GVL_APP.nNUM_OF_SAFETY_FUNCTIONS DO
     stPNOZEtherCATOut.aSafetyFunctionOut[i] := stSafetyData.stSafetyOut.astSafetyFunctionOut[i];
 END_FOR
 
@@ -349,41 +362,28 @@ _bSTO_OK := stSafetyData.stSafetyOut.bSTOActive;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="P_EStopOK" Id="{091ff546-d8eb-0d5e-357d-a3cab02108c2}">
-      <Declaration><![CDATA[PROPERTY P_EStopOK : BOOL
-]]></Declaration>
-      <Get Name="Get" Id="{2846d572-a688-01b9-3c1a-4bb8c129c7da}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[P_EStopOK := _bEStopOK;
-]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="P_ReadFromSafetyController" Id="{344a7c9b-f2eb-0925-0d9c-4061d58174aa}">
-      <Declaration><![CDATA[PROPERTY P_ReadFromSafetyController : BOOL
+    <Property Name="ReadFromSafetyController" Id="{344a7c9b-f2eb-0925-0d9c-4061d58174aa}">
+      <Declaration><![CDATA[PROPERTY ReadFromSafetyController : BOOL
 ]]></Declaration>
       <Get Name="Get" Id="{63255920-86e1-0734-0991-0089eb4d820b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[P_ReadFromSafetyController :=_bReadFromSafetyController;
+          <ST><![CDATA[ReadFromSafetyController :=_bReadFromSafetyController;
 ]]></ST>
         </Implementation>
       </Get>
     </Property>
-    <Property Name="P_STO_OK" Id="{d243bd90-4f74-01d6-15d5-b8656588b41a}">
-      <Declaration><![CDATA[PROPERTY P_STO_OK : BOOL
+    <Property Name="STO_OK" Id="{d243bd90-4f74-01d6-15d5-b8656588b41a}">
+      <Declaration><![CDATA[PROPERTY STO_OK : BOOL
 ]]></Declaration>
       <Get Name="Get" Id="{6aaebc09-0854-0576-2784-59a76f893781}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[P_STO_OK := _bSTO_OK;
+          <ST><![CDATA[STO_OK := _bSTO_OK;
 
 ]]></ST>
         </Implementation>

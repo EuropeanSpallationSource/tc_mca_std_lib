@@ -3,22 +3,22 @@
   <DUT Name="ST_TechnosoftMotionError" Id="{90598514-2df2-078a-0a1a-d8b0c6c1a1f5}">
     <Declaration><![CDATA[TYPE ST_TechnosoftMotionError :
 STRUCT
-    bit0_EtherCATCommunicationError: BIT; //EtherCAT communication error
-    bit1_ShortCircuit: BIT; //Short circuit
-    bit2_InvalidSetupData: BIT; //Invalid setup data
-    bit3_ControlError: BIT; //Position or speed error
-    bit4_CommunicationError: BIT; //Communication error
-    bit5_FeedbackError: BIT; //Feedback error
-    bit6_PositiveLimitSwitchActive: BIT; //Positive limit active
-    bit7_NegativeLimitSwitchActive: BIT; //Negative limit active
-    bit8_OverCurrent: BIT; //Over current
-    bit9_I2TProtection: BIT; //I2T protection active
-    bit10_MotorOverTemperature: BIT; //Motor over temperature
-    bit11_DriveOverTemperature: BIT; //Drive over temperature
-    bit12_OverVoltage: BIT; //Over voltage
-    bit13_UnderVoltage: BIT; //Under voltage
-    bit14_CommandError: BIT; //Command error
-    bit15_STOActive: BIT; //Enabled or STO disabled
+    bEtherCATCommunicationError: BIT; //EtherCAT communication error, bit 0
+    bShortCircuit: BIT; //Short circuit, bit 1
+    bInvalidSetupData: BIT; //Invalid setup data, bit2
+    bControlError: BIT; //Position or speed error, bit3
+    bCommunicationError: BIT; //Communication error, bit 4
+    bFeedbackError: BIT; //Feedback error, bit 5
+    bPositiveLimitSwitchActive: BIT; //Positive limit active, bit 6
+    bNegativeLimitSwitchActive: BIT; //Negative limit active, bit 7
+    bOverCurrent: BIT; //Over current, bit 8
+    bI2TProtection: BIT; //I2T protection active, bit 9
+    bMotorOverTemperature: BIT; //Motor over temperature, bit 10
+    bDriveOverTemperature: BIT; //Drive over temperature, bit 11
+    bOverVoltage: BIT; //Over voltage, bit 12
+    bUnderVoltage: BIT; //Under voltage, bit 13
+    bCommandError: BIT; //Command error, bit 14
+    bSTOActive: BIT; //Enabled or STO disabled, bit 15
 END_STRUCT
 END_TYPE
 ]]></Declaration>

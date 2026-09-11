@@ -5,10 +5,10 @@
 STRUCT
     stMCCStatusIn: ST_MCCStatusIn;
     stMCC_CustomStatusIn: ST_MCC_CustomStatusIn;
-    astSafetyFunctionIn: ARRAY[1..GVL_APP.cNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn;
+    astSafetyFunctionIn: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn;
     stLEDState: ST_LEDState;
     stPNOZCommDiag: ST_PNOZCommDiag;
-    astTechnosoftMotionError: ARRAY[1..GVL_APP.cNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
+    astTechnosoftMotionError: ARRAY[1..GVL_APP.nNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
