@@ -403,34 +403,41 @@ VAR_INST
     nActualEcSlaves: UINT := 0;
     TON_UpdateGetEcConfSlaves: TON;
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
-    _aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;  // Temporary container
-    aSlaveConfig: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData;
+    aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
+    aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
+    pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
+    pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
 
     //Frame statistics
     fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
-
-    fbEtherCATAlarmDelayTON: TON;
-    bStartEtherCATdelayTON: BOOL := FALSE;
-    bEtherCATInitialized: BOOL := FALSE;
+    bFirstReadSlaveConfigDone: BOOL := FALSE;
+    bErrorZeroEcSlavesFound: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Read frames
 fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
 fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
-TON_UpdateGetEcConfSlaves(IN:=NOT TON_UpdateGetEcConfSlaves.Q, PT:=T#100MS);
+
 fbGetEcConfSlaves(
     sNetId:=nEcMasterNetId,
-    pArrEcConfSlaveInfo := ADR(_aSlaveConfig),
-    cbBufLen := SIZEOF(_aSlaveConfig),
-    bExecute := TON_UpdateGetEcConfSlaves.Q);
-IF NOT fbGetEcConfSlaves.bBusy AND NOT fbGetEcConfSlaves.bError THEN
-    aSlaveConfig := _aSlaveConfig;
-END_IF
-
-
+    pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
+    cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
+    bExecute := NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError));
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
+
+//Swap buffer if read out is finished
+IF NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError) THEN
+    bFirstReadSlaveConfigDone := TRUE;
+    IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
+        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+    ELSE
+        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+    END_IF
+END_IF
 
 //Check ethercat master device state
 bEcLinkError := _nEcMasterDevState.0;
@@ -456,14 +463,7 @@ fbGetEcSlaveStates(
     bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
-fbEtherCATAlarmDelayTON(IN:=bStartEtherCATdelayTON, PT:=T#3S);
-IF fbEtherCATAlarmDelayTON.Q THEN
-    bStartEtherCATdelayTON := FALSE;
-    bEtherCATInitialized := TRUE;
-END_IF
-
-IF NOT bEtherCATInitialized THEN
-    bStartEtherCATdelayTON := TRUE;
+IF NOT bFirstReadSlaveConfigDone THEN
     RETURN;
 END_IF
 
@@ -475,13 +475,26 @@ bSlaveLinkError := FALSE;
 aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
 aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
+IF nActualEcSlaves = 0 THEN
+    IF NOT bErrorZeroEcSlavesFound THEN
+        bErrorZeroEcSlavesFound := TRUE;
+        ADSLOGSTR(
+            msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+            msgFmtStr := 'FB_ESSMonitoringBase Error: %s',
+            strArg := '0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
+    END_IF
+    bSlaveLinkError := TRUE;
+    aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
+    RETURN;
+END_IF
+
 FOR i:=0 TO nActualEcSlaves-1 DO
     IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=UINT_TO_STRING(i+1));
         IF NOT bSlaveLinkError THEN
             aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
         END_IF
         aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=', ');
@@ -495,7 +508,7 @@ FOR i:=0 TO nActualEcSlaves-1 DO
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:= UINT_TO_STRING(i+1));
         IF NOT bSlaveStateNotOP THEN
             aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(aSlaveConfig[i+1].sName, FIND(aSlaveConfig[i+1].sName,' (')-1)));
+                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
         END_IF
         aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
             CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=', ');
