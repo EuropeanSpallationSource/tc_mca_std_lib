@@ -397,35 +397,34 @@ VAR
 END_VAR
 
 VAR_INST
-    fbUpdateEcSlaveStateTON: TON;
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
     stSlaveState: ARRAY[0..nMAX_EC_SLAVES] OF ST_EcSlaveState;
     nActualEcSlaves: UINT := 0;
-    TON_UpdateGetEcConfSlaves: TON;
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
     aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
     aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
     pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
     pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
-
-    //Frame statistics
-    fbUpdateEcMasterFrame: TON;
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
     bFirstReadSlaveConfigDone: BOOL := FALSE;
     bErrorZeroEcSlavesFound: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Read frames
-fbUpdateEcMasterFrame(IN:=NOT fbUpdateEcMasterFrame.q, PT:=T#1000MS);
-fbGetEcMasterFrames(sNetId:= nEcMasterNetId, bExecute:= fbUpdateEcMasterFrame.q);
+//Read the frame statistics of the EtherCAT master.
+fbGetEcMasterFrames(
+    sNetId := nEcMasterNetId,
+    bExecute := NOT (fbGetEcMasterFrames.bBusy
+        OR fbGetEcMasterFrames.bError);
+nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
+//Read a list of configured slaves from the EtherCAT master object directory.
 fbGetEcConfSlaves(
-    sNetId:=nEcMasterNetId,
+    sNetId := nEcMasterNetId,
     pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
     cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
-    bExecute := NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError));
-nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
+    bExecute := NOT (fbGetEcConfSlaves.bBusy
+        OR fbGetEcConfSlaves.bError));
 
 //Swap buffer if read out is sucessfully finishes
 IF NOT (fbGetEcConfSlaves.bBusy
@@ -442,6 +441,17 @@ THEN
     END_IF
 END_IF
 
+//Get EtherCAT status and the Link status of all the slaves connected to the master.
+fbGetEcSlaveStates(
+    sNetId := nEcMasterNetId,
+    pStateBuf := ADR(stSlaveState),
+    cbBufLen := SIZEOF(stSlaveState),
+    //fbGetEcSlaveStates never goes bBusy (finishes same cycle as bExecute)
+    //Starts on bExecute of fbGetEcConfSlaves instead
+    bExecute := (fbGetEcConfSlaves.bExecute
+        AND NOT fbGetEcSlaveStates.bError));
+nActualEcSlaves := fbGetEcSlaveStates.nSlaves;
+
 //Check ethercat master device state
 bEcLinkError := _nEcMasterDevState.0;
 bEcIOlocked := _nEcMasterDevState.1;
@@ -457,18 +467,9 @@ bEcSlaveSafeOP := _nEcMasterDevState.10;
 bEcSlaveError := _nEcMasterDevState.11;
 bEcDCnotInSync := _nEcMasterDevState.12;
 
-//Check ethercat slave device state
-fbUpdateEcSlaveStateTON(IN:=NOT fbUpdateEcSlaveStateTON.q, PT:=T#100MS);
-fbGetEcSlaveStates(
-    sNetId:=nEcMasterNetId,
-    pStateBuf:=ADR(stSlaveState),
-    cbBufLen:=SIZEOF(stSlaveState),
-    bExecute:=fbUpdateEcSlaveStateTON.q);
-nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
-
 bEcMasterError := _nEcMasterDevState > 0;
 
-// After startup timeout, reset variables before loop
+//After startup reset variables before loop
 bSlaveStateNotOP := FALSE;
 bSlaveLinkError := FALSE;
 aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
