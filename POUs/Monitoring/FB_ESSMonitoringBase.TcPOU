@@ -427,8 +427,11 @@ fbGetEcConfSlaves(
     bExecute := NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError));
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
-//Swap buffer if read out is finished
-IF NOT (fbGetEcConfSlaves.bBusy OR fbGetEcConfSlaves.bError) THEN
+//Swap buffer if read out is sucessfully finishes
+IF NOT (fbGetEcConfSlaves.bBusy
+    OR fbGetEcConfSlaves.bError
+    OR fbGetEcConfSlaves.nSlaves = 0)
+THEN
     bFirstReadSlaveConfigDone := TRUE;
     IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
         pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
