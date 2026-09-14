@@ -463,10 +463,6 @@ fbGetEcSlaveStates(
     bExecute:=fbUpdateEcSlaveStateTON.q);
 nActualEcSlaves:=fbGetEcSlaveStates.nSlaves;
 
-IF NOT bFirstReadSlaveConfigDone THEN
-    RETURN;
-END_IF
-
 bEcMasterError := _nEcMasterDevState > 0;
 
 // After startup timeout, reset variables before loop
@@ -485,6 +481,10 @@ IF nActualEcSlaves = 0 THEN
     END_IF
     bSlaveLinkError := TRUE;
     aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
+    RETURN;
+END_IF
+
+IF NOT bFirstReadSlaveConfigDone THEN
     RETURN;
 END_IF
 
