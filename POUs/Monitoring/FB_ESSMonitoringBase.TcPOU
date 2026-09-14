@@ -403,16 +403,23 @@ VAR_INST
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
     aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
     aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
-    pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
-    pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
+    pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with write access
+    pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with read access
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
     tonAutoResetError: TON := (PT := T#3S);
     bFirstReadSlaveConfigDone: BOOL := FALSE;
     bErrorZeroEcSlavesFound: BOOL := FALSE;
+    bInit: BOOL := TRUE;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[tonAutoResetError(
+        <ST><![CDATA[IF bInit THEN
+    bInit := FALSE;
+    pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+    pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+END_IF
+
+tonAutoResetError(
     IN := NOT tonAutoResetError.Q
     AND (fbGetEcMasterFrames.bError
     OR fbGetEcConfSlaves.bError
