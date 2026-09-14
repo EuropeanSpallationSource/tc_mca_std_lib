@@ -406,16 +406,24 @@ VAR_INST
     pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer1); //Pointer to the buffer with write access
     pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData := ADR(aSlaveConfigBuffer2); //Pointer to the buffer with read access
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
+    tonAutoResetError: TON := (PT := T#3S);
     bFirstReadSlaveConfigDone: BOOL := FALSE;
     bErrorZeroEcSlavesFound: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
+        <ST><![CDATA[tonAutoResetError(
+    IN := NOT tonAutoResetError.Q
+    AND (fbGetEcMasterFrames.bError
+    OR fbGetEcConfSlaves.bError
+    OR fbGetEcSlaveStates.bError));
+
 //Read the frame statistics of the EtherCAT master.
 fbGetEcMasterFrames(
     sNetId := nEcMasterNetId,
     bExecute := NOT (fbGetEcMasterFrames.bBusy
-        OR fbGetEcMasterFrames.bError);
+        OR fbGetEcMasterFrames.bError)
+        OR tonAutoResetError.Q);
 nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Read a list of configured slaves from the EtherCAT master object directory.
@@ -424,7 +432,8 @@ fbGetEcConfSlaves(
     pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
     cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
     bExecute := NOT (fbGetEcConfSlaves.bBusy
-        OR fbGetEcConfSlaves.bError));
+        OR fbGetEcConfSlaves.bError)
+        OR tonAutoResetError.Q);
 
 //Swap buffer if read out is sucessfully finishes
 IF NOT (fbGetEcConfSlaves.bBusy
@@ -449,7 +458,8 @@ fbGetEcSlaveStates(
     //fbGetEcSlaveStates never goes bBusy (finishes same cycle as bExecute)
     //Starts on bExecute of fbGetEcConfSlaves instead
     bExecute := (fbGetEcConfSlaves.bExecute
-        AND NOT fbGetEcSlaveStates.bError));
+        AND NOT fbGetEcSlaveStates.bError)
+        OR tonAutoResetError.Q);
 nActualEcSlaves := fbGetEcSlaveStates.nSlaves;
 
 //Check ethercat master device state
