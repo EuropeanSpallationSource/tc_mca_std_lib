@@ -483,6 +483,7 @@ IF nActualEcSlaves = 0 THEN
     aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
     RETURN;
 END_IF
+bErrorZeroEcSlavesFound := FALSE;
 
 IF NOT bFirstReadSlaveConfigDone THEN
     RETURN;
