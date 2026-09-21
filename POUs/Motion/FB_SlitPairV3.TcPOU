@@ -30,7 +30,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[actEnableDisableAxes();
-    
+actGapLimitSwitches();
 ]]></ST>
     </Implementation>
     <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
@@ -62,6 +62,16 @@ IF rtrigBladeAnyAxisDisable.Q THEN
     stGapSize.stControl.bEnable := FALSE;
     stGapCentre.stControl.bEnable := FALSE;
 END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actGapLimitSwitches" Id="{1d6ed593-63d9-0790-211c-df7a24fd9645}">
+      <Implementation>
+        <ST><![CDATA[//Set Virtual axes inputs: both Limit must be TRUE (inverse logic)
+stGapSize.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitFwd AND stBladePositive.stInputs.bLimitBwd;
+stGapSize.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitBwd AND stBladePositive.stInputs.bLimitFwd;
+stGapCentre.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitBwd AND stBladePositive.stInputs.bLimitBwd;
+stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitFwd AND stBladePositive.stInputs.bLimitFwd;
 ]]></ST>
       </Implementation>
     </Action>
