@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SlitPairV3" Id="{d4da73bc-5f78-0085-0ded-751dd6b2dbe5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPairV3
+
+VAR
+    rtrigVirtualAxisEnable: R_TRIG;
+    rtrigVirtualAxisDisable: R_TRIG;
+    rtrigBladeAnyAxisDisable: R_TRIG;
+END_VAR
+
+VAR_INPUT
+    nIdNegativeAxis: UINT; //ID of axis for which negative motion increases gap size
+    nIdPositiveAxis: UINT; //ID of axis for which positive motion increases gap size
+    nIdGapSizeAxis: UINT; //ID of virtual gap aperture size axis
+    nIdGapCentreAxis: UINT; //ID of virtual gap centre position axis
+END_VAR
+
+VAR_IN_OUT
+    stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
+    stBladePositive: ST_AxisStruct; //Axis data of the positive blade
+    stGapSize: ST_AxisStruct; //Axis data of the gap size
+    stGapCentre: ST_AxisStruct; //Axis data of the gap centre
+END_VAR
+
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[actEnableDisableAxes();
+    
+]]></ST>
+    </Implementation>
+    <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
+      <Implementation>
+        <ST><![CDATA[//Enable all axes when one of the virtual axes is enabled
+rtrigVirtualAxisEnable(CLK := stGapSize.stControl.bEnable OR stGapCentre.stControl.bEnable);
+
+//Disable blade axes when both the virtuals are disabled
+rtrigVirtualAxisDisable(CLK := NOT stGapSize.stControl.bEnable OR NOT stGapCentre.stControl.bEnable);
+
+// Disable GapSize and Centre when any blade is disabled
+rtrigBladeAnyAxisDisable(CLK := NOT stBladeNegative.stControl.bEnable OR NOT stBladePositive.stControl.bEnable);
+
+IF rtrigVirtualAxisEnable.Q THEN
+    stBladeNegative.stControl.bEnable := TRUE;
+    stBladePositive.stControl.bEnable := TRUE;
+    stGapSize.stControl.bEnable := TRUE;
+    stGapCentre.stControl.bEnable := TRUE;
+END_IF
+
+IF rtrigVirtualAxisDisable.Q THEN
+    stBladeNegative.stControl.bEnable := FALSE;
+    stBladePositive.stControl.bEnable := FALSE;
+    stGapSize.stControl.bEnable := FALSE;
+    stGapCentre.stControl.bEnable := FALSE;
+END_IF
+
+IF rtrigBladeAnyAxisDisable.Q THEN
+    stGapSize.stControl.bEnable := FALSE;
+    stGapCentre.stControl.bEnable := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>
