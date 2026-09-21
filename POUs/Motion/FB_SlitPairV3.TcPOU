@@ -7,8 +7,8 @@ VAR
     rtrigVirtualAxisEnable: R_TRIG;
     rtrigVirtualAxisDisable: R_TRIG;
     rtrigBladeAnyAxisDisable: R_TRIG;
-    fbResetCalibrationGapSize: MC_Home;
-    fbResetCalibrationGapCentre: MC_Home;
+    fbHomeGapSize: MC_Home;
+    fbHomeGapCentre: MC_Home;
 END_VAR
 
 VAR_INPUT
@@ -33,7 +33,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[actEnableDisableAxes();
 actGapLimitSwitches();
-actGapNotHomed();
+actGapHomeNotHome();
 ]]></ST>
     </Implementation>
     <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
@@ -68,6 +68,58 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="actGapHomeNotHome" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
+      <Implementation>
+        <ST><![CDATA[
+IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed THEN
+    IF stGapSize.stStatus.bHomed THEN
+        IF NOT fbHomeGapSize.Busy THEN
+            fbHomeGapSize(Axis := stGapSize.Axis,
+                          Execute := FALSE,
+                          HomingMode := MC_HomingMode.MC_ResetCalibration);
+        END_IF
+        fbHomeGapSize(Axis := stGapSize.Axis,
+                                  Execute := TRUE,
+                                  HomingMode := MC_HomingMode.MC_ResetCalibration);
+    END_IF
+    IF stGapCentre.stStatus.bHomed THEN
+        IF NOT fbHomeGapCentre.Busy THEN
+            fbHomeGapCentre(Axis := stGapCentre.Axis,
+                                        Execute := FALSE,
+                                        HomingMode := MC_HomingMode.MC_ResetCalibration);
+        END_IF
+        fbHomeGapCentre(Axis := stGapCentre.Axis,
+                                    Execute := TRUE,
+                                    HomingMode := MC_HomingMode.MC_ResetCalibration);
+    END_IF
+ELSE
+    // Both blades are homed
+    IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy AND NOT stGapSize.stStatus.bGeared THEN
+        IF NOT fbHomeGapSize.Busy THEN
+            fbHomeGapSize(Axis := stGapSize.Axis,
+                                  Execute := FALSE,
+                                  HomingMode := MC_HomingMode.MC_Direct);
+        END_IF
+        fbHomeGapSize(Axis := stGapSize.Axis,
+                                  Execute := TRUE,
+                                  HomingMode := MC_HomingMode.MC_Direct,
+                                  Position := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition);
+    END_IF
+    IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy AND NOT stGapCentre.stStatus.bGeared THEN
+        IF NOT fbHomeGapCentre.Busy THEN
+            fbHomeGapCentre(Axis := stGapCentre.Axis,
+                            Execute := FALSE,
+                            HomingMode := MC_HomingMode.MC_Direct);
+        END_IF
+        fbHomeGapCentre(Axis := stGapCentre.Axis,
+                        Execute := TRUE,
+                        HomingMode := MC_HomingMode.MC_Direct,
+                        Position := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0);
+    END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="actGapLimitSwitches" Id="{1d6ed593-63d9-0790-211c-df7a24fd9645}">
       <Implementation>
         <ST><![CDATA[//Set Virtual axes inputs: both Limit must be TRUE (inverse logic)
@@ -75,34 +127,6 @@ stGapSize.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitFwd AND stBladePo
 stGapSize.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitBwd AND stBladePositive.stInputs.bLimitFwd;
 stGapCentre.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitBwd AND stBladePositive.stInputs.bLimitBwd;
 stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitFwd AND stBladePositive.stInputs.bLimitFwd;
-]]></ST>
-      </Implementation>
-    </Action>
-    <Action Name="actGapNotHomed" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
-      <Implementation>
-        <ST><![CDATA[
-IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed THEN
-    IF stGapSize.stStatus.bHomed THEN
-        IF NOT fbResetCalibrationGapSize.Busy THEN
-            fbResetCalibrationGapSize(Axis := stGapSize.Axis,
-                                      Execute := FALSE,
-                                      HomingMode := MC_HomingMode.MC_ResetCalibration);
-        END_IF
-        fbResetCalibrationGapSize(Axis := stGapSize.Axis,
-                                  Execute := TRUE,
-                                  HomingMode := MC_HomingMode.MC_ResetCalibration);
-    END_IF
-    IF stGapCentre.stStatus.bHomed THEN
-        IF NOT fbResetCalibrationGapCentre.Busy THEN
-            fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
-                                        Execute := FALSE,
-                                        HomingMode := MC_HomingMode.MC_ResetCalibration);
-        END_IF
-        fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
-                                    Execute := TRUE,
-                                    HomingMode := MC_HomingMode.MC_ResetCalibration);
-    END_IF
-END_IF
 ]]></ST>
       </Implementation>
     </Action>
