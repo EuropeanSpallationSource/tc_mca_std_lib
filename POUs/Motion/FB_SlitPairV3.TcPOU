@@ -4,6 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPairV3
 
 VAR
+    initDone: BOOL := FALSE;
     rtrigVirtualAxisEnable: R_TRIG;
     rtrigVirtualAxisDisable: R_TRIG;
     rtrigBladeAnyAxisDisable: R_TRIG;
@@ -102,6 +103,36 @@ IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed TH
                                     Execute := TRUE,
                                     HomingMode := MC_HomingMode.MC_ResetCalibration);
     END_IF
+ELSE
+    // Both blades are homed
+    IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy AND NOT stGapSize.stStatus.bGeared THEN
+        stGapSize.stConfig.fHomePosition := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition;
+        IF ABS(stGapSize.stConfig.fHomePosition - stGapSize.stStatus.fActPosition) > stGapSize.stConfig.fTargetPositionWindow THEN
+            stGapSize.stControl.eCommand := E_MotionFunctions.eHome;
+            stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+            stGapSize.stControl.bExecute := TRUE;
+        END_IF
+    END_IF
+    IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy AND NOT stGapCentre.stStatus.bGeared THEN
+        stGapCentre.stConfig.fHomePosition := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0;
+        IF ABS(stGapCentre.stConfig.fHomePosition - stGapCentre.stStatus.fActPosition) > stGapCentre.stConfig.fTargetPositionWindow THEN
+            stGapCentre.stControl.eCommand := E_MotionFunctions.eHome;
+            stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+            stGapCentre.stControl.bExecute := TRUE;
+        END_IF
+    END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actInit" Id="{5d77996e-061e-0280-39fb-35033569225b}">
+      <Implementation>
+        <ST><![CDATA[
+IF NOT initDone THEN
+    // When Gap is homed, we do it from here
+    stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+    stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+    initDone := TRUE;
 END_IF
 ]]></ST>
       </Implementation>
