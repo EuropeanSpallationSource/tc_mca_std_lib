@@ -425,9 +425,9 @@ END_IF
 tonAutoResetError(
     PT := tAUTO_RESET,
     IN := NOT tonAutoResetError.Q
-    AND (fbGetEcMasterFrames.bError
-    OR fbGetEcConfSlaves.bError
-    OR fbGetEcSlaveStates.bError));
+        AND (fbGetEcMasterFrames.bError
+        OR fbGetEcConfSlaves.bError
+        OR fbGetEcSlaveStates.bError));
 
 //Read the frame statistics of the EtherCAT master.
 fbGetEcMasterFrames(
