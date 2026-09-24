@@ -390,6 +390,51 @@ eError := mMonitor_Pressure;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mOutputs" Id="{e0f2114b-e095-0a99-3a69-d7ef5bca3c9b}">
+      <Declaration><![CDATA[//Updates the status/output variables
+METHOD PRIVATE mOutputs
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Actuate Solenoids
+_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn :=
+	//EITHER: Moving with ValveOn Request
+	(eState = E_PneumaticAxisState.eMoving
+	AND eRequestedValveState = E_PneumaticAxisValveState.eValveOn)
+	//OR: Standstill / Interlocked with ValveOn Current
+	OR ((eState = E_PneumaticAxisState.eStandstill
+	OR eState = E_PneumaticAxisState.eInterlocked)
+	AND eCurrentValveState = E_PneumaticAxisValveState.eValveOn);
+
+//Pressure
+_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
+_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := _iPressureGroup.bPressureHigh;
+
+//Valve Off
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := apEndSwitch[eVALVE_OFF]^;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := 
+	(eState = E_PneumaticAxisState.eMoving)
+	AND (eRequestedValveState = E_PneumaticAxisValveState.eValveOff);
+	
+_stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
+
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoidActive := 
+	_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn;
+
+//Valve On
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_ON]^;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := 
+	(eState = E_PneumaticAxisState.eMoving)
+	AND (eRequestedValveState = E_PneumaticAxisValveState.eValveOn);
+	
+_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
+
+//Error
+_stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
       <Declaration><![CDATA[METHOD PUBLIC mRun
 VAR
@@ -445,6 +490,9 @@ mControl_State(eNextState := eNextState);
 mControl_Reset();
 
 mStatusInfo();
+mOutputs();
+
+
 ]]></ST>
       </Implementation>
     </Method>
