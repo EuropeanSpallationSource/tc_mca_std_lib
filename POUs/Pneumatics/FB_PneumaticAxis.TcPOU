@@ -14,10 +14,6 @@ VAR
 
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
-    fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
-    fbTimerAirPressureErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
-    fbTimerAirPressureNoErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
-    fbTimerAirPressureNoErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
     fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
     fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
@@ -157,54 +153,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="mCheckForAirPressureError" Id="{02975cbe-1049-025d-3e6b-ceb11cb4a2a0}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckForAirPressureError : BOOL
-VAR
-    bAirPressureoutOfRangeError : BOOL;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureNoErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureNoErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-
-//Check if the air pressure value is too low for longer than defined time
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled < _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue  THEN
-    fbTimerAirPressureErrorLow.IN := TRUE;
-    IF fbTimerAirPressureErrorLow.Q THEN
-        _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-        bAirPressureoutOfRangeError := TRUE;
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorLow;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eLowAirPressure;
-    END_IF
-
-
-//Check if the air pressure value is too high for longer than defined time
-ELSIF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled > _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue  THEN
-    fbTimerAirPressureErrorHigh.IN := TRUE;
-    IF fbTimerAirPressureErrorHigh.Q THEN
-        _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-        bAirPressureoutOfRangeError := TRUE;
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorHigh;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eHighAirPressure;
-    END_IF
-
-
-//If the air pressure value is in range, no errors
-ELSIF (_stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue
-     AND _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue) THEN
-    fbTimerAirPressureErrorLow.IN := FALSE;
-    fbTimerAirPressureErrorHigh.IN := FALSE;
-    bAirPressureoutOfRangeError := FALSE;
-END_IF
-
-
-
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mCheckForMovingError" Id="{c3d6d062-4852-0e9f-18de-b8a77172336a}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckForMovingError
 
@@ -352,39 +300,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mHighAirPressure" Id="{a41851e4-8444-48e2-8f12-5249a689e7bc}">
-      <Declaration><![CDATA[METHOD mHighAirPressure : BOOL
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue THEN
-    fbTimerAirPressureNoErrorHigh.IN := TRUE;
-    IF fbTimerAirPressureNoErrorHigh.Q THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-        fbTimerAirPressureErrorHigh.IN := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
       <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
 ]]></Declaration>
@@ -414,39 +329,6 @@ mInit := NOT tonInitializeTimer.IN;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mLowAirPressure" Id="{c0310bb5-42a6-4cfb-b918-7f4740f67c8e}">
-      <Declaration><![CDATA[METHOD mLowAirPressure : BOOL
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue THEN
-    fbTimerAirPressureNoErrorLow.IN := TRUE;
-    IF fbTimerAirPressureNoErrorLow.Q THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-        fbTimerAirPressureErrorLow.IN := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mMonitor_EndSwitch" Id="{8fe57045-97da-0040-2f5f-3113c2e4a645}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: End Switch
 METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
@@ -462,6 +344,23 @@ END_VAR
 END_IF
 
 eError := mMonitor_EndSwitch;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_Pressure" Id="{6586e859-2ea5-03c2-26ee-d35e5e7cbace}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Pressure Low & High (Auto-Resets)
+METHOD PRIVATE mMonitor_Pressure : E_PneumaticAxisErrors
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _iPneumaticBox.bPressureLow THEN
+	mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorLow;
+END_IF
+
+IF _iPneumaticBox.bPressureHigh THEN
+	mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorHigh;
+END_IF
+
+eError := mMonitor_Pressure;
 ]]></ST>
       </Implementation>
     </Method>
@@ -632,55 +531,11 @@ mSetInputStatuses();
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
 mSetAllowedTravelTime();
 
-//Get the value of the air pressure in mb
-mSelectAirPressureSensorGroup();
-
 //Check if air pressure is in range
 mCheckForAirPressureError();
 
 //Reset Error
 mReset();
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mScaledPressureValue" Id="{3012bd32-5e56-08e5-357d-6a59fe398239}">
-      <Declaration><![CDATA[METHOD PUBLIC mScaledPressureValue : REAL
-VAR_INPUT
-    nRawValue: INT; //Raw value from the Terminal
-    fRawHigh: REAL; //Highest value for the Raw value
-    fRawLow: REAL; //Lowest value for the Raw value
-    fScaledHigh: REAL; //Highest value for the Scaled value
-    fScaledLow: REAL; //Lowest value for the Scaled value
-END_VAR
-VAR
-    rGradient: REAL; //Internal variable to calculate gradient of the slope
-    rOffset: REAL; //Internal variable to calculate the offset value
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
-rOffset:= fScaledHigh - rGradient * fRawHigh;
-mScaledPressureValue:= rGradient * nRawValue + rOffset;
-
-
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSelectAirPressureSensorGroup" Id="{8416effc-de90-0c76-3051-15a05f13b381}">
-      <Declaration><![CDATA[METHOD mSelectAirPressureSensorGroup
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
-
-        E_PneumaticAxisGroup.ePneumaticAxisGroup1:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup1,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-
-        E_PneumaticAxisGroup.ePneumaticAxisGroup2:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup2,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
-END_CASE
 ]]></ST>
       </Implementation>
     </Method>
