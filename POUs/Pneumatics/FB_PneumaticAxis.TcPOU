@@ -15,20 +15,11 @@ VAR
 	apMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO INT;
 
     atonMoving: ARRAY [eVALVE_OFF..eVALVE_ON] OF TON;
-    fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
-    fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
-    fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
-    fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
-    fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
 	afElapsedTime: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
 	afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
-    bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
-    bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
-    bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
-    bStartExtendManual: BOOL; //Variable to extend cylinder with momentary push button
-    bStartRetractManual: BOOL; //Variable to retract cylinder with momentary push button
+	
+	bPSSPermitNeeded: BOOL;
     bInterlockRequest: BOOL;
-    bStartInitDelay: BOOL := FALSE;
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
 	
@@ -270,6 +261,34 @@ mInit := NOT tonInitializeTimer.IN;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mInputs" Id="{81f9e40e-e6f9-0de7-2c11-798b5a563dc2}">
+      <Declaration><![CDATA[//Reads input variables and transforms them into internal variables
+METHOD PRIVATE mInputs
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//PSS Permit
+bPSSPermitNeeded := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
+	AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
+	
+//Interlock
+bInterlockRequest := _stPneumaticAxis.stPneumaticAxisControl.bInterlock 
+	AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
+
+//Valve Request
+artrigValveRequest[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
+	OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
+	OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1
+	OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2);
+	
+artrigValveRequest[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
+	OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn
+	OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1
+	OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2);
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mMonitor_EndSwitch" Id="{8fe57045-97da-0040-2f5f-3113c2e4a645}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: End Switch
 METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
@@ -382,6 +401,8 @@ END_VAR
     RETURN;
 END_IF
 
+mInputs();
+
 mControl_MoveTimer(eValve := eVALVE_OFF);
 mControl_MoveTimer(eValve := eVALVE_ON);
 mControl_ValveRequest();
@@ -422,20 +443,6 @@ END_CASE
 
 mControl_State(eNextState := eNextState);
 mControl_Reset();
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSetInputStatuses" Id="{85a914cc-13e6-05a5-383f-5d3b917db237}">
-      <Declaration><![CDATA[METHOD PUBLIC mSetInputStatuses
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
-//Check if cylinder is moving: extending or retracting
-_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff;
-_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn;
-_stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOffManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOnManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2;
 ]]></ST>
       </Implementation>
     </Method>
