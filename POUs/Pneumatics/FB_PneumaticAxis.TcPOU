@@ -5,12 +5,13 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
-	
-	eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
-	eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
-	
-	apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
-	
+    _iPneumaticBox: I_PressureGroup;
+
+    eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+    eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+
+    apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
+
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
@@ -39,9 +40,9 @@ VAR
     bInitPointers: BOOL := TRUE;
 END_VAR
 VAR CONSTANT
-	eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
-	eVALVE_ON: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOn;
-	tINIT: TIME := T#3S;
+    eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
+    eVALVE_ON: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOn;
+    tINIT: TIME := T#3S;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -113,13 +114,13 @@ END_VAR
         </Implementation>
       </Get>
       <Set Name="Set" Id="{915d3ea3-4659-00d6-29b2-9f1cbc8f96f8}">
-        <Declaration><![CDATA[PRIVATE 
+        <Declaration><![CDATA[PRIVATE
 VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[IF eError <> E_PneumaticAxisErrors.eNoError THEN
-	_stPneumaticAxis.ePneumaticAxisErrors := eError;
+    _stPneumaticAxis.ePneumaticAxisErrors := eError;
 END_IF
 ]]></ST>
         </Implementation>
@@ -135,6 +136,27 @@ END_VAR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="iPneumaticBox" Id="{22d0755b-7b13-0cd9-272f-68eae7b24e53}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY iPneumaticBox : I_PressureGroup]]></Declaration>
+      <Get Name="Get" Id="{9ea5e737-d543-0a73-2f8d-8db64b66adcb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iPneumaticBox := _iPneumaticBox;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c7f592e7-b27b-0c07-3f42-42fbd40d1cc1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_iPneumaticBox := iPneumaticBox;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Method Name="mCheckForAirPressureError" Id="{02975cbe-1049-025d-3e6b-ceb11cb4a2a0}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckForAirPressureError : BOOL
 VAR
@@ -368,19 +390,24 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT __ISVALIDREF(_stPneumaticAxis) THEN
-	RETURN;
+    RETURN;
 END_IF
 
-IF bInitPointers THEN	
-	apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);	
-	apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
-	
-	bInitPointers := FALSE;
+IF _iPneumaticBox = 0 THEN
+    _iPneumaticBox :=
+        GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
+END_IF
+
+IF bInitPointers THEN
+    apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
+    apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
+
+    bInitPointers := FALSE;
 END_IF
 
 tonInitializeTimer();
 IF tonInitializeTimer.Q THEN
-	tonInitializeTimer.IN := FALSE;
+    tonInitializeTimer.IN := FALSE;
 END_IF
 
 mInit := NOT tonInitializeTimer.IN;
@@ -424,14 +451,14 @@ END_IF
       <Declaration><![CDATA[//Monitor: End Switch
 METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
 VAR CONSTANT
-	aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
-		E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff,
-		E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn];
+    aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+        E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff,
+        E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn];
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT apEndSwitch[eCurrentValveState]^ THEN
-	mMonitor_EndSwitch := aERROR[eCurrentValveState];
+    mMonitor_EndSwitch := aERROR[eCurrentValveState];
 END_IF
 
 eError := mMonitor_EndSwitch;
@@ -596,7 +623,7 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT mInit() THEN
-	RETURN;
+    RETURN;
 END_IF
 
 //Set the current status of the end position switches, and permit and intelock signals

@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_PressureGroup" Id="{bdc1d7c0-6b5c-06bf-358c-d7d1869947c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PressureGroup IMPLEMENTS I_PressureGroup
+VAR_INPUT
+    fPressureLimitLow: REAL := 1.0; //Minimum pressure limit
+    fPressureLimitHigh: REAL := 6.0; //Maximum pressure limit
+    tPressureOutOfRange: TIME := T#15S; //Time limit pressure is out of range
+    fRawHigh: REAL := 30518.0; //Highest value for the Raw value
+    fRawLow: REAL := 0.0; //Lowest value for the Raw value
+    fScaledHigh: REAL := 10.0; //Highest value for the Scaled value 10 bar
+    fScaledLow: REAL := 0.0; //Lowest value for the Scaled value 0 bar
+END_VAR
+VAR_IN_OUT CONSTANT
+    nAirPressureSensorRaw: INT; //Raw value from analog air pressure sensor
+END_VAR
+VAR
+    _fScaledPressureValue: REAL;
+    tonTimerPressureLow: TON := (Q := TRUE);
+    tonTimerPressureHigh: TON := (Q := TRUE);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[_fScaledPressureValue := mScalePressureValue(nRawValue := nAirPressureSensorRaw);
+
+tonTimerPressureLow(
+    IN := _fScaledPressureValue < fPressureLimitLow,
+    PT := tPressureOutOfRange);
+
+tonTimerPressureHigh(
+    IN := _fScaledPressureValue > fPressureLimitHigh,
+    PT := tPressureOutOfRange);
+]]></ST>
+    </Implementation>
+    <Property Name="bPressureHigh" Id="{a98d5871-a004-082f-2621-3184809d1573}">
+      <Declaration><![CDATA[PROPERTY bPressureHigh : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f3b4e553-8860-0192-16e6-469b74f61a51}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bPressureHigh := tonTimerPressureHigh.Q;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="bPressureLow" Id="{be51e195-fa7f-0ccc-3811-074a1e15914f}">
+      <Declaration><![CDATA[PROPERTY bPressureLow : BOOL]]></Declaration>
+      <Get Name="Get" Id="{cb05adcf-d57e-0d22-1095-76ebd24bf9b5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bPressureLow := tonTimerPressureLow.Q;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="fScaledPressureValue" Id="{ea8dfccc-e203-05f0-3d29-bbe5890bd9eb}">
+      <Declaration><![CDATA[PROPERTY fScaledPressureValue : REAL]]></Declaration>
+      <Get Name="Get" Id="{3ebff06d-3e02-0ee2-1268-04c0624560bf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fScaledPressureValue := _fScaledPressureValue;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="mScalePressureValue" Id="{b7519c62-7156-0d37-0443-eeecc8fc8823}">
+      <Declaration><![CDATA[METHOD PUBLIC mScalePressureValue : REAL
+VAR_INPUT
+    nRawValue: INT; //Raw value from the Terminal
+END_VAR
+VAR
+    rGradient: REAL; //Internal variable to calculate gradient of the slope
+    rOffset: REAL; //Internal variable to calculate the offset value
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
+rOffset:= fScaledHigh - rGradient * fRawHigh;
+mScalePressureValue:= rGradient * nRawValue + rOffset;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
