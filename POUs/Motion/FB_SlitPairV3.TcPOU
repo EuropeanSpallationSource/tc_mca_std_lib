@@ -10,6 +10,15 @@ VAR
     rtrigBladeAnyAxisDisable: R_TRIG;
     fbResetCalibrationGapSize: MC_Home;
     fbResetCalibrationGapCentre: MC_Home;
+    // Saved commands when we need to gear in
+    bSavedExecuteBladeNegative: BOOL := FALSE;
+    bSavedExecuteBladePositive: BOOL := FALSE;
+    bSavedExecuteGapSize: BOOL := FALSE;
+    bSavedExecuteGapCentre: BOOL := FALSE;
+    eSavedCommandBladeNegative: E_MotionFunctions;
+    eSavedCommandBladePositive: E_MotionFunctions;
+    eSavedCommandGapSize: E_MotionFunctions;
+    eSavedCommandGapCentre: E_MotionFunctions;
 END_VAR
 
 VAR_INPUT
@@ -39,6 +48,7 @@ END_IF
 actEnableDisableAxes();
 actGapLimitSwitches();
 actGapNotHomed();
+actGearInWhenNeeded();
 ]]></ST>
     </Implementation>
     <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
@@ -124,6 +134,63 @@ ELSE
             stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
             stGapCentre.stControl.bExecute := TRUE;
         END_IF
+    END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="actGearInWhenNeeded" Id="{deb2387a-c21a-077c-3d6c-ac603c4ecd46}">
+      <Implementation>
+        <ST><![CDATA[
+IF stGapSize.stControl.bExecute AND
+    // TODO: More moving functions
+    stGapSize.stControl.eCommand = E_MotionFunctions.eMoveAbsolute AND
+    (NOT stBladeNegative.stStatus.bGeared OR
+     NOT stBladePositive.stStatus.bGeared)
+     AND NOT bSavedExecuteGapSize THEN
+         eSavedCommandGapSize := stGapSize.stControl.eCommand;
+         bSavedExecuteGapSize := TRUE;
+         stGapSize.stControl.bExecute := FALSE;
+        IF (NOT stBladeNegative.stStatus.bGeared OR
+            NOT stBladePositive.stStatus.bGeared) THEN
+               stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
+               stBladePositive.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
+               stBladeNegative.stControl.bExecute := TRUE;
+               stBladePositive.stControl.bExecute := TRUE;
+        END_IF
+
+END_IF
+IF bSavedExecuteGapSize THEN
+    IF stBladeNegative.stStatus.bGeared AND stBladePositive.stStatus.bGeared THEN
+        stGapSize.stControl.eCommand := eSavedCommandGapSize;
+        stGapSize.stControl.bExecute := TRUE;
+        bSavedExecuteGapSize := FALSE;
+    END_IF
+END_IF
+
+IF stGapCentre.stControl.bExecute AND
+    // TODO: More moving functions
+    stGapCentre.stControl.eCommand = E_MotionFunctions.eMoveAbsolute AND
+    (NOT stBladeNegative.stStatus.bGeared OR
+     NOT stBladePositive.stStatus.bGeared)
+     AND NOT bSavedExecuteGapCentre THEN
+         eSavedCommandGapCentre := stGapCentre.stControl.eCommand;
+         bSavedExecuteGapCentre := TRUE;
+         stGapCentre.stControl.bExecute := FALSE;
+        IF (NOT stBladeNegative.stStatus.bGeared OR
+            NOT stBladePositive.stStatus.bGeared) THEN
+               stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
+               stBladePositive.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
+               stBladeNegative.stControl.bExecute := TRUE;
+               stBladePositive.stControl.bExecute := TRUE;
+        END_IF
+
+END_IF
+IF bSavedExecuteGapCentre THEN
+    IF stBladeNegative.stStatus.bGeared AND stBladePositive.stStatus.bGeared THEN
+        stGapCentre.stControl.eCommand := eSavedCommandGapCentre;
+        stGapCentre.stControl.bExecute := TRUE;
+        bSavedExecuteGapCentre := FALSE;
     END_IF
 END_IF
 ]]></ST>
