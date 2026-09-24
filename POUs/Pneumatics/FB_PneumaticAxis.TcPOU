@@ -443,6 +443,65 @@ END_CASE
 
 mControl_State(eNextState := eNextState);
 mControl_Reset();
+
+mStatusInfo();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatusInfo" Id="{e5a09ca1-5616-0a51-3f8d-aecba84ee10e}">
+      <Declaration><![CDATA[//Maps the current state and errors into an status info text
+METHOD PRIVATE mStatusInfo
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE _stPneumaticAxis.ePneumaticAxisErrors OF
+	
+	E_PneumaticAxisErrors.eAirPressureErrorLow:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
+		
+	E_PneumaticAxisErrors.eAirPressureErrorHigh:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
+		
+	E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE OFF';
+		
+	E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE ON';
+	
+	E_PneumaticAxisErrors.eNotMovingWithValveOff:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF NOT MOVING';
+	
+	E_PneumaticAxisErrors.eNotMovingWithValveOn:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON NOT MOVING';
+	
+	E_PneumaticAxisErrors.eMovingWithValveOffTimedOut:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF TIMEDOUT';
+		
+	E_PneumaticAxisErrors.eMovingWithValveOnTimedOut:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON TIMEDOUT';
+		
+	E_PneumaticAxisErrors.eValveOffInterlocked:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF INTERLOCKED';
+		
+	E_PneumaticAxisErrors.eValveOnInterlocked:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON INTERLOCKED';
+
+	E_PneumaticAxisErrors.eNoError:
+		CASE eState OF
+			E_PneumaticAxisState.eStandstill:
+				_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+			E_PneumaticAxisState.eMoving:
+				IF eRequestedValveState = E_PneumaticAxisValveState.eValveOn THEN
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_ON';
+				ELSE
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_OFF';
+				END_IF
+			E_PneumaticAxisState.eInterlocked:
+				_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
+		END_CASE
+		
+	ELSE
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN_STATE';
+END_CASE
 ]]></ST>
       </Implementation>
     </Method>
