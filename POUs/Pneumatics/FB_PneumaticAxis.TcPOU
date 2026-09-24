@@ -5,7 +5,7 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
-    _iPneumaticBox: I_PressureGroup;
+    _iPressureGroup: I_PressureGroup;
 
     eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
     eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
@@ -140,7 +140,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[iPneumaticBox := _iPneumaticBox;
+          <ST><![CDATA[iPneumaticBox := _iPressureGroup;
 ]]></ST>
         </Implementation>
       </Get>
@@ -149,7 +149,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[_iPneumaticBox := iPneumaticBox;
+          <ST><![CDATA[_iPressureGroup := iPneumaticBox;
 ]]></ST>
         </Implementation>
       </Set>
@@ -238,8 +238,8 @@ END_VAR]]></Declaration>
 	RETURN;
 END_IF
 
-IF _iPneumaticBox = 0 THEN
-	_iPneumaticBox := 
+IF _iPressureGroup = 0 THEN
+	_iPressureGroup := 
 		GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
 END_IF
 
@@ -333,11 +333,11 @@ eError := mMonitor_Move;
 METHOD PRIVATE mMonitor_Pressure : E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _iPneumaticBox.bPressureLow THEN
+        <ST><![CDATA[IF _iPressureGroup.bPressureLow THEN
 	mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorLow;
 END_IF
 
-IF _iPneumaticBox.bPressureHigh THEN
+IF _iPressureGroup.bPressureHigh THEN
 	mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorHigh;
 END_IF
 
