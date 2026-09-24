@@ -20,10 +20,11 @@ VAR
 
     bPSSPermitNeeded: BOOL;
     bInterlockRequest: BOOL;
+
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
 
-    tonErrorAutoReset: TON := (PT := T#3S);
+    tonErrorAutoReset: TON := (PT := tAUTO_ERROR_RESET);
     rtrigReset: R_TRIG;
     artrigValveRequest: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
 END_VAR
@@ -31,6 +32,7 @@ VAR CONSTANT
     eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
     eVALVE_ON: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOn;
     tINIT: TIME := T#3S;
+    tAUTO_ERROR_RESET: TIME := T#3S;
 END_VAR
 ]]></Declaration>
     <Implementation>
