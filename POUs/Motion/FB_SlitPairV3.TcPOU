@@ -32,7 +32,11 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[actEnableDisableAxes();
+      <ST><![CDATA[
+IF NOT initDone THEN
+    actInit();
+END_IF
+actEnableDisableAxes();
 actGapLimitSwitches();
 actGapNotHomed();
 ]]></ST>
@@ -132,6 +136,24 @@ IF NOT initDone THEN
     // When Gap is homed, we do it from here
     stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
     stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+    //Setup multimaster gearing of negative blade
+    stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
+    stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+    stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+    stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+    //Setup multimaster gearing of positive blade
+    stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
+    stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+    stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+    stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
     initDone := TRUE;
 END_IF
 ]]></ST>
