@@ -11,18 +11,16 @@ VAR
     eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 
     apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
+	apMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO INT;
 
-    fbTimerExtend: TON; //Timing the extraction of the cylinder
-    fbTimerRetract: TON; //Timing the retraction of the cylinder
+    atonMoving: ARRAY [eVALVE_OFF..eVALVE_ON] OF TON;
     fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
     fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
     fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
     fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
     fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
-    fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
-    fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
-    fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
-    fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
+	afElapsedTime: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
+	afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
     bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
     bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
     bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
@@ -86,6 +84,7 @@ mReset();
 END_CASE
 ]]></ST>
     </Implementation>
+    <Folder Name="Control Methods" Id="{39c4bcb2-31af-075e-197a-162c75539148}" />
     <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
     <Folder Name="Monitor Methods" Id="{1de9d575-2430-0608-3cc7-4848c696c067}" />
     <Folder Name="Properties" Id="{91a1fcf0-14fd-0997-1818-cca146c94024}" />
@@ -155,45 +154,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="mCheckForMovingError" Id="{c3d6d062-4852-0e9f-18de-b8a77172336a}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckForMovingError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
-IF fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingWithValveOn;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//If the command to extract has timed out
-IF fbTimerExtend.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eMovingWithValveOnTimedOut;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//IF the command to retract has been given, but the cylinder hasn't moved from bEndSwitchFwd
-IF fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingWithValveOff;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//If the command to retract has timed out
-IF fbTimerRetract.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eMovingWithValveOffTimedOut;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mCheckStatusOfPermitSignal" Id="{a6169d52-c0e0-0319-04a8-3ea0650a4765}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfPermitSignal
 
@@ -211,6 +171,37 @@ ELSIF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_MoveTimer" Id="{b5c0d43d-0f0f-0b38-3402-746380f2c7c0}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls move timer and timing data
+METHOD PRIVATE mControl_MoveTimer
+VAR_INPUT
+	eValve: E_PneumaticAxisValveState;
+END_VAR
+VAR 
+	bStart: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bStart := (eState = E_PneumaticAxisState.eMoving)
+	AND (eValve = eRequestedValveState);
+
+//Update Time
+IF atonMoving[eValve].IN THEN
+	afElapsedTime[eValve] := TIME_TO_REAL(atonMoving[eValve].ET) / 1000.0;
+	
+	IF NOT bStart THEN
+		afElapsedTimeTotal[eValve] := afElapsedTime[eValve];
+	END_IF
+END_IF
+
+//Call
+atonMoving[eValve](
+	IN := bStart,
+	PT := INT_TO_TIME(apMoveTimeLimit[eValve]^ * 1000));
 
 ]]></ST>
       </Implementation>
@@ -237,39 +228,31 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mExtendTimeStatus" Id="{684456d9-6481-0894-1ad2-4fe1d1b95577}">
-      <Declaration><![CDATA[METHOD mExtendTimeStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
-    fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := fElapsedTimeExtending;
-ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
-    fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := fElapsedTimeTotalExtended;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
       <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
-]]></Declaration>
+VAR
+	eValve: E_PneumaticAxisValveState;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT __ISVALIDREF(_stPneumaticAxis) THEN
-    RETURN;
+	RETURN;
 END_IF
 
 IF _iPneumaticBox = 0 THEN
-    _iPneumaticBox :=
-        GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
+	_iPneumaticBox := 
+		GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
 END_IF
 
 IF bInitPointers THEN
-    apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
-    apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
-
-    bInitPointers := FALSE;
+	apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
+	apMoveTimeLimit[eVALVE_OFF] := 
+		ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOff);
+	
+	apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
+	apMoveTimeLimit[eVALVE_ON] := 
+		ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOn);
+	
+	bInitPointers := FALSE;
 END_IF
 
 tonInitializeTimer();
@@ -316,6 +299,32 @@ THEN
 END_IF
 
 eError := mMonitor_InterlockMove;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_Move" Id="{759d2f8d-8e84-0713-216f-f31787094c5b}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Move Timeout & No Movement
+METHOD PRIVATE mMonitor_Move : E_PneumaticAxisErrors
+VAR CONSTANT
+	aERROR_TIMEOUT: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+		E_PneumaticAxisErrors.eMovingWithValveOffTimedOut,
+		E_PneumaticAxisErrors.eMovingWithValveOnTimedOut];
+	aERROR_NO_MOVE: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+		E_PneumaticAxisErrors.eNotMovingWithValveOff,
+		E_PneumaticAxisErrors.eNotMovingWithValveOn];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Timeout
+IF atonMoving[eRequestedValveState].Q THEN
+	IF apEndSwitch[eCurrentValveState]^ THEN
+		mMonitor_Move := aERROR_NO_MOVE[eRequestedValveState];
+	ELSE
+		mMonitor_Move := aERROR_TIMEOUT[eRequestedValveState];
+	END_IF
+END_IF
+
+eError := mMonitor_Move;
 ]]></ST>
       </Implementation>
     </Method>
@@ -449,21 +458,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mRetractTimeStatus" Id="{2a6d9485-1bbd-0fc2-1d9c-693843a607b0}">
-      <Declaration><![CDATA[METHOD mRetractTimeStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
-    fElapsedTimeRetracting := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := fElapsedTimeRetracting;
-ELSIF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
-    fElapsedTimeTotalRetracted := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := fElapsedTimeTotalRetracted;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
       <Declaration><![CDATA[METHOD PUBLIC mRun
 ]]></Declaration>
@@ -483,17 +477,6 @@ mCheckForAirPressureError();
 
 //Reset Error
 mReset();
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSetAllowedTravelTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}">
-      <Declaration><![CDATA[METHOD PUBLIC mSetAllowedTravelTime
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOn)*1000;
-fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOff)*1000;
 ]]></ST>
       </Implementation>
     </Method>
