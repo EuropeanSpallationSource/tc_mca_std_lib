@@ -4,9 +4,9 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticAxisMode :
-(   
-	eMonostable := 0, //One stable point, single solenoid
-	eBistable := 1 //Two stable points, double solenoid
+(
+    eMonostable := 0, //One stable point, single solenoid
+    eBistable := 1 //Two stable points, double solenoid
 ):= eMonostable;
 END_TYPE
 ]]></Declaration>

@@ -4,11 +4,11 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 TYPE E_PneumaticAxisState :
-(	
-	eUnknown := 0,
-	eStandstill := 1,
-	eMoving := 2,
-	eInterlocked := 3
+(
+    eUnknown := 0,
+    eStandstill := 1,
+    eMoving := 2,
+    eInterlocked := 3
 ) := eUnknown;
 END_TYPE
 ]]></Declaration>

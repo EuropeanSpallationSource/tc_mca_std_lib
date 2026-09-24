@@ -4,8 +4,8 @@
     <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
 STRUCT
     bEndSwitchesPowerON AT %Q*: BOOL := TRUE; //Power output for pneumatic axis end switches
-	bSolenoid1On AT %Q*: BOOL; //Output of the solenoid valve 1
-	bSolenoid2On AT %Q*: BOOL; //Output of the solenoid valve 2
+    bSolenoid1On AT %Q*: BOOL; //Output of the solenoid valve 1
+    bSolenoid2On AT %Q*: BOOL; //Output of the solenoid valve 2
 END_STRUCT
 END_TYPE
 ]]></Declaration>

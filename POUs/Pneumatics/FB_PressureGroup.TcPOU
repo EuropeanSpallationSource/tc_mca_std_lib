@@ -33,7 +33,8 @@ tonTimerPressureHigh(
 ]]></ST>
     </Implementation>
     <Property Name="bPressureHigh" Id="{a98d5871-a004-082f-2621-3184809d1573}">
-      <Declaration><![CDATA[PROPERTY bPressureHigh : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY bPressureHigh : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{f3b4e553-8860-0192-16e6-469b74f61a51}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -45,7 +46,8 @@ END_VAR
       </Get>
     </Property>
     <Property Name="bPressureLow" Id="{be51e195-fa7f-0ccc-3811-074a1e15914f}">
-      <Declaration><![CDATA[PROPERTY bPressureLow : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY bPressureLow : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{cb05adcf-d57e-0d22-1095-76ebd24bf9b5}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -57,7 +59,8 @@ END_VAR
       </Get>
     </Property>
     <Property Name="fScaledPressureValue" Id="{ea8dfccc-e203-05f0-3d29-bbe5890bd9eb}">
-      <Declaration><![CDATA[PROPERTY fScaledPressureValue : REAL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY fScaledPressureValue : REAL
+]]></Declaration>
       <Get Name="Get" Id="{3ebff06d-3e02-0ee2-1268-04c0624560bf}">
         <Declaration><![CDATA[VAR
 END_VAR
