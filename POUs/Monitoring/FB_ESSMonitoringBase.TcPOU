@@ -406,10 +406,13 @@ VAR_INST
     pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with write access
     pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with read access
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
-    tonAutoResetError: TON := (PT := T#3S);
+    tonAutoResetError: TON;
     bFirstReadSlaveConfigDone: BOOL := FALSE;
     bErrorZeroEcSlavesFound: BOOL := FALSE;
     bInit: BOOL := TRUE;
+END_VAR
+VAR CONSTANT
+    tAUTO_RESET: TIME := T#3S;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -420,6 +423,7 @@ END_VAR
 END_IF
 
 tonAutoResetError(
+    PT := tAUTO_RESET,
     IN := NOT tonAutoResetError.Q
     AND (fbGetEcMasterFrames.bError
     OR fbGetEcConfSlaves.bError
