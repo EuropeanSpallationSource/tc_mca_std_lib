@@ -5,6 +5,10 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
+	
+	eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+	eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+	
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
