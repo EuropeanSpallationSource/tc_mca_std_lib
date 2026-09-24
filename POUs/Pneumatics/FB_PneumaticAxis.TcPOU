@@ -101,10 +101,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff
  AND NOT bStateChange
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd;
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff THEN
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 ]]></ST>
@@ -116,9 +116,9 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
+ AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
  AND bStateChange THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 ]]></ST>
@@ -178,34 +178,34 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
-IF fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingExtract;
+IF fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingWithValveOn;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 
 //If the command to extract has timed out
 IF fbTimerExtend.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtractTimedOut;
+   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff
+   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eMovingWithValveOnTimedOut;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 
 //IF the command to retract has been given, but the cylinder hasn't moved from bEndSwitchFwd
-IF fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingRetract;
+IF fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingWithValveOff;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 
 //If the command to retract has timed out
 IF fbTimerRetract.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractTimedOut;
+   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
+   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eMovingWithValveOffTimedOut;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
 END_IF
 ]]></ST>
@@ -220,11 +220,11 @@ END_IF
     _stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
 ELSIF _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bRetracted OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
+    IF _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff OR _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff THEN
         _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlocked;
     END_IF
 
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bExtended OR _stPneumaticAxis.stPneumaticAxisStatus.bExtending THEN
+    IF _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn OR _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn THEN
         _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlocked;
     END_IF
 END_IF
@@ -265,16 +265,16 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
 IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract
-    OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual)
+IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOff
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual)
     OR bInterlockedExtended THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOnInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
 ]]></ST>
@@ -287,9 +287,9 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
 bInterlockedExtended := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2 := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
@@ -309,12 +309,12 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+        <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
     fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeExtending;
-ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := fElapsedTimeExtending;
+ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
     fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeTotalExtended;
+    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := fElapsedTimeTotalExtended;
 END_IF
 ]]></ST>
       </Implementation>
@@ -327,16 +327,16 @@ END_IF
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
 _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := TRUE;
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bStateChange := FALSE;
 bStartExtendPLC := FALSE;
 bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
 bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
 
 IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue THEN
     fbTimerAirPressureNoErrorHigh.IN := TRUE;
@@ -360,16 +360,16 @@ END_IF
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
 _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := TRUE;
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bStateChange := FALSE;
 bStartExtendPLC := FALSE;
 bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
 bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
 
 IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue THEN
     fbTimerAirPressureNoErrorLow.IN := TRUE;
@@ -393,25 +393,25 @@ END_IF
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
- OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual
- OR _stPneumaticAxis.stPneumaticAxisControl.bRetract
- OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual
+IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOn
+ OR _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
+ OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
+ OR _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
  OR bNoPSSPermitError) THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
 END_IF
 IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
     _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
     bStateChange := FALSE;
     bStartExtendPLC := FALSE;
     bStartExtendManual := FALSE;
     bStartRetractManual := FALSE;
     bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
@@ -428,29 +428,29 @@ END_IF
         <ST><![CDATA[bNoPSSPermitError := TRUE;
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 bStateChange := FALSE;
 bStartExtendPLC := FALSE;
 bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
 bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL.';
 
 IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
     bNoPSSPermitError := FALSE;
     _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
     bStateChange := FALSE;
     bStartExtendPLC := FALSE;
     bStartExtendManual := FALSE;
     bStartRetractManual := FALSE;
     bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
@@ -483,16 +483,16 @@ END_IF
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
 END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
-    OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual)
+IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOn
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual)
     OR bInterlockedRetracted THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOffInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
 ]]></ST>
@@ -505,9 +505,9 @@ END_IF
       <Implementation>
         <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bInterlockedRetracted := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1 := FALSE;
+_stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2 := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
 _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
@@ -528,12 +528,12 @@ END_IF
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+        <ST><![CDATA[IF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
     fElapsedTimeRetracting := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeRetracting;
-ELSIF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+    _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := fElapsedTimeRetracting;
+ELSIF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
     fElapsedTimeTotalRetracted := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeTotalRetracted;
+    _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := fElapsedTimeTotalRetracted;
 END_IF
 ]]></ST>
       </Implementation>
@@ -606,8 +606,8 @@ END_CASE
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToExtend)*1000;
-fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToRetract)*1000;
+fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOn)*1000;
+fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOff)*1000;
 ]]></ST>
       </Implementation>
     </Method>
@@ -617,11 +617,11 @@ fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeTo
       <Implementation>
         <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
 //Check if cylinder is moving: extending or retracting
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff;
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn;
 _stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
-_stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
-_stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOffManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOnManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2;
 ]]></ST>
       </Implementation>
     </Method>
@@ -643,21 +643,21 @@ fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
 
 mRetractTimeStatus();
 
-fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
+fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOff);
 IF fbTrigRetract.Q THEN
    bStartRetractPLC := TRUE;
 END_IF
 
 //If the manual momentary push button is used for control of the pneumatic cylinder
 IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1;
-    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1;
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOffManual);
     IF fbTrigRetractManual.Q THEN
        bStartRetractManual := TRUE;
     END_IF
 ELSE
-    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
-    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2;
+    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOffManual);
     IF fbTrigRetractManual.Q THEN
        bStartRetractManual := TRUE;
     END_IF
@@ -668,21 +668,21 @@ fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
 
 mExtendTimeStatus();
 
-fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
+fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOn);
 IF fbTrigExtend.Q THEN
    bStartExtendPLC := TRUE;
 END_IF
 
 //If the manual momentary push button is used for control of the pneumatic cylinder
 IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1;
-    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1;
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOnManual);
     IF fbTrigExtendManual.Q THEN
        bStartExtendManual := TRUE;
     END_IF
 ELSE
-    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
-    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual := _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2;
+    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bValveOnManual);
     IF fbTrigExtendManual.Q THEN
        bStartExtendManual := TRUE;
     END_IF
@@ -691,19 +691,19 @@ END_IF
 //Starting the extraction movement
 IF (bStartExtendPLC OR bStartExtendManual) THEN
     _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bExtending := TRUE;
+    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
+       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
+        _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := TRUE;
     END_IF
     //If the command to retract is given after the valve was activated
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
-       OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
+       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff
+       OR _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
         IF (bStartRetractPLC OR bStartRetractManual) THEN
             _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-            _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
+            _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := TRUE;
+            _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+            _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
             bStartExtendPLC := FALSE;
             bStartExtendManual := FALSE;
         END_IF
@@ -711,10 +711,10 @@ IF (bStartExtendPLC OR bStartExtendManual) THEN
 END_IF
 
 // Extraction of the cylinder finished, reset timer
-IF (bStartExtendPLC OR bStartExtendManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
+IF (bStartExtendPLC OR bStartExtendManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn THEN
     bStateChange := TRUE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
     bStartExtendPLC := FALSE;
     bStartExtendManual := FALSE;
 END_IF
@@ -724,17 +724,17 @@ mCheckEndSwitchFwdStatus();
 
 IF (bStartRetractPLC OR bStartRetractManual) THEN
     _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
+    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
+       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
+        _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := TRUE;
     END_IF
 END_IF
 
 // Retraction of the cylinder finished, reset timer
-IF  (bStartRetractPLC OR bStartRetractManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+IF  (bStartRetractPLC OR bStartRetractManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
     bStateChange := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
+    _stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
     bStartRetractPLC := FALSE;
     bStartRetractManual := FALSE;
 END_IF
@@ -756,48 +756,48 @@ mCheckForMovingError();
     E_PneumaticAxisErrors.eNoError:
     _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
 
-    E_PneumaticAxisErrors.eExtractTimedOut:
+    E_PneumaticAxisErrors.eMovingWithValveOnTimedOut:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: COMMAND TIMED OUT';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 
-    E_PneumaticAxisErrors.eRetractTimedOut:
+    E_PneumaticAxisErrors.eMovingWithValveOffTimedOut:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: COMMAND TIMED OUT';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 
-    E_PneumaticAxisErrors.eNotMovingExtract:
+    E_PneumaticAxisErrors.eNotMovingWithValveOn:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: CYLINDER NOT MOVING';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 
-    E_PneumaticAxisErrors.eNotMovingRetract:
+    E_PneumaticAxisErrors.eNotMovingWithValveOff:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: CYLINDER NOT MOVING';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 
-    E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd:
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH BWD';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
+    IF _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff THEN
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
         _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
         _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
         _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
     END_IF
 
-    E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd:
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn:
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM LIMIT SWITCH FWD';
     _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
 
 END_CASE
 
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
 _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
 bStateChange := FALSE;
 bStartExtendPLC := FALSE;
 bStartExtendManual := FALSE;
 bStartRetractManual := FALSE;
 bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
 
 
 ]]></ST>

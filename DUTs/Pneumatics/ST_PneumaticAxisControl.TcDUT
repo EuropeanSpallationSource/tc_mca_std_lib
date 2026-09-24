@@ -3,12 +3,12 @@
   <DUT Name="ST_PneumaticAxisControl" Id="{9b02699a-1208-07c7-0d58-2a295cd065b4}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisControl :
 STRUCT
-    bExtend: BOOL; //Variable to control solenoid valve from PLC
-    bRetract: BOOL; //Variable to control solenoid valve from PLC
+    bValveOn: BOOL; //Variable to control solenoid valve from PLC
+    bValveOff: BOOL; //Variable to control solenoid valve from PLC
     bInterlock: BOOL; //Input interlock signal for the movement
-    bReset: BOOL; //Reset signal from EPICS
-    bOpenManual: BOOL; //Variable to control the solenoid valve from the OP
-    bCloseManual: BOOL; //Variable to close the solenoid valve from the OP
+    bReset: BOOL; //Reset signal
+    bValveOnManual: BOOL; //Variable to control the solenoid valve from the Operation Panel
+    bValveOffManual: BOOL; //Variable to close the solenoid valve from the Operation Panel
 END_STRUCT
 END_TYPE
 

@@ -6,17 +6,17 @@
 TYPE E_PneumaticAxisErrors :
 (
     eNoError := 0,
-    eExtractTimedOut := 1, //Extraction movement not done in expected time
-    eRetractTimedOut := 2, //Retraction movement not done in expected time
-    eNotMovingExtract := 3, //Extract command not executed, cylinder stays in place
-    eNotMovingRetract := 4, //Retract command not executed, cylinder stays in place
+    eMovingWithValveOnTimedOut := 1, //Moving with valve on not done in expected time
+    eMovingWithValveOffTimedOut := 2, //Moving with valve off not done in expected time
+    eNotMovingWithValveOn := 3, //Moving with valve on not executed, cylinder stays in place
+    eNotMovingWithValveOff := 4, //Moving with valve off not executed, cylinder stays in place
     eNoPSSPermit := 5, //Permit signal lost, and trying to move
-    eRetractInterlocked := 6, //Cylinder interlocked, but given signal to Extend
-    eExtendInterlocked := 7, //Cylinder interlocked, but given signal to Retract
+    eValveOffInterlocked := 6, //Cylinder interlocked, but given signal to move with valve on
+    eValveOnInterlocked := 7, //Cylinder interlocked, but given signal to move with valve off
     eAirPressureErrorLow := 8, //Air pressure too low
     eAirPressureErrorHigh := 9, //Air pressure too high
-    eNoSignalFromEndSwitchBwd := 10, //Lost signal from the EndSwitchBwd
-    eNoSignalFromEndSwitchFwd := 11 //Lost signal from the EndSwitchFwd
+    eNoSignalFromEndSwitchValveOff := 10, //Lost signal from the EndSwitch of valve off
+    eNoSignalFromEndSwitchValveOn := 11 //Lost signal from the EndSwitch of valve on
 ):= eNoError;
 END_TYPE
 ]]></Declaration>

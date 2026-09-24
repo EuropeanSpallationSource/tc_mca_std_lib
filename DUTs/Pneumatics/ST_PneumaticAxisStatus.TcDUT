@@ -3,12 +3,12 @@
   <DUT Name="ST_PneumaticAxisStatus" Id="{834f971f-5bf6-0da5-0505-eb536ce0d2fb}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisStatus :
 STRUCT
-    bExtending: BOOL; //Extending movement status
-    bRetracting: BOOL; //Retraction movement status
-    bExtended: BOOL; //Cylinder extracted status
-    bRetracted: BOOL; //Cylinder retracted status
-    fTimeElapsedExtend: REAL; //Elapsed time while extracting cylinder
-    fTimeElapsedRetract: REAL; //Elapsed time while retracting cylinder
+    bMovingWithValveOn: BOOL; //Moving with valve on status
+    bMovingWithValveOff: BOOL; //Moving with valve off status
+    bInPositionValveOn: BOOL; //In valve on position status
+    bInPositionValveOff: BOOL; //In valve off postion status
+    fTimeElapsedMovingWithValveOn: REAL; //Elapsed time while moving with valve on
+    bTimeElapsedMovingWithValveOff: REAL; //Elapsed time while moving with valve off
     bSolenoidActive: BOOL; //Status input of valve solenoid
     sStatus: STRING; //Pneumatic cylinder current status
     bInterlocked: BOOL; //Interlock siganl active

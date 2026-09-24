@@ -3,13 +3,13 @@
   <DUT Name="ST_PneumaticAxisInputs" Id="{a13cd38f-3036-02f4-0651-ea4a97049122}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisInputs :
 STRUCT
-    bEndSwitchFwd AT %I*: BOOL; //End Switch Fwd input
-    bEndSwitchBwd AT %I*: BOOL; //End Switch Bwd input
+    bEndSwitchValveOn AT %I*: BOOL; //End Switch valve on input
+    bEndSwitchValveOff AT %I*: BOOL; //End Switch valve off input
     fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
-    bOpenManualOP1 AT %I*: BOOL; //Push button input to extend cylinder from Operator Panel 1
-    bCloseManualOP1 AT %I*: BOOL; //Push button input to retract the cylinder from Operator Panel 1
-    bOpenManualOP2 AT %I*: BOOL; //Push button input to extend cylinder from Operator Panel 2
-    bCloseManualOP2 AT %I*: BOOL; //Push button input to retract the cylinder from Operator Panel 2
+    bValveOnManualOP1 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 1
+    bValveOffManualOP1 AT %I*: BOOL; //Push button input to move to valve off position from Operator Panel 1
+    bValveOnManualOP2 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 2
+    bValveOffManualOP2 AT %I*: BOOL; //Push button input to move to valve off position from Operator Panel 2
 END_STRUCT
 END_TYPE
 ]]></Declaration>
