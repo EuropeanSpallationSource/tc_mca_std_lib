@@ -7,6 +7,7 @@ VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
     _iPressureGroup: I_PressureGroup;
 
+	eState: E_PneumaticAxisState := E_PneumaticAxisState.eUnknown;
     eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
     eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 
@@ -43,47 +44,7 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-
-mRun();
-
-CASE _stPneumaticAxis.ePneumaticAxisMode OF
-
-E_PneumaticMode.eSingleSolenoidControl:
-mSingleSolenoid();
-
-E_PneumaticMode.eNoPSSPermit:
-mNoPSSPermit();
-
-E_PneumaticMode.eNoPSSPermitError:
-mNoPSSPermitError();
-
-E_PneumaticMode.eCylinderRetractInterlocked:
-mRetractedInterlocked();
-
-E_PneumaticMode.eCylinderExtendInterlocked:
-mExtendedInterlocked();
-
-E_PneumaticMode.eCylinderRetractInterlockedError:
-mRetractedInterlockedError();
-
-E_PneumaticMode.eCylinderExtendInterlockedError:
-mExtendedInterlockedError();
-
-E_PneumaticMode.eLowAirPressure:
-mLowAirPressure();
-
-E_PneumaticMode.eHighAirPressure:
-mHighAirPressure();
-
-E_PneumaticMode.eError:
-mSingleSolenoidError();
-
-E_PneumaticMode.eReset:
-mReset();
-
-END_CASE
-]]></ST>
+      <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="Control Methods" Id="{39c4bcb2-31af-075e-197a-162c75539148}" />
     <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
@@ -216,6 +177,34 @@ IF rtrigReset.Q
 THEN
 	_stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
 END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_State" Id="{5e029d34-6f19-0ae7-3102-4e3b30808b90}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Control state change requests
+METHOD mControl_State
+VAR_INPUT
+	eNextState: E_PneumaticAxisState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Try to set initial state to standstill on init
+IF tonInitializeTimer.Q THEN
+	IF apEndSwitch[eVALVE_OFF]^ 
+		OR apEndSwitch[eVALVE_ON]^
+	THEN
+		eNextState := E_PneumaticAxisState.eStandstill;
+	END_IF
+END_IF
+
+//Change to next state, if no error present
+IF bErrorPresent 
+	AND (eState <> E_PneumaticAxisState.eInterlocked)
+THEN
+	eState := E_PneumaticAxisState.eUnknown;
+ELSE
+	eState := eNextState;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mExtendedInterlocked" Id="{51cc7600-2ccc-454d-ab69-1386ac754d66}">
@@ -400,23 +389,54 @@ END_IF
     </Method>
     <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
       <Declaration><![CDATA[METHOD PUBLIC mRun
+VAR
+	eNextState: E_PneumaticAxisState;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT mInit() THEN
     RETURN;
 END_IF
 
-//Set the current status of the end position switches, and permit and intelock signals
-mSetInputStatuses();
+mControl_MoveTimer(eValve := eVALVE_OFF);
+mControl_MoveTimer(eValve := eVALVE_ON);
 
-//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-mSetAllowedTravelTime();
+mMonitor_Pressure();
+mMonitor_Permit();
 
-//Check if air pressure is in range
-mCheckForAirPressureError();
+CASE eState OF
+	E_PneumaticAxisState.eUnknown:
+		IF eRequestedValveState <> eCurrentValveState THEN
+			eNextState := E_PneumaticAxisState.eMoving;
+		END_IF
+		
+	E_PneumaticAxisState.eStandstill:
+		mMonitor_EndSwitch();
+	
+		IF bInterlockRequest THEN
+			eNextState := E_PneumaticAxisState.eInterlocked;
+		ELSIF eRequestedValveState <> eCurrentValveState THEN
+			eNextState := E_PneumaticAxisState.eMoving;
+		END_IF
+		
+	E_PneumaticAxisState.eMoving:
+		mMonitor_Move();
+		
+		IF apEndSwitch[eRequestedValveState]^ THEN
+			eCurrentValveState := eRequestedValveState;
+			eNextState := E_PneumaticAxisState.eStandstill;
+		END_IF
+		
+	E_PneumaticAxisState.eInterlocked:
+		mMonitor_InterlockMove();
+	
+		IF NOT bInterlockRequest THEN
+			eNextState := E_PneumaticAxisState.eStandstill;
+		END_IF
+END_CASE
 
-//Reset Error
-mReset();
+mControl_State(eNextState := eNextState);
+mControl_Reset();
 ]]></ST>
       </Implementation>
     </Method>
