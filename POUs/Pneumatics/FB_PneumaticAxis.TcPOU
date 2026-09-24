@@ -34,6 +34,8 @@ VAR
     bStartInitDelay: BOOL := FALSE;
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
+	
+	artrigValveRequest: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
 END_VAR
 VAR CONSTANT
     eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
@@ -192,32 +194,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckStatusOfInterlockSignal" Id="{cc7fcaed-155e-0884-115d-338b746a2dd3}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfInterlockSignal
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
-ELSIF _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff OR _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff THEN
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlocked;
-    END_IF
-
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn OR _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn THEN
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlocked;
-    END_IF
-END_IF
-
-
-
-
-
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mCheckStatusOfPermitSignal" Id="{a6169d52-c0e0-0319-04a8-3ea0650a4765}">
       <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfPermitSignal
 
@@ -258,30 +234,6 @@ IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOff
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOnInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
 END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mExtendedInterlockedError" Id="{c0b4e652-3937-42fe-a869-ee6da9ba93ff}">
-      <Declaration><![CDATA[METHOD mExtendedInterlockedError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-bInterlockedExtended := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    bInterlockedExtended := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -344,6 +296,26 @@ END_VAR
 END_IF
 
 eError := mMonitor_EndSwitch;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_InterlockMove" Id="{5b74e8a2-afbb-097b-0a74-e3f8f8f7ad98}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Interlock
+METHOD PRIVATE mMonitor_InterlockMove : E_PneumaticAxisErrors
+VAR CONSTANT
+	aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+		E_PneumaticAxisErrors.eValveOffInterlocked,
+		E_PneumaticAxisErrors.eValveOnInterlocked];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF artrigValveRequest[eRequestedValveState].Q
+	AND (eRequestedValveState <> eCurrentValveState)
+THEN
+	mMonitor_InterlockMove := aERROR[eCurrentValveState];
+END_IF
+
+eError := mMonitor_InterlockMove;
 ]]></ST>
       </Implementation>
     </Method>
@@ -474,31 +446,6 @@ IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOn
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOffInterlocked;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
 END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRetractedInterlockedError" Id="{f0f9b367-fd49-420b-9b3d-ab1f518c85fd}">
-      <Declaration><![CDATA[METHOD mRetractedInterlockedError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bInterlockedRetracted := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    bInterlockedRetracted:= FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
-
-
 ]]></ST>
       </Implementation>
     </Method>
