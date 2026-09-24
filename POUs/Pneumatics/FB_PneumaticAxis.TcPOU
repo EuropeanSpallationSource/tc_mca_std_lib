@@ -27,8 +27,7 @@ VAR
     bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
     bStartExtendManual: BOOL; //Variable to extend cylinder with momentary push button
     bStartRetractManual: BOOL; //Variable to retract cylinder with momentary push button
-    bInterlockedExtended: BOOL := FALSE;
-    bInterlockedRetracted: BOOL := FALSE;
+    bInterlockRequest: BOOL;
     bStartInitDelay: BOOL := FALSE;
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
@@ -207,28 +206,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mExtendedInterlocked" Id="{51cc7600-2ccc-454d-ab69-1386ac754d66}">
-      <Declaration><![CDATA[METHOD mExtendedInterlocked
-
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOff
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual)
-    OR bInterlockedExtended THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOnInterlocked;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
       <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
 VAR
@@ -363,27 +340,6 @@ IF _iPressureGroup.bPressureHigh THEN
 END_IF
 
 eError := mMonitor_Pressure;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRetractedInterlocked" Id="{119414ab-e2e9-44e0-b866-f00dc58d7c9f}">
-      <Declaration><![CDATA[METHOD mRetractedInterlocked
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOn
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual)
-    OR bInterlockedRetracted THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eValveOffInterlocked;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
-END_IF
 ]]></ST>
       </Implementation>
     </Method>
