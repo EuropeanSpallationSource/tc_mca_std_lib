@@ -5,7 +5,6 @@
 STRUCT
     bEndSwitchValveOn AT %I*: BOOL; //End Switch valve on input
     bEndSwitchValveOff AT %I*: BOOL; //End Switch valve off input
-    fPressureValueScaled: REAL; //Scaled value from analog air pressure sensor for pneumatic valve in bar
     bValveOnManualOP1 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 1
     bValveOffManualOP1 AT %I*: BOOL; //Push button input to move to valve off position from Operator Panel 1
     bValveOnManualOP2 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 2
