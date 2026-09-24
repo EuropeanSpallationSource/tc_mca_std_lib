@@ -28,7 +28,6 @@ VAR
     bStartRetractManual: BOOL; //Variable to retract cylinder with momentary push button
     bInterlockedExtended: BOOL := FALSE;
     bInterlockedRetracted: BOOL := FALSE;
-    bNoPSSPermitError: BOOL := FALSE;
     bStartInitDelay: BOOL := FALSE;
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
@@ -156,27 +155,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="mCheckStatusOfPermitSignal" Id="{a6169d52-c0e0-0319-04a8-3ea0650a4765}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfPermitSignal
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-ELSIF NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermit;
-ELSIF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mControl_MoveTimer" Id="{b5c0d43d-0f0f-0b38-3402-746380f2c7c0}" FolderPath="Control Methods\">
       <Declaration><![CDATA[//Controls move timer and timing data
 METHOD PRIVATE mControl_MoveTimer
@@ -362,6 +340,26 @@ eError := mMonitor_Move;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mMonitor_Permit" Id="{1368e518-6934-07f8-2e25-d6a5ffa1a744}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: PSS Permit
+METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
+VAR
+	bPSSPermitMissing : BOOL; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bPSSPermitMissing := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter
+	AND (NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK);
+
+IF bPSSPermitMissing
+	AND (artrigValveRequest[eVALVE_OFF].Q
+	OR artrigValveRequest[eVALVE_ON].Q)
+THEN
+	mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
+END_IF
+
+eError := mMonitor_Permit;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mMonitor_Pressure" Id="{6586e859-2ea5-03c2-26ee-d35e5e7cbace}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: Pressure Low & High (Auto-Resets)
 METHOD PRIVATE mMonitor_Pressure : E_PneumaticAxisErrors
@@ -376,80 +374,6 @@ IF _iPressureGroup.bPressureHigh THEN
 END_IF
 
 eError := mMonitor_Pressure;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mNoPSSPermit" Id="{992f1dea-d5e2-43e5-8693-024ad7503be1}">
-      <Declaration><![CDATA[METHOD mNoPSSPermit
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
-IF (_stPneumaticAxis.stPneumaticAxisControl.bValveOn
- OR _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
- OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
- OR _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
- OR bNoPSSPermitError) THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
-END_IF
-IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-    bStateChange := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-    bStartRetractManual := FALSE;
-    bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mNoPSSPermitError" Id="{4bd71f8e-be7a-40c7-9cce-4b92b8835477}">
-      <Declaration><![CDATA[METHOD mNoPSSPermitError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[bNoPSSPermitError := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL.';
-
-IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    bNoPSSPermitError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bValveOff := FALSE;
-    bStateChange := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-    bStartRetractManual := FALSE;
-    bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
 ]]></ST>
       </Implementation>
     </Method>
