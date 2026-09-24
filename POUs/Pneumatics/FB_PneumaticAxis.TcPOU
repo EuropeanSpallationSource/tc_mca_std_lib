@@ -88,6 +88,42 @@ END_CASE
 ]]></ST>
     </Implementation>
     <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
+    <Folder Name="Properties" Id="{91a1fcf0-14fd-0997-1818-cca146c94024}" />
+    <Property Name="bErrorPresent" Id="{e61928f7-5b1b-0cb8-323f-b7787336ed0f}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY bErrorPresent : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4c00db51-9bfe-0487-2f10-0681dde6f968}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bErrorPresent := _stPneumaticAxis.ePneumaticAxisErrors <> E_PneumaticAxisErrors.eNoError;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="eError" Id="{32047246-0707-0216-16bf-04057767b842}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY eError : E_PneumaticAxisErrors]]></Declaration>
+      <Get Name="Get" Id="{f3f6439d-58c8-0d64-1024-38a7f4d298fb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eError := _stPneumaticAxis.ePneumaticAxisErrors;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{915d3ea3-4659-00d6-29b2-9f1cbc8f96f8}">
+        <Declaration><![CDATA[PRIVATE 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF eError <> E_PneumaticAxisErrors.eNoError THEN
+	_stPneumaticAxis.ePneumaticAxisErrors := eError;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Method Name="FB_reinit" Id="{1b0a7963-bcaa-0f91-0224-0925d012a176}" FolderPath="Init Methods\">
       <Declaration><![CDATA[METHOD FB_reinit : BOOL
 VAR_INPUT
