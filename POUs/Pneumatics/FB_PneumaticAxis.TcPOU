@@ -9,6 +9,8 @@ VAR
 	eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 	eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 	
+	apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
+	
     fbTimerExtend: TON; //Timing the extraction of the cylinder
     fbTimerRetract: TON; //Timing the retraction of the cylinder
     fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
@@ -33,69 +35,66 @@ VAR
     bInterlockedRetracted: BOOL := FALSE;
     bNoPSSPermitError: BOOL := FALSE;
     bStartInitDelay: BOOL := FALSE;
-    tInitializeTimer: TON;
-    bInitialized: BOOL := FALSE;
+    tonInitializeTimer: TON := (PT := tINIT);
+    bInitPointers: BOOL := TRUE;
+END_VAR
+VAR CONSTANT
+	eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
+	eVALVE_ON: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOn;
+	tINIT: TIME := T#3S;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#3S);
+      <ST><![CDATA[
 
-IF tInitializeTimer.Q THEN
-    bStartInitDelay := FALSE;
-    bInitialized := TRUE;
-END_IF
+mRun();
 
-IF bInitialized THEN
-    mRun();
+CASE _stPneumaticAxis.ePneumaticAxisMode OF
 
-        CASE _stPneumaticAxis.ePneumaticAxisMode OF
+E_PneumaticMode.eSingleSolenoidControl:
+mSingleSolenoid();
 
-        E_PneumaticMode.eSingleSolenoidControl:
-        mSingleSolenoid();
+E_PneumaticMode.eNoPSSPermit:
+mNoPSSPermit();
 
-        E_PneumaticMode.eNoPSSPermit:
-        mNoPSSPermit();
+E_PneumaticMode.eNoPSSPermitError:
+mNoPSSPermitError();
 
-        E_PneumaticMode.eNoPSSPermitError:
-        mNoPSSPermitError();
+E_PneumaticMode.eCylinderRetractInterlocked:
+mRetractedInterlocked();
 
-        E_PneumaticMode.eCylinderRetractInterlocked:
-        mRetractedInterlocked();
+E_PneumaticMode.eCylinderExtendInterlocked:
+mExtendedInterlocked();
 
-        E_PneumaticMode.eCylinderExtendInterlocked:
-        mExtendedInterlocked();
+E_PneumaticMode.eCylinderRetractInterlockedError:
+mRetractedInterlockedError();
 
-        E_PneumaticMode.eCylinderRetractInterlockedError:
-        mRetractedInterlockedError();
+E_PneumaticMode.eCylinderExtendInterlockedError:
+mExtendedInterlockedError();
 
-        E_PneumaticMode.eCylinderExtendInterlockedError:
-        mExtendedInterlockedError();
+E_PneumaticMode.eLowAirPressure:
+mLowAirPressure();
 
-        E_PneumaticMode.eLowAirPressure:
-        mLowAirPressure();
+E_PneumaticMode.eHighAirPressure:
+mHighAirPressure();
 
-        E_PneumaticMode.eHighAirPressure:
-        mHighAirPressure();
+E_PneumaticMode.eError:
+mSingleSolenoidError();
 
-        E_PneumaticMode.eError:
-        mSingleSolenoidError();
+E_PneumaticMode.eReset:
+mReset();
 
-        E_PneumaticMode.eReset:
-        mReset();
-
-        END_CASE
-END_IF
+END_CASE
 ]]></ST>
     </Implementation>
-    <Method Name="FB_init" Id="{5454029e-f817-018f-32fe-52a7c013d503}">
-      <Declaration><![CDATA[METHOD FB_init : BOOL
+    <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
+    <Method Name="FB_reinit" Id="{1b0a7963-bcaa-0f91-0224-0925d012a176}" FolderPath="Init Methods\">
+      <Declaration><![CDATA[METHOD FB_reinit : BOOL
 VAR_INPUT
-    bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
-    bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bStartInitDelay := TRUE;
+        <ST><![CDATA[bInitPointers := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
@@ -356,6 +355,30 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
+      <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(_stPneumaticAxis) THEN
+	RETURN;
+END_IF
+
+IF bInitPointers THEN	
+	apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);	
+	apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
+	
+	bInitPointers := FALSE;
+END_IF
+
+tonInitializeTimer();
+IF tonInitializeTimer.Q THEN
+	tonInitializeTimer.IN := FALSE;
+END_IF
+
+mInit := NOT tonInitializeTimer.IN;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mLowAirPressure" Id="{c0310bb5-42a6-4cfb-b918-7f4740f67c8e}">
       <Declaration><![CDATA[METHOD mLowAirPressure : BOOL
 
@@ -546,7 +569,11 @@ END_IF
       <Declaration><![CDATA[METHOD PUBLIC mRun
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
+        <ST><![CDATA[IF NOT mInit() THEN
+	RETURN;
+END_IF
+
+//Set the current status of the end position switches, and permit and intelock signals
 mSetInputStatuses();
 
 //Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
