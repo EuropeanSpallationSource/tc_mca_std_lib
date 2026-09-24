@@ -33,6 +33,8 @@ VAR
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
 	
+	tonErrorAutoReset: TON := (PT := T#3S);
+	rtrigReset: R_TRIG;
 	artrigValveRequest: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
 END_VAR
 VAR CONSTANT
@@ -204,6 +206,38 @@ atonMoving[eValve](
 	PT := INT_TO_TIME(apMoveTimeLimit[eValve]^ * 1000));
 
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_Reset" Id="{eb46ca39-d8bd-0f8f-0608-612e177641a1}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls error reset
+METHOD PRIVATE mControl_Reset
+VAR
+	bResetInterlockError: BOOL;
+	bResetNoPermitError: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
+
+tonErrorAutoReset(
+	IN := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eAirPressureErrorLow
+	AND NOT _iPressureGroup.bPressureLow)
+	OR (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eAirPressureErrorHigh
+	AND NOT _iPressureGroup.bPressureHigh));
+
+bResetInterlockError := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eValveOffInterlocked)
+	OR (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eValveOnInterlocked)
+	AND NOT bInterlockRequest;
+	
+bResetNoPermitError := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eNoPSSPermit)
+	AND (_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK);
+
+IF rtrigReset.Q 
+	OR tonErrorAutoReset.Q
+	OR bResetInterlockError
+	OR bResetNoPermitError
+THEN
+	_stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="mExtendedInterlocked" Id="{51cc7600-2ccc-454d-ab69-1386ac754d66}">
@@ -415,24 +449,6 @@ IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
     _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mReset" Id="{4721b129-abfa-4113-85bb-a13eb59dedea}">
-      <Declaration><![CDATA[METHOD PUBLIC mReset
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Reset all the error messages
-//Set the operating mode to Single Solenoid Control
-fbTrigRisingEdgePermit(clk:=_stPneumaticAxis.stPneumaticAxisControl.bReset);
-IF _stPneumaticAxis.stPneumaticAxisControl.bReset THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
 END_IF
 ]]></ST>
       </Implementation>
