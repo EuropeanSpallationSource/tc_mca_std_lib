@@ -154,6 +154,12 @@ IF NOT initDone THEN
     stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
     stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
     stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+    // Set up the slaves from masters
+    stGapSize.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
+    stGapSize.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
+    stGapCentre.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
+    stGapCentre.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
+
     initDone := TRUE;
 END_IF
 ]]></ST>
