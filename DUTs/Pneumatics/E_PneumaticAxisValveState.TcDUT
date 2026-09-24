@@ -5,8 +5,8 @@
 {attribute 'strict'}
 TYPE E_PneumaticAxisValveState :
 (
-	eValveOff := 0,
-	eValveOn := 1
+    eValveOff := 0,
+    eValveOn := 1
 ) := eValveOff;
 END_TYPE
 ]]></Declaration>

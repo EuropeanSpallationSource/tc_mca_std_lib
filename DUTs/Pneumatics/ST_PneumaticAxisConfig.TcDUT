@@ -8,7 +8,7 @@ STRUCT
     nTimeLimitMovingWithValveOn: INT; //User defined time limit for moving with valve on in seconds
     nTimeLimitMovingWithValveOff: INT; //User defined time limit for moving with valve off in seconds
     eSelectPneumaticAxisGroup: E_PneumaticAxisGroup; //Select the pneumatic group 1 or 2, to connect to the correct pressure sensor
-	ePneumaticAxisMode: E_PneumaticAxisMode := E_PneumaticAxisMode.eMonostable;
+    ePneumaticAxisMode: E_PneumaticAxisMode := E_PneumaticAxisMode.eMonostable;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

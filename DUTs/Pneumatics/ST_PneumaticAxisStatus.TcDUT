@@ -10,7 +10,7 @@ STRUCT
     fTimeElapsedMovingWithValveOn: REAL; //Elapsed time while moving with valve on
     bTimeElapsedMovingWithValveOff: REAL; //Elapsed time while moving with valve off
     bSolenoid1Active: BOOL; //Status valve solenoid 1
-	bSolenoid2Active: BOOL; //Status valve solenoid 2
+    bSolenoid2Active: BOOL; //Status valve solenoid 2
     sStatus: STRING; //Pneumatic cylinder current status
     bInterlocked: BOOL; //Interlock siganl active
     bPSSPermitOK: BOOL; //Status of the PSS permit signal

@@ -4,21 +4,27 @@
     <Declaration><![CDATA[INTERFACE I_PressureGroup
 ]]></Declaration>
     <Property Name="bPressureHigh" Id="{71df05fc-5032-0c63-3f95-2e923ef5c275}">
-      <Declaration><![CDATA[PROPERTY bPressureHigh : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY bPressureHigh : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{f0ba445a-7413-0135-0268-37b377e91c05}">
-        <Declaration><![CDATA[]]></Declaration>
+        <Declaration><![CDATA[
+]]></Declaration>
       </Get>
     </Property>
     <Property Name="bPressureLow" Id="{f249617a-6bcf-02dc-10de-eb7be8179edb}">
-      <Declaration><![CDATA[PROPERTY bPressureLow : BOOL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY bPressureLow : BOOL
+]]></Declaration>
       <Get Name="Get" Id="{81528a58-bd64-05e1-32cd-7952bd8bf52a}">
-        <Declaration><![CDATA[]]></Declaration>
+        <Declaration><![CDATA[
+]]></Declaration>
       </Get>
     </Property>
     <Property Name="fScaledPressureValue" Id="{ddf1f188-a4db-0c49-1996-48d24cb2467c}">
-      <Declaration><![CDATA[PROPERTY fScaledPressureValue : REAL]]></Declaration>
+      <Declaration><![CDATA[PROPERTY fScaledPressureValue : REAL
+]]></Declaration>
       <Get Name="Get" Id="{cf025ad1-5fda-0c97-2075-07e2f62da985}">
-        <Declaration><![CDATA[]]></Declaration>
+        <Declaration><![CDATA[
+]]></Declaration>
       </Get>
     </Property>
   </Itf>
