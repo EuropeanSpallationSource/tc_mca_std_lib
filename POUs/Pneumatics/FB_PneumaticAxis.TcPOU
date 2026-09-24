@@ -88,6 +88,7 @@ END_CASE
 ]]></ST>
     </Implementation>
     <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
+    <Folder Name="Monitor Methods" Id="{1de9d575-2430-0608-3cc7-4848c696c067}" />
     <Folder Name="Properties" Id="{91a1fcf0-14fd-0997-1818-cca146c94024}" />
     <Property Name="bErrorPresent" Id="{e61928f7-5b1b-0cb8-323f-b7787336ed0f}" FolderPath="Properties\">
       <Declaration><![CDATA[PROPERTY bErrorPresent : BOOL]]></Declaration>
@@ -131,35 +132,6 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bInitPointers := TRUE;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckEndSwitchBwdStatus" Id="{fde97b3f-ebc0-087e-124e-79f9c467bc30}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchBwdStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff
- AND NOT bStateChange
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckEndSwitchFwdStatus" Id="{2421d0d3-9422-0ef2-10bf-967b1b7d731a}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchFwdStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn
- AND bStateChange THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -445,6 +417,24 @@ IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAx
         _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
     END_IF
 END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_EndSwitch" Id="{8fe57045-97da-0040-2f5f-3113c2e4a645}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: End Switch
+METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
+VAR CONSTANT
+	aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+		E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff,
+		E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT apEndSwitch[eCurrentValveState]^ THEN
+	mMonitor_EndSwitch := aERROR[eCurrentValveState];
+END_IF
+
+eError := mMonitor_EndSwitch;
 ]]></ST>
       </Implementation>
     </Method>
