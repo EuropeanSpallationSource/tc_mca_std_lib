@@ -155,6 +155,8 @@ bInternalExecute := FALSE;
 bEnabledOld := _stAxis.stStatus.bEnabled;
 bEnableCmdOld := _stAxis.stControl.bEnable;
 
+_stAxis.stControl.bInterlockFwd := FALSE;
+_stAxis.stControl.bInterlockBwd := FALSE;
 _stAxis.stControl.bExecute := FALSE;
 ]]></ST>
       </Implementation>

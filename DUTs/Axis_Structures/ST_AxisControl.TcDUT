@@ -11,8 +11,8 @@ STRUCT
     bStop: BOOL; //Stop the axis movement
     bHalt: BOOL; //Halt the axis movement
     bEnable: BOOL; //Enable axis drive
-    bInterlockFwd: BOOL := FALSE; //Enable interlock for forward movement
-    bInterlockBwd: BOOL := FALSE; //Enable interlock for backward movement
+    bInterlockFwd: BOOL := FALSE; //Enable interlock for forward movement (resets at end of cycle)
+    bInterlockBwd: BOOL := FALSE; //Enable interlock for backward movement (resets at end of cycle)
     eCommand: E_MotionFunctions; //Specifies the motion function to execute
     fVelocity: LREAL; //Specifies the velocity to be used for executing motion commands
     fJogVelocity: LREAL; //Velocity for jogging operations
