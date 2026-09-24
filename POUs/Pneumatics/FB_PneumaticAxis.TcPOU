@@ -396,7 +396,7 @@ METHOD PRIVATE mOutputs
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Actuate Solenoids
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn :=
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
 	//EITHER: Moving with ValveOn Request
 	(eState = E_PneumaticAxisState.eMoving
 	AND eRequestedValveState = E_PneumaticAxisValveState.eValveOn)
@@ -404,6 +404,17 @@ _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn :=
 	OR ((eState = E_PneumaticAxisState.eStandstill
 	OR eState = E_PneumaticAxisState.eInterlocked)
 	AND eCurrentValveState = E_PneumaticAxisValveState.eValveOn);
+
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On :=
+	//MUST: Bistable Mode
+	_stPneumaticAxis.stPneumaticAxisConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable
+	//EITHER: Moving with ValveOff Request
+	AND ((eState = E_PneumaticAxisState.eMoving
+	AND eRequestedValveState = E_PneumaticAxisValveState.eValveOff)
+	//OR: Standstill / Interlocked with ValveOff Current
+	OR ((eState = E_PneumaticAxisState.eStandstill
+	OR eState = E_PneumaticAxisState.eInterlocked)
+	AND eCurrentValveState = E_PneumaticAxisValveState.eValveOff));
 
 //Pressure
 _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
@@ -418,8 +429,8 @@ _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
 	
 _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoidActive := 
-	_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn;
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid1Active := 
+	_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On;
 
 //Valve On
 _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_ON]^;
@@ -429,6 +440,9 @@ _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn :=
 	AND (eRequestedValveState = E_PneumaticAxisValveState.eValveOn);
 	
 _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
+
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid2Active := 
+	_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On;
 
 //Error
 _stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
