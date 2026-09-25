@@ -160,20 +160,23 @@ IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed TH
     END_IF
 ELSE
     // Both blades are homed
-    IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy AND NOT stGapSize.stStatus.bGeared THEN
-        stGapSize.stConfig.fHomePosition := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition;
-        IF ABS(stGapSize.stConfig.fHomePosition - stGapSize.stStatus.fActPosition) > stGapSize.stConfig.fTargetPositionWindow THEN
-            stGapSize.stControl.eCommand := E_MotionFunctions.eHome;
-            stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-            stGapSize.stControl.bExecute := TRUE;
+    IF NOT stBladeNegative.stStatus.stStatus.bGeared AND NOT stBladePositive.stStatus.stStatus.bGeared THEN
+        // Don't do this when blades are coupled
+        IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy AND
+            stGapSize.stConfig.fHomePosition := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition;
+            IF ABS(stGapSize.stConfig.fHomePosition - stGapSize.stStatus.fActPosition) > stGapSize.stConfig.fTargetPositionWindow THEN
+                stGapSize.stControl.eCommand := E_MotionFunctions.eHome;
+                stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+                stGapSize.stControl.bExecute := TRUE;
+            END_IF
         END_IF
-    END_IF
-    IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy AND NOT stGapCentre.stStatus.bGeared THEN
-        stGapCentre.stConfig.fHomePosition := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0;
-        IF ABS(stGapCentre.stConfig.fHomePosition - stGapCentre.stStatus.fActPosition) > stGapCentre.stConfig.fTargetPositionWindow THEN
-            stGapCentre.stControl.eCommand := E_MotionFunctions.eHome;
-            stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-            stGapCentre.stControl.bExecute := TRUE;
+        IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy THEN
+            stGapCentre.stConfig.fHomePosition := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0;
+            IF ABS(stGapCentre.stConfig.fHomePosition - stGapCentre.stStatus.fActPosition) > stGapCentre.stConfig.fTargetPositionWindow THEN
+                stGapCentre.stControl.eCommand := E_MotionFunctions.eHome;
+                stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+                stGapCentre.stControl.bExecute := TRUE;
+            END_IF
         END_IF
     END_IF
 END_IF
