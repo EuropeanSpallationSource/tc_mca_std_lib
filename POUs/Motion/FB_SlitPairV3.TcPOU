@@ -10,6 +10,10 @@ VAR
     rtrigBladeAnyAxisDisable: R_TRIG;
     fbResetCalibrationGapSize: MC_Home;
     fbResetCalibrationGapCentre: MC_Home;
+    fbWriteParameterGapSizeLimitPos: MC_WriteParameter;
+    fbWriteParameterGapSizeLimitNeg: MC_WriteParameter;
+    fbWriteParameterGapCentreLimitPos: MC_WriteParameter;
+    fbWriteParameterGapCentreLimitNeg: MC_WriteParameter;
     // Saved commands when we need to gear in
     bSavedExecuteBladeNegative: BOOL := FALSE;
     bSavedExecuteBladePositive: BOOL := FALSE;
@@ -19,6 +23,12 @@ VAR
     eSavedCommandBladePositive: E_MotionFunctions;
     eSavedCommandGapSize: E_MotionFunctions;
     eSavedCommandGapCentre: E_MotionFunctions;
+    // Helper for setting soft limits
+    nParameterNumber : INT;
+    fValueNew: LREAL;
+    fValueOld: LREAL;
+    fValueTolerance: LREAL;
+
 END_VAR
 
 VAR_INPUT
@@ -49,6 +59,37 @@ actEnableDisableAxes();
 actGapLimitSwitches();
 actGapNotHomed();
 actGearInWhenNeeded();
+
+nParameterNumber := SWLimitPos;
+fValueNew := stBladePositive.stConfig.fMaxSoftPosLimit
+              - ABS(stGapCentre.stStatus.fActPosition - stBladePositive.stStatus.fActPosition)
+              (*-fSoftLimitDelta *);
+fValueOld := stGapSize.stConfig.fMaxSoftPosLimit;
+fValueTolerance := stGapSize.stConfig.fTargetPositionWindow;
+stGapSize.stConfig.fMaxSoftPosLimit;
+stGapSize.stConfig.fTargetPositionWindow;
+IF ABS(fValueNew - fValueOld) > fValueTolerance THEN
+    IF NOT fbWriteParameterGapSizeLimitPos.Busy THEN
+        fbWriteParameterGapSizeLimitPos(Axis := stGapSize.Axis,
+                                        Execute := FALSE);
+    END_IF
+    fbWriteParameterGapSizeLimitPos(Axis := stGapSize.Axis,
+                                    ParameterNumber := nParameterNumber,
+                                    Value := fValueNew,
+                                    Execute := TRUE);
+END_IF
+
+(*
+mUpdateGapSoftLimits(fbWriteParameterGapSizeLimitPos,
+                     nParameterNumber := SWLimitPos,
+                     fValueNew := stBladePositive.stConfig.fMaxSoftPosLimit
+                                  - ABS(stGapCentre.stStatus.fActPosition - stBladePositive.stStatus.fActPosition)
+                                  (*-fSoftLimitDelta *),
+                     fValueOld := stGapSize.stConfig.fMaxSoftPosLimit,
+                     fValueTolerance := stGapSize.stConfig.fTargetPositionWindow,
+                     Axis := stGapSize.Axis);
+*)
+
 ]]></ST>
     </Implementation>
     <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
@@ -232,5 +273,34 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Method Name="mUpdateGapSoftLimits" Id="{8bc1a38b-c7c2-0d6f-36e5-84310b644ec8}">
+      <Declaration><![CDATA[METHOD mUpdateGapSoftLimits : BOOL
+VAR_INPUT
+    fbWriteParameter: REFERENCE TO MC_WriteParameter;
+    nParameterNumber : INT;
+    fValueNew: LREAL;
+    fValueOld: LREAL;
+    fValueTolerance: LREAL;
+    Axis: AXIS_REF;
+END_VAR
+
+VAR_IN_OUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF ABS(fValueNew - fValueOld) > fValueTolerance THEN
+    IF NOT fbWriteParameter.Busy THEN
+        fbWriteParameter(Axis := Axis,
+                         Execute := FALSE);
+    END_IF
+    fbWriteParameter(Axis := Axis,
+                     ParameterNumber := nParameterNumber,
+                     Value := fValueNew,
+                     Execute := TRUE);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
