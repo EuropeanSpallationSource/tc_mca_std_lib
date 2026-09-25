@@ -507,6 +507,8 @@ bGapHomed := checkGapHomed(stGapSize, stGapCentre);
 bBladesCoupled := checkBladesCoupled(stBladeNegative, stBladePositive);
 bBladesUncoupled := checkBladesUncoupled(stBladeNegative, stBladePositive);
 bAxisErrorsPresent := checkAnyAxisHasError(stBladeNegative, stBladePositive, stGapSize, stGapCentre);
+stGapCentre.stStatus.bSlitsAxisBusy := stBladeNegative.stStatus.bBusy OR stBladePositive.stStatus.bBusy;
+stGapSize.stStatus.bSlitsAxisBusy := stBladeNegative.stStatus.bBusy OR stBladePositive.stStatus.bBusy;
 ]]></ST>
       </Implementation>
     </Action>
