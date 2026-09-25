@@ -51,14 +51,13 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-IF NOT initDone THEN
-    actInit();
+      <ST><![CDATA[IF NOT initDone THEN
+    act0Init();
 END_IF
-actEnableDisableAxes();
-actGapLimitSwitches();
-actGapNotHomed();
-actGearInWhenNeeded();
+act1EnableDisableAxes();
+act2GapLimitSwitches();
+act3GearInWhenNeeded();
+act4GapNotHomed();
 
 nParameterNumber := SWLimitPos;
 fValueNew := stBladePositive.stConfig.fMaxSoftPosLimit
@@ -92,7 +91,43 @@ mUpdateGapSoftLimits(fbWriteParameterGapSizeLimitPos,
 
 ]]></ST>
     </Implementation>
-    <Action Name="actEnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
+    <Action Name="act0Init" Id="{5d77996e-061e-0280-39fb-35033569225b}">
+      <Implementation>
+        <ST><![CDATA[
+IF NOT initDone THEN
+    // When Gap is homed, we do it from here
+    stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+    stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+    //Setup multimaster gearing of negative blade
+    stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
+    stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+    stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+    stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+    stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+    //Setup multimaster gearing of positive blade
+    stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
+    stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+    stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+    stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+    stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+    // Set up the slaves from masters
+    stGapSize.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
+    stGapSize.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
+    stGapCentre.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
+    stGapCentre.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
+
+    initDone := TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="act1EnableDisableAxes" Id="{9cca7254-2de4-0e61-3b14-5f2f0aa1eeaf}">
       <Implementation>
         <ST><![CDATA[//Enable all axes when one of the virtual axes is enabled
 rtrigVirtualAxisEnable(CLK := stGapSize.stControl.bEnable OR stGapCentre.stControl.bEnable);
@@ -124,7 +159,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actGapLimitSwitches" Id="{1d6ed593-63d9-0790-211c-df7a24fd9645}">
+    <Action Name="act2GapLimitSwitches" Id="{1d6ed593-63d9-0790-211c-df7a24fd9645}">
       <Implementation>
         <ST><![CDATA[//Set Virtual axes inputs: both Limit must be TRUE (inverse logic)
 stGapSize.stInputs.bLimitBwd := stBladeNegative.stInputs.bLimitFwd AND stBladePositive.stInputs.bLimitBwd;
@@ -134,56 +169,7 @@ stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitFwd AND stBlade
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actGapNotHomed" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
-      <Implementation>
-        <ST><![CDATA[
-IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed THEN
-    IF stGapSize.stStatus.bHomed THEN
-        IF NOT fbResetCalibrationGapSize.Busy THEN
-            fbResetCalibrationGapSize(Axis := stGapSize.Axis,
-                                      Execute := FALSE,
-                                      HomingMode := MC_HomingMode.MC_ResetCalibration);
-        END_IF
-        fbResetCalibrationGapSize(Axis := stGapSize.Axis,
-                                  Execute := TRUE,
-                                  HomingMode := MC_HomingMode.MC_ResetCalibration);
-    END_IF
-    IF stGapCentre.stStatus.bHomed THEN
-        IF NOT fbResetCalibrationGapCentre.Busy THEN
-            fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
-                                        Execute := FALSE,
-                                        HomingMode := MC_HomingMode.MC_ResetCalibration);
-        END_IF
-        fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
-                                    Execute := TRUE,
-                                    HomingMode := MC_HomingMode.MC_ResetCalibration);
-    END_IF
-ELSE
-    // Both blades are homed
-    IF NOT stBladeNegative.stStatus.stStatus.bGeared AND NOT stBladePositive.stStatus.stStatus.bGeared THEN
-        // Don't do this when blades are coupled
-        IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy AND
-            stGapSize.stConfig.fHomePosition := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition;
-            IF ABS(stGapSize.stConfig.fHomePosition - stGapSize.stStatus.fActPosition) > stGapSize.stConfig.fTargetPositionWindow THEN
-                stGapSize.stControl.eCommand := E_MotionFunctions.eHome;
-                stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-                stGapSize.stControl.bExecute := TRUE;
-            END_IF
-        END_IF
-        IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy THEN
-            stGapCentre.stConfig.fHomePosition := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0;
-            IF ABS(stGapCentre.stConfig.fHomePosition - stGapCentre.stStatus.fActPosition) > stGapCentre.stConfig.fTargetPositionWindow THEN
-                stGapCentre.stControl.eCommand := E_MotionFunctions.eHome;
-                stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-                stGapCentre.stControl.bExecute := TRUE;
-            END_IF
-        END_IF
-    END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Action>
-    <Action Name="actGearInWhenNeeded" Id="{deb2387a-c21a-077c-3d6c-ac603c4ecd46}">
+    <Action Name="act3GearInWhenNeeded" Id="{deb2387a-c21a-077c-3d6c-ac603c4ecd46}">
       <Implementation>
         <ST><![CDATA[
 IF stGapSize.stControl.bExecute AND
@@ -240,38 +226,51 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="actInit" Id="{5d77996e-061e-0280-39fb-35033569225b}">
+    <Action Name="act4GapNotHomed" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
       <Implementation>
         <ST><![CDATA[
-IF NOT initDone THEN
-    // When Gap is homed, we do it from here
-    stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-    stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
-    //Setup multimaster gearing of negative blade
-    stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
-    stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
-    stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
-    stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
-    stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
-    stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
-    stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
-    stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
-    //Setup multimaster gearing of positive blade
-    stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
-    stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
-    stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
-    stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
-    stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
-    stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
-    stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
-    stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
-    // Set up the slaves from masters
-    stGapSize.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
-    stGapSize.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
-    stGapCentre.stConfig.anMultiSlaveAxisIndex[1] := nIdNegativeAxis;
-    stGapCentre.stConfig.anMultiSlaveAxisIndex[2] := nIdPositiveAxis;
-
-    initDone := TRUE;
+IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed THEN
+    IF stGapSize.stStatus.bHomed THEN
+        IF NOT fbResetCalibrationGapSize.Busy THEN
+            fbResetCalibrationGapSize(Axis := stGapSize.Axis,
+                                      Execute := FALSE,
+                                      HomingMode := MC_HomingMode.MC_ResetCalibration);
+        END_IF
+        fbResetCalibrationGapSize(Axis := stGapSize.Axis,
+                                  Execute := TRUE,
+                                  HomingMode := MC_HomingMode.MC_ResetCalibration);
+    END_IF
+    IF stGapCentre.stStatus.bHomed THEN
+        IF NOT fbResetCalibrationGapCentre.Busy THEN
+            fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
+                                        Execute := FALSE,
+                                        HomingMode := MC_HomingMode.MC_ResetCalibration);
+        END_IF
+        fbResetCalibrationGapCentre(Axis := stGapCentre.Axis,
+                                    Execute := TRUE,
+                                    HomingMode := MC_HomingMode.MC_ResetCalibration);
+    END_IF
+ELSE
+    // Both blades are homed
+    IF NOT stBladeNegative.stStatus.bGeared AND NOT stBladePositive.stStatus.bGeared THEN
+        // Don't do this when blades are coupled
+        IF NOT stGapSize.stControl.bExecute AND NOT stGapSize.stStatus.bBusy THEN
+            stGapSize.stConfig.fHomePosition := stBladePositive.stStatus.fActPosition - stBladeNegative.stStatus.fActPosition;
+            IF ABS(stGapSize.stConfig.fHomePosition - stGapSize.stStatus.fActPosition) > stGapSize.stConfig.fTargetPositionWindow THEN
+                stGapSize.stControl.eCommand := E_MotionFunctions.eHome;
+                stGapSize.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+                stGapSize.stControl.bExecute := TRUE;
+            END_IF
+        END_IF
+        IF NOT stGapCentre.stControl.bExecute AND NOT stGapCentre.stStatus.bBusy THEN
+            stGapCentre.stConfig.fHomePosition := (stBladePositive.stStatus.fActPosition + stBladeNegative.stStatus.fActPosition) / 2.0;
+            IF ABS(stGapCentre.stConfig.fHomePosition - stGapCentre.stStatus.fActPosition) > stGapCentre.stConfig.fTargetPositionWindow THEN
+                stGapCentre.stControl.eCommand := E_MotionFunctions.eHome;
+                stGapCentre.stConfig.eHomeSeq := E_HomingRoutines.eHomeDirect;
+                stGapCentre.stControl.bExecute := TRUE;
+            END_IF
+        END_IF
+    END_IF
 END_IF
 ]]></ST>
       </Implementation>
