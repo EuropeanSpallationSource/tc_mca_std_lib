@@ -213,7 +213,6 @@ CASE eSlitPairState OF
         nAutoErrorResetCounter := 0;
         bError := TRUE;
         bEnabled := FALSE;
-        actStopAxes();
         IF bReset THEN
             bResetting := TRUE;
             eSlitPairState := E_SlitPairStates.eErrorGearOut;
@@ -381,6 +380,7 @@ END_IF
 bReset := stGapCentre.stControl.bReset OR stGapSize.stControl.bReset;
 
 IF NOT bError AND bAxisErrorsPresent AND (stGapCentre.stStatus.bEnabled OR stGapSize.stStatus.bEnabled) THEN
+    actStopAxes();
     eSlitPairState := E_SlitPairStates.eError;
 END_IF
 
