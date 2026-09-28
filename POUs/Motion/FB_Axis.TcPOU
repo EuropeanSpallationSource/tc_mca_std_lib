@@ -1726,7 +1726,6 @@ IF rtrigFwdLimit.Q THEN
     _stAxis.stStatus.stSwitchInfo.fLimitFwdUntrigExternalPos := _stAxis.stInputs.fExternalPos;
 END_IF
 
-//The home sensor is expected to be false when not enganged.
 IF rtrigHomeSensor.Q THEN
     _stAxis.stStatus.stSwitchInfo.fHomeSensorTrigPos := _stAxis.stStatus.fActPosition;
     _stAxis.stStatus.stSwitchInfo.nHomeSensorTrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
