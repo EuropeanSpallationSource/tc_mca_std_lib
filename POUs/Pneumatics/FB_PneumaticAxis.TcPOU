@@ -250,10 +250,8 @@ END_IF
     RETURN;
 END_IF
 
-IF _iPressureGroup = 0 THEN
-    _iPressureGroup :=
-        GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
-END_IF
+_iPressureGroup :=
+    GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
 
 IF bInitPointers THEN
     apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
