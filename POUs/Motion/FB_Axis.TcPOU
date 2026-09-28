@@ -1639,6 +1639,9 @@ VAR_INST
     ftrigBwdLimit: F_TRIG;
     rtrigFwdLimit: R_TRIG;
     ftrigFwdLimit: F_TRIG;
+
+    rtrigHomeSensor: R_TRIG;
+    ftrigHomeSensor: F_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -1691,6 +1694,9 @@ ftrigBwdLimit(CLK := _stAxis.stInputs.bLimitBwd);
 rtrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
 ftrigFwdLimit(CLK := _stAxis.stInputs.bLimitFwd);
 
+rtrigHomeSensor(CLK := _stAxis.stInputs.bHomeSensor);
+ftrigHomeSensor(CLK := _stAxis.stInputs.bHomeSensor);
+
 IF NOT _stAxis.stStatus.bAxisInitialized THEN
     RETURN;
 END_IF
@@ -1719,6 +1725,20 @@ IF rtrigFwdLimit.Q THEN
     _stAxis.stStatus.stSwitchInfo.nLimitFwdUntrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
     _stAxis.stStatus.stSwitchInfo.fLimitFwdUntrigExternalPos := _stAxis.stInputs.fExternalPos;
 END_IF
+
+//The home sensor is expected to be false when not enganged.
+IF rtrigHomeSensor.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fHomeSensorTrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nHomeSensorTrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fHomeSensorTrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
+IF ftrigHomeSensor.Q THEN
+    _stAxis.stStatus.stSwitchInfo.fHomeSensorUntrigPos := _stAxis.stStatus.fActPosition;
+    _stAxis.stStatus.stSwitchInfo.nHomeSensorUntrigEncoderRaw := _stAxis.stStatus.nEncoderRawCounter;
+    _stAxis.stStatus.stSwitchInfo.fHomeSensorUntrigExternalPos := _stAxis.stInputs.fExternalPos;
+END_IF
+
 ]]></ST>
       </Implementation>
     </Method>
