@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SlitPairAfterWork" Id="{3d2ae8b9-8ee2-0fe7-1d43-c3ce05391276}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPairAfterWork
+
+VAR_INPUT
+    nIdNegativeAxis: UINT; //ID of axis for which negative motion increases gap size
+    nIdPositiveAxis: UINT; //ID of axis for which positive motion increases gap size
+    nIdGapSizeAxis: UINT; //ID of virtual gap aperture size axis
+    nIdGapCentreAxis: UINT; //ID of virtual gap centre position axis
+END_VAR
+
+VAR_IN_OUT
+    stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
+    stBladePositive: ST_AxisStruct; //Axis data of the positive blade
+    stGapSize: ST_AxisStruct; //Axis data of the gap size
+    stGapCentre: ST_AxisStruct; //Axis data of the gap centre
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
