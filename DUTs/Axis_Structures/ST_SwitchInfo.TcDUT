@@ -15,6 +15,13 @@ STRUCT
     nLimitFwdUntrigEncoderRaw: UDINT; //Last untrigger encoder raw value of the fwd limit
     fLimitFwdTrigExternalPos: LREAL; //Last trigger external tool pos of the fwd limit
     fLimitFwdUntrigExternalPos: LREAL; //Last untrigger external tool pos of the fwd limit
+
+    fHomeSensorTrigPos: LREAL; //Last trigger pos of the home sensor
+    fHomeSensorUntrigPos: LREAL; //Last untrigger pos of the home sensor
+    nHomeSensorTrigEncoderRaw: UDINT; //Last trigger encoder raw value of the home sensor
+    nHomeSensorUntrigEncoderRaw: UDINT; //Last untrigger encoder raw value of the home sensor
+    fHomeSensorTrigExternalPos: LREAL; //Last trigger external tool pos of the home sensor
+    fHomeSensorUntrigExternalPos: LREAL; //Last untrigger external tool pos of the home sensor
 END_STRUCT
 END_TYPE
 ]]></Declaration>
