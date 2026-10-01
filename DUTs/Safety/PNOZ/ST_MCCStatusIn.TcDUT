@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MCCStatusIn" Id="{72c2d88f-a765-0a04-1255-9624a4d4f1ce}">
+    <Declaration><![CDATA[// Status information related to the cabinet PNOZ --> IPC, will not change from cabinet to cabinet
+TYPE ST_MCCStatusIn :
+STRUCT
+    bHeartbeat: BIT; //The loop-back signal of the heartbeat signal from the PLC-to-PNOZ-to-PLC.
+    bEStopOK: BIT; //If no E-Stop connected to this cabinet is pressed, this bit is TRUE. When pressed, it is FALSE.
+    bRemote: BIT; //When remote mode is active, this allows remote resetting of E-Stop zones from EPICS/NICOS. Remote is active when the physical doors/access into said instruments are locked.
+    bFault: BIT; //Feedback to safety controller that fault has been acknowledged
+    bReserved4: BIT;
+    bReserved5: BIT;
+    bReserved6: BIT;
+    bReserved7: BIT;
+    bReserved8: BIT;
+    bReserved9: BIT;
+    bReserved10: BIT;
+    bReserved11: BIT;
+    bReserved12: BIT;
+    bReserved13: BIT;
+    bReserved14: BIT;
+    bReserved15: BIT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

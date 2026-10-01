@@ -1,0 +1,327 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_ZoneMonitoring" Id="{4c541b3f-0d68-09b3-36df-efceff1f6c20}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ZoneMonitoring
+VAR_INPUT
+    iSafetyProvider: I_SafetyProvider;
+    stSafety: ST_Safety;
+END_VAR
+VAR_OUTPUT
+    aErrorID: ARRAY[1..nMAX_ALARMS] OF INT;
+    aErrorMsg: ARRAY[1..nMAX_ALARMS] OF STRING;
+    nAlarmGrpBitNumber: UDINT;
+END_VAR
+VAR
+    _bSafetyAcknowledgeButton: BOOL;
+    _bSafetyAcknowledgeLED: BOOL;
+    _bEStopReleased: BOOL;
+    _bEStopLED: BOOL;
+
+    aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
+(*[1]*)(nErrorID := 106, sErrorMsg := 'EtherCAT PNOZ is not ok', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[2]*)(nErrorID := 107, sErrorMsg := 'Zone fault', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[3]*)(nErrorID := 108, sErrorMsg := 'Watchdog triggered (missing heartbeat), safety zone down', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[4]*)(nErrorID := 502, sErrorMsg := 'E-Stop active', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined, eEStopLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+
+(*[5]*)(nErrorID := 801, sErrorMsg := 'Safety function 1 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[6]*)(nErrorID := 802, sErrorMsg := 'Safety function 2 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[7]*)(nErrorID := 803, sErrorMsg := 'Safety function 3 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[8]*)(nErrorID := 804, sErrorMsg := 'Safety function 4 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[9]*)(nErrorID := 805, sErrorMsg := 'Safety function 5 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[10]*)(nErrorID := 806, sErrorMsg := 'Safety function 6 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE)
+//(*[5]*)(nErrorID := 521, sErrorMsg := 'Motion Safety: OP-Stop 1 active', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+//(*[6]*)(nErrorID := 522, sErrorMsg := 'Motion Safety: OP-Stop 2 active', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+];
+
+    aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
+    aTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
+
+    nAlarmCnt: INT;
+    nAlarmBitNumber: UDINT;
+
+    aExtraMessage: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+
+    //Ethercat PNOZ device state
+    bPNOZWatchdogTriggered: BOOL;
+    bPNOZWcStateInvalid: BOOL;
+    bPNOZSlaveINIT: BOOL;
+    bPNOZSlavePreOP: BOOL;
+    bPNOZSlaveSafeOP: BOOL;
+    bPNOZSlaveError: BOOL;
+
+    //Data from the safety controller
+    _EStopReleased: BOOL;
+    _STOReleased: BOOL;
+
+    fbSafetyAcknowledgeButtonTrig: R_TRIG;
+END_VAR
+
+VAR CONSTANT
+    tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
+    nMAX_ALARMS: UINT := 50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[mMonitorAlarms();
+mLink();
+]]></ST>
+    </Implementation>
+    <Property Name="EStopReleased" Id="{b6e46bf5-e187-0482-3cb2-d4df4d4c3416}">
+      <Declaration><![CDATA[PROPERTY PUBLIC EStopReleased : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{3762badc-347c-0515-1247-decd5569535b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EStopReleased := _bEStopReleased;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4682ac96-7fe1-0504-14f3-eb80a56a6812}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_bEStopReleased := EStopReleased;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="mAlarmActive" Id="{593bf7f2-9177-06be-12a8-f4b9e9c62e4a}">
+      <Declaration><![CDATA[METHOD mAlarmActive
+VAR_INPUT
+    i: UINT;
+    bUpdatedExtraMessage: BOOL;
+END_VAR
+
+VAR_INST
+    aFbErrorMessageTimer: ARRAY[1..nMAX_ALARMS] OF TON;
+    aStartErrorMsgTimer: ARRAY[1..nMAX_ALARMS] OF BOOL;
+    aFbErrorTrig: ARRAY[1..nMAX_ALARMS] OF R_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Update timer and trigger for new log message
+aStartErrorMsgTimer[i] :=
+    aAlarmList[i].bAlarmActive
+    AND NOT aFbErrorMessageTimer[i].Q;
+
+aFbErrorMessageTimer[i](
+    IN := aStartErrorMsgTimer[i],
+    PT := tNEW_MESSAGE_TIMEOUT);
+
+aFbErrorTrig[i](CLK := aStartErrorMsgTimer[i]);
+
+IF NOT aAlarmList[i].bAlarmActive THEN
+    RETURN;
+END_IF
+
+nAlarmCnt := nAlarmCnt + 1;
+aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
+aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
+
+mPrintErrorMessage(
+    bPrintLog := aFbErrorTrig[i].Q OR bUpdatedExtraMessage,
+    sErrorMessage := aTempErrorMsg[nAlarmCnt],
+    nErrorID := aAlarmList[i].nErrorID,
+    nIndex := i);
+
+//Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.'
+CASE aAlarmList[i].nErrorID OF
+    106:
+        nAlarmBitNumber.0 := TRUE; //EtherCAT PNOZ not OK
+    107:
+        nAlarmBitNumber.1 := TRUE; //Motion safety zone fault
+    108:
+        nAlarmBitNumber.2 := TRUE; //Heartbeat watchdog fault
+    502:
+        nAlarmBitNumber.3 := TRUE; //E-stop active
+    801, 802, 803, 804, 805, 806:
+        nAlarmBitNumber.4 := TRUE; //Safety-function fault
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mLink" Id="{87b635d2-9522-049e-135a-07b0efffd009}">
+      <Declaration><![CDATA[METHOD mLink
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Input Variables
+
+
+//Output Variables
+
+IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.ReadFromSafetyController THEN
+    _EStopReleased := iSafetyProvider.EStopOK;
+    _STOReleased := iSafetyProvider.STO_OK;
+END_IF;
+
+EStopReleased := _EStopReleased;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorAlarms" Id="{f37e8f99-a3b4-04ca-3a37-17a2fdfb4045}">
+      <Declaration><![CDATA[METHOD mMonitorAlarms
+VAR
+    i: UINT := 0;
+    stMonitorLed: ST_MonitoringAlarm;
+END_VAR
+
+VAR_INST
+    aExtraMessageOld: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+    bLedActive: BOOL := FALSE;
+    fbFastBlinkOn: TON;
+    fbFastBlinkOff: TON;
+    fbSlowBlinkOn: TON;
+    fbSlowBlinkOff: TON;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbSafetyAcknowledgeButtonTrig(CLK:=_bSafetyAcknowledgeButton);
+mSetResetAlarmsLeds();
+
+//Reset before loop
+nAlarmCnt := 0;
+nAlarmBitNumber := 0;
+MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
+MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
+bLedActive := FALSE;
+
+FOR i := 1 TO nMAX_ALARMS DO
+    //Handle log prints, alarm bits and prepare alarm LEDs
+    mAlarmActive(i := i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
+
+    //Set the alarm LEDs according to first occurrence
+    IF NOT bLedActive
+        AND aAlarmList[i].bLedActive THEN
+        bLedActive := TRUE;
+        stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
+        stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
+    END_IF
+
+    //If any error exists requiring an acknowledge, highlight Acknowledge LED.
+    IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
+        stMonitorLed.eErrorAcknowledgeLED := aAlarmList[i].eErrorAcknowledgeLED;
+    END_IF
+END_FOR
+
+aExtraMessageOld := aExtraMessage; //Save last messages for next iteration
+
+//Copy to output variables
+aErrorID := aTempErrorID;
+aErrorMsg := aTempErrorMsg;
+nAlarmGrpBitNumber := nAlarmBitNumber;
+
+//Handle LED blinking
+fbFastBlinkOn(IN:=NOT fbFastBlinkOff.Q, PT:=T#250MS);
+fbFastBlinkOff(IN:=fbFastBlinkOn.Q, PT:=T#250MS);
+
+fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
+fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
+
+_bSafetyAcknowledgeLED :=
+    (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSteady)
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+
+_bEStopLED := aAlarmList[4].bLedActive;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitorEtherCAT" Id="{a98322c6-2970-0ea8-39fa-da8f76119b4f}">
+      <Declaration><![CDATA[METHOD mMonitorEtherCAT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mPrintErrorMessage" Id="{b59fd036-adae-0c85-3115-622ab4e95619}">
+      <Declaration><![CDATA[METHOD mPrintErrorMessage
+VAR_INPUT
+    bPrintLog : BOOL;
+    sErrorMessage: STRING;
+    nErrorID: INT;
+    nIndex: UINT;
+END_VAR
+VAR
+    sErrorId: STRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bPrintLog THEN
+    RETURN;
+END_IF;
+
+sErrorId := CONCAT(
+    STR1 := 'ErrorID: ',
+    STR2 := INT_TO_STRING(nErrorID));
+
+sErrorId := CONCAT(
+    STR1 := sErrorId,
+    STR2 := '. Motion Safety: %s');
+
+ADSLOGSTR(
+    msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+    msgFmtStr := sErrorId,
+    strArg := sErrorMessage);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetReset" Id="{8e8b985e-d1a1-0f21-2171-9817c5ff65ad}">
+      <Declaration><![CDATA[METHOD mSetReset
+VAR_INPUT
+    bOk: BOOL;
+END_VAR
+
+VAR_IN_OUT
+    stAlarmList: ST_MonitoringAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bOk THEN
+    stAlarmList.bAlarmActive := TRUE;
+    stAlarmList.bLedActive := TRUE;
+    RETURN;
+END_IF
+
+stAlarmList.bAlarmActive := FALSE;
+
+IF stAlarmList.bLedAutoReset OR fbSafetyAcknowledgeButtonTrig.Q THEN
+    stAlarmList.bLedActive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetResetAlarmsLeds" Id="{0a8103d7-6a7f-0338-02c3-c707c6c6f187}">
+      <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
+VAR_INST
+    nIndex: UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stSafetyIn.stPNOZCommDiag.bWcState);
+mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stSafetyIn.stMCCStatusIn.bFault);
+
+mSetReset(stAlarmList := aAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
+mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stSafetyIn.stMCCStatusIn.bEStopOK);
+
+//Safety function faults
+mSetReset(stAlarmList := aAlarmList[5], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[1].bFault);
+mSetReset(stAlarmList := aAlarmList[6], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[2].bFault);
+mSetReset(stAlarmList := aAlarmList[7], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[3].bFault);
+mSetReset(stAlarmList := aAlarmList[8], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[4].bFault);
+mSetReset(stAlarmList := aAlarmList[9], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[5].bFault);
+mSetReset(stAlarmList := aAlarmList[10], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[6].bFault);
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
