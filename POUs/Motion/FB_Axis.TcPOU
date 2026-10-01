@@ -97,6 +97,8 @@ VAR
     fbReadAxisMaxPosLagValue: MC_ReadParameter;
     fbReadEnTargetPositionMonitoring: MC_ReadParameter;
     fbReadTargetPositionWindow: MC_ReadParameter;
+    fbReadAxisEncoderScalingNumerator: MC_ReadParameter;
+    fbReadAxisEncoderScalingDenominator: MC_ReadParameter;
     fbReadBacklashConfigEnable: MC_ReadParameter;
     fbReadDriveAdress: MC_ReadDriveAddress;
 
@@ -1463,6 +1465,16 @@ fbReadBacklashConfigEnable(Axis := _stAxis.Axis,
                         ParameterNumber := E_AxisParameters.AxisEnablePosCorrection);
 _stAxis.stConfig.stBacklashConfig.bEnabledInNC := LREAL_TO_BOOL(fbReadBacklashConfigEnable.Value);
 
+fbReadAxisEncoderScalingNumerator(Axis := _stAxis.Axis,
+                    Enable := TRUE,
+                    ReadMode := READMODE_CYCLIC,
+                    ParameterNumber := E_AxisParameters.AxisEncoderScalingNumerator,
+                    Value => _stAxis.stConfig.fAxisEncoderScalingNumerator);
+fbReadAxisEncoderScalingDenominator(Axis := _stAxis.Axis,
+                      Enable := TRUE,
+                      ReadMode := READMODE_CYCLIC,
+                      ParameterNumber := E_AxisParameters.AxisEncoderScalingDenominator,
+                      Value => _stAxis.stConfig.fAxisEncoderScalingDenominator);
 
 //All variables are valid
 _stAxis.stConfig.bReadMcParametersValid := FALSE;
@@ -1480,7 +1492,9 @@ _stAxis.stConfig.bReadMcParametersValid := fbReadAxisVeloManSlow.Valid AND
     fbReadEnPositionLagMonitoring.Valid AND
     fbReadAxisMaxPosLagValue.Valid AND
     fbReadEnTargetPositionMonitoring.Valid AND
-    fbReadTargetPositionWindow.Valid;
+    fbReadTargetPositionWindow.Valid AND
+    fbReadAxisEncoderScalingNumerator.Valid AND
+    fbReadAxisEncoderScalingDenominator.Valid;
 
 //One of the variables has a read error
 _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
@@ -1497,7 +1511,9 @@ _stAxis.stConfig.bReadMcParametersError := fbReadAxisVeloManSlow.Error OR
     fbReadEnPositionLagMonitoring.Error OR
     fbReadAxisMaxPosLagValue.Error OR
     fbReadEnTargetPositionMonitoring.Error OR
-    fbReadTargetPositionWindow.Error;
+    fbReadTargetPositionWindow.Error OR
+    fbReadAxisEncoderScalingNumerator.Error OR
+    fbReadAxisEncoderScalingDenominator.Error;
 ]]></ST>
       </Implementation>
     </Method>
