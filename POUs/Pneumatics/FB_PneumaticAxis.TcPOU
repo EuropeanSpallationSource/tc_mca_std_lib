@@ -19,6 +19,7 @@ VAR
     afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
 
     bPSSPermitNeeded: BOOL;
+    bPSSPermitMissing: BOOL;
     bInterlockRequest: BOOL;
 
     tonInitializeTimer: TON := (PT := tINIT);
@@ -156,31 +157,42 @@ atonMoving[eValve](
       <Declaration><![CDATA[//Controls error reset
 METHOD PRIVATE mControl_Reset
 VAR
-    bResetInterlockError: BOOL;
-    bResetNoPermitError: BOOL;
+	bReset: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
 
-tonErrorAutoReset(
-    IN := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eAirPressureErrorLow
-    AND NOT _iPressureGroup.bPressureLow)
-    OR (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eAirPressureErrorHigh
-    AND NOT _iPressureGroup.bPressureHigh));
+tonErrorAutoReset.IN := FALSE;
+  
+CASE eError OF
+    E_PneumaticAxisErrors.eAirPressureErrorLow:
+        tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureLow;
+        bReset := tonErrorAutoReset.Q;
+        
+    E_PneumaticAxisErrors.eAirPressureErrorHigh:
+        tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureHigh;
+        bReset := tonErrorAutoReset.Q;
+        
+    E_PneumaticAxisErrors.eNoPSSPermit:
+        bReset := NOT bPSSPermitMissing;
+        
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
+        bReset := apEndSwitch[eVALVE_OFF]^;
+        
+    E_PneumaticAxisErrors.eEndSwitchSignalConflict:
+        bReset := NOT (apEndSwitch[eVALVE_OFF]^ 
+            AND apEndSwitch[eVALVE_ON]^);
+        
+    E_PneumaticAxisErrors.eValveOffInterlocked,
+    E_PneumaticAxisErrors.eValveOnInterlocked:
+        bReset := NOT bInterlockRequest;
+        
+END_CASE
 
-bResetInterlockError := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eValveOffInterlocked)
-    OR (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eValveOnInterlocked)
-    AND NOT bInterlockRequest;
+tonErrorAutoReset();
 
-bResetNoPermitError := (_stPneumaticAxis.ePneumaticAxisErrors = E_PneumaticAxisErrors.eNoPSSPermit)
-    AND (_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK);
-
-IF rtrigReset.Q
-    OR tonErrorAutoReset.Q
-    OR bResetInterlockError
-    OR bResetNoPermitError
-THEN
+IF rtrigReset.Q OR bReset THEN
     _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
 END_IF
 ]]></ST>
@@ -284,6 +296,9 @@ bPSSPermitNeeded := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter;
 _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
     AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
 
+bPSSPermitMissing := bPSSPermitNeeded
+	AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
+	
 //Interlock
 bInterlockRequest := _stPneumaticAxis.stPneumaticAxisControl.bInterlock
     AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
@@ -372,15 +387,9 @@ eError := mMonitor_Move;
     <Method Name="mMonitor_Permit" Id="{1368e518-6934-07f8-2e25-d6a5ffa1a744}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: PSS Permit
 METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
-VAR
-    bPSSPermitMissing : BOOL;
-END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bPSSPermitMissing := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter
-    AND (NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK);
-
-IF bPSSPermitMissing
+        <ST><![CDATA[IF bPSSPermitMissing
     AND (artrigMoveCommand[eVALVE_OFF].Q
     OR artrigMoveCommand[eVALVE_ON].Q)
 THEN
@@ -608,101 +617,5 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <LineIds Name="FB_PneumaticAxis">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.bErrorPresent.Get">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.eError.Get">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.eError.Set">
-      <LineId Id="3" Count="2" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.EndOfCycle">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.FB_reinit">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.iPressureGroup.Get">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.iPressureGroup.Set">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mControl_MoveTimer">
-      <LineId Id="3" Count="16" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mControl_Reset">
-      <LineId Id="3" Count="21" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mControl_State">
-      <LineId Id="3" Count="16" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mControl_ValveRequest">
-      <LineId Id="3" Count="19" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mInit">
-      <LineId Id="3" Count="24" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mInputs">
-      <LineId Id="3" Count="19" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mMonitor_EndSwitch">
-      <LineId Id="8" Count="8" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mMonitor_InterlockMove">
-      <LineId Id="3" Count="6" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mMonitor_Move">
-      <LineId Id="3" Count="9" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mMonitor_Permit">
-      <LineId Id="3" Count="10" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mMonitor_Pressure">
-      <LineId Id="3" Count="8" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mOutputs">
-      <LineId Id="3" Count="50" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.mStatusInfo">
-      <LineId Id="3" Count="48" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.Run">
-      <LineId Id="3" Count="51" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.stPneumaticAxis.Get">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_PneumaticAxis.stPneumaticAxis.Set">
-      <LineId Id="3" Count="0" />
-      <LineId Id="2" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
