@@ -208,19 +208,14 @@ METHOD PRIVATE mControl_SetValveState
 END_IF
 
 //Update set valve state
-IF artrigMoveCommand[eVALVE_OFF].Q THEN
-    eSetValveState := E_PneumaticAxisValveState.eValveOff;
-ELSIF artrigMoveCommand[eVALVE_ON].Q
+IF artrigMoveCommand[eVALVE_OFF].Q 
+	OR bPSSPermitMissing 
+THEN
+	eSetValveState := eVALVE_OFF;
+ELSIF artrigMoveCommand[eVALVE_ON].Q 
     AND (eState <> E_PneumaticAxisState.eMoving)
 THEN
-    eSetValveState := E_PneumaticAxisValveState.eValveOn;
-END_IF
-
-//Lock request to Valve Off, if PSS Permit is missing
-IF bPSSPermitNeeded
-    AND _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter
-THEN
-    eSetValveState := E_PneumaticAxisValveState.eValveOff;
+	eSetValveState := eVALVE_ON;
 END_IF
 ]]></ST>
       </Implementation>
