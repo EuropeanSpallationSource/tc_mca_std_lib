@@ -5,11 +5,11 @@
 {attribute 'strict'}
 TYPE E_PneumaticAxisState :
 (
-    eUnknown := 0,
-    eStandstill := 1,
+    eFailSafe := 0,
+    eInPosition := 1,
     eMoving := 2,
     eInterlocked := 3
-) := eUnknown;
+) := eFailSafe;
 END_TYPE
 ]]></Declaration>
   </DUT>

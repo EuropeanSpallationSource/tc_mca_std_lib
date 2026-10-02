@@ -7,9 +7,9 @@ VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
     _iPressureGroup: I_PressureGroup;
 
-    eState: E_PneumaticAxisState := E_PneumaticAxisState.eUnknown;
-    eRequestedValveState: E_PneumaticAxisValveState := eVALVE_OFF;
-    eCurrentValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+    eState: E_PneumaticAxisState := E_PneumaticAxisState.eFailSafe;
+    eSetValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+    eActValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 
     apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
     apMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO INT;
@@ -26,7 +26,7 @@ VAR
 
     tonErrorAutoReset: TON := (PT := tAUTO_ERROR_RESET);
     rtrigReset: R_TRIG;
-    artrigValveRequest: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
+    artrigMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
 END_VAR
 VAR CONSTANT
     eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
@@ -133,7 +133,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bStart := (eState = E_PneumaticAxisState.eMoving)
-    AND (eValve = eRequestedValveState);
+    AND (eValve = eSetValveState);
 
 //Update Time
 IF atonMoving[eValve].IN THEN
@@ -186,6 +186,33 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mControl_SetValveState" Id="{22b8f3fa-139b-0f55-370c-d7d4300933e5}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls set valve state 
+METHOD PRIVATE mControl_SetValveState
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eState <> E_PneumaticAxisState.eMoving THEN
+    eSetValveState := eActValveState;
+END_IF
+
+//Update set valve state
+IF artrigMoveCommand[eVALVE_OFF].Q THEN
+    eSetValveState := E_PneumaticAxisValveState.eValveOff;
+ELSIF artrigMoveCommand[eVALVE_ON].Q
+    AND (eState <> E_PneumaticAxisState.eMoving)
+THEN
+    eSetValveState := E_PneumaticAxisValveState.eValveOn;
+END_IF
+
+//Lock request to Valve Off, if PSS Permit is missing
+IF bPSSPermitNeeded
+    AND _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter
+THEN
+    eSetValveState := E_PneumaticAxisValveState.eValveOff;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mControl_State" Id="{5e029d34-6f19-0ae7-3102-4e3b30808b90}" FolderPath="Control Methods\">
       <Declaration><![CDATA[//Control state change requests
 METHOD mControl_State
@@ -199,7 +226,7 @@ IF tonInitializeTimer.Q THEN
     IF apEndSwitch[eVALVE_OFF]^
         OR apEndSwitch[eVALVE_ON]^
     THEN
-        eNextState := E_PneumaticAxisState.eStandstill;
+        eNextState := E_PneumaticAxisState.eInPosition;
     END_IF
 END_IF
 
@@ -207,37 +234,9 @@ END_IF
 IF bErrorPresent
     AND (eState <> E_PneumaticAxisState.eInterlocked)
 THEN
-    eState := E_PneumaticAxisState.eUnknown;
+    eState := E_PneumaticAxisState.eFailSafe;
 ELSE
     eState := eNextState;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mControl_ValveRequest" Id="{22b8f3fa-139b-0f55-370c-d7d4300933e5}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[//Controls valve state change requests
-METHOD PRIVATE mControl_ValveRequest
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Reset request when not moving
-IF eState <> E_PneumaticAxisState.eMoving THEN
-    eRequestedValveState := eCurrentValveState;
-END_IF
-
-//Update request based on button press
-IF artrigValveRequest[eVALVE_OFF].Q THEN
-    eRequestedValveState := E_PneumaticAxisValveState.eValveOff;
-ELSIF artrigValveRequest[eVALVE_ON].Q
-    AND (eState <> E_PneumaticAxisState.eMoving)
-THEN
-    eRequestedValveState := E_PneumaticAxisValveState.eValveOn;
-END_IF
-
-//Lock request to Valve Off, if PSS Permit is missing
-IF bPSSPermitNeeded
-    AND _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter
-THEN
-    eRequestedValveState := E_PneumaticAxisValveState.eValveOff;
 END_IF
 ]]></ST>
       </Implementation>
@@ -289,13 +288,13 @@ _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
 bInterlockRequest := _stPneumaticAxis.stPneumaticAxisControl.bInterlock
     AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
 
-//Valve Request
-artrigValveRequest[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
+//Move Request
+artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
     OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
     OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1
     OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2);
 
-artrigValveRequest[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
+artrigMoveCommand[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
     OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn
     OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1
     OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2);
@@ -312,8 +311,8 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT apEndSwitch[eCurrentValveState]^ THEN
-    mMonitor_EndSwitch := aERROR[eCurrentValveState];
+        <ST><![CDATA[IF NOT apEndSwitch[eActValveState]^ THEN
+    mMonitor_EndSwitch := aERROR[eActValveState];
 END_IF
 
 eError := mMonitor_EndSwitch;
@@ -330,10 +329,10 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF artrigValveRequest[eRequestedValveState].Q
-    AND (eRequestedValveState <> eCurrentValveState)
+        <ST><![CDATA[IF artrigMoveCommand[eSetValveState].Q
+    AND (eSetValveState <> eActValveState)
 THEN
-    mMonitor_InterlockMove := aERROR[eCurrentValveState];
+    mMonitor_InterlockMove := aERROR[eActValveState];
 END_IF
 
 eError := mMonitor_InterlockMove;
@@ -354,11 +353,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Timeout
-IF atonMoving[eRequestedValveState].Q THEN
-    IF apEndSwitch[eCurrentValveState]^ THEN
-        mMonitor_Move := aERROR_NO_MOVE[eRequestedValveState];
+IF atonMoving[eSetValveState].Q THEN
+    IF apEndSwitch[eActValveState]^ THEN
+        mMonitor_Move := aERROR_NO_MOVE[eSetValveState];
     ELSE
-        mMonitor_Move := aERROR_TIMEOUT[eRequestedValveState];
+        mMonitor_Move := aERROR_TIMEOUT[eSetValveState];
     END_IF
 END_IF
 
@@ -378,8 +377,8 @@ END_VAR
     AND (NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK);
 
 IF bPSSPermitMissing
-    AND (artrigValveRequest[eVALVE_OFF].Q
-    OR artrigValveRequest[eVALVE_ON].Q)
+    AND (artrigMoveCommand[eVALVE_OFF].Q
+    OR artrigMoveCommand[eVALVE_ON].Q)
 THEN
     mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
@@ -412,24 +411,24 @@ METHOD PRIVATE mOutputs
       <Implementation>
         <ST><![CDATA[//Actuate Solenoids
 _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
-    //EITHER: Moving with ValveOn Request
+    //EITHER: Moving with Set ValveOn
     (eState = E_PneumaticAxisState.eMoving
-    AND eRequestedValveState = E_PneumaticAxisValveState.eValveOn)
-    //OR: Standstill / Interlocked with ValveOn Current
-    OR ((eState = E_PneumaticAxisState.eStandstill
+    AND eSetValveState = E_PneumaticAxisValveState.eValveOn)
+    //OR: InPosition / Interlocked in Act ValveOn
+    OR ((eState = E_PneumaticAxisState.eInPosition
     OR eState = E_PneumaticAxisState.eInterlocked)
-    AND eCurrentValveState = E_PneumaticAxisValveState.eValveOn);
+    AND eActValveState = E_PneumaticAxisValveState.eValveOn);
 
 _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On :=
-    //MUST: Bistable Mode
+    //MUST: Bistable mode
     _stPneumaticAxis.stPneumaticAxisConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable
-    //EITHER: Moving with ValveOff Request
+    //EITHER: Moving with Set ValveOff
     AND ((eState = E_PneumaticAxisState.eMoving
-    AND eRequestedValveState = E_PneumaticAxisValveState.eValveOff)
-    //OR: Standstill / Interlocked with ValveOff Current
-    OR ((eState = E_PneumaticAxisState.eStandstill
+    AND eSetValveState = E_PneumaticAxisValveState.eValveOff)
+    //OR: InPosition / Interlocked in Act ValveOff
+    OR ((eState = E_PneumaticAxisState.eInPosition
     OR eState = E_PneumaticAxisState.eInterlocked)
-    AND eCurrentValveState = E_PneumaticAxisValveState.eValveOff));
+    AND eActValveState = E_PneumaticAxisValveState.eValveOff));
 
 //Pressure
 _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
@@ -440,7 +439,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := apEndSwitch[eVALVE
 
 _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
     (eState = E_PneumaticAxisState.eMoving)
-    AND (eRequestedValveState = E_PneumaticAxisValveState.eValveOff);
+    AND (eSetValveState = E_PneumaticAxisValveState.eValveOff);
 
 _stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
 
@@ -452,7 +451,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_
 
 _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn :=
     (eState = E_PneumaticAxisState.eMoving)
-    AND (eRequestedValveState = E_PneumaticAxisValveState.eValveOn);
+    AND (eSetValveState = E_PneumaticAxisValveState.eValveOn);
 
 _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
 
@@ -503,10 +502,10 @@ METHOD PRIVATE mStatusInfo
 
     E_PneumaticAxisErrors.eNoError:
         CASE eState OF
-            E_PneumaticAxisState.eStandstill:
+            E_PneumaticAxisState.eInPosition:
                 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
             E_PneumaticAxisState.eMoving:
-                IF eRequestedValveState = E_PneumaticAxisValveState.eValveOn THEN
+                IF eSetValveState = E_PneumaticAxisValveState.eValveOn THEN
                     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_ON';
                 ELSE
                     _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_OFF';
@@ -536,40 +535,40 @@ mInputs();
 
 mControl_MoveTimer(eValve := eVALVE_OFF);
 mControl_MoveTimer(eValve := eVALVE_ON);
-mControl_ValveRequest();
+mControl_SetValveState();
 
 mMonitor_Pressure();
 mMonitor_Permit();
 
 eNextState := eState;
 CASE eState OF
-    E_PneumaticAxisState.eUnknown:
-        IF eRequestedValveState <> eCurrentValveState THEN
+    E_PneumaticAxisState.eFailSafe:
+        IF eSetValveState <> eActValveState THEN
             eNextState := E_PneumaticAxisState.eMoving;
         END_IF
 
-    E_PneumaticAxisState.eStandstill:
+    E_PneumaticAxisState.eInPosition:
         mMonitor_EndSwitch();
 
         IF bInterlockRequest THEN
             eNextState := E_PneumaticAxisState.eInterlocked;
-        ELSIF eRequestedValveState <> eCurrentValveState THEN
+        ELSIF eSetValveState <> eActValveState THEN
             eNextState := E_PneumaticAxisState.eMoving;
         END_IF
 
     E_PneumaticAxisState.eMoving:
         mMonitor_Move();
 
-        IF apEndSwitch[eRequestedValveState]^ THEN
-            eCurrentValveState := eRequestedValveState;
-            eNextState := E_PneumaticAxisState.eStandstill;
+        IF apEndSwitch[eSetValveState]^ THEN
+            eActValveState := eSetValveState;
+            eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
 
     E_PneumaticAxisState.eInterlocked:
         mMonitor_InterlockMove();
 
         IF NOT bInterlockRequest THEN
-            eNextState := E_PneumaticAxisState.eStandstill;
+            eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
 END_CASE
 
