@@ -385,8 +385,7 @@ METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPSSPermitMissing
-    AND (artrigMoveCommand[eVALVE_OFF].Q
-    OR artrigMoveCommand[eVALVE_ON].Q)
+	AND artrigMoveCommand[eVALVE_ON].Q
 THEN
     mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
