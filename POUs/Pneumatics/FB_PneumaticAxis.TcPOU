@@ -550,8 +550,13 @@ mMonitor_Permit();
 eNextState := eState;
 CASE eState OF
     E_PneumaticAxisState.eFailSafe:
-        IF eSetValveState <> eActValveState THEN
+        IF artrigMoveCommand[eVALVE_OFF].Q 
+            OR artrigMoveCommand[eVALVE_ON].Q 
+        THEN
             eNextState := E_PneumaticAxisState.eMoving;
+        ELSIF apEndSwitch[eVALVE_OFF]^ THEN
+            eActValveState := eVALVE_OFF;
+            eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
 
     E_PneumaticAxisState.eInPosition:
