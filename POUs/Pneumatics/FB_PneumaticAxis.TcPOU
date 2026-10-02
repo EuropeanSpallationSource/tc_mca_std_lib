@@ -157,37 +157,37 @@ atonMoving[eValve](
       <Declaration><![CDATA[//Controls error reset
 METHOD PRIVATE mControl_Reset
 VAR
-	bReset: BOOL := FALSE;
+    bReset: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
 
 tonErrorAutoReset.IN := FALSE;
-  
+
 CASE eError OF
     E_PneumaticAxisErrors.eAirPressureErrorLow:
         tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureLow;
         bReset := tonErrorAutoReset.Q;
-        
+
     E_PneumaticAxisErrors.eAirPressureErrorHigh:
         tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureHigh;
         bReset := tonErrorAutoReset.Q;
-        
+
     E_PneumaticAxisErrors.eNoPSSPermit:
         bReset := NOT bPSSPermitMissing;
-        
+
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
         bReset := apEndSwitch[eVALVE_OFF]^;
-        
+
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
-        bReset := NOT (apEndSwitch[eVALVE_OFF]^ 
+        bReset := NOT (apEndSwitch[eVALVE_OFF]^
             AND apEndSwitch[eVALVE_ON]^);
-        
+
     E_PneumaticAxisErrors.eValveOffInterlocked,
     E_PneumaticAxisErrors.eValveOnInterlocked:
         bReset := NOT bInterlockRequest;
-        
+
 END_CASE
 
 tonErrorAutoReset();
@@ -199,7 +199,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mControl_SetValveState" Id="{22b8f3fa-139b-0f55-370c-d7d4300933e5}" FolderPath="Control Methods\">
-      <Declaration><![CDATA[//Controls set valve state 
+      <Declaration><![CDATA[//Controls set valve state
 METHOD PRIVATE mControl_SetValveState
 ]]></Declaration>
       <Implementation>
@@ -208,14 +208,14 @@ METHOD PRIVATE mControl_SetValveState
 END_IF
 
 //Update set valve state
-IF artrigMoveCommand[eVALVE_OFF].Q 
-	OR bPSSPermitMissing 
+IF artrigMoveCommand[eVALVE_OFF].Q
+    OR bPSSPermitMissing
 THEN
-	eSetValveState := eVALVE_OFF;
-ELSIF artrigMoveCommand[eVALVE_ON].Q 
+    eSetValveState := eVALVE_OFF;
+ELSIF artrigMoveCommand[eVALVE_ON].Q
     AND (eState <> E_PneumaticAxisState.eMoving)
 THEN
-	eSetValveState := eVALVE_ON;
+    eSetValveState := eVALVE_ON;
 END_IF
 ]]></ST>
       </Implementation>
@@ -292,8 +292,8 @@ _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
     AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
 
 bPSSPermitMissing := bPSSPermitNeeded
-	AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
-	
+    AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
+
 //Interlock
 bInterlockRequest := _stPneumaticAxis.stPneumaticAxisControl.bInterlock
     AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
@@ -323,10 +323,10 @@ END_VAR
       <Implementation>
         <ST><![CDATA[IF NOT apEndSwitch[eActValveState]^ THEN
     mMonitor_EndSwitch := aERROR[eActValveState];
-ELSIF apEndSwitch[eVALVE_OFF]^ 
-	AND apEndSwitch[eVALVE_ON]^
+ELSIF apEndSwitch[eVALVE_OFF]^
+    AND apEndSwitch[eVALVE_ON]^
 THEN
-	mMonitor_EndSwitch := E_PneumaticAxisErrors.eEndSwitchSignalConflict;
+    mMonitor_EndSwitch := E_PneumaticAxisErrors.eEndSwitchSignalConflict;
 END_IF
 
 eError := mMonitor_EndSwitch;
@@ -385,7 +385,7 @@ METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPSSPermitMissing
-	AND artrigMoveCommand[eVALVE_ON].Q
+    AND artrigMoveCommand[eVALVE_ON].Q
 THEN
     mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
@@ -550,8 +550,8 @@ mMonitor_Permit();
 eNextState := eState;
 CASE eState OF
     E_PneumaticAxisState.eFailSafe:
-        IF artrigMoveCommand[eVALVE_OFF].Q 
-            OR artrigMoveCommand[eVALVE_ON].Q 
+        IF artrigMoveCommand[eVALVE_OFF].Q
+            OR artrigMoveCommand[eVALVE_ON].Q
         THEN
             eNextState := E_PneumaticAxisState.eMoving;
         ELSIF apEndSwitch[eVALVE_OFF]^ THEN
