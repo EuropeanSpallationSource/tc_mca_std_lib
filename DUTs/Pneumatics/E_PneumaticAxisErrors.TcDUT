@@ -15,8 +15,9 @@ TYPE E_PneumaticAxisErrors :
     eValveOnInterlocked := 7, //Cylinder interlocked, but given signal to move with valve off
     eAirPressureErrorLow := 8, //Air pressure too low
     eAirPressureErrorHigh := 9, //Air pressure too high
-    eNoSignalFromEndSwitchValveOff := 10, //Lost signal from the EndSwitch of valve off
-    eNoSignalFromEndSwitchValveOn := 11 //Lost signal from the EndSwitch of valve on
+    eNoSignalFromEndSwitchValveOff := 10, //Lost signal from the end switch of valve off
+    eNoSignalFromEndSwitchValveOn := 11, //Lost signal from the end switch of valve on
+    eEndSwitchSignalConflict := 12 //Signal from both end switch is high
 ):= eNoError;
 END_TYPE
 ]]></Declaration>
