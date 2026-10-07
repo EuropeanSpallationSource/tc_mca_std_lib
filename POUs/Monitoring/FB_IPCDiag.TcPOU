@@ -30,6 +30,7 @@ VAR CONSTANT
     ERR_NOT_SUPPORTED: DINT := -324661248; //Error Code: Parameter not supported.
     ERR_UNAVAILABLE: DINT := -327090174; //Error Code: Module of parameter is unavailable (not existing).
     ERR_NO_DATA: DINT := -324665083; //Error Code: No data available.
+    ERR_INVALID_INDEX: DINT := -324665088; //Error Code: Invalid index.
     CPU_NAME_LENGTH: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF USINT := [6, 10];
     CPU_NAME: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF STRING(10) := ['CX5130', 'C6017-0020'];
     MAX_PARAMS: USINT := 72;
@@ -262,6 +263,11 @@ END_VAR
             ERR_NO_DATA:
                 IF NOT bFirstReadDone THEN
                     ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag no data available: %s',TO_STRING(PARAM_LIST[iParam].eParam));
+                END_IF
+                eState := eNext;
+            ERR_INVALID_INDEX:
+                IF NOT bFirstReadDone THEN
+                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag invalid index: %s',TO_STRING(PARAM_LIST[iParam].eParam));
                 END_IF
                 eState := eNext;
             ELSE
