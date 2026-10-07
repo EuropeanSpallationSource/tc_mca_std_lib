@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyOut" Id="{6db86537-94b6-04bd-253e-6dba0646fcc5}">
+    <Declaration><![CDATA[TYPE ST_SafetyOut :
+STRUCT
+    stMCCStatusOut: ST_MCCStatusOut;
+    stMCC_CustomStatusOut: ST_MCC_CustomStatusOut;
+    astSafetyFunctionOut: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionOut;
+
+    bSTOActive: BOOL;
+    bTechnosoftMotionErrors: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
