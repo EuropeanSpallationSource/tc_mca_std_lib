@@ -95,10 +95,12 @@ VAR
     bEcSlaveError: BOOL;
     bEcDCnotInSync: BOOL;
 
+    tonInitDelay: TON := (IN := TRUE, PT := tINIT_DELAY);
     fbAcknowledgeButtonTrig: R_TRIG;
 END_VAR
 
 VAR CONSTANT
+    tINIT_DELAY: TIME := T#3S;
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
     nMAX_EC_SLAVES: INT := 255;
@@ -108,7 +110,12 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[mMonitorAlarms();
+      <ST><![CDATA[tonInitDelay();
+IF NOT tonInitDelay.Q THEN
+    RETURN;
+END_IF
+
+mMonitorAlarms();
 mMonitorCPU();
 mMonitorEtherCAT();
 mLink();
