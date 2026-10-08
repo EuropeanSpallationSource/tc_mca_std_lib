@@ -27,12 +27,12 @@ VAR
     nUPSBatteryCapacityWarning: BOOL; //Warning set for UPS battery capacity is below limit
 END_VAR
 VAR CONSTANT
-    CPU_NAME_LENGTH: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF USINT := [6, 10];
-    CPU_NAME: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF STRING(10) := ['CX5130', 'C6017-0020'];
-    MAX_PARAMS: USINT := 56;
-    CYCLIC_READ_PARAM_COUNT: USINT := 10;
-    CYCLIC_READ_INDEX: USINT := MAX_PARAMS - CYCLIC_READ_PARAM_COUNT + 1;
-    PARAM_LIST: ARRAY [1..MAX_PARAMS] OF ST_IPCDiagParamSpec := [
+    anCPU_NAME_LENGTH: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF USINT := [6, 10];
+    asCPU_NAME: ARRAY [E_CPUType.CX5130..E_CPUType.C6017_0020] OF STRING(10) := ['CX5130', 'C6017-0020'];
+    nMAX_PARAMS: USINT := 56;
+    nCYCLIC_READ_PARAM_COUNT: USINT := 10;
+    nCYCLIC_READ_INDEX: USINT := nMAX_PARAMS - nCYCLIC_READ_PARAM_COUNT + 1;
+    astPARAM_LIST: ARRAY [1..nMAX_PARAMS] OF ST_IPCDiagParamSpec := [
     //READ ONCE
             (eParam := E_IPCDiag_ParameterKey.IPCDeviceName, pData := ADR(stIPCDiagData.sIPCDeviceName), nSize := SIZEOF(stIPCDiagData.sIPCDeviceName)),
             (eParam := E_IPCDiag_ParameterKey.IPCHardwareVersion, pData := ADR(stIPCDiagData.sIPCHardwareVersion), nSize := SIZEOF(stIPCDiagData.sIPCHardwareVersion)),
@@ -125,12 +125,12 @@ END_VAR
       <Implementation>
         <ST><![CDATA[IF bFirstReadDone AND eState = eDelay THEN
     //CPU Type mismatch
-    IF LEFT(stIPCDiagData.sIPCHardwareVersion, CPU_NAME_LENGTH[eCPUType]) <> CPU_NAME[eCPUType] THEN
+    IF LEFT(stIPCDiagData.sIPCHardwareVersion, anCPU_NAME_LENGTH[eCPUType]) <> asCPU_NAME[eCPUType] THEN
         IF NOT bCPUTypeWarning THEN
             sMessage := CONCAT(
                 STR1 := 'IPC diag CPU type mistmatch IPC configured as %s, read:  ',
                 STR2 := stIPCDiagData.sIPCHardwareVersion);
-            ADSLOGSTR(ADSLOG_MSGTYPE_WARN, sMessage, CPU_NAME[eCPUType]);
+            ADSLOGSTR(ADSLOG_MSGTYPE_WARN, sMessage, asCPU_NAME[eCPUType]);
         END_IF
         bCPUTypeWarning := TRUE;
     ELSE
@@ -189,7 +189,7 @@ END_VAR
 
 fbIPCReadParam(
     bExecute := NOT fbIPCRegister.bError AND fbIPCRegister.bValid AND (eState = eRead),
-    eParameterKey := PARAM_LIST[iParam].eParam,
+    eParameterKey := astPARAM_LIST[iParam].eParam,
     fbRegister := fbIPCRegister);
 
 tonReadDelay(
@@ -212,7 +212,7 @@ END_IF
 ADSLOGSTR(
     msgCtrlMask := ADSLOG_MSGTYPE_WARN,
     msgFmtStr := sFmtStr,
-    strArg := TO_STRING(PARAM_LIST[iParam].eParam));
+    strArg := TO_STRING(astPARAM_LIST[iParam].eParam));
 ]]></ST>
       </Implementation>
     </Method>
@@ -223,7 +223,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mGetModuleType := SHR(PARAM_LIST[iParam].eParam, 32) AND 16#FFFF;
+        <ST><![CDATA[mGetModuleType := SHR(astPARAM_LIST[iParam].eParam, 32) AND 16#FFFF;
 ]]></ST>
       </Implementation>
     </Method>
@@ -238,12 +238,12 @@ END_VAR
     eDelay:
         IF tonReadDelay.Q THEN
             bFirstReadDone := TRUE;
-            iParam := CYCLIC_READ_INDEX;
+            iParam := nCYCLIC_READ_INDEX;
             eState := eRead;
         END_IF
 
     eNext:
-        IF iParam = MAX_PARAMS THEN
+        IF iParam = nMAX_PARAMS THEN
             eState := eDelay;
         ELSE
             iParam := iParam + 1;
@@ -271,8 +271,8 @@ END_VAR
 
     eValid:
         fbIPCReadParam.GetParameter(
-            pBuffer := PARAM_LIST[iParam].pData,
-            nBufferSize := PARAM_LIST[iParam].nSize);
+            pBuffer := astPARAM_LIST[iParam].pData,
+            nBufferSize := astPARAM_LIST[iParam].nSize);
         eState := eNext;
 
     eError:
@@ -291,7 +291,7 @@ END_VAR
                     msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
                     msgFmtStr := CONCAT(
                         STR1 := 'IPC diag unknown error id: %d, stopping... parameter: ',
-                        STR2 := TO_STRING(PARAM_LIST[iParam].eParam)),
+                        STR2 := TO_STRING(astPARAM_LIST[iParam].eParam)),
                     dintArg := fbIPCReadParam.hrErrorCode);
                 eState := eStopped;
         END_CASE
