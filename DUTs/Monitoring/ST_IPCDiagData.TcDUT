@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_IPCDiagData" Id="{e883e933-7427-0bb1-3ce6-60b4ebb90547}">
-    <Declaration><![CDATA[TYPE ST_IPCDiagData :
+    <Declaration><![CDATA[//Info: https://infosys.beckhoff.com/english.php?content=../content/1033/devicemanager/759343243.html&id=
+TYPE ST_IPCDiagData :
 STRUCT
     sIPCDeviceName: T_MaxString; //IPC device name
     sIPCHardwareVersion: T_MaxString; //IPC hardware version
     sIPCImageVersion: T_MaxString; //IPC image version
     nIPCVendor: UDINT; //IPC vendor
     sIPCSerialNumber: T_MaxString; //serial number (or BTN) of Beckhoff IPC
+
+    sOS_Name: T_MaxString; //OS name
+    nOS_VersionMajor: UDINT; //OS major version
+    nOS_VersionMinor: UDINT; //OS minor version
+    nOS_VersionBuild: UDINT; //OS build
+    //sOS_CSDVersion: T_MaxString; //OS CSD version
 
     sCPU_Name: T_MaxString; //CPU name
     nCPU_Frequency: UDINT; //CPU frequency
@@ -51,12 +58,6 @@ STRUCT
     //sNIC_IPv4DNSServers: T_MaxString; //DNS servers
     //sNIC_VirtualDeviceName: T_MaxString; //virtual device name
     //sNIC_IPv4DNSServersActive: T_MaxString; //active DNS servers
-
-    sOS_Name: T_MaxString; //OS name
-    nOS_VersionMajor: UDINT; //OS major version
-    nOS_VersionMinor: UDINT; //OS minor version
-    nOS_VersionBuild: UDINT; //OS build
-    //sOS_CSDVersion: T_MaxString; //OS CSD version
 
     sSoftware_MDPVersion: STRING; //version of the MDP.exe service
     nSoftware_NoSoftwares: UINT; //number of software components

@@ -17,7 +17,7 @@ VAR
     fbIPCRegister: Tc3_IPCDiag.FB_IPCDiag_Register; //Initializes the PLC API for IPC diagnostics on a specific IPC
     fbIPCReadParam: Tc3_IPCDiag.FB_IPCDiag_ReadParameter; //Reads an IPC diagnostic parameter
     iParam: USINT := 1; //Index of current parameter being read in PARAM_LIST
-    eState: (eDelay := 1, eNext := 2, eRead := 3, eCheckAvailable := 4, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
+    eState: (eDelay := 1, eNext := 2, eRead := 3, eCheckModuleType := 4, eValid := 10, eError := 20, eStopped := 25) := eRead; //State of parameters being read
     tonReadDelay: TON; //Delay timer before starting a new cyclic read
     bFirstReadDone: BOOL := FALSE; //First readout of all parameters is done
 
@@ -43,6 +43,11 @@ VAR CONSTANT
             (eParam := E_IPCDiag_ParameterKey.IPCImageVersion, pData := ADR(stIPCDiagData.sIPCImageVersion), nSize := SIZEOF(stIPCDiagData.sIPCImageVersion)),
             (eParam := E_IPCDiag_ParameterKey.IPCVendor, pData := ADR(stIPCDiagData.nIPCVendor), nSize := SIZEOF(stIPCDiagData.nIPCVendor)),
             (eParam := E_IPCDiag_ParameterKey.IPCSerialNumber, pData := ADR(stIPCDiagData.sIPCSerialNumber), nSize := SIZEOF(stIPCDiagData.sIPCSerialNumber)),
+            (eParam := E_IPCDiag_ParameterKey.OS_Name, pData := ADR(stIPCDiagData.sOS_Name), nSize := SIZEOF(stIPCDiagData.sOS_Name)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionMajor, pData := ADR(stIPCDiagData.nOS_VersionMajor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMajor)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionMinor, pData := ADR(stIPCDiagData.nOS_VersionMinor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMinor)),
+            (eParam := E_IPCDiag_ParameterKey.OS_VersionBuild, pData := ADR(stIPCDiagData.nOS_VersionBuild), nSize := SIZEOF(stIPCDiagData.nOS_VersionBuild)),
+            //(eParam := E_IPCDiag_ParameterKey.OS_CSDVersion, pData := ADR(stIPCDiagData.sOS_CSDVersion), nSize := SIZEOF(stIPCDiagData.sOS_CSDVersion)),
             (eParam := E_IPCDiag_ParameterKey.CPU_Name, pData := ADR(stIPCDiagData.sCPU_Name), nSize := SIZEOF(stIPCDiagData.sCPU_Name)),
             (eParam := E_IPCDiag_ParameterKey.CPU_Frequency, pData := ADR(stIPCDiagData.nCPU_Frequency), nSize := SIZEOF(stIPCDiagData.nCPU_Frequency)),
             //(eParam := E_IPCDiag_ParameterKey.Fan_ModuleCnt, pData := ADR(stIPCDiagData.nFan_ModuleCnt), nSize := SIZEOF(stIPCDiagData.nFan_ModuleCnt)),
@@ -73,11 +78,6 @@ VAR CONSTANT
             //(eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServers, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServers), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServers)),
             //(eParam := E_IPCDiag_ParameterKey.NIC_VirtualDeviceName, pData := ADR(stIPCDiagData.sNIC_VirtualDeviceName), nSize := SIZEOF(stIPCDiagData.sNIC_VirtualDeviceName)),
             //(eParam := E_IPCDiag_ParameterKey.NIC_IPv4DNSServersActive, pData := ADR(stIPCDiagData.sNIC_IPv4DNSServersActive), nSize := SIZEOF(stIPCDiagData.sNIC_IPv4DNSServersActive)),
-            (eParam := E_IPCDiag_ParameterKey.OS_Name, pData := ADR(stIPCDiagData.sOS_Name), nSize := SIZEOF(stIPCDiagData.sOS_Name)),
-            (eParam := E_IPCDiag_ParameterKey.OS_VersionMajor, pData := ADR(stIPCDiagData.nOS_VersionMajor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMajor)),
-            (eParam := E_IPCDiag_ParameterKey.OS_VersionMinor, pData := ADR(stIPCDiagData.nOS_VersionMinor), nSize := SIZEOF(stIPCDiagData.nOS_VersionMinor)),
-            (eParam := E_IPCDiag_ParameterKey.OS_VersionBuild, pData := ADR(stIPCDiagData.nOS_VersionBuild), nSize := SIZEOF(stIPCDiagData.nOS_VersionBuild)),
-            //(eParam := E_IPCDiag_ParameterKey.OS_CSDVersion, pData := ADR(stIPCDiagData.sOS_CSDVersion), nSize := SIZEOF(stIPCDiagData.sOS_CSDVersion)),
             (eParam := E_IPCDiag_ParameterKey.Software_MDPVersion, pData := ADR(stIPCDiagData.sSoftware_MDPVersion), nSize := SIZEOF(stIPCDiagData.sSoftware_MDPVersion)),
             (eParam := E_IPCDiag_ParameterKey.Software_NoSoftwares, pData := ADR(stIPCDiagData.nSoftware_NoSoftwares), nSize := SIZEOF(stIPCDiagData.nSoftware_NoSoftwares)),
             (eParam := E_IPCDiag_ParameterKey.TC_Version, pData := ADR(stIPCDiagData.sTC_Version), nSize := SIZEOF(stIPCDiagData.sTC_Version)),
@@ -220,10 +220,21 @@ ADSLOGSTR(
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mGetModuleType" Id="{e1ac6605-dc43-03ab-3552-49caab19866f}">
+      <Declaration><![CDATA[METHOD mGetModuleType : LWORD
+VAR_INPUT
+    iParam: USINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mGetModuleType := SHR(PARAM_LIST[iParam].eParam, 32) AND 16#FFFF;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStateMachine" Id="{4a9ac8ad-eadf-0299-3f8c-08c79007b287}">
       <Declaration><![CDATA[METHOD mStateMachine
 VAR
-    iCnt: UINT;
+    bSkipParam: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -240,6 +251,18 @@ END_VAR
             eState := eDelay;
         ELSE
             iParam := iParam + 1;
+            eState := eCheckModuleType;
+        END_IF
+
+    eCheckModuleType:
+        CASE mGetModuleType(iParam) OF
+            E_IPCDiag_ModuleType.UPS:
+                bSkipParam := stIPCDiagData.nOS_VersionMajor < 10;
+        END_CASE
+
+        IF bSkipParam THEN
+            eState := eNext;
+        ELSE
             eState := eRead;
         END_IF
 
