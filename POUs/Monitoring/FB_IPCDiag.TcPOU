@@ -131,7 +131,9 @@ END_VAR
     //CPU Type mismatch
     IF LEFT(stIPCDiagData.sIPCHardwareVersion, CPU_NAME_LENGTH[eCPUType]) <> CPU_NAME[eCPUType] THEN
         IF NOT bCPUTypeWarning THEN
-            sMessage := CONCAT('IPC diag CPU type mistmatch IPC configured as %s, read:  ', stIPCDiagData.sIPCHardwareVersion);
+            sMessage := CONCAT(
+                STR1 := 'IPC diag CPU type mistmatch IPC configured as %s, read:  ',
+                STR2 := stIPCDiagData.sIPCHardwareVersion);
             ADSLOGSTR(ADSLOG_MSGTYPE_WARN, sMessage, CPU_NAME[eCPUType]);
         END_IF
         bCPUTypeWarning := TRUE;
@@ -142,7 +144,9 @@ END_VAR
     //CPU Temp above limit
     IF stIPCDiagData.nCPU_Temp > nCPUTempLimit THEN
         IF NOT bCPUTempWarning THEN
-            sMessage := CONCAT('IPC diag CPU temperature is above limit of %d °C, current:  ', TO_STRING(stIPCDiagData.nCPU_Temp));
+            sMessage := CONCAT(
+                STR1 := 'IPC diag CPU temperature is above limit of %d °C, current:  ',
+                STR2 := TO_STRING(stIPCDiagData.nCPU_Temp));
             ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUTempLimit);
         END_IF
         bCPUTempWarning := TRUE;
@@ -153,7 +157,9 @@ END_VAR
     //CPU Usage above limit
     IF stIPCDiagData.nCPU_Usage > nCPUUsageLimit THEN
         IF NOT bCPUUsageWarning THEN
-            sMessage := CONCAT('IPC diag CPU usage is above limit of %d %, current:  ', TO_STRING(stIPCDiagData.nCPU_Usage));
+            sMessage := CONCAT(
+                STR1 := 'IPC diag CPU usage is above limit of %d %, current:  ',
+                STR2 := TO_STRING(stIPCDiagData.nCPU_Usage));
             ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nCPUUsageLimit);
         END_IF
         bCPUUsageWarning := TRUE;
@@ -164,8 +170,10 @@ END_VAR
     //UPS Capacity below limit
     IF stIPCDiagData.nUPS_BatteryCapacity < nUPSBatteryCapacityLimit THEN
         IF NOT nUPSBatteryCapacityWarning THEN
-            sMessage := CONCAT('IPC diag UPS battery capacity is below limit of %d %, current: ', TO_STRING(stIPCDiagData.nUPS_BatteryCapacity));
-            ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage ,nUPSBatteryCapacityLimit);
+            sMessage := CONCAT(
+                STR1 := 'IPC diag UPS battery capacity is below limit of %d %, current: ',
+                STR2 := TO_STRING(stIPCDiagData.nUPS_BatteryCapacity));
+            ADSLOGDINT(ADSLOG_MSGTYPE_WARN, sMessage, nUPSBatteryCapacityLimit);
         END_IF
         nUPSBatteryCapacityWarning := TRUE;
     ELSE
@@ -194,6 +202,24 @@ tonReadDelay(
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mFirstReadWarn" Id="{8b6f9eb8-d6e0-005d-27fd-e3d6ce2b4e85}">
+      <Declaration><![CDATA[METHOD mFirstReadWarn
+VAR_INPUT
+    sFmtStr: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bFirstReadDone THEN
+    RETURN;
+END_IF
+
+ADSLOGSTR(
+    msgCtrlMask := ADSLOG_MSGTYPE_WARN,
+    msgFmtStr := sFmtStr,
+    strArg := TO_STRING(PARAM_LIST[iParam].eParam));
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStateMachine" Id="{4a9ac8ad-eadf-0299-3f8c-08c79007b287}">
       <Declaration><![CDATA[METHOD mStateMachine
 VAR
@@ -215,9 +241,9 @@ END_VAR
         ELSE
             iParam := iParam + 1;
             eState := eRead;
-            END_IF
+        END_IF
 
-     eRead:
+    eRead:
         IF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bValid THEN;
             eState := eValid;
         ELSIF NOT fbIPCReadParam.bBusy AND fbIPCReadParam.bError THEN
@@ -225,33 +251,29 @@ END_VAR
         END_IF
 
     eValid:
-        fbIPCReadParam.GetParameter(pBuffer := PARAM_LIST[iParam].pData, nBufferSize := PARAM_LIST[iParam].nSize);
+        fbIPCReadParam.GetParameter(
+            pBuffer := PARAM_LIST[iParam].pData,
+            nBufferSize := PARAM_LIST[iParam].nSize);
         eState := eNext;
 
     eError:
+        eState := eNext;
         CASE fbIPCReadParam.hrErrorCode OF
             ERR_NOT_SUPPORTED:
-                IF NOT bFirstReadDone THEN
-                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is not supported: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-                END_IF
-                eState := eNext;
+                mFirstReadWarn(sFmtStr := 'IPC diag parameter is not supported: %s');
             ERR_UNAVAILABLE:
-                IF NOT bFirstReadDone THEN
-                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag parameter is unavailable: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-                END_IF
-                eState := eNext;
+                mFirstReadWarn(sFmtStr := 'IPC diag parameter is unavailable: %s');
             ERR_NO_DATA:
-                IF NOT bFirstReadDone THEN
-                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag no data available: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-                END_IF
-                eState := eNext;
+                mFirstReadWarn(sFmtStr := 'IPC diag no data available: %s');
             ERR_INVALID_INDEX:
-                IF NOT bFirstReadDone THEN
-                    ADSLOGSTR(ADSLOG_MSGTYPE_WARN,'IPC diag invalid index: %s',TO_STRING(PARAM_LIST[iParam].eParam));
-                END_IF
-                eState := eNext;
+                mFirstReadWarn(sFmtStr := 'IPC diag invalid index: %s');
             ELSE
-                ADSLOGDINT(ADSLOG_MSGTYPE_ERROR,'IPC diag error: %d, stopping...',fbIPCReadParam.hrErrorCode);
+                ADSLOGDINT(
+                    msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+                    msgFmtStr := CONCAT(
+                        STR1 := 'IPC diag unknown error id: %d, stopping... parameter: ',
+                        STR2 := TO_STRING(PARAM_LIST[iParam].eParam)),
+                    dintArg := fbIPCReadParam.hrErrorCode);
                 eState := eStopped;
         END_CASE
 
