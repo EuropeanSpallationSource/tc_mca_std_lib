@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_IPCDiagError" Id="{e6493fe0-6f27-006d-2367-683c6f5b10f0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_IPCDiagError :
+(
+    eNone := 0,
+    eNotSupported := -324661248, //Parameter not supported.
+    eUnavailable := -327090174, //Module of parameter is unavailable (not existing).
+    eNoData := -324665083, //No data available.
+    eInvalidIndex := -324665088 //Invalid index.
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
