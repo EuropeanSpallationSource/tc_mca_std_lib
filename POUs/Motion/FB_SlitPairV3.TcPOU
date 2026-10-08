@@ -57,7 +57,7 @@ END_IF
 act1EnableDisableAxes();
 act2GapLimitSwitches();
 act3GearInWhenNeeded();
-act4GapNotHomed();
+act5GapNotHomedOrHomeDirect();
 
 nParameterNumber := SWLimitPos;
 fValueNew := stBladePositive.stConfig.fMaxSoftPosLimit
@@ -171,8 +171,7 @@ stGapCentre.stInputs.bLimitFwd := stBladeNegative.stInputs.bLimitFwd AND stBlade
     </Action>
     <Action Name="act3GearInWhenNeeded" Id="{deb2387a-c21a-077c-3d6c-ac603c4ecd46}">
       <Implementation>
-        <ST><![CDATA[
-IF stGapSize.stControl.bExecute AND
+        <ST><![CDATA[IF stGapSize.stControl.bExecute AND
     // TODO: More moving functions
     stGapSize.stControl.eCommand = E_MotionFunctions.eMoveAbsolute AND
     (NOT stBladeNegative.stStatus.bGeared OR
@@ -183,6 +182,10 @@ IF stGapSize.stControl.bExecute AND
          stGapSize.stControl.bExecute := FALSE;
         IF (NOT stBladeNegative.stStatus.bGeared OR
             NOT stBladePositive.stStatus.bGeared) THEN
+               mConfigureGearIn(stBladeNegative := stBladeNegative,
+                                stBladePositive := stBladePositive,
+                                nIdGapSizeAxis  := nIdGapSizeAxis,
+                                nIdGapCentreAxis  := nIdGapCentreAxis);
                stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
                stBladePositive.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
                stBladeNegative.stControl.bExecute := TRUE;
@@ -209,6 +212,10 @@ IF stGapCentre.stControl.bExecute AND
          stGapCentre.stControl.bExecute := FALSE;
         IF (NOT stBladeNegative.stStatus.bGeared OR
             NOT stBladePositive.stStatus.bGeared) THEN
+               mConfigureGearIn(stBladeNegative := stBladeNegative,
+                                stBladePositive := stBladePositive,
+                                nIdGapSizeAxis  := nIdGapSizeAxis,
+                                nIdGapCentreAxis  := nIdGapCentreAxis);
                stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
                stBladePositive.stControl.eCommand := E_MotionFunctions.eGearInMultiMaster;
                stBladeNegative.stControl.bExecute := TRUE;
@@ -226,7 +233,50 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="act4GapNotHomed" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
+    <Action Name="act4GearOutWhenNeeded" Id="{35df3ab6-ed91-0495-0a84-b318b74a2cfa}">
+      <Implementation>
+        <ST><![CDATA[IF stBladeNegative.stControl.bExecute
+  AND (stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
+      OR stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveRelative
+      OR stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveVelocity
+      OR stBladeNegative.stControl.eCommand = E_MotionFunctions.eHome)
+  AND stBladeNegative.stStatus.bGeared
+  AND NOT bSavedExecuteBladeNegative THEN
+      eSavedCommandBladeNegative := stBladeNegative.stControl.eCommand;
+      bSavedExecuteBladeNegative := TRUE;
+      IF stBladeNegative.stStatus.bGeared THEN
+          stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearOut;
+      END_IF
+END_IF
+IF bSavedExecuteBladeNegative AND NOT stBladeNegative.stStatus.bGeared THEN
+    stBladeNegative.stControl.eCommand := eSavedCommandBladeNegative;
+    stBladeNegative.stControl.bExecute := TRUE;
+    bSavedExecuteBladeNegative := FALSE;
+END_IF
+
+
+IF stBladePositive.stControl.bExecute
+  AND (stBladePositive.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
+      OR stBladePositive.stControl.eCommand = E_MotionFunctions.eMoveRelative
+      OR stBladePositive.stControl.eCommand = E_MotionFunctions.eMoveVelocity
+      OR stBladePositive.stControl.eCommand = E_MotionFunctions.eHome)
+  AND stBladePositive.stStatus.bGeared
+  AND NOT bSavedExecuteBladePositive THEN
+      eSavedCommandBladePositive := stBladePositive.stControl.eCommand;
+      bSavedExecuteBladePositive := TRUE;
+      IF stBladePositive.stStatus.bGeared THEN
+          stBladePositive.stControl.eCommand := E_MotionFunctions.eGearOut;
+      END_IF
+END_IF
+IF bSavedExecuteBladePositive AND NOT stBladePositive.stStatus.bGeared THEN
+    stBladePositive.stControl.eCommand := eSavedCommandBladePositive;
+    stBladePositive.stControl.bExecute := TRUE;
+    bSavedExecuteBladePositive := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="act5GapNotHomedOrHomeDirect" Id="{519f4eb1-b3fb-0833-05e2-03d50cd99de4}">
       <Implementation>
         <ST><![CDATA[
 IF NOT stBladeNegative.stStatus.bHomed OR NOT stBladePositive.stStatus.bHomed THEN
@@ -275,6 +325,39 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Method Name="mConfigureGearIn" Id="{51f908d3-f887-033b-0fe9-123e02bd0637}">
+      <Declaration><![CDATA[METHOD mConfigureGearIn : BOOL
+VAR_IN_OUT
+    stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
+    stBladePositive: ST_AxisStruct; //Axis data of the positive blade
+    nIdGapSizeAxis: UINT; //ID of virtual gap aperture size axis
+    nIdGapCentreAxis: UINT; //ID of virtual gap centre position axis
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//Setup multimaster gearing of negative blade
+stBladeNegative.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+stBladeNegative.stConfig.astMultiMasterAxis[1].fRatio := -0.5;
+stBladeNegative.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+stBladeNegative.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+stBladeNegative.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+stBladeNegative.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+stBladeNegative.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+stBladeNegative.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+//Setup multimaster gearing of positive blade
+stBladePositive.stConfig.astMultiMasterAxis[1].nIndex := nIdGapSizeAxis;
+stBladePositive.stConfig.astMultiMasterAxis[1].fRatio := 0.5;
+stBladePositive.stConfig.astMultiMasterAxis[2].nIndex := nIdGapCentreAxis;
+stBladePositive.stConfig.astMultiMasterAxis[2].fRatio := 1.0;
+stBladePositive.stConfig.astMultiMasterAxis[3].nIndex := nIdGapCentreAxis;
+stBladePositive.stConfig.astMultiMasterAxis[3].fRatio := 0.0;
+stBladePositive.stConfig.astMultiMasterAxis[4].nIndex := nIdGapCentreAxis;
+stBladePositive.stConfig.astMultiMasterAxis[4].fRatio := 0.0;
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mUpdateGapSoftLimits" Id="{8bc1a38b-c7c2-0d6f-36e5-84310b644ec8}">
       <Declaration><![CDATA[METHOD mUpdateGapSoftLimits : BOOL
 VAR_INPUT
