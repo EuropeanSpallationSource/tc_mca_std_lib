@@ -2,7 +2,9 @@
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_SlitPairAfterWork" Id="{3d2ae8b9-8ee2-0fe7-1d43-c3ce05391276}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlitPairAfterWork
-
+VAR
+    bInitDone: BOOL := FALSE;
+END_VAR
 VAR_INPUT
     nIdNegativeAxis: UINT; //ID of axis for which negative motion increases gap size
     nIdPositiveAxis: UINT; //ID of axis for which positive motion increases gap size
@@ -19,6 +21,28 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
+IF bInitDone THEN
+    // This code is run after stc_lib/FB_Axis has run
+    // Busy must propagete to the related axes
+    IF stGapSize.stStatus.bBusy OR stGapCentre.stStatus.bBusy THEN
+        stBladeNegative.stStatus.bBusy := TRUE;
+        stBladePositive.stStatus.bBusy := TRUE;
+    ELSIF stBladeNegative.stStatus.bBusy OR stBladePositive.stStatus.bBusy THEN
+        stGapSize.stStatus.bBusy := TRUE;
+        stGapCentre.stStatus.bBusy := TRUE;
+    END_IF
+
+    // bMoving must propagate as well
+    IF stGapSize.stStatus.bMoving OR stGapCentre.stStatus.bMoving THEN
+        stBladeNegative.stStatus.bMoving := TRUE;
+        stBladePositive.stStatus.bMoving := TRUE;
+    ELSIF stBladeNegative.stStatus.bMoving OR stBladePositive.stStatus.bMoving THEN
+        stGapSize.stStatus.bMoving := TRUE;
+        stGapCentre.stStatus.bMoving := TRUE;
+    END_IF
+ELSE
+    bInitDone := TRUE;
+END_IF
 ]]></ST>
     </Implementation>
   </POU>
