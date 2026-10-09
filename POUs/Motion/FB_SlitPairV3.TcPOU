@@ -236,7 +236,8 @@ END_IF
     </Action>
     <Action Name="act4GearOutWhenNeeded" Id="{35df3ab6-ed91-0495-0a84-b318b74a2cfa}">
       <Implementation>
-        <ST><![CDATA[IF stBladeNegative.stControl.bExecute
+        <ST><![CDATA[// Empty first line
+IF stBladeNegative.stControl.bExecute
   AND (stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveAbsolute
       OR stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveRelative
       OR stBladeNegative.stControl.eCommand = E_MotionFunctions.eMoveVelocity
@@ -246,17 +247,16 @@ END_IF
       eSavedCommandBladeNegative := stBladeNegative.stControl.eCommand;
       bSavedExecuteBladeNegative := TRUE;
       stBladeNegative.stControl.bExecute := FALSE;
-      IF stBladeNegative.stStatus.bGeared THEN
-          stGapSize.stControl.eCommand := E_MotionFunctions.eGearOut;
-          IF NOT stGapSize.stStatus.bBusy THEN
-              stGapSize.stControl.bExecute := TRUE;
-          END_IF
-          stGapCentre.stControl.eCommand := E_MotionFunctions.eGearOut;
-          IF NOT stGapCentre.stStatus.bBusy THEN
-              stGapCentre.stControl.bExecute := TRUE;
-          END_IF
-      END_IF
 END_IF
+IF bSavedExecuteBladeNegative THEN
+    IF stBladePositive.stStatus.bGeared THEN
+        stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearOut;
+        stBladeNegative.stControl.bExecute := TRUE;
+        stBladePositive.stControl.eCommand := E_MotionFunctions.eGearOut;
+        stBladePositive.stControl.bExecute := TRUE;
+    END_IF
+END_IF
+
 IF bSavedExecuteBladeNegative AND NOT stBladeNegative.stStatus.bGeared THEN
     stBladeNegative.stControl.eCommand := eSavedCommandBladeNegative;
     stBladeNegative.stControl.bExecute := TRUE;
@@ -274,16 +274,14 @@ IF stBladePositive.stControl.bExecute
       eSavedCommandBladePositive := stBladePositive.stControl.eCommand;
       bSavedExecuteBladePositive := TRUE;
       stBladePositive.stControl.bExecute := FALSE;
-      IF stBladePositive.stStatus.bGeared THEN
-          stGapSize.stControl.eCommand := E_MotionFunctions.eGearOut;
-          IF NOT stGapSize.stStatus.bBusy THEN
-              stGapSize.stControl.bExecute := TRUE;
-          END_IF
-          stGapCentre.stControl.eCommand := E_MotionFunctions.eGearOut;
-          IF NOT stGapCentre.stStatus.bBusy THEN
-              stGapCentre.stControl.bExecute := TRUE;
-          END_IF
-      END_IF
+END_IF
+IF bSavedExecuteBladePositive THEN
+    IF stBladePositive.stStatus.bGeared THEN
+        stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearOut;
+        stBladeNegative.stControl.bExecute := TRUE;
+        stBladePositive.stControl.eCommand := E_MotionFunctions.eGearOut;
+        stBladePositive.stControl.bExecute := TRUE;
+    END_IF
 END_IF
 IF bSavedExecuteBladePositive AND NOT stBladePositive.stStatus.bGeared THEN
     stBladePositive.stControl.eCommand := eSavedCommandBladePositive;
