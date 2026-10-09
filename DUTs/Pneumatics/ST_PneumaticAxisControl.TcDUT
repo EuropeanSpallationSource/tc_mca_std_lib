@@ -5,7 +5,8 @@
 STRUCT
     bValveOn: BOOL; //Variable to control solenoid valve from PLC
     bValveOff: BOOL; //Variable to control solenoid valve from PLC
-    bInterlock: BOOL; //Input interlock signal for the movement
+    bInterlockCyclic: BOOL; //Input interlock signal (resets end of cycle)
+    bInterlockLatched: BOOL; //Input interlock signal (latches)
     bReset: BOOL; //Reset signal
     bValveOnManual: BOOL; //Variable to control the solenoid valve from the Operation Panel
     bValveOffManual: BOOL; //Variable to close the solenoid valve from the Operation Panel
