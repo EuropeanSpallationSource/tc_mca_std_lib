@@ -86,7 +86,8 @@ END_IF
       <Declaration><![CDATA[METHOD PRIVATE EndOfCycle
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
+        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
 ]]></ST>
       </Implementation>
     </Method>
@@ -295,7 +296,8 @@ bPSSPermitMissing := bPSSPermitNeeded
     AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
 
 //Interlock
-bInterlockRequest := _stPneumaticAxis.stPneumaticAxisControl.bInterlock
+bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
+    OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
     AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
 
 //Move Request
