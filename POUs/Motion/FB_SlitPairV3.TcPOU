@@ -57,6 +57,7 @@ END_IF
 act1EnableDisableAxes();
 act2GapLimitSwitches();
 act3GearInWhenNeeded();
+act4GearOutWhenNeeded();
 act5GapNotHomedOrHomeDirect();
 
 nParameterNumber := SWLimitPos;
@@ -244,8 +245,16 @@ END_IF
   AND NOT bSavedExecuteBladeNegative THEN
       eSavedCommandBladeNegative := stBladeNegative.stControl.eCommand;
       bSavedExecuteBladeNegative := TRUE;
+      stBladeNegative.stControl.bExecute := FALSE;
       IF stBladeNegative.stStatus.bGeared THEN
-          stBladeNegative.stControl.eCommand := E_MotionFunctions.eGearOut;
+          stGapSize.stControl.eCommand := E_MotionFunctions.eGearOut;
+          IF NOT stGapSize.stStatus.bBusy THEN
+              stGapSize.stControl.bExecute := TRUE;
+          END_IF
+          stGapCentre.stControl.eCommand := E_MotionFunctions.eGearOut;
+          IF NOT stGapCentre.stStatus.bBusy THEN
+              stGapCentre.stControl.bExecute := TRUE;
+          END_IF
       END_IF
 END_IF
 IF bSavedExecuteBladeNegative AND NOT stBladeNegative.stStatus.bGeared THEN
@@ -264,8 +273,16 @@ IF stBladePositive.stControl.bExecute
   AND NOT bSavedExecuteBladePositive THEN
       eSavedCommandBladePositive := stBladePositive.stControl.eCommand;
       bSavedExecuteBladePositive := TRUE;
+      stBladePositive.stControl.bExecute := FALSE;
       IF stBladePositive.stStatus.bGeared THEN
-          stBladePositive.stControl.eCommand := E_MotionFunctions.eGearOut;
+          stGapSize.stControl.eCommand := E_MotionFunctions.eGearOut;
+          IF NOT stGapSize.stStatus.bBusy THEN
+              stGapSize.stControl.bExecute := TRUE;
+          END_IF
+          stGapCentre.stControl.eCommand := E_MotionFunctions.eGearOut;
+          IF NOT stGapCentre.stStatus.bBusy THEN
+              stGapCentre.stControl.bExecute := TRUE;
+          END_IF
       END_IF
 END_IF
 IF bSavedExecuteBladePositive AND NOT stBladePositive.stStatus.bGeared THEN
