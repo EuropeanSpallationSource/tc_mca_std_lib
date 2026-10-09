@@ -5,805 +5,606 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
-    fbTimerExtend: TON; //Timing the extraction of the cylinder
-    fbTimerRetract: TON; //Timing the retraction of the cylinder
-    fbTimerAirPressureErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
-    fbTimerAirPressureErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
-    fbTimerAirPressureNoErrorLow: TON; //Timer to check the fluctuation of the low air pressure value
-    fbTimerAirPressureNoErrorHigh: TON; //Timer to check the fluctuation of the high air pressure value
-    fbTrigRisingEdgePermit: R_TRIG; //Rising edge detection for Permit signal
-    fbTrigExtend: R_TRIG; //Rising edge detection to Extend cylinder
-    fbTrigRetract: R_TRIG; //Rising edge detection to Retract cylinder
-    fbTrigExtendManual: R_TRIG; //Rising edge detection for manual push button
-    fbTrigRetractManual: R_TRIG; //Rising edge detection for manual push button
-    fElapsedTimeExtending: REAL; //Measuring elapsed time while Extending
-    fElapsedTimeTotalExtended: REAL; //Showing total elapsed time for Extended movement
-    fElapsedTimeRetracting: REAL; //Measuring elapsed time while Retracting
-    fElapsedTimeTotalRetracted: REAL; //Showing total elapsed time for Retracted movement
-    bStateChange: BOOL := FALSE; //State of the cylinder changed from extend to retract and vice versa
-    bStartExtendPLC: BOOL; //Variable to extend cylinder from PLC
-    bStartRetractPLC: BOOL; //Variable to retract cylinder from PLC
-    bStartExtendManual: BOOL; //Variable to extend cylinder with momentary push button
-    bStartRetractManual: BOOL; //Variable to retract cylinder with momentary push button
-    bInterlockedExtended: BOOL := FALSE;
-    bInterlockedRetracted: BOOL := FALSE;
-    bNoPSSPermitError: BOOL := FALSE;
-    bStartInitDelay: BOOL := FALSE;
-    tInitializeTimer: TON;
-    bInitialized: BOOL := FALSE;
+    _iPressureGroup: I_PressureGroup;
+
+    eState: E_PneumaticAxisState := E_PneumaticAxisState.eFailSafe;
+    eSetValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+    eActValveState: E_PneumaticAxisValveState := eVALVE_OFF;
+
+    apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
+    apMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO INT;
+
+    atonMoving: ARRAY [eVALVE_OFF..eVALVE_ON] OF TON;
+    afElapsedTime: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
+    afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
+
+    bPSSPermitNeeded: BOOL;
+    bPSSPermitMissing: BOOL;
+    bInterlockRequest: BOOL;
+
+    tonInitializeTimer: TON := (PT := tINIT);
+    bInitPointers: BOOL := TRUE;
+
+    tonErrorAutoReset: TON := (PT := tAUTO_ERROR_RESET);
+    rtrigReset: R_TRIG;
+    artrigMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
+END_VAR
+VAR CONSTANT
+    eVALVE_OFF: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOff;
+    eVALVE_ON: E_PneumaticAxisValveState := E_PneumaticAxisValveState.eValveOn;
+    tINIT: TIME := T#3S;
+    tAUTO_ERROR_RESET: TIME := T#3S;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[tInitializeTimer(IN := bStartInitDelay, PT := T#3S);
-
-IF tInitializeTimer.Q THEN
-    bStartInitDelay := FALSE;
-    bInitialized := TRUE;
-END_IF
-
-IF bInitialized THEN
-    mRun();
-
-        CASE _stPneumaticAxis.ePneumaticAxisMode OF
-
-        E_PneumaticMode.eSingleSolenoidControl:
-        mSingleSolenoid();
-
-        E_PneumaticMode.eNoPSSPermit:
-        mNoPSSPermit();
-
-        E_PneumaticMode.eNoPSSPermitError:
-        mNoPSSPermitError();
-
-        E_PneumaticMode.eCylinderRetractInterlocked:
-        mRetractedInterlocked();
-
-        E_PneumaticMode.eCylinderExtendInterlocked:
-        mExtendedInterlocked();
-
-        E_PneumaticMode.eCylinderRetractInterlockedError:
-        mRetractedInterlockedError();
-
-        E_PneumaticMode.eCylinderExtendInterlockedError:
-        mExtendedInterlockedError();
-
-        E_PneumaticMode.eLowAirPressure:
-        mLowAirPressure();
-
-        E_PneumaticMode.eHighAirPressure:
-        mHighAirPressure();
-
-        E_PneumaticMode.eError:
-        mSingleSolenoidError();
-
-        E_PneumaticMode.eReset:
-        mReset();
-
-        END_CASE
-END_IF
+      <ST><![CDATA[
 ]]></ST>
     </Implementation>
-    <Method Name="FB_init" Id="{5454029e-f817-018f-32fe-52a7c013d503}">
-      <Declaration><![CDATA[METHOD FB_init : BOOL
-VAR_INPUT
-    bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
-    bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+    <Folder Name="Control Methods" Id="{39c4bcb2-31af-075e-197a-162c75539148}" />
+    <Folder Name="Init Methods" Id="{8087fea6-af25-066c-2ec8-166e5ff52603}" />
+    <Folder Name="Monitor Methods" Id="{1de9d575-2430-0608-3cc7-4848c696c067}" />
+    <Folder Name="Properties" Id="{91a1fcf0-14fd-0997-1818-cca146c94024}" />
+    <Property Name="bErrorPresent" Id="{e61928f7-5b1b-0cb8-323f-b7787336ed0f}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY bErrorPresent : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{4c00db51-9bfe-0487-2f10-0681dde6f968}">
+        <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[bStartInitDelay := TRUE;
+        <Implementation>
+          <ST><![CDATA[bErrorPresent := _stPneumaticAxis.ePneumaticAxisErrors <> E_PneumaticAxisErrors.eNoError;
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckEndSwitchBwdStatus" Id="{fde97b3f-ebc0-087e-124e-79f9c467bc30}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchBwdStatus
-
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="eError" Id="{32047246-0707-0216-16bf-04057767b842}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY eError : E_PneumaticAxisErrors
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
- AND NOT bStateChange
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckEndSwitchFwdStatus" Id="{2421d0d3-9422-0ef2-10bf-967b1b7d731a}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckEndSwitchFwdStatus
-
+      <Get Name="Get" Id="{f3f6439d-58c8-0d64-1024-38a7f4d298fb}">
+        <Declaration><![CDATA[VAR
+END_VAR
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn
- AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
- AND bStateChange THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
+        <Implementation>
+          <ST><![CDATA[eError := _stPneumaticAxis.ePneumaticAxisErrors;
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckForAirPressureError" Id="{02975cbe-1049-025d-3e6b-ceb11cb4a2a0}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckForAirPressureError : BOOL
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{915d3ea3-4659-00d6-29b2-9f1cbc8f96f8}">
+        <Declaration><![CDATA[PRIVATE
 VAR
-    bAirPressureoutOfRangeError : BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF eError <> E_PneumaticAxisErrors.eNoError THEN
+    _stPneumaticAxis.ePneumaticAxisErrors := eError;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="EndOfCycle" Id="{57491fe1-9ec0-014f-336a-f4f65c1d22e5}">
+      <Declaration><![CDATA[METHOD PRIVATE EndOfCycle
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic := FALSE;
+_stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_reinit" Id="{1b0a7963-bcaa-0f91-0224-0925d012a176}" FolderPath="Init Methods\">
+      <Declaration><![CDATA[METHOD FB_reinit : BOOL
+VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbTimerAirPressureErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureNoErrorLow(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-fbTimerAirPressureNoErrorHigh(IN :=,PT:= _stPneumaticAxis.stPneumaticAxisConfig.tAllowTimePressureOutOfRange, Q=>,ET=>);
-
-//Check if the air pressure value is too low for longer than defined time
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled < _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue  THEN
-    fbTimerAirPressureErrorLow.IN := TRUE;
-    IF fbTimerAirPressureErrorLow.Q THEN
-        _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-        bAirPressureoutOfRangeError := TRUE;
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorLow;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eLowAirPressure;
-    END_IF
-
-
-//Check if the air pressure value is too high for longer than defined time
-ELSIF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled > _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue  THEN
-    fbTimerAirPressureErrorHigh.IN := TRUE;
-    IF fbTimerAirPressureErrorHigh.Q THEN
-        _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-        bAirPressureoutOfRangeError := TRUE;
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eAirPressureErrorHigh;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eHighAirPressure;
-    END_IF
-
-
-//If the air pressure value is in range, no errors
-ELSIF (_stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue
-     AND _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue) THEN
-    fbTimerAirPressureErrorLow.IN := FALSE;
-    fbTimerAirPressureErrorHigh.IN := FALSE;
-    bAirPressureoutOfRangeError := FALSE;
-END_IF
-
-
-
-
+        <ST><![CDATA[bInitPointers := TRUE;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mCheckForMovingError" Id="{c3d6d062-4852-0e9f-18de-b8a77172336a}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckForMovingError
-
+    <Property Name="iPressureGroup" Id="{22d0755b-7b13-0cd9-272f-68eae7b24e53}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY iPressureGroup : I_PressureGroup
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//IF the command to extract is given, but the cylinder hasn't moved from the bEndSwitchBwd
-IF fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingExtract;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//If the command to extract has timed out
-IF fbTimerExtend.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtractTimedOut;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//IF the command to retract has been given, but the cylinder hasn't moved from bEndSwitchFwd
-IF fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNotMovingRetract;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-
-//If the command to retract has timed out
-IF fbTimerRetract.Q
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-   AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractTimedOut;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckStatusOfInterlockSignal" Id="{cc7fcaed-155e-0884-115d-338b746a2dd3}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfInterlockSignal
-
+      <Get Name="Get" Id="{9ea5e737-d543-0a73-2f8d-8db64b66adcb}">
+        <Declaration><![CDATA[VAR
+END_VAR
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
-ELSIF _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bRetracted OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracting THEN
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlocked;
-    END_IF
-
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bExtended OR _stPneumaticAxis.stPneumaticAxisStatus.bExtending THEN
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlocked;
-    END_IF
-END_IF
-
-
-
-
-
-
+        <Implementation>
+          <ST><![CDATA[iPressureGroup := _iPressureGroup;
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mCheckStatusOfPermitSignal" Id="{a6169d52-c0e0-0319-04a8-3ea0650a4765}">
-      <Declaration><![CDATA[METHOD PUBLIC mCheckStatusOfPermitSignal
-
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c7f592e7-b27b-0c07-3f42-42fbd40d1cc1}">
+        <Declaration><![CDATA[VAR
+END_VAR
 ]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-ELSIF NOT _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermit;
-ELSIF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
+        <Implementation>
+          <ST><![CDATA[_iPressureGroup := iPressureGroup;
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mExtendedInterlocked" Id="{51cc7600-2ccc-454d-ab69-1386ac754d66}">
-      <Declaration><![CDATA[METHOD mExtendedInterlocked
-
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bRetract
-    OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual)
-    OR bInterlockedExtended THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eExtendInterlocked;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderExtendInterlockedError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mExtendedInterlockedError" Id="{c0b4e652-3937-42fe-a869-ee6da9ba93ff}">
-      <Declaration><![CDATA[METHOD mExtendedInterlockedError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-bInterlockedExtended := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    bInterlockedExtended := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
-
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mExtendTimeStatus" Id="{684456d9-6481-0894-1ad2-4fe1d1b95577}">
-      <Declaration><![CDATA[METHOD mExtendTimeStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    fElapsedTimeExtending := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeExtending;
-ELSIF fbTimerExtend.IN AND NOT fbTimerExtend.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    fElapsedTimeTotalExtended := TIME_TO_REAL(fbTimerExtend.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedExtend := fElapsedTimeTotalExtended;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mHighAirPressure" Id="{a41851e4-8444-48e2-8f12-5249a689e7bc}">
-      <Declaration><![CDATA[METHOD mHighAirPressure : BOOL
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled <= _stPneumaticAxis.stPneumaticAxisConfig.fHighLimitPressureValue THEN
-    fbTimerAirPressureNoErrorHigh.IN := TRUE;
-    IF fbTimerAirPressureNoErrorHigh.Q THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-        fbTimerAirPressureErrorHigh.IN := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mLowAirPressure" Id="{c0310bb5-42a6-4cfb-b918-7f4740f67c8e}">
-      <Declaration><![CDATA[METHOD mLowAirPressure : BOOL
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-
-IF _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled >= _stPneumaticAxis.stPneumaticAxisConfig.fLowLimitPressureValue THEN
-    fbTimerAirPressureNoErrorLow.IN := TRUE;
-    IF fbTimerAirPressureNoErrorLow.Q THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-        fbTimerAirPressureErrorLow.IN := FALSE;
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mNoPSSPermit" Id="{992f1dea-d5e2-43e5-8693-024ad7503be1}">
-      <Declaration><![CDATA[METHOD mNoPSSPermit
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisControl.bInterlock := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: NO PERMIT SIGNAL.';
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
- OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual
- OR _stPneumaticAxis.stPneumaticAxisControl.bRetract
- OR _stPneumaticAxis.stPneumaticAxisControl.bCloseManual
- OR bNoPSSPermitError) THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoPSSPermit;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eNoPSSPermitError;
-END_IF
-IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-    bStateChange := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-    bStartRetractManual := FALSE;
-    bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mNoPSSPermitError" Id="{4bd71f8e-be7a-40c7-9cce-4b92b8835477}">
-      <Declaration><![CDATA[METHOD mNoPSSPermitError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[bNoPSSPermitError := TRUE;
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PERMIT SIGNAL.';
-
-IF _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK THEN
-    bNoPSSPermitError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-    bStateChange := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-    bStartRetractManual := FALSE;
-    bStartRetractPLC := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mReset" Id="{4721b129-abfa-4113-85bb-a13eb59dedea}">
-      <Declaration><![CDATA[METHOD PUBLIC mReset
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Reset all the error messages
-//Set the operating mode to Single Solenoid Control
-fbTrigRisingEdgePermit(clk:=_stPneumaticAxis.stPneumaticAxisControl.bReset);
-IF _stPneumaticAxis.stPneumaticAxisControl.bReset THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRetractedInterlocked" Id="{119414ab-e2e9-44e0-b866-f00dc58d7c9f}">
-      <Declaration><![CDATA[METHOD mRetractedInterlocked
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-IF (_stPneumaticAxis.stPneumaticAxisControl.bExtend
-    OR _stPneumaticAxis.stPneumaticAxisControl.bOpenManual)
-    OR bInterlockedRetracted THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eRetractInterlocked;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eCylinderRetractInterlockedError;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRetractedInterlockedError" Id="{f0f9b367-fd49-420b-9b3d-ab1f518c85fd}">
-      <Declaration><![CDATA[METHOD mRetractedInterlockedError
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bInterlockedRetracted := TRUE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 := FALSE;
-_stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2 := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AXIS INTERLOCKED';
-_stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-IF NOT _stPneumaticAxis.stPneumaticAxisControl.bInterlock THEN
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-    bInterlockedRetracted:= FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-    _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-END_IF
-
-
-
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRetractTimeStatus" Id="{2a6d9485-1bbd-0fc2-1d9c-693843a607b0}">
-      <Declaration><![CDATA[METHOD mRetractTimeStatus
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    fElapsedTimeRetracting := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeRetracting;
-ELSIF fbTimerRetract.IN AND NOT fbTimerRetract.Q AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    fElapsedTimeTotalRetracted := TIME_TO_REAL(fbTimerRetract.ET)/1000;
-    _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedRetract := fElapsedTimeTotalRetracted;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mRun" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
-      <Declaration><![CDATA[METHOD PUBLIC mRun
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set the current status of the end position switches, and permit and intelock signals
-mSetInputStatuses();
-
-//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-mSetAllowedTravelTime();
-
-//Get the value of the air pressure in mb
-mSelectAirPressureSensorGroup();
-
-//Check if air pressure is in range
-mCheckForAirPressureError();
-
-//Reset Error
-mReset();
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mScaledPressureValue" Id="{3012bd32-5e56-08e5-357d-6a59fe398239}">
-      <Declaration><![CDATA[METHOD PUBLIC mScaledPressureValue : REAL
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="mControl_MoveTimer" Id="{b5c0d43d-0f0f-0b38-3402-746380f2c7c0}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls move timer and timing data
+METHOD PRIVATE mControl_MoveTimer
 VAR_INPUT
-    nRawValue: INT; //Raw value from the Terminal
-    fRawHigh: REAL; //Highest value for the Raw value
-    fRawLow: REAL; //Lowest value for the Raw value
-    fScaledHigh: REAL; //Highest value for the Scaled value
-    fScaledLow: REAL; //Lowest value for the Scaled value
+    eValve: E_PneumaticAxisValveState;
 END_VAR
 VAR
-    rGradient: REAL; //Internal variable to calculate gradient of the slope
-    rOffset: REAL; //Internal variable to calculate the offset value
+    bStart: BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[rGradient:= (fScaledHigh - fScaledLow)/(fRawHigh - fRawLow);
-rOffset:= fScaledHigh - rGradient * fRawHigh;
-mScaledPressureValue:= rGradient * nRawValue + rOffset;
+        <ST><![CDATA[bStart := (eState = E_PneumaticAxisState.eMoving)
+    AND (eValve = eSetValveState);
 
+//Update Time
+IF atonMoving[eValve].IN THEN
+    afElapsedTime[eValve] := TIME_TO_REAL(atonMoving[eValve].ET) / 1000.0;
+
+    IF NOT bStart THEN
+        afElapsedTimeTotal[eValve] := afElapsedTime[eValve];
+    END_IF
+END_IF
+
+//Call
+atonMoving[eValve](
+    IN := bStart,
+    PT := INT_TO_TIME(apMoveTimeLimit[eValve]^ * 1000));
 
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSelectAirPressureSensorGroup" Id="{8416effc-de90-0c76-3051-15a05f13b381}">
-      <Declaration><![CDATA[METHOD mSelectAirPressureSensorGroup
-
+    <Method Name="mControl_Reset" Id="{eb46ca39-d8bd-0f8f-0608-612e177641a1}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls error reset
+METHOD PRIVATE mControl_Reset
+VAR
+    bReset: BOOL := FALSE;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[CASE _stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup OF
+        <ST><![CDATA[rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
 
-        E_PneumaticAxisGroup.ePneumaticAxisGroup1:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup1,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+tonErrorAutoReset.IN := FALSE;
 
-        E_PneumaticAxisGroup.ePneumaticAxisGroup2:
-            _stPneumaticAxis.stPneumaticAxisInputs.fPressureValueScaled := mScaledPressureValue(nRawValue := GVL.nAirPressureSensorGroup2,
-                fRawHigh := 30518, fRawLow :=0, fScaledHigh := 10, fScaledLow := 0 );
+CASE eError OF
+    E_PneumaticAxisErrors.eAirPressureErrorLow:
+        tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureLow;
+        bReset := tonErrorAutoReset.Q;
+
+    E_PneumaticAxisErrors.eAirPressureErrorHigh:
+        tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureHigh;
+        bReset := tonErrorAutoReset.Q;
+
+    E_PneumaticAxisErrors.eNoPSSPermit:
+        bReset := NOT bPSSPermitMissing;
+
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
+        bReset := apEndSwitch[eVALVE_OFF]^;
+
+    E_PneumaticAxisErrors.eEndSwitchSignalConflict:
+        bReset := NOT (apEndSwitch[eVALVE_OFF]^
+            AND apEndSwitch[eVALVE_ON]^);
+
+    E_PneumaticAxisErrors.eValveOffInterlocked,
+    E_PneumaticAxisErrors.eValveOnInterlocked:
+        bReset := NOT bInterlockRequest;
+
 END_CASE
+
+tonErrorAutoReset();
+
+IF rtrigReset.Q OR bReset THEN
+    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSetAllowedTravelTime" Id="{ee25c044-23c7-095b-0652-d0275aeaa21a}">
-      <Declaration><![CDATA[METHOD PUBLIC mSetAllowedTravelTime
-
+    <Method Name="mControl_SetValveState" Id="{22b8f3fa-139b-0f55-370c-d7d4300933e5}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Controls set valve state
+METHOD PRIVATE mControl_SetValveState
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Enter allowed times for extraction and retraction of pneumatic cylinder in seconds
-fbTimerExtend.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToExtend)*1000;
-fbTimerRetract.PT := INT_TO_TIME( _stPneumaticAxis.stPneumaticAxisConfig.nTimeToRetract)*1000;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSetInputStatuses" Id="{85a914cc-13e6-05a5-383f-5d3b917db237}">
-      <Declaration><![CDATA[METHOD PUBLIC mSetInputStatuses
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set the inputs of limit switches to bExtracted and bRetracted states of the pneumatic cylinders
-//Check if cylinder is moving: extending or retracting
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracted := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchBwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtended := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchFwd;
-_stPneumaticAxis.stPneumaticAxisStatus.bInterlocked := _stPneumaticAxis.stPneumaticAxisControl.bInterlock;
-_stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
-_stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mSingleSolenoid" Id="{b00d3187-fb9b-06fe-3a49-6151a7623336}">
-      <Declaration><![CDATA[METHOD PUBLIC mSingleSolenoid
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-
-//Check if Ithe PSS signal for shutter is ON
-mCheckStatusOfPermitSignal();
-
-//Check if Interlock signal is ON
-mCheckStatusOfInterlockSignal();
-
-//Starting the retraction movement and retraction timing
-fbTimerRetract (IN := bStartRetractPLC OR bStartRetractManual);
-
-mRetractTimeStatus();
-
-fbTrigRetract(clk:=_stPneumaticAxis.stPneumaticAxisControl.bRetract);
-IF fbTrigRetract.Q THEN
-   bStartRetractPLC := TRUE;
+        <ST><![CDATA[IF eState <> E_PneumaticAxisState.eMoving THEN
+    eSetValveState := eActValveState;
 END_IF
 
-//If the manual momentary push button is used for control of the pneumatic cylinder
-IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1;
-    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
-    IF fbTrigRetractManual.Q THEN
-       bStartRetractManual := TRUE;
+//Update set valve state
+IF artrigMoveCommand[eVALVE_OFF].Q
+    OR bPSSPermitMissing
+THEN
+    eSetValveState := eVALVE_OFF;
+ELSIF artrigMoveCommand[eVALVE_ON].Q
+    AND (eState <> E_PneumaticAxisState.eMoving)
+THEN
+    eSetValveState := eVALVE_ON;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mControl_State" Id="{5e029d34-6f19-0ae7-3102-4e3b30808b90}" FolderPath="Control Methods\">
+      <Declaration><![CDATA[//Control state change requests
+METHOD mControl_State
+VAR_INPUT
+    eNextState: E_PneumaticAxisState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Try to set initial state to standstill on init
+IF tonInitializeTimer.Q THEN
+    IF apEndSwitch[eVALVE_OFF]^
+        OR apEndSwitch[eVALVE_ON]^
+    THEN
+        eNextState := E_PneumaticAxisState.eInPosition;
     END_IF
+END_IF
+
+//Change to next state, if no error present
+IF bErrorPresent
+    AND (eState <> E_PneumaticAxisState.eInterlocked)
+THEN
+    eState := E_PneumaticAxisState.eFailSafe;
 ELSE
-    _stPneumaticAxis.stPneumaticAxisControl.bCloseManual := _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bCloseManualOP2;
-    fbTrigRetractManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bCloseManual);
-    IF fbTrigRetractManual.Q THEN
-       bStartRetractManual := TRUE;
-    END_IF
+    eState := eNextState;
 END_IF
-
-//Starting the timing of extraction movement
-fbTimerExtend(IN := bStartExtendPLC OR bStartExtendManual);
-
-mExtendTimeStatus();
-
-fbTrigExtend(clk:=_stPneumaticAxis.stPneumaticAxisControl.bExtend);
-IF fbTrigExtend.Q THEN
-   bStartExtendPLC := TRUE;
-END_IF
-
-//If the manual momentary push button is used for control of the pneumatic cylinder
-IF NOT _stPneumaticAxis.stPneumaticAxisConfig.bSecondOperatorPanel THEN
-    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1;
-    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
-    IF fbTrigExtendManual.Q THEN
-       bStartExtendManual := TRUE;
-    END_IF
-ELSE
-    _stPneumaticAxis.stPneumaticAxisControl.bOpenManual := _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP1 OR _stPneumaticAxis.stPneumaticAxisInputs.bOpenManualOP2;
-    fbTrigExtendManual(clk:=_stPneumaticAxis.stPneumaticAxisControl.bOpenManual);
-    IF fbTrigExtendManual.Q THEN
-       bStartExtendManual := TRUE;
-    END_IF
-END_IF
-
-//Starting the extraction movement
-IF (bStartExtendPLC OR bStartExtendManual) THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := TRUE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bExtending := TRUE;
-    END_IF
-    //If the command to retract is given after the valve was activated
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted
-       OR _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        IF (bStartRetractPLC OR bStartRetractManual) THEN
-            _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
-            _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-            _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-            bStartExtendPLC := FALSE;
-            bStartExtendManual := FALSE;
-        END_IF
-    END_IF
-END_IF
-
-// Extraction of the cylinder finished, reset timer
-IF (bStartExtendPLC OR bStartExtendManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bExtended THEN
-    bStateChange := TRUE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-    bStartExtendPLC := FALSE;
-    bStartExtendManual := FALSE;
-END_IF
-
-//Check if LimitSwitchBwd signal is ON
-mCheckEndSwitchFwdStatus();
-
-IF (bStartRetractPLC OR bStartRetractManual) THEN
-    _stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-    IF NOT _stPneumaticAxis.stPneumaticAxisStatus.bExtended
-       AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := TRUE;
-    END_IF
-END_IF
-
-// Retraction of the cylinder finished, reset timer
-IF  (bStartRetractPLC OR bStartRetractManual) AND _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-    bStateChange := FALSE;
-    _stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-    _stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-    bStartRetractPLC := FALSE;
-    bStartRetractManual := FALSE;
-END_IF
-//Check if LimitSwitchFwd signal is ON
-mCheckEndSwitchBwdStatus();
-
-
-mCheckForMovingError();
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mSingleSolenoidError" Id="{60e07ee6-93c1-0a35-3946-686c9080e0f9}">
-      <Declaration><![CDATA[METHOD PUBLIC mSingleSolenoidError
-
+    <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
+      <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[CASE  _stPneumaticAxis.ePneumaticAxisErrors OF
+        <ST><![CDATA[IF NOT __ISVALIDREF(_stPneumaticAxis) THEN
+    RETURN;
+END_IF
+
+_iPressureGroup :=
+    GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
+
+IF bInitPointers THEN
+    apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
+    apMoveTimeLimit[eVALVE_OFF] :=
+        ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOff);
+
+    apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
+    apMoveTimeLimit[eVALVE_ON] :=
+        ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOn);
+
+    bInitPointers := FALSE;
+END_IF
+
+tonInitializeTimer();
+IF tonInitializeTimer.Q THEN
+    tonInitializeTimer.IN := FALSE;
+END_IF
+
+mInit := NOT tonInitializeTimer.IN;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mInputs" Id="{81f9e40e-e6f9-0de7-2c11-798b5a563dc2}">
+      <Declaration><![CDATA[//Reads input variables and transforms them into internal variables
+METHOD PRIVATE mInputs
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//PSS Permit
+bPSSPermitNeeded := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
+    AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
+
+bPSSPermitMissing := bPSSPermitNeeded
+    AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
+
+//Interlock
+bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
+    OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
+    AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
+
+//Move Request
+artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
+    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1
+    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2);
+
+artrigMoveCommand[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn
+    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1
+    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_EndSwitch" Id="{8fe57045-97da-0040-2f5f-3113c2e4a645}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: End Switch
+METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
+VAR CONSTANT
+    aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+        E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff,
+        E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT apEndSwitch[eActValveState]^ THEN
+    mMonitor_EndSwitch := aERROR[eActValveState];
+ELSIF apEndSwitch[eVALVE_OFF]^
+    AND apEndSwitch[eVALVE_ON]^
+THEN
+    mMonitor_EndSwitch := E_PneumaticAxisErrors.eEndSwitchSignalConflict;
+END_IF
+
+eError := mMonitor_EndSwitch;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_InterlockMove" Id="{5b74e8a2-afbb-097b-0a74-e3f8f8f7ad98}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Interlock
+METHOD PRIVATE mMonitor_InterlockMove : E_PneumaticAxisErrors
+VAR CONSTANT
+    aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+        E_PneumaticAxisErrors.eValveOffInterlocked,
+        E_PneumaticAxisErrors.eValveOnInterlocked];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF artrigMoveCommand[eSetValveState].Q
+    AND (eSetValveState <> eActValveState)
+THEN
+    mMonitor_InterlockMove := aERROR[eActValveState];
+END_IF
+
+eError := mMonitor_InterlockMove;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_Move" Id="{759d2f8d-8e84-0713-216f-f31787094c5b}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Move Timeout & No Movement
+METHOD PRIVATE mMonitor_Move : E_PneumaticAxisErrors
+VAR CONSTANT
+    aERROR_TIMEOUT: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+        E_PneumaticAxisErrors.eMovingWithValveOffTimedOut,
+        E_PneumaticAxisErrors.eMovingWithValveOnTimedOut];
+    aERROR_NO_MOVE: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
+        E_PneumaticAxisErrors.eNotMovingWithValveOff,
+        E_PneumaticAxisErrors.eNotMovingWithValveOn];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Timeout
+IF atonMoving[eSetValveState].Q THEN
+    IF apEndSwitch[eActValveState]^ THEN
+        mMonitor_Move := aERROR_NO_MOVE[eSetValveState];
+    ELSE
+        mMonitor_Move := aERROR_TIMEOUT[eSetValveState];
+    END_IF
+END_IF
+
+eError := mMonitor_Move;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_Permit" Id="{1368e518-6934-07f8-2e25-d6a5ffa1a744}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: PSS Permit
+METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bPSSPermitMissing
+    AND artrigMoveCommand[eVALVE_ON].Q
+THEN
+    mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
+END_IF
+
+eError := mMonitor_Permit;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mMonitor_Pressure" Id="{6586e859-2ea5-03c2-26ee-d35e5e7cbace}" FolderPath="Monitor Methods\">
+      <Declaration><![CDATA[//Monitor: Pressure Low & High (Auto-Resets)
+METHOD PRIVATE mMonitor_Pressure : E_PneumaticAxisErrors
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _iPressureGroup.bPressureLow THEN
+    mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorLow;
+END_IF
+
+IF _iPressureGroup.bPressureHigh THEN
+    mMonitor_Pressure := E_PneumaticAxisErrors.eAirPressureErrorHigh;
+END_IF
+
+eError := mMonitor_Pressure;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mOutputs" Id="{e0f2114b-e095-0a99-3a69-d7ef5bca3c9b}">
+      <Declaration><![CDATA[//Updates the status/output variables
+METHOD PRIVATE mOutputs
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Actuate Solenoids
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
+    //EITHER: Moving with Set ValveOn
+    (eState = E_PneumaticAxisState.eMoving
+    AND eSetValveState = E_PneumaticAxisValveState.eValveOn)
+    //OR: InPosition / Interlocked in Act ValveOn
+    OR ((eState = E_PneumaticAxisState.eInPosition
+    OR eState = E_PneumaticAxisState.eInterlocked)
+    AND eActValveState = E_PneumaticAxisValveState.eValveOn);
+
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On :=
+    //MUST: Bistable mode
+    _stPneumaticAxis.stPneumaticAxisConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable
+    //EITHER: Moving with Set ValveOff
+    AND ((eState = E_PneumaticAxisState.eMoving
+    AND eSetValveState = E_PneumaticAxisValveState.eValveOff)
+    //OR: InPosition / Interlocked in Act ValveOff
+    OR ((eState = E_PneumaticAxisState.eInPosition
+    OR eState = E_PneumaticAxisState.eInterlocked)
+    AND eActValveState = E_PneumaticAxisValveState.eValveOff));
+
+//Pressure
+_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
+_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := _iPressureGroup.bPressureHigh;
+
+//Valve Off
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := apEndSwitch[eVALVE_OFF]^;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
+    (eState = E_PneumaticAxisState.eMoving)
+    AND (eSetValveState = E_PneumaticAxisValveState.eValveOff);
+
+_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
+
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid1Active :=
+    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On;
+
+//Valve On
+_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_ON]^;
+
+_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn :=
+    (eState = E_PneumaticAxisState.eMoving)
+    AND (eSetValveState = E_PneumaticAxisValveState.eValveOn);
+
+_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
+
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid2Active :=
+    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On;
+
+//Error
+_stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mStatusInfo" Id="{e5a09ca1-5616-0a51-3f8d-aecba84ee10e}">
+      <Declaration><![CDATA[//Maps the current state and errors into an status info text
+METHOD PRIVATE mStatusInfo
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE _stPneumaticAxis.ePneumaticAxisErrors OF
+
+    E_PneumaticAxisErrors.eAirPressureErrorLow:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
+
+    E_PneumaticAxisErrors.eAirPressureErrorHigh:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
+
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE OFF';
+
+    E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE ON';
+
+	E_PneumaticAxisErrors.eEndSwitchSignalConflict:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: SIGNAL FROM BOTH SWITCH HIGH';
+	
+    E_PneumaticAxisErrors.eNotMovingWithValveOff:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF NOT MOVING';
+
+    E_PneumaticAxisErrors.eNotMovingWithValveOn:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON NOT MOVING';
+
+    E_PneumaticAxisErrors.eMovingWithValveOffTimedOut:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF TIMEDOUT';
+
+    E_PneumaticAxisErrors.eMovingWithValveOnTimedOut:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON TIMEDOUT';
+
+    E_PneumaticAxisErrors.eValveOffInterlocked:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF INTERLOCKED';
+
+    E_PneumaticAxisErrors.eValveOnInterlocked:
+        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON INTERLOCKED';
+
+	E_PneumaticAxisErrors.eNoPSSPermit:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PSS PERMIT';
 
     E_PneumaticAxisErrors.eNoError:
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
+        CASE eState OF
+            E_PneumaticAxisState.eFailSafe:
+                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: FAILSAFE';
+            E_PneumaticAxisState.eInPosition:
+				_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: IN POSITION';
+            E_PneumaticAxisState.eMoving:
+                IF eSetValveState = E_PneumaticAxisValveState.eValveOn THEN
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE ON';
+                ELSE
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE OFF';
+                END_IF
+            E_PneumaticAxisState.eInterlocked:
+                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
+        END_CASE
 
-    E_PneumaticAxisErrors.eExtractTimedOut:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: COMMAND TIMED OUT';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-
-    E_PneumaticAxisErrors.eRetractTimedOut:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: COMMAND TIMED OUT';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-
-    E_PneumaticAxisErrors.eNotMovingExtract:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: CYLINDER NOT MOVING';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-
-    E_PneumaticAxisErrors.eNotMovingRetract:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: CYLINDER NOT MOVING';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-
-    E_PneumaticAxisErrors.eNoSignalFromEndSwitchBwd:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH BWD';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-    IF _stPneumaticAxis.stPneumaticAxisStatus.bRetracted THEN
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
-        _stPneumaticAxis.stPneumaticAxisStatus.bError := FALSE;
-        _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
-        _stPneumaticAxis.ePneumaticAxisMode := E_PneumaticMode.eSingleSolenoidControl;
-    END_IF
-
-    E_PneumaticAxisErrors.eNoSignalFromEndSwitchFwd:
-    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM LIMIT SWITCH FWD';
-    _stPneumaticAxis.stPneumaticAxisStatus.bError := TRUE;
-
+    ELSE
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN STATE';
 END_CASE
-
-_stPneumaticAxis.stPneumaticAxisControl.bExtend := FALSE;
-_stPneumaticAxis.stPneumaticAxisControl.bRetract := FALSE;
-_stPneumaticAxis.stPneumaticAxisOutputs.bValveOn := FALSE;
-bStateChange := FALSE;
-bStartExtendPLC := FALSE;
-bStartExtendManual := FALSE;
-bStartRetractManual := FALSE;
-bStartRetractPLC := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bExtending := FALSE;
-_stPneumaticAxis.stPneumaticAxisStatus.bRetracting := FALSE;
-
-
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="stPneumaticAxis" Id="{32b385f3-2648-4c7a-b2e7-2316433a21ee}">
+    <Method Name="Run" Id="{4ff666c5-8aa4-4eaa-803d-5700cbef55c2}">
+      <Declaration><![CDATA[METHOD PUBLIC Run
+VAR
+    eNextState: E_PneumaticAxisState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT mInit() THEN
+    RETURN;
+END_IF
+
+mInputs();
+
+mControl_MoveTimer(eValve := eVALVE_OFF);
+mControl_MoveTimer(eValve := eVALVE_ON);
+mControl_SetValveState();
+
+mMonitor_Pressure();
+mMonitor_Permit();
+
+eNextState := eState;
+CASE eState OF
+    E_PneumaticAxisState.eFailSafe:
+        IF artrigMoveCommand[eVALVE_OFF].Q
+            OR artrigMoveCommand[eVALVE_ON].Q
+        THEN
+            eNextState := E_PneumaticAxisState.eMoving;
+        ELSIF apEndSwitch[eVALVE_OFF]^ THEN
+            eActValveState := eVALVE_OFF;
+            eNextState := E_PneumaticAxisState.eInPosition;
+        END_IF
+
+    E_PneumaticAxisState.eInPosition:
+        mMonitor_EndSwitch();
+
+        IF bInterlockRequest THEN
+            eNextState := E_PneumaticAxisState.eInterlocked;
+        ELSIF eSetValveState <> eActValveState THEN
+            eNextState := E_PneumaticAxisState.eMoving;
+        END_IF
+
+    E_PneumaticAxisState.eMoving:
+        mMonitor_Move();
+
+        IF apEndSwitch[eSetValveState]^ THEN
+            eActValveState := eSetValveState;
+            eNextState := E_PneumaticAxisState.eInPosition;
+        END_IF
+
+    E_PneumaticAxisState.eInterlocked:
+        mMonitor_InterlockMove();
+
+        IF NOT bInterlockRequest THEN
+            eNextState := E_PneumaticAxisState.eInPosition;
+        END_IF
+END_CASE
+
+mControl_State(eNextState := eNextState);
+mControl_Reset();
+
+mStatusInfo();
+mOutputs();
+
+EndOfCycle();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="stPneumaticAxis" Id="{32b385f3-2648-4c7a-b2e7-2316433a21ee}" FolderPath="Properties\">
       <Declaration><![CDATA[PROPERTY PUBLIC stPneumaticAxis : REFERENCE TO ST_PneumaticAxisStruct
 ]]></Declaration>
       <Get Name="Get" Id="{adb8011b-822d-0d9a-11a8-4f5c0c464fc5}">
