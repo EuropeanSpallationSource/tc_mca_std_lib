@@ -491,6 +491,9 @@ METHOD PRIVATE mStatusInfo
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn:
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE ON';
 
+	E_PneumaticAxisErrors.eEndSwitchSignalConflict:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: SIGNAL FROM BOTH SWITCH HIGH';
+	
     E_PneumaticAxisErrors.eNotMovingWithValveOff:
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF NOT MOVING';
 
@@ -509,22 +512,27 @@ METHOD PRIVATE mStatusInfo
     E_PneumaticAxisErrors.eValveOnInterlocked:
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON INTERLOCKED';
 
+	E_PneumaticAxisErrors.eNoPSSPermit:
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PSS PERMIT';
+
     E_PneumaticAxisErrors.eNoError:
         CASE eState OF
+            E_PneumaticAxisState.eFailSafe:
+                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: FAILSAFE';
             E_PneumaticAxisState.eInPosition:
-                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'NO_ERRORS_READY_TO_START';
+				_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: IN POSITION';
             E_PneumaticAxisState.eMoving:
                 IF eSetValveState = E_PneumaticAxisValveState.eValveOn THEN
-                    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_ON';
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE ON';
                 ELSE
-                    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING_WITH_VALVE_OFF';
+					_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE OFF';
                 END_IF
             E_PneumaticAxisState.eInterlocked:
                 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
         END_CASE
 
     ELSE
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN_STATE';
+		_stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN STATE';
 END_CASE
 ]]></ST>
       </Implementation>
