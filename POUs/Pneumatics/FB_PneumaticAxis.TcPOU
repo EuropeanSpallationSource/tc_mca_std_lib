@@ -450,7 +450,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
     (eState = E_PneumaticAxisState.eMoving)
     AND (eSetValveState = E_PneumaticAxisValveState.eValveOff);
 
-_stPneumaticAxis.stPneumaticAxisStatus.bTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
+_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
 
 _stPneumaticAxis.stPneumaticAxisStatus.bSolenoid1Active :=
     _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On;

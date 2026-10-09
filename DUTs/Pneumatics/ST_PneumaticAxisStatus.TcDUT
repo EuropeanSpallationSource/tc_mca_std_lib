@@ -8,7 +8,7 @@ STRUCT
     bInPositionValveOn: BOOL; //In valve on position status
     bInPositionValveOff: BOOL; //In valve off postion status
     fTimeElapsedMovingWithValveOn: REAL; //Elapsed time while moving with valve on
-    bTimeElapsedMovingWithValveOff: REAL; //Elapsed time while moving with valve off
+    fTimeElapsedMovingWithValveOff: REAL; //Elapsed time while moving with valve off
     bSolenoid1Active: BOOL; //Status valve solenoid 1
     bSolenoid2Active: BOOL; //Status valve solenoid 2
     sStatus: STRING; //Pneumatic cylinder current status
