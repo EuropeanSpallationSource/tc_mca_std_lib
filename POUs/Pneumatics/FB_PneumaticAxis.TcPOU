@@ -5,6 +5,7 @@
 
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
+    _stConfig: REFERENCE TO ST_PneumaticAxisConfig;
     _iPressureGroup: I_PressureGroup;
 
     eState: E_PneumaticAxisState := E_PneumaticAxisState.eFailSafe;
@@ -179,7 +180,8 @@ CASE eError OF
         bReset := NOT bPSSPermitMissing;
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
-        bReset := apEndSwitch[eVALVE_OFF]^;
+        bReset := apEndSwitch[eVALVE_OFF]^
+            AND (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eMonostable);
 
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
         bReset := NOT (apEndSwitch[eVALVE_OFF]^
@@ -257,20 +259,19 @@ END_IF
     RETURN;
 END_IF
 
-_iPressureGroup :=
-    GVL.afbPressureGroup[_stPneumaticAxis.stPneumaticAxisConfig.eSelectPneumaticAxisGroup];
-
 IF bInitPointers THEN
+    _stConfig REF= _stPneumaticAxis.stPneumaticAxisConfig;
+
     apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
-    apMoveTimeLimit[eVALVE_OFF] :=
-        ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOff);
+    apMoveTimeLimit[eVALVE_OFF] := ADR(_stConfig.nTimeLimitMovingWithValveOff);
 
     apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
-    apMoveTimeLimit[eVALVE_ON] :=
-        ADR(_stPneumaticAxis.stPneumaticAxisConfig.nTimeLimitMovingWithValveOn);
+    apMoveTimeLimit[eVALVE_ON] := ADR(_stConfig.nTimeLimitMovingWithValveOn);
 
     bInitPointers := FALSE;
 END_IF
+
+_iPressureGroup := GVL.afbPressureGroup[_stConfig.eSelectPneumaticAxisGroup];
 
 tonInitializeTimer();
 IF tonInitializeTimer.Q THEN
@@ -287,7 +288,7 @@ METHOD PRIVATE mInputs
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//PSS Permit
-bPSSPermitNeeded := _stPneumaticAxis.stPneumaticAxisConfig.bSafetyShutter;
+bPSSPermitNeeded := _stConfig.bSafetyShutter;
 
 _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
     AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
@@ -298,7 +299,7 @@ bPSSPermitMissing := bPSSPermitNeeded
 //Interlock
 bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
     OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
-    AND NOT _stPneumaticAxis.stPneumaticAxisconfig.bSafetyShutter;
+    AND NOT _stConfig.bSafetyShutter;
 
 //Move Request
 artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
@@ -430,7 +431,7 @@ _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
 
 _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On :=
     //MUST: Bistable mode
-    _stPneumaticAxis.stPneumaticAxisConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable
+    (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable)
     //EITHER: Moving with Set ValveOff
     AND ((eState = E_PneumaticAxisState.eMoving
     AND eSetValveState = E_PneumaticAxisValveState.eValveOff)
