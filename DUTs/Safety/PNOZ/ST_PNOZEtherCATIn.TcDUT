@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATIn" Id="{4d26afb5-ffd0-0d85-0f77-77acb686f585}">
+    <Declaration><![CDATA[//Formatted PNOZ -> PLC EtherCAT input data copied from the raw %I* process image.
+TYPE ST_PNOZEtherCATIn :
+STRUCT
+    stMCCStatusIn: ST_MCCStatusIn; //Input Byte 00..01
+    stMCC_CustomStatusIn: ST_MCC_CustomStatusIn; //Input Byte 02..03
+    astSafetyFunctionIn: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_FUNCTIONS] OF ST_SafetyFunctionIn; //Input Byte 04..15
+    stLEDState: ST_LEDState; //Input Byte 16
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

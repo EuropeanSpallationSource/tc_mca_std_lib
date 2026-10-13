@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MCCStatusOut" Id="{4ca824d4-32e3-0c0c-0c21-10b3968bc3f6}">
+    <Declaration><![CDATA[//Status information related to the cabinet IPC --> PNOZ, will not change from cabinet to cabinet
+TYPE ST_MCCStatusOut :
+STRUCT
+    bHeartbeat: BIT; //Pulsed every ~200ms by the PLC-to-PNOZ, the PNOZ is expected to loop back this signal.
+    bReserved1: BIT;
+    bReserved2: BIT;
+    bErrAck: BIT; //If there is a fault requiring intervention (from cabinet), CabAck will clear it
+    bReserved4: BIT;
+    bReserved5: BIT;
+    bSTOFbk: BIT;
+    bSTO_OK: BIT;
+    bReserved8: BIT;
+    bReserved9: BIT;
+    bReserved10: BIT;
+    bReserved11: BIT;
+    bReserved12: BIT;
+    bReserved13: BIT;
+    bReserved14: BIT;
+    bReserved15: BIT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
