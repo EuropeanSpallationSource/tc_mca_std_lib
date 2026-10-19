@@ -455,9 +455,11 @@ CASE eState OF
         eState := E_CommandHandlerState.eIdle;
 
     E_CommandHandlerState.eWaitForMotionStart:
-        IF _stAxis.stStatus.bMoving
-            OR _stAxis.stStatus.bDone
+        IF _stAxis.stStatus.bMoving THEN
+            eState := E_CommandHandlerState.eIdle;
+        ELSIF _stAxis.stStatus.bDone
             OR _stAxis.stStatus.bError THEN
+            bInternalMovePermit := FALSE;
             eState := E_CommandHandlerState.eIdle;
         END_IF
 
