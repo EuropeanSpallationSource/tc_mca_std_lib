@@ -406,6 +406,9 @@ CASE eState OF
                 E_MotionFunctions.eGearInMultiMaster,
                 E_MotionFunctions.eGearOut,
                 E_MotionFunctions.eHome :
+                IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome AND _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect THEN
+                    ; // nothing
+                ELSE
                     eLatchedCommand := _stAxis.stControl.eCommand;
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
@@ -414,6 +417,7 @@ CASE eState OF
                         _stAxis.stControl.bEnable := TRUE;
                     END_IF
                     eState := E_CommandHandlerState.eWaitPermits;
+                END_IF
             END_CASE
         END_IF
 
