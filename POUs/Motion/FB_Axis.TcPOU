@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="FB_Axis" Id="{beb60ab5-3bf2-0ae6-2037-f6d7e95a54b2}" SpecialFunc="None">
     <Declaration><![CDATA[//Function block to run a virtual drive with Nc
@@ -408,19 +408,29 @@ CASE eState OF
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
 
-                    IF _stAxis.stConfig.bAutoEnable THEN
-                        _stAxis.stControl.bEnable := TRUE;
+                    IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
+                        AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
+                            OR _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming) THEN
+                        eState := E_CommandHandlerState.eReleaseNonMoveCommand;
+                    ELSE
+                        IF _stAxis.stConfig.bAutoEnable THEN
+                            _stAxis.stControl.bEnable := TRUE;
+                        END_IF
+                        eState := E_CommandHandlerState.eWaitPermits;
                     END_IF
-                    eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
         IF (bPermitRequired AND bAxisPermittedToMove)
             OR NOT bPermitRequired
-            OR (bPermitRequired AND NOT _stAxis.stConfig.bAutoEnable AND NOT _stAxis.stStatus.bEnabled) THEN
-
+        THEN
             eState := E_CommandHandlerState.eStabilizeNC;
+        ELSIF bPermitRequired
+            AND NOT _stAxis.stConfig.bAutoEnable
+            AND NOT _stAxis.stStatus.bEnabled
+        THEN
+            eState := E_CommandHandlerState.eReleaseCommand;
         END_IF
 
     E_CommandHandlerState.eStabilizeNC:
@@ -440,6 +450,11 @@ CASE eState OF
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
+
+    E_CommandHandlerState.eReleaseNonMoveCommand:
+        _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
+        bInternalExecute := TRUE;
+        eState := E_CommandHandlerState.eIdle;
 
     E_CommandHandlerState.eWaitForMotionStart:
         IF _stAxis.stStatus.bMoving
