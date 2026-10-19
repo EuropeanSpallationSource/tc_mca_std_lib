@@ -26,6 +26,7 @@ VAR
     tonInitializeTimer: TON := (PT := tINIT);
     bInitPointers: BOOL := TRUE;
 
+    _eError: E_PneumaticAxisErrors := E_PneumaticAxisErrors.eNoError; //Current error, use property eError to GET/SET
     tonErrorAutoReset: TON := (PT := tAUTO_ERROR_RESET);
     rtrigReset: R_TRIG;
     artrigMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF R_TRIG;
@@ -53,7 +54,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[bErrorPresent := _stPneumaticAxis.ePneumaticAxisErrors <> E_PneumaticAxisErrors.eNoError;
+          <ST><![CDATA[bErrorPresent := eError <> E_PneumaticAxisErrors.eNoError;
 ]]></ST>
         </Implementation>
       </Get>
@@ -66,7 +67,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[eError := _stPneumaticAxis.ePneumaticAxisErrors;
+          <ST><![CDATA[eError := _eError;
 ]]></ST>
         </Implementation>
       </Get>
@@ -77,7 +78,7 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[IF eError <> E_PneumaticAxisErrors.eNoError THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := eError;
+    _eError := eError;
 END_IF
 ]]></ST>
         </Implementation>
@@ -196,7 +197,7 @@ END_CASE
 tonErrorAutoReset();
 
 IF rtrigReset.Q OR bReset THEN
-    _stPneumaticAxis.ePneumaticAxisErrors := E_PneumaticAxisErrors.eNoError;
+    _eError := E_PneumaticAxisErrors.eNoError;
 END_IF
 ]]></ST>
       </Implementation>
@@ -466,6 +467,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bSolenoid2Active :=
 
 //Error
 _stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
+_stPneumaticAxis.stPneumaticAxisStatus.eError := eError;
 ]]></ST>
       </Implementation>
     </Method>
@@ -474,7 +476,7 @@ _stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
 METHOD PRIVATE mStatusInfo
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[CASE _stPneumaticAxis.ePneumaticAxisErrors OF
+        <ST><![CDATA[CASE eError OF
 
     E_PneumaticAxisErrors.eAirPressureErrorLow:
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
