@@ -408,19 +408,27 @@ CASE eState OF
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
 
-                    IF _stAxis.stConfig.bAutoEnable THEN
-                        _stAxis.stControl.bEnable := TRUE;
+                    IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
+                        AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
+                            OR _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming) THEN
+                        eState := E_CommandHandlerState.eReleaseNonMoveCommand;
+                    ELSE
+                        IF _stAxis.stConfig.bAutoEnable THEN
+                            _stAxis.stControl.bEnable := TRUE;
+                        END_IF
+                        eState := E_CommandHandlerState.eWaitPermits;
                     END_IF
-                    eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
         IF (bPermitRequired AND bAxisPermittedToMove)
-            OR NOT bPermitRequired
-            OR (bPermitRequired AND NOT _stAxis.stConfig.bAutoEnable AND NOT _stAxis.stStatus.bEnabled) THEN
-
+            OR NOT bPermitRequired THEN
             eState := E_CommandHandlerState.eStabilizeNC;
+        ELSIF bPermitRequired
+            AND NOT _stAxis.stConfig.bAutoEnable
+            AND NOT _stAxis.stStatus.bEnabled THEN
+            eState := E_CommandHandlerState.eReleaseCommand;
         END_IF
 
     E_CommandHandlerState.eStabilizeNC:
@@ -440,6 +448,11 @@ CASE eState OF
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
+
+    E_CommandHandlerState.eReleaseNonMoveCommand:
+        _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
+        bInternalExecute := TRUE;
+        eState := E_CommandHandlerState.eIdle;
 
     E_CommandHandlerState.eWaitForMotionStart:
         IF _stAxis.stStatus.bMoving
