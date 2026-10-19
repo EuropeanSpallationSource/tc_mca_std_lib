@@ -6,7 +6,6 @@ VAR_INPUT
     bEnable: BOOL;
 END_VAR
 VAR_OUTPUT
-    bDataValid: BOOL;
     bMCC_OK: BOOL;
     bAxisEnableAllowed: BOOL;
     bMCCWatchdogFault: BOOL;
@@ -28,7 +27,10 @@ VAR
     bMCCHeartbeatInOld: BOOL;
     bMCCHeartbeatInit: BOOL;
 
-    fbSafetyAckLedPulse: FB_PulseGenerator;
+    fbSafetyAcknowledgeLedPulse: FB_PulseGenerator;
+
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_3^TxPDO_1'}
+    stPNOZEtherCATDiagIn AT %I*: ST_PNOZEtherCATDiagIn; //Raw EtherCAT Input of TxPDO_1
 
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_3^TxPDO'}
     stPNOZEtherCATIn AT %I*: ST_PNOZEtherCATIn; //Raw EtherCAT input
@@ -36,6 +38,10 @@ VAR
     stPNOZEtherCATOut AT %Q*: ST_PNOZEtherCATOut; //Raw EtherCAT output
     {attribute 'TcLinkTo' :=  'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^WcState^WcState'}
     bWcState AT %I*: BOOL;
+
+    {attribute 'TcLinkTo' :=  'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^InfoData^State'}
+    nEtherCATState AT %I*: UINT; //State of EtherCAT slave
+    sEtherCATState: STRING(10); //String to map states
 
     //Motion error registers from the Technosoft drives
     {attribute 'TcLinkTo' := '[1] := TIID^Device 2 (EtherCAT)^TA701 (iPOS8020 BX-CAT)^Transmit PDO 3 mapping parameters^Motion Error Register;
@@ -59,7 +65,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[_bReadFromSafetyController := bEnable;
 stSafety.stSafetyIn.stPNOZCommDiag.bWcState := bWcState;
-bDataValid := FALSE;
+stSafety.stSafetyIn.stPNOZCommDiag.nEtherCATState := nEtherCATState;
 
 IF NOT bEnable OR bWcState THEN
     bAxisEnableAllowed := FALSE; //Withdraw general motion permission
@@ -77,9 +83,9 @@ IF NOT bEnable OR bWcState THEN
         bWatchdogFault => bMCCWatchdogFault
     ); //Reset heartbeat generation and watchdog memory
 
-    stSafety.stSafetyOut.stMCCStatusOut.bErrAck := FALSE; //Clear fault-acknowledge command
+    stSafety.stSafetyOut.stMCCStatusOut.bErrorAcknowledge := FALSE; //Clear fault-acknowledge command
 
-    fbSafetyAckLedPulse(
+    fbSafetyAcknowledgeLedPulse(
         bEnable := FALSE,
         bOut => bSafetyAcknowledgeLED
     ); //Reset pulse generator and physical LED
@@ -89,8 +95,6 @@ IF NOT bEnable OR bWcState THEN
 END_IF;
 
 mReadInputs(stSafetyData := stSafety);
-bDataValid := TRUE;
-
 mMCCStatus(stSafetyData := stSafety); //Heartbeat generation and MCC watchdog check
 mTechnosoftStatus(stSafetyData := stSafety);
 
@@ -224,6 +228,16 @@ END_VAR
     bWatchdogFault => bMCCWatchdogFault
 );
 
+CASE nEtherCATState OF
+    1: sEtherCATState := 'INIT';
+    2: sEtherCATState := 'PRE_OP';
+    3: sEtherCATState := 'BOOT';
+    4: sEtherCATState := 'SAFE_OP';
+    8: sEtherCATState := 'OP';
+ELSE
+    sEtherCATState := 'UNDEFINED';
+END_CASE
+
 bAxisEnableAllowed :=
     stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK
     AND bMCC_OK;
@@ -235,25 +249,77 @@ bAxisEnableAllowed :=
 VAR_IN_OUT
     stSafetyData: ST_Safety;
 END_VAR
+VAR
+    nIndex: UINT; //Array index
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[stSafetyData.stSafetyIn.stMCCStatusIn := stPNOZEtherCATIn.stMCCStatusIn;
-stSafetyData.stSafetyIn.stMCC_CustomStatusIn := stPNOZEtherCATIn.stMCC_CustomStatusIn;
-stSafetyData.stSafetyIn.stLEDState := stPNOZEtherCATIn.stLEDState;
+        <ST><![CDATA[//Common cabinet status: input bytes 00..01.
+stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat := stPNOZEtherCATIn.wMCCStatus.0;
+stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired := stPNOZEtherCATIn.wMCCStatus.1;
+stSafetyData.stSafetyIn.stMCCStatusIn.bFault := stPNOZEtherCATIn.wMCCStatus.2;
+stSafetyData.stSafetyIn.stMCCStatusIn.bWarning := stPNOZEtherCATIn.wMCCStatus.3;
+stSafetyData.stSafetyIn.stMCCStatusIn.bMessage := stPNOZEtherCATIn.wMCCStatus.4;
+stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK := stPNOZEtherCATIn.wMCCStatus.8;
+stSafetyData.stSafetyIn.stMCCStatusIn.bRemote := stPNOZEtherCATIn.wMCCStatus.9;
 
-FOR i := 1 TO GVL_APP.nNUM_OF_SAFETY_FUNCTIONS DO
-    stSafetyData.stSafetyIn.astSafetyFunctionIn[i] := stPNOZEtherCATIn.astSafetyFunctionIn[i];
+
+//Controller LED states: input byte 16.
+stSafetyData.stSafetyIn.stLEDState.bLED_OFAULT := stPNOZEtherCATIn.byLEDState.0;
+stSafetyData.stSafetyIn.stLEDState.bLED_IFAULT := stPNOZEtherCATIn.byLEDState.1;
+stSafetyData.stSafetyIn.stLEDState.bLED_FAULT := stPNOZEtherCATIn.byLEDState.2;
+stSafetyData.stSafetyIn.stLEDState.bLED_DIAG := stPNOZEtherCATIn.byLEDState.3;
+stSafetyData.stSafetyIn.stLEDState.bLED_RUN := stPNOZEtherCATIn.byLEDState.4;
+
+//Decode diagnostic elements from TxPDO_1.
+FOR nIndex := 1 TO GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS DO
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bPulseTestError :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.0;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn1 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.4;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn2 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.5;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn3 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.6;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn4 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.7;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bActive :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.0;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSafe :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.1;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bReady :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.2;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bTestReq :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.3;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bOperatedLate :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.4;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSwitchError :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.5;
+
+    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bDisabled :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.6;
 END_FOR
 
+//Motion error registers from the Technosoft drives.
 IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
-    FOR i := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
-        stSafetyData.stSafetyIn.astTechnosoftMotionError[i] :=
-            astTechnosoftMotionError[i];
+    FOR nIndex := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
+        stSafetyData.stSafetyIn.astTechnosoftMotionError[nIndex] :=
+            astTechnosoftMotionError[nIndex];
     END_FOR
 END_IF
 
+//Used internally in this function block.
 _bEStopOK := stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK;
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -312,11 +378,11 @@ IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
 END_IF
 
 IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
-    stSafetyData.stSafetyOut.stMCCStatusOut.bSTOFbk :=
-        stSafetyData.stSafetyOut.bSTOActive; //TRUE when any Technosoft drive reports STO active
+//    stSafetyData.stSafetyOut.stMCCStatusOut.bSTOFbk :=
+//        stSafetyData.stSafetyOut.bSTOActive; //TRUE when any Technosoft drive reports STO active
 
-    stSafetyData.stSafetyOut.stMCCStatusOut.bSTO_OK :=
-        NOT stSafetyData.stSafetyOut.bTechnosoftMotionErrors; //Preserve the existing no-motion-error feedback
+//    stSafetyData.stSafetyOut.stMCCStatusOut.bSTO_OK :=
+//        NOT stSafetyData.stSafetyOut.bTechnosoftMotionErrors; //Preserve the existing no-motion-error feedback
 END_IF
 ]]></ST>
       </Implementation>
@@ -329,10 +395,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Fault feedback to safety controller
-stSafety.stSafetyOut.stMCCStatusOut.bErrAck :=
+stSafety.stSafetyOut.stMCCStatusOut.bErrorAcknowledge :=
     stSafety.stSafetyIn.stMCCStatusIn.bFault;
 
-fbSafetyAckLedPulse(
+fbSafetyAcknowledgeLedPulse(
     bEnable := stSafety.stSafetyIn.stMCCStatusIn.bFault,
     tFlashPeriod := T#1S,
     tOffTime := T#500MS,
@@ -349,16 +415,34 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[stPNOZEtherCATOut.stMCCStatusOut := stSafetyData.stSafetyOut.stMCCStatusOut;
-stPNOZEtherCATOut.stMCC_CustomStatusOut := stSafetyData.stSafetyOut.stMCC_CustomStatusOut;
+        <ST><![CDATA[//Initialize common commands; unused bits remain FALSE.
+stPNOZEtherCATOut.wMCCStatus := WORD#0;
 
-FOR i := 1 TO GVL_APP.nNUM_OF_SAFETY_FUNCTIONS DO
-    stPNOZEtherCATOut.aSafetyFunctionOut[i] := stSafetyData.stSafetyOut.astSafetyFunctionOut[i];
+//Encode common cabinet commands.
+stPNOZEtherCATOut.wMCCStatus.0 :=
+    stSafetyData.stSafetyOut.stMCCStatusOut.bHeartbeat;
+
+stPNOZEtherCATOut.wMCCStatus.1 :=
+    stSafetyData.stSafetyOut.stMCCStatusOut.bPLC_OK;
+
+stPNOZEtherCATOut.wMCCStatus.2 :=
+    stSafetyData.stSafetyOut.stMCCStatusOut.bErrorAcknowledge;
+
+//No custom commands are currently defined.
+stPNOZEtherCATOut.wMCCCustomStatus := WORD#0;
+
+//Digital outputs are currently unused.
+FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.abyDigitalOutputs) DO
+    stPNOZEtherCATOut.abyDigitalOutputs[i] := BYTE#0;
 END_FOR
 
-//Write to internal STO variable that is then written to the property
-_bSTO_OK := stSafetyData.stSafetyOut.bSTOActive;
+//Safe output groups are currently unused.
+FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.astSafeOutputGroups) DO
+    stPNOZEtherCATOut.astSafeOutputGroups[i] := BYTE#0;
+END_FOR
 
+//Preserve the existing internal STO assignment.
+_bSTO_OK := stSafetyData.stSafetyOut.bSTOActive;
 ]]></ST>
       </Implementation>
     </Method>
