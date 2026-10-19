@@ -9,6 +9,7 @@ STRUCT
     abyDigitalOutputs: ARRAY[1..4] OF BYTE; //Output bytes 04..07: Currently unused
     astSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..15: Currently unused
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

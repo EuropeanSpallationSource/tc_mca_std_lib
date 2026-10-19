@@ -10,6 +10,7 @@ STRUCT
     abySafeInputGroups: ARRAY[1..8] OF BYTE; //Input bytes 08..15: safe input group states.
     byLEDState: BYTE; //Input byte 16: PNOZ controller LED states.
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

@@ -7,6 +7,7 @@ STRUCT
     byHigh: BYTE; //Diagnostic bits 8..15: pulse-test error and inputs 1..4.
     byLow: BYTE; //Diagnostic bits 0..7: element status and errors.
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

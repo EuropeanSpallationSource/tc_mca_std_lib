@@ -10,6 +10,7 @@ STRUCT
     bLED_DIAG: BOOL; //Bit 3: DIAG LED is lit or flashing.
     bLED_RUN: BOOL; //Bit 4: RUN LED is lit.
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>
