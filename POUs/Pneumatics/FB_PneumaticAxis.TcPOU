@@ -290,8 +290,8 @@ METHOD PRIVATE mInputs
         <ST><![CDATA[//PSS Permit
 bPSSPermitNeeded := _stConfig.bSafetyShutter;
 
-_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := bPSSPermitNeeded
-    AND _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
+_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := NOT bPSSPermitNeeded
+    OR _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
 
 bPSSPermitMissing := bPSSPermitNeeded
     AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
