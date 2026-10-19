@@ -4,7 +4,6 @@
     <Declaration><![CDATA[TYPE ST_PNOZCommDiag :
 STRUCT
     bWcState: BOOL; //0 = Valid real-time communication in the last cycle, 1 = Invalid real-time communication
-    bInputToggle: BOOL; //It changes its state 0/1 whenever new data is received.
     nEtherCATState: UINT; //State of EtherCAT slave
 END_STRUCT
 END_TYPE

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_DiagnosticElementIn" Id="{914f8296-8878-0964-0157-c8b75d7ef354}">
+    <Declaration><![CDATA[//Decoded diagnostic element status.
+TYPE ST_DiagnosticElementIn :
+STRUCT
+    bPulseTestError: BOOL; //Bit 8, high byte bit 0: pulse-test error.
+    bIn1: BOOL; //Bit 12, high byte bit 4: diagnostic input 1 state.
+    bIn2: BOOL; //Bit 13, high byte bit 5: diagnostic input 2 state.
+    bIn3: BOOL; //Bit 14, high byte bit 6: diagnostic input 3 state.
+    bIn4: BOOL; //Bit 15, high byte bit 7: diagnostic input 4 state.
+
+    bActive: BOOL; //Bit 0, low byte bit 0: element active.
+    bSafe: BOOL; //Bit 1, low byte bit 1: element reports safe status.
+    bReady: BOOL; //Bit 2, low byte bit 2: element ready.
+    bTestReq: BOOL; //Bit 3, low byte bit 3: test requested.
+    bOperatedLate: BOOL; //Bit 4, low byte bit 4: late operation indicated.
+    bSwitchError: BOOL; //Bit 5, low byte bit 5: switching error indicated.
+    bDisabled: BOOL; //Bit 6, low byte bit 6: element disabled.
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>
