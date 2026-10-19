@@ -5,10 +5,6 @@
 STRUCT
     bEndSwitchValveOn AT %I*: BOOL; //End Switch valve on input
     bEndSwitchValveOff AT %I*: BOOL; //End Switch valve off input
-    bValveOnManualOP1 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 1
-    bValveOffManualOP1 AT %I*: BOOL; //Push button input to move to valve off position from Operator Panel 1
-    bValveOnManualOP2 AT %I*: BOOL; //Push button input to move to valve on position from Operator Panel 2
-    bValveOffManualOP2 AT %I*: BOOL; //Push button input to move to valve off position from Operator Panel 2
     bPSSPermitOK: BOOL; //PSS Permit Ok input
 END_STRUCT
 END_TYPE

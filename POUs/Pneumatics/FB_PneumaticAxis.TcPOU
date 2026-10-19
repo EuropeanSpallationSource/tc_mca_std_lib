@@ -303,14 +303,10 @@ bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
 
 //Move Request
 artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff
-    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP1
-    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOffManualOP2);
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff);
 
 artrigMoveCommand[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn
-    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP1
-    OR _stPneumaticAxis.stPneumaticAxisInputs.bValveOnManualOP2);
+    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn);
 ]]></ST>
       </Implementation>
     </Method>
