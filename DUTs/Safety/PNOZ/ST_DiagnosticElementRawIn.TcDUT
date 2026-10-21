@@ -4,8 +4,8 @@
     <Declaration><![CDATA[// Raw diagnostic bytes; preserves your existing high-byte-first order.
 TYPE ST_DiagnosticElementRawIn :
 STRUCT
-    byHigh: BYTE; //Diagnostic bits 8..15: pulse-test error and inputs 1..4.
-    byLow: BYTE; //Diagnostic bits 0..7: element status and errors.
+    nHigh: BYTE; //Diagnostic bits 8..15: pulse-test error and inputs 1..4.
+    nLow: BYTE; //Diagnostic bits 0..7: element status and errors.
 END_STRUCT
 END_TYPE
 ]]></Declaration>

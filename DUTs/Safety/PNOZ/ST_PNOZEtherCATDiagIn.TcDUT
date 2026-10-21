@@ -5,9 +5,9 @@
 STRUCT
     astDiagnosticElementsIn: ARRAY[1..GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS]
         OF ST_DiagnosticElementRawIn; //Input bytes 00..63
-    astBaseModuleInput: ARRAY[1..3] OF BYTE; //Input bytes 64..66
-    astBaseModuleOutput: ARRAY[1..2] OF BYTE; //Input bytes 66..67
-    astFieldbusModuleLED: ARRAY[1..2] OF BYTE; //Input bytes 68..69
+    anBaseModuleInput: ARRAY[1..3] OF BYTE; //Input bytes 64..66
+    anBaseModuleOutput: ARRAY[1..2] OF BYTE; //Input bytes 66..67
+    anFieldbusModuleLED: ARRAY[1..2] OF BYTE; //Input bytes 68..69
     astExpansionModuleRight: ARRAY[1..4] OF ST_ExpansionModuleRight; //Input bytes 70..90
     astExpansionModuleLeft: ARRAY[1..2] OF ST_ExpansionModuleLeft; //Input bytes 91..113
 END_STRUCT

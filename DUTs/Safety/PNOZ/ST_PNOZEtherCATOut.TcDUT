@@ -4,10 +4,10 @@
     <Declaration><![CDATA[//Raw PLC -> PNOZ RxPDO layout.
 TYPE ST_PNOZEtherCATOut :
 STRUCT
-    wMCCStatus: WORD; //Output bytes 00..01: common cabinet commands.
-    wMCCCustomStatus: WORD; //Output bytes 02..03: application-specific commands.
-    abyDigitalOutputs: ARRAY[1..4] OF BYTE; //Output bytes 04..07: Currently unused
-    astSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..15: Currently unused
+    nMCCStatus: WORD; //Output bytes 00..01: common cabinet commands.
+    nMCCCustomStatus: WORD; //Output bytes 02..03: application-specific commands.
+    anDigitalOutputs: ARRAY[1..4] OF BYTE; //Output bytes 04..07: Currently unused
+    anSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..15: Currently unused
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -249,59 +249,59 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Common cabinet status: input bytes 00..01.
-stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat := stPNOZEtherCATIn.wMCCStatus.0;
-stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired := stPNOZEtherCATIn.wMCCStatus.1;
-stSafetyData.stSafetyIn.stMCCStatusIn.bFault := stPNOZEtherCATIn.wMCCStatus.2;
-stSafetyData.stSafetyIn.stMCCStatusIn.bWarning := stPNOZEtherCATIn.wMCCStatus.3;
-stSafetyData.stSafetyIn.stMCCStatusIn.bMessage := stPNOZEtherCATIn.wMCCStatus.4;
-stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK := stPNOZEtherCATIn.wMCCStatus.8;
-stSafetyData.stSafetyIn.stMCCStatusIn.bRemote := stPNOZEtherCATIn.wMCCStatus.9;
+stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat := stPNOZEtherCATIn.nMCCStatus.0;
+stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired := stPNOZEtherCATIn.nMCCStatus.1;
+stSafetyData.stSafetyIn.stMCCStatusIn.bFault := stPNOZEtherCATIn.nMCCStatus.2;
+stSafetyData.stSafetyIn.stMCCStatusIn.bWarning := stPNOZEtherCATIn.nMCCStatus.3;
+stSafetyData.stSafetyIn.stMCCStatusIn.bMessage := stPNOZEtherCATIn.nMCCStatus.4;
+stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK := stPNOZEtherCATIn.nMCCStatus.8;
+stSafetyData.stSafetyIn.stMCCStatusIn.bRemote := stPNOZEtherCATIn.nMCCStatus.9;
 
 
 //Controller LED states: input byte 16.
-stSafetyData.stSafetyIn.stLEDState.bLED_OFAULT := stPNOZEtherCATIn.byLEDState.0;
-stSafetyData.stSafetyIn.stLEDState.bLED_IFAULT := stPNOZEtherCATIn.byLEDState.1;
-stSafetyData.stSafetyIn.stLEDState.bLED_FAULT := stPNOZEtherCATIn.byLEDState.2;
-stSafetyData.stSafetyIn.stLEDState.bLED_DIAG := stPNOZEtherCATIn.byLEDState.3;
-stSafetyData.stSafetyIn.stLEDState.bLED_RUN := stPNOZEtherCATIn.byLEDState.4;
+stSafetyData.stSafetyIn.stLEDState.bLED_OFAULT := stPNOZEtherCATIn.nLEDState.0;
+stSafetyData.stSafetyIn.stLEDState.bLED_IFAULT := stPNOZEtherCATIn.nLEDState.1;
+stSafetyData.stSafetyIn.stLEDState.bLED_FAULT := stPNOZEtherCATIn.nLEDState.2;
+stSafetyData.stSafetyIn.stLEDState.bLED_DIAG := stPNOZEtherCATIn.nLEDState.3;
+stSafetyData.stSafetyIn.stLEDState.bLED_RUN := stPNOZEtherCATIn.nLEDState.4;
 
 //Decode diagnostic elements from TxPDO_1.
 FOR nIndex := 1 TO GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS DO
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bPulseTestError :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.0;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.0;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn1 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.4;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.4;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn2 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.5;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.5;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn3 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.6;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.6;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn4 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byHigh.7;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.7;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bActive :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.0;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.0;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSafe :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.1;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.1;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bReady :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.2;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.2;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bTestReq :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.3;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.3;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bOperatedLate :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.4;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.4;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSwitchError :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.5;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.5;
 
     stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bDisabled :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].byLow.6;
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.6;
 END_FOR
 
 //Motion error registers from the Technosoft drives.
@@ -418,29 +418,29 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Initialize common commands; unused bits remain FALSE.
-stPNOZEtherCATOut.wMCCStatus := WORD#0;
+stPNOZEtherCATOut.nMCCStatus := WORD#0;
 
 //Encode common cabinet commands.
-stPNOZEtherCATOut.wMCCStatus.0 :=
+stPNOZEtherCATOut.nMCCStatus.0 :=
     stSafetyData.stSafetyOut.stMCCStatusOut.bHeartbeat;
 
-stPNOZEtherCATOut.wMCCStatus.1 :=
+stPNOZEtherCATOut.nMCCStatus.1 :=
     stSafetyData.stSafetyOut.stMCCStatusOut.bPLC_OK;
 
-stPNOZEtherCATOut.wMCCStatus.2 :=
+stPNOZEtherCATOut.nMCCStatus.2 :=
     stSafetyData.stSafetyOut.stMCCStatusOut.bErrorAcknowledge;
 
 //No custom commands are currently defined.
-stPNOZEtherCATOut.wMCCCustomStatus := WORD#0;
+stPNOZEtherCATOut.nMCCCustomStatus := WORD#0;
 
 //Digital outputs are currently unused.
-FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.abyDigitalOutputs) DO
-    stPNOZEtherCATOut.abyDigitalOutputs[i] := BYTE#0;
+FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.anDigitalOutputs) DO
+    stPNOZEtherCATOut.anDigitalOutputs[i] := BYTE#0;
 END_FOR
 
 //Safe output groups are currently unused.
-FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.astSafeOutputGroups) DO
-    stPNOZEtherCATOut.astSafeOutputGroups[i] := BYTE#0;
+FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.anSafeOutputGroups) DO
+    stPNOZEtherCATOut.anSafeOutputGroups[i] := BYTE#0;
 END_FOR
 
 //Preserve the existing internal STO assignment.

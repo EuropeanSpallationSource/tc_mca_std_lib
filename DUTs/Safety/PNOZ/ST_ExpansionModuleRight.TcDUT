@@ -3,9 +3,9 @@
   <DUT Name="ST_ExpansionModuleRight" Id="{fa5bcf7c-31ae-07a5-2cc6-ba246db6f27f}">
     <Declaration><![CDATA[TYPE ST_ExpansionModuleRight :
 STRUCT
-    byExpansionModuleInput: BYTE;
-    byExpansionModuleOutput: BYTE;
-    byExpansionModuleLEDState: ARRAY[1..3] OF BYTE;
+    nExpansionModuleInput: BYTE;
+    nExpansionModuleOutput: BYTE;
+    anExpansionModuleLEDState: ARRAY[1..3] OF BYTE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
