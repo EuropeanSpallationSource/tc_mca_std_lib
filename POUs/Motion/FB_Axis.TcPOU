@@ -458,7 +458,9 @@ CASE eState OF
         IF _stAxis.stStatus.bMoving THEN
             eState := E_CommandHandlerState.eIdle;
         ELSIF _stAxis.stStatus.bDone
-            OR _stAxis.stStatus.bError THEN
+            OR _stAxis.stStatus.bCommandAborted
+            OR _stAxis.stStatus.bError
+            OR _stAxis.stStatus.nErrorID <> 0 THEN
             bInternalMovePermit := FALSE;
             eState := E_CommandHandlerState.eIdle;
         END_IF
