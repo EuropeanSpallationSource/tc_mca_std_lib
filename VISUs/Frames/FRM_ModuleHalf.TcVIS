@@ -6748,7 +6748,7 @@
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">201</v>
+                      <v n="Value">181</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
@@ -7253,7 +7253,7 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">110</v>
+                      <v n="Value">100</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
@@ -7301,10 +7301,7 @@
                             <v n="TypeNodeName">"bPower"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">255</v>
@@ -7333,10 +7330,7 @@
                             <v n="TypeNodeName">"bRun"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">256</v>
@@ -7365,10 +7359,7 @@
                             <v n="TypeNodeName">"bDiag"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">257</v>
@@ -7397,10 +7388,7 @@
                             <v n="TypeNodeName">"bFault"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">258</v>
@@ -7429,10 +7417,7 @@
                             <v n="TypeNodeName">"bInputFault"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">259</v>
@@ -7461,10 +7446,7 @@
                             <v n="TypeNodeName">"bOutputFault"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">260</v>
@@ -7493,10 +7475,7 @@
                             <v n="TypeNodeName">"sName"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">261</v>
@@ -7508,7 +7487,7 @@
                           </o>
                           <o>
                             <v n="Flags">2L</v>
-                            <v n="BasicTypeNodeValue">"'32143'"</v>
+                            <v n="BasicTypeNodeValue">""</v>
                             <v n="BasicTypeNodeAcceptsExpression">true</v>
                             <n n="BasicTypeNodeFastAccess" />
                             <a n="BasicTypeNodeEnumValues" et="String" />
@@ -7519,20 +7498,17 @@
                             <l n="TypeNodeChildren" t="ArrayList" />
                             <o n="TypeNodeType" t="TypeNodeType">
                               <v n="TypeClass" t="TypeClass">Reference</v>
-                              <v n="QualifiedName">"STRING"</v>
-                              <v n="Name">"STRING"</v>
+                              <v n="QualifiedName">"UDINT"</v>
+                              <v n="Name">"UDINT"</v>
                             </o>
-                            <v n="TypeNodeName">"sID"</v>
+                            <v n="TypeNodeName">"nID"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">262</v>
-                            <v n="TypeNodeIdLong">2818323967L</v>
+                            <v n="TypeNodeIdLong">3003254236L</v>
                             <n n="LibraryId" />
                             <n n="DisplayTextId" />
                             <n n="DescriptionTextID" />
@@ -7540,7 +7516,7 @@
                           </o>
                           <o>
                             <v n="Flags">2L</v>
-                            <v n="BasicTypeNodeValue">"'SN777777'"</v>
+                            <n n="BasicTypeNodeValue" />
                             <v n="BasicTypeNodeAcceptsExpression">true</v>
                             <n n="BasicTypeNodeFastAccess" />
                             <a n="BasicTypeNodeEnumValues" et="String" />
@@ -7551,20 +7527,17 @@
                             <l n="TypeNodeChildren" t="ArrayList" />
                             <o n="TypeNodeType" t="TypeNodeType">
                               <v n="TypeClass" t="TypeClass">Reference</v>
-                              <v n="QualifiedName">"STRING"</v>
-                              <v n="Name">"STRING"</v>
+                              <v n="QualifiedName">"UDINT"</v>
+                              <v n="Name">"UDINT"</v>
                             </o>
-                            <v n="TypeNodeName">"sSerialNumber"</v>
+                            <v n="TypeNodeName">"nSerialNumber"</v>
                             <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
                               <v n="AttrFlags">0UL</v>
-                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" ckt="String" cvt="String">
-                                <v>Editor_TypeMatchVariable</v>
-                                <v>true</v>
-                              </d>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
                               <v n="ConvDone">true</v>
                             </o>
                             <v n="TypeNodeId" t="Int16">263</v>
-                            <v n="TypeNodeIdLong">2672549055L</v>
+                            <v n="TypeNodeIdLong">1818237467L</v>
                             <n n="LibraryId" />
                             <n n="DisplayTextId" />
                             <n n="DescriptionTextID" />
@@ -7598,16 +7571,8 @@
                       </o>
                     </o>
                     <o>
-                      <v n="Id">3398742237L</v>
-                      <v n="Value">"'8DI4DO'"</v>
-                    </o>
-                    <o>
-                      <v n="Id">2818323967L</v>
-                      <v n="Value">"'32143'"</v>
-                    </o>
-                    <o>
-                      <v n="Id">2672549055L</v>
-                      <v n="Value">"'SN777777'"</v>
+                      <v n="Id">1922395148L</v>
+                      <v n="Value">"TRUE"</v>
                     </o>
                     <o>
                       <v n="Id">1797704627L</v>
@@ -7630,8 +7595,12 @@
                       <v n="Value">"TRUE"</v>
                     </o>
                     <o>
-                      <v n="Id">1922395148L</v>
-                      <v n="Value">"TRUE"</v>
+                      <v n="Id">3398742237L</v>
+                      <v n="Value">"'8DI4DO'"</v>
+                    </o>
+                    <o>
+                      <v n="Id">3003254236L</v>
+                      <v n="Value">""</v>
                     </o>
                   </l>
                 </o>
@@ -8020,12 +7989,12 @@
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">211</v>
+                <v n="Width">201</v>
                 <v n="Height">361</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">211</v>
+                <v n="Width">202</v>
                 <v n="Height">362</v>
               </o>
             </d2>

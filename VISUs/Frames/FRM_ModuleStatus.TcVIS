@@ -5,7 +5,7 @@
       <Data>
         <o xml:space="preserve" t="VisualObject">
           <n n="LastVisuLanguageModelEntry" />
-          <v n="UniqueIdGenerator">"25"</v>
+          <v n="UniqueIdGenerator">"26"</v>
           <o n="VisualElemList" t="VisualElemList">
             <l n="VisualElementList" t="VisualElemCollection" cet="GenericVisualElem">
               <o>
@@ -1955,7 +1955,7 @@
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">151</v>
+                      <v n="Value">81</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
@@ -1986,7 +1986,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"%s"</v>
+                      <v n="Value">"%d"</v>
                     </o>
                     <o>
                       <v n="Id">1782330054L</v>
@@ -1998,7 +1998,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"sSerialNumber"</v>
+                      <v n="Value">"nSerialNumber"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -2006,7 +2006,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"821"</v>
+                      <v n="Value">"982"</v>
                     </o>
                   </l>
                 </o>
@@ -2129,7 +2129,7 @@
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">161</v>
+                      <v n="Value">91</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
@@ -2160,7 +2160,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"%s"</v>
+                      <v n="Value">"%d"</v>
                     </o>
                     <o>
                       <v n="Id">1782330054L</v>
@@ -2172,7 +2172,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"sID"</v>
+                      <v n="Value">"nID"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -2180,7 +2180,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"821"</v>
+                      <v n="Value">"982"</v>
                     </o>
                   </l>
                 </o>
@@ -2303,7 +2303,7 @@
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
-                      <v n="Value">181</v>
+                      <v n="Value">111</v>
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
@@ -2825,12 +2825,12 @@
               <o>
                 <v n="Id">23L</v>
                 <n n="Tag" />
-                <v n="Text">"    sID: STRING;"</v>
+                <v n="Text">"    nID: UDINT;"</v>
               </o>
               <o>
                 <v n="Id">24L</v>
                 <n n="Tag" />
-                <v n="Text">"    sSerialNumber: STRING;"</v>
+                <v n="Text">"    nSerialNumber: UDINT;"</v>
               </o>
               <o>
                 <v n="Id">14L</v>
@@ -2861,12 +2861,12 @@
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">261</v>
+                <v n="Width">191</v>
                 <v n="Height">111</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">261</v>
+                <v n="Width">191</v>
                 <v n="Height">112</v>
               </o>
             </d2>
