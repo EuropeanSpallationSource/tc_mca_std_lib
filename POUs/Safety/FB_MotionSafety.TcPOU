@@ -84,12 +84,6 @@ IF NOT bEnable OR bWcState THEN
     ); //Reset heartbeat generation and watchdog memory
 
     stSafety.stSafetyOut.stMCCStatusOut.bErrorAcknowledge := FALSE; //Clear fault-acknowledge command
-
-    fbSafetyAcknowledgeLedPulse(
-        bEnable := FALSE,
-        bOut => bSafetyAcknowledgeLED
-    ); //Reset pulse generator and physical LED
-
     mHandleMotionPermission(); //Process falling edge of motion permission
     RETURN;
 END_IF;
@@ -394,17 +388,25 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Fault feedback to safety controller
-stSafety.stSafetyOut.stMCCStatusOut.bErrorAcknowledge :=
-    stSafety.stSafetyIn.stMCCStatusIn.bFault;
+        <ST><![CDATA[//Fault feedback to safety controller.
+stSafetyData.stSafetyOut.stMCCStatusOut.bErrorAcknowledge :=
+    stSafetyData.stSafetyIn.stMCCStatusIn.bFault;
 
+//Watchdog fault: triple flash. Acknowledgment required: single flash.
 fbSafetyAcknowledgeLedPulse(
-    bEnable := stSafety.stSafetyIn.stMCCStatusIn.bFault,
+    bEnable := bMCCWatchdogFault OR stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired,
     tFlashPeriod := T#1S,
-    tOffTime := T#500MS,
-    tOnTime := T#500MS,
-    nFlashCount := 1,
-    bOut => bSafetyAcknowledgeLED);
+    tOffTime := SEL(bMCCWatchdogFault, T#500MS, T#100MS),
+    tOnTime := SEL(bMCCWatchdogFault, T#500MS, T#100MS),
+    nFlashCount := SEL(bMCCWatchdogFault, 1, 3)
+);
+
+//Watchdog fault or acknowledgment required: use flashing output.
+IF bMCCWatchdogFault OR stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired THEN
+    bSafetyAcknowledgeLED := fbSafetyAcknowledgeLedPulse.bOut;
+ELSE
+    bSafetyAcknowledgeLED := stSafetyData.stSafetyIn.stMCCStatusIn.bFault; //Fault only: solid. No fault: off.
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
