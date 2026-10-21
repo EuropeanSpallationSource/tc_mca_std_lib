@@ -15,6 +15,7 @@ VAR_OUTPUT
     nAlarmGrpBitNumber: UDINT;
 END_VAR
 VAR
+    tonInitDelay: TON := (IN := TRUE, PT := tINIT_DELAY);
     _bErrorAcknowledgeButton: BOOL;
     _bErrorAcknowledgeLED: BOOL;
     _bStatusLED: BOOL;
@@ -101,6 +102,7 @@ VAR
 END_VAR
 
 VAR CONSTANT
+    tINIT_DELAY: TIME := T#3S;
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
     nMAX_EC_SLAVES: INT := 255;
@@ -110,10 +112,16 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[mMonitorAlarms();
+      <ST><![CDATA[tonInitDelay();
+IF NOT tonInitDelay.Q THEN
+    RETURN;
+END_IF
+
+mLink();
+mMonitorAlarms();
 mMonitorCPU();
 mMonitorEtherCAT();
-mLink();
+
 ]]></ST>
     </Implementation>
     <Property Name="AcknowledgeButton" Id="{4553ddaa-9a47-067f-1824-16747e3b18bb}">
