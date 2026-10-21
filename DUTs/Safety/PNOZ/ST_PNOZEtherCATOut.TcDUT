@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATOut" Id="{2f65ec2d-5561-0256-2e54-58b3e165bd48}">
+    <Declaration><![CDATA[//Raw PLC -> PNOZ RxPDO layout.
+TYPE ST_PNOZEtherCATOut :
+STRUCT
+    nMCCStatus: WORD; //Output bytes 00..01: common cabinet commands.
+    nMCCCustomStatus: WORD; //Output bytes 02..03: application-specific commands.
+    anDigitalOutputs: ARRAY[1..4] OF BYTE; //Output bytes 04..07: Currently unused
+    anSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..15: Currently unused
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATIn" Id="{4d26afb5-ffd0-0d85-0f77-77acb686f585}">
+    <Declaration><![CDATA[//Raw PNOZ -> PLC TxPDO data.
+TYPE ST_PNOZEtherCATIn :
+STRUCT
+    nMCCStatus: WORD; //Input bytes 00..01: common cabinet status.
+    nMCCCustomStatus: WORD; //Input bytes 02..03: application-specific cabinet status.
+    anDigitalInputs: ARRAY[1..4] OF BYTE; //Input bytes 04..07: digital input states.
+    anSafeInputGroups: ARRAY[1..8] OF BYTE; //Input bytes 08..15: safe input group states.
+    nLEDState: BYTE; //Input byte 16: PNOZ controller LED states.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

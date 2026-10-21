@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_DiagnosticElementOut" Id="{a03f9acf-2cc9-020d-31d2-8b63b6993c66}">
+    <Declaration><![CDATA[TYPE ST_DiagnosticElementOut :
+STRUCT
+    bRun: BOOL;
+    bReady: BOOL;
+    bSafe: BOOL;
+    bError: BOOL;
+    bCycle: BOOL;
+    bReset: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
