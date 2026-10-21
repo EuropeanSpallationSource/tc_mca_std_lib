@@ -382,7 +382,6 @@ VAR_INST
     RTRIG_Execute: R_TRIG;
     FTRIG_Moving: F_TRIG;
     TON_CommandHandlerTimeout: TON;
-    RTRIG_ReleasedMoveCommand: R_TRIG;
     TON_LatchReleasedCommandStatus: TON;
     TON_DisableAxis: TON;
     RTRIG_DisableAxis: R_TRIG;
@@ -391,7 +390,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//State machine for command handling
 RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
-RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
 
 CASE eState OF
     E_CommandHandlerState.eIdle:
@@ -517,9 +515,6 @@ IF RTRIG_DisableAxis.Q
     _stAxis.stControl.bEnable := FALSE;
 END_IF
 
-IF RTRIG_ReleasedMoveCommand.Q THEN
-    bInternalReleasedMoveCmd := TRUE;
-END_IF
 
 IF TON_LatchReleasedCommandStatus.Q THEN
     bInternalReleasedMoveCmd := FALSE;
