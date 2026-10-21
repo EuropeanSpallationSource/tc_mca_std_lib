@@ -78,9 +78,9 @@ bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
 
-IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.P_ReadFromSafetyController THEN
-    _EStopReleased := iSafetyProvider.P_EStopOK;
-    _STOReleased := iSafetyProvider.P_STO_OK;
+IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.ReadFromSafetyController THEN
+    _EStopReleased := iSafetyProvider.EStopOK;
+    _STOReleased := iSafetyProvider.STO_OK;
 ELSE
     _EStopReleased := bEStopReleased;
     _STOReleased := bSTOReleased;
@@ -114,6 +114,7 @@ mSetReset(stAlarmList := aAlarmList[12], bOk := bFuse2_OK);
 mSetReset(stAlarmList := aAlarmList[13], bOk := bFuse3_OK);
 
 mSetReset(stAlarmList := aAlarmList[19], bOk := EStopReleased);
+mSetReset(stAlarmList := aAlarmList[20], bOk := bSTOReleased);
 
 mSetReset(stAlarmList := aAlarmList[24], bOk := NOT bEcMasterError);
 mSetReset(stAlarmList := aAlarmList[25], bOk := NOT bSlaveStateNotOP);
