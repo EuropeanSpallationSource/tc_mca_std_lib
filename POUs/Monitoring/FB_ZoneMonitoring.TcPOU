@@ -12,6 +12,7 @@ VAR_OUTPUT
     nAlarmGrpBitNumber: UDINT;
 END_VAR
 VAR
+    tonInitDelay: TON := (IN := TRUE, PT := tINIT_DELAY);
     _bSafetyAcknowledgeButton: BOOL;
     _bSafetyAcknowledgeLED: BOOL;
     _bEStopReleased: BOOL;
@@ -21,16 +22,7 @@ VAR
 (*[1]*)(nErrorID := 106, sErrorMsg := 'EtherCAT PNOZ is not ok', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
 (*[2]*)(nErrorID := 107, sErrorMsg := 'Zone fault', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
 (*[3]*)(nErrorID := 108, sErrorMsg := 'Watchdog triggered (missing heartbeat), safety zone down', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
-(*[4]*)(nErrorID := 502, sErrorMsg := 'E-Stop active', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined, eEStopLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
-
-(*[5]*)(nErrorID := 801, sErrorMsg := 'Safety function 1 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-(*[6]*)(nErrorID := 802, sErrorMsg := 'Safety function 2 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-(*[7]*)(nErrorID := 803, sErrorMsg := 'Safety function 3 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-(*[8]*)(nErrorID := 804, sErrorMsg := 'Safety function 4 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-(*[9]*)(nErrorID := 805, sErrorMsg := 'Safety function 5 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-(*[10]*)(nErrorID := 806, sErrorMsg := 'Safety function 6 faulted', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE)
-//(*[5]*)(nErrorID := 521, sErrorMsg := 'Motion Safety: OP-Stop 1 active', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
-//(*[6]*)(nErrorID := 522, sErrorMsg := 'Motion Safety: OP-Stop 2 active', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[4]*)(nErrorID := 502, sErrorMsg := 'E-Stop active', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined, eEStopLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE)
 ];
 
     aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
@@ -57,13 +49,24 @@ VAR
 END_VAR
 
 VAR CONSTANT
+    tINIT_DELAY: TIME := T#3S;
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
+
+    nDIAGNOSTIC_ALARM_OFFSET: UINT := 4; //Diagnostic alarms to be padded after the common entries
+    nDIAGNOSTIC_ERROR_BASE: UINT := 800; //Diagnostic element 1 receives error ID 801.
+    nDIAGNOSTIC_SAFETY_ALARMS: UINT := nDIAGNOSTIC_ALARM_OFFSET + TO_UINT(E_DiagnosticElements.eCount) - 1;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[mMonitorAlarms();
+      <ST><![CDATA[tonInitDelay();
+IF NOT tonInitDelay.Q THEN
+    mInit();
+    RETURN;
+END_IF
+
 mLink();
+mMonitorAlarms();
 ]]></ST>
     </Implementation>
     <Property Name="EStopReleased" Id="{b6e46bf5-e187-0482-3cb2-d4df4d4c3416}">
@@ -143,18 +146,32 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mLink" Id="{87b635d2-9522-049e-135a-07b0efffd009}">
-      <Declaration><![CDATA[METHOD mLink
-VAR_INPUT
+    <Method Name="mInit" Id="{ee336645-787c-0df4-1581-15e09392d976}">
+      <Declaration><![CDATA[METHOD mInit
+VAR
+    nIndex: UINT; //Diagnostic element index.
+    nAlarmIndex: UINT; //Corresponding alarm list index.
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Input Variables
+        <ST><![CDATA[FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
+    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
 
-
-//Output Variables
-
-IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.ReadFromSafetyController THEN
+    aAlarmList[nAlarmIndex].nErrorID := nDIAGNOSTIC_ERROR_BASE + nIndex;
+    aAlarmList[nAlarmIndex].sErrorMsg :=
+        CONCAT(CONCAT('Safety Function ', UINT_TO_STRING(nIndex)), ' is faulted, not safe');
+    aAlarmList[nAlarmIndex].eStatusLED := E_MonitorLed.eFast;
+    aAlarmList[nAlarmIndex].eErrorLED := E_MonitorLed.eUndefined;
+    aAlarmList[nAlarmIndex].bLedAutoReset := TRUE;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mLink" Id="{87b635d2-9522-049e-135a-07b0efffd009}">
+      <Declaration><![CDATA[METHOD mLink
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.ReadFromSafetyController THEN
     _EStopReleased := iSafetyProvider.EStopOK;
     _STOReleased := iSafetyProvider.STO_OK;
 END_IF;
@@ -232,16 +249,6 @@ _bEStopLED := aAlarmList[4].bLedActive;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mMonitorEtherCAT" Id="{a98322c6-2970-0ea8-39fa-da8f76119b4f}">
-      <Declaration><![CDATA[METHOD mMonitorEtherCAT
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="mPrintErrorMessage" Id="{b59fd036-adae-0c85-3115-622ab4e95619}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
@@ -302,24 +309,27 @@ END_IF
     </Method>
     <Method Name="mSetResetAlarmsLeds" Id="{0a8103d7-6a7f-0338-02c3-c707c6c6f187}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
-VAR_INST
-    nIndex: UINT;
+VAR
+     nIndex: UINT;
+     nAlarmIndex: UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stSafetyIn.stPNOZCommDiag.bWcState);
+        <ST><![CDATA[//Communication and cabinet alarms.
+mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stSafetyIn.stPNOZCommDiag.bWcState);
 mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stSafetyIn.stMCCStatusIn.bFault);
-
 mSetReset(stAlarmList := aAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
 mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stSafetyIn.stMCCStatusIn.bEStopOK);
 
-//Safety function faults
-mSetReset(stAlarmList := aAlarmList[5], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[1].bFault);
-mSetReset(stAlarmList := aAlarmList[6], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[2].bFault);
-mSetReset(stAlarmList := aAlarmList[7], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[3].bFault);
-mSetReset(stAlarmList := aAlarmList[8], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[4].bFault);
-mSetReset(stAlarmList := aAlarmList[9], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[5].bFault);
-mSetReset(stAlarmList := aAlarmList[10], bOk := NOT stSafety.stSafetyIn.astSafetyFunctionIn[6].bFault);
+//Diagnostic alarms.
+FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
+    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
+
+    mSetReset(
+        stAlarmList := aAlarmList[nAlarmIndex],
+        bOk := stSafety.stSafetyIn.astDiagnosticElementIn[nIndex].bActive
+    );
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
