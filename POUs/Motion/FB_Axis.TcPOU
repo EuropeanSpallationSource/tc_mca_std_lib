@@ -399,8 +399,6 @@ CASE eState OF
                 E_MotionFunctions.eMoveRelative,
                 E_MotionFunctions.eMoveVelocity,
                 E_MotionFunctions.eMoveModulo,
-                E_MotionFunctions.eGearInMultiMaster,
-                E_MotionFunctions.eGearOut,
                 E_MotionFunctions.eHome :
                     eLatchedCommand := _stAxis.stControl.eCommand;
                     nWaitCounter := 0;
