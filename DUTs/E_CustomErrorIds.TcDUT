@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_CustomErrorIds" Id="{1eae1086-6cf7-091d-1abe-b91f408f0adc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_CustomErrorIds :
+(
+    //More information in: https://confluence.ess.eu/spaces/MCAG/pages/968065463/Custom+Error+IDs
+
+    eNoCustomError := 0,
+    eTemperatureSensorError := 16#10201,
+    eAirPadPressureError := 16#10202,
+    eExternalBrakeError := 16#10203,
+    eExternalBrakeTimeoutError := 16#10204,
+    eCommandHandlerTimeoutError := 16#10205
+) UDINT := eNoCustomError;
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>
