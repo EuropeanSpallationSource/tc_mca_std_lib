@@ -403,6 +403,7 @@ CASE eState OF
                     eLatchedCommand := _stAxis.stControl.eCommand;
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+                    _stAxis.stControl.bHalt := FALSE;
 
                     IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
                         AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
@@ -492,10 +493,13 @@ FTRIG_Moving(CLK :=
     (_stAxis.stStatus.bMoving AND NOT _stAxis.Axis.Status.HomingBusy)
     OR _stAxis.Axis.Status.HomingBusy);
 
-IF FTRIG_Moving.Q
-    OR _stAxis.stStatus.bError THEN
+IF _stAxis.stStatus.bError THEN
     eState := E_CommandHandlerState.eIdle;
     bInternalWaitingForMovePermit := FALSE;
+    bInternalMovePermit := FALSE;
+    bInternalReleasedMoveCmd := FALSE;
+ELSIF FTRIG_Moving.Q
+    AND eState = E_CommandHandlerState.eIdle THEN
     bInternalMovePermit := FALSE;
     bInternalReleasedMoveCmd := FALSE;
 END_IF
