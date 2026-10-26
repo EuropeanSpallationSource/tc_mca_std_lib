@@ -5,7 +5,7 @@
       <Data>
         <o xml:space="preserve" t="VisualObject">
           <n n="LastVisuLanguageModelEntry" />
-          <v n="UniqueIdGenerator">"11"</v>
+          <v n="UniqueIdGenerator">"13"</v>
           <o n="VisualElemList" t="VisualElemList">
             <l n="VisualElementList" t="VisualElemCollection" cet="GenericVisualElem">
               <o>
@@ -279,7 +279,7 @@
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">20</v>
+                      <v n="Value" t="Int16">18</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -296,7 +296,7 @@
                           <v n="FontStyle">1</v>
                           <v n="AdditionalFontStyle" t="UInt16">0</v>
                           <v n="ExplicitColor">-5000269</v>
-                          <v n="FontName">"Cascadia Mono SemiBold"</v>
+                          <v n="FontName">"Consolas"</v>
                           <v n="FontSize">12</v>
                           <v n="ScriptIdentification">0</v>
                           <v n="DoubleFontSize" t="Double">0</v>
@@ -632,7 +632,7 @@
                           <v n="FontStyle">1</v>
                           <v n="AdditionalFontStyle" t="UInt16">0</v>
                           <v n="ExplicitColor">-5000269</v>
-                          <v n="FontName">"Cascadia Mono SemiBold"</v>
+                          <v n="FontName">"Consolas"</v>
                           <v n="FontSize">12</v>
                           <v n="ScriptIdentification">0</v>
                           <v n="DoubleFontSize" t="Double">0</v>
@@ -783,7 +783,7 @@
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">44</v>
+                      <v n="Value" t="Int16">46</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -800,7 +800,7 @@
                           <v n="FontStyle">1</v>
                           <v n="AdditionalFontStyle" t="UInt16">0</v>
                           <v n="ExplicitColor">-5000269</v>
-                          <v n="FontName">"Cascadia Mono SemiBold"</v>
+                          <v n="FontName">"Consolas"</v>
                           <v n="FontSize">12</v>
                           <v n="ScriptIdentification">0</v>
                           <v n="DoubleFontSize" t="Double">0</v>
@@ -1014,11 +1014,6 @@
                 <v n="Text">"VAR_IN_OUT"</v>
               </o>
               <o>
-                <v n="Id">9L</v>
-                <n n="Tag" />
-                <v n="Text">"    nIndex: USINT;"</v>
-              </o>
-              <o>
                 <v n="Id">10L</v>
                 <n n="Tag" />
                 <v n="Text">"   nValue: USINT;"</v>
@@ -1031,7 +1026,17 @@
               <o>
                 <v n="Id">11L</v>
                 <n n="Tag" />
-                <v n="Text">""</v>
+                <v n="Text">"VAR_INPUT"</v>
+              </o>
+              <o>
+                <v n="Id">12L</v>
+                <n n="Tag" />
+                <v n="Text">"   nIndex: USINT;	"</v>
+              </o>
+              <o>
+                <v n="Id">13L</v>
+                <n n="Tag" />
+                <v n="Text">"END_VAR"</v>
               </o>
             </a>
           </o>
