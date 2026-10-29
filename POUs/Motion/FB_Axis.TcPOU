@@ -431,7 +431,12 @@ CASE eState OF
     E_CommandHandlerState.eWaitPermits:
         IF (bPermitRequired AND bAxisPermittedToMove)
             OR NOT bPermitRequired THEN
-            eState := E_CommandHandlerState.eStabilizeNC;
+            //Already moving under a valid permit. Stop is handled by the halt/stop block below, which overrides eState
+            IF bInternalMovePermit AND _stAxis.stStatus.bMoving THEN
+                eState := E_CommandHandlerState.eReleaseCommand;
+            ELSE
+                eState := E_CommandHandlerState.eStabilizeNC;
+            END_IF
         ELSIF bPermitRequired
             AND NOT _stAxis.stConfig.bAutoEnable
             AND NOT _stAxis.stStatus.bEnabled THEN
