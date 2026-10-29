@@ -115,6 +115,8 @@ VAR
     fbModMovDyn2RiseEdge: R_TRIG;
 
     bInternalExecute: BOOL := FALSE;
+    //Command that owns bDone/bCommandAborted. eWaitingForCommand = none (set while a new command is being buffered)
+    eActiveMotionCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
@@ -126,6 +128,12 @@ VAR CONSTANT
     nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //Used for the FOR loops for the Busy, Done, Command Aborted Status
     nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loops for Done
     nMCSTATUS_ARRAY_SIZE: UINT := 19;
+    //Indices of the motion FBs in astMcStatus (see FB_init)
+    nINDEX_MOVE_ABSOLUTE: UINT := 5;
+    nINDEX_MOVE_RELATIVE: UINT := 6;
+    nINDEX_MOVE_VELOCITY: UINT := 7;
+    nINDEX_MOVE_MODULO: UINT := 8;
+    nINDEX_HOME: UINT := 9;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -400,6 +408,8 @@ CASE eState OF
                 E_MotionFunctions.eMoveModulo,
                 E_MotionFunctions.eHome :
                     eLatchedCommand := _stAxis.stControl.eCommand;
+                    //The previous command no longer owns bDone/bCommandAborted
+                    eActiveMotionCommand := E_MotionFunctions.eWaitingForCommand;
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
                     _stAxis.stError.nCommandHandlerErrorID := 0;
@@ -440,16 +450,15 @@ CASE eState OF
         END_IF
 
     E_CommandHandlerState.eReleaseCommand:
+        eActiveMotionCommand := eLatchedCommand;
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
-        //Drop status latched by the previous motion while this command was waiting
-        _stAxis.stStatus.bDone := FALSE;
-        _stAxis.stStatus.bCommandAborted := FALSE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eReleaseNonMoveCommand:
+        eActiveMotionCommand := eLatchedCommand;
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
         eState := E_CommandHandlerState.eIdle;
@@ -1799,6 +1808,35 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mStatus_IsStaleMotionIndex" Id="{3b7d2c64-5e1a-4f0b-9a38-6c2d8e41f7a5}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[//bDone, bCommandAborted and bBusy describe the most recently accepted command.
+//A motion FB that does not own the result is stale, so its Done/abort is ignored.
+METHOD mStatus_IsStaleMotionIndex : BOOL
+VAR_INPUT
+    nIndex: UINT;
+END_VAR
+VAR
+    nActiveIndex: UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eActiveMotionCommand OF
+    E_MotionFunctions.eMoveAbsolute: nActiveIndex := nINDEX_MOVE_ABSOLUTE;
+    E_MotionFunctions.eMoveRelative: nActiveIndex := nINDEX_MOVE_RELATIVE;
+    E_MotionFunctions.eMoveVelocity: nActiveIndex := nINDEX_MOVE_VELOCITY;
+    E_MotionFunctions.eMoveModulo:   nActiveIndex := nINDEX_MOVE_MODULO;
+    E_MotionFunctions.eHome:         nActiveIndex := nINDEX_HOME;
+    ELSE
+        nActiveIndex := 0;
+END_CASE
+
+//Only the motion FBs are filtered. Parameter, backlash and handler results always count
+mStatus_IsStaleMotionIndex := nIndex >= nINDEX_MOVE_ABSOLUTE
+    AND nIndex <= nINDEX_HOME
+    AND nIndex <> nActiveIndex;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStatus_Busy" Id="{41cf8366-0cbd-0f66-1e94-c9cc649849e7}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
 VAR
@@ -1823,7 +1861,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
-    tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
+    IF NOT mStatus_IsStaleMotionIndex(i) THEN
+        tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
+    END_IF
 END_FOR
 
 fbCommandAbortedRTrig(CLK := tmpCmdAborted);
@@ -1842,7 +1882,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
-    tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    IF NOT mStatus_IsStaleMotionIndex(i) THEN
+        tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    END_IF
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
 fbDoneRTrig(CLK := tmpDone);
