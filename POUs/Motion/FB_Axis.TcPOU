@@ -380,7 +380,6 @@ VAR_INST
     bInternalReleasedMoveCmd: BOOL := FALSE;
     nWaitCounter: UINT := 0;
     RTRIG_Execute: R_TRIG;
-    FTRIG_Moving: F_TRIG;
     TON_CommandHandlerTimeout: TON;
     TON_LatchReleasedCommandStatus: TON;
     TON_DisableAxis: TON;
@@ -403,6 +402,7 @@ CASE eState OF
                     eLatchedCommand := _stAxis.stControl.eCommand;
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+                    _stAxis.stError.nCommandHandlerErrorID := 0;
                     _stAxis.stControl.bHalt := FALSE;
 
                     IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
@@ -444,6 +444,9 @@ CASE eState OF
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
+        //Drop status latched by the previous motion while this command was waiting
+        _stAxis.stStatus.bDone := FALSE;
+        _stAxis.stStatus.bCommandAborted := FALSE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eReleaseNonMoveCommand:
@@ -452,61 +455,65 @@ CASE eState OF
         eState := E_CommandHandlerState.eIdle;
 
     E_CommandHandlerState.eWaitForMotionStart:
-        IF _stAxis.stStatus.bMoving THEN
+        IF _stAxis.stStatus.bMoving
+            OR _stAxis.Axis.Status.HomingBusy THEN
             eState := E_CommandHandlerState.eIdle;
         ELSIF _stAxis.stStatus.bDone
             OR _stAxis.stStatus.bCommandAborted
             OR _stAxis.stStatus.bError
             OR _stAxis.stStatus.nErrorID <> 0 THEN
-            bInternalMovePermit := FALSE;
             eState := E_CommandHandlerState.eIdle;
         END_IF
 
 END_CASE
 
-bInternalWaitingForMovePermit := (eState = E_CommandHandlerState.eWaitPermits OR eState = E_CommandHandlerState.eStabilizeNC);
-
 TON_CommandHandlerTimeout(
-    IN := bInternalWaitingForMovePermit,
+    IN := (eState = E_CommandHandlerState.eWaitPermits
+        OR eState = E_CommandHandlerState.eStabilizeNC
+        OR eState = E_CommandHandlerState.eWaitForMotionStart),
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
-TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
-
 IF TON_CommandHandlerTimeout.Q THEN
+    IF eState = E_CommandHandlerState.eWaitForMotionStart THEN
+        _stAxis.stControl.bHalt := TRUE; // never leave a released move running under an error
+    END_IF
     eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
-    bInternalMovePermit := FALSE;
-    bInternalReleasedMoveCmd := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
 END_IF
 
 IF _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
-    bCommandAborted := bInternalWaitingForMovePermit;
+    bCommandAborted := (eState = E_CommandHandlerState.eWaitPermits
+        OR eState = E_CommandHandlerState.eStabilizeNC);
     eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
+END_IF
+
+IF _stAxis.stStatus.bError THEN
+    eState := E_CommandHandlerState.eIdle;
+END_IF
+
+bInternalWaitingForMovePermit :=
+    (eState = E_CommandHandlerState.eWaitPermits
+    OR eState = E_CommandHandlerState.eStabilizeNC);
+
+IF _stAxis.stStatus.bError
+    OR (eState <> E_CommandHandlerState.eWaitForMotionStart
+        AND NOT _stAxis.stStatus.bMoving
+        AND NOT _stAxis.Axis.Status.HomingBusy) THEN
     bInternalMovePermit := FALSE;
     bInternalReleasedMoveCmd := FALSE;
 END_IF
 
-FTRIG_Moving(CLK :=
-    (_stAxis.stStatus.bMoving AND NOT _stAxis.Axis.Status.HomingBusy)
-    OR _stAxis.Axis.Status.HomingBusy);
-
-IF _stAxis.stStatus.bError THEN
-    eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
-    bInternalMovePermit := FALSE;
-    bInternalReleasedMoveCmd := FALSE;
-ELSIF FTRIG_Moving.Q
-    AND eState = E_CommandHandlerState.eIdle THEN
-    bInternalMovePermit := FALSE;
+TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
+IF TON_LatchReleasedCommandStatus.Q THEN
     bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 TON_DisableAxis(
     IN := _stAxis.stConfig.bAutoDisable
         AND _stAxis.stStatus.bEnabled
+        AND NOT _stAxis.stStatus.bMoving
+        AND NOT _stAxis.Axis.Status.HomingBusy
         AND NOT bInternalWaitingForMovePermit
         AND NOT bInternalMovePermit
         AND NOT bInternalReleasedMoveCmd,
@@ -515,11 +522,6 @@ RTRIG_DisableAxis(CLK := TON_DisableAxis.Q);
 IF RTRIG_DisableAxis.Q
     AND _stAxis.stConfig.bAutoDisable THEN
     _stAxis.stControl.bEnable := FALSE;
-END_IF
-
-
-IF TON_LatchReleasedCommandStatus.Q THEN
-    bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
