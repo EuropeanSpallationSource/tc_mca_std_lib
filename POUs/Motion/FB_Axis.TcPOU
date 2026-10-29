@@ -115,6 +115,8 @@ VAR
     fbModMovDyn2RiseEdge: R_TRIG;
 
     bInternalExecute: BOOL := FALSE;
+    //Command that owns bDone/bCommandAborted. eWaitingForCommand = none (set while a new command is being buffered)
+    eActiveMotionCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
@@ -126,6 +128,12 @@ VAR CONSTANT
     nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //Used for the FOR loops for the Busy, Done, Command Aborted Status
     nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loops for Done
     nMCSTATUS_ARRAY_SIZE: UINT := 19;
+    //Indices of the motion FBs in astMcStatus (see FB_init)
+    nINDEX_MOVE_ABSOLUTE: UINT := 5;
+    nINDEX_MOVE_RELATIVE: UINT := 6;
+    nINDEX_MOVE_VELOCITY: UINT := 7;
+    nINDEX_MOVE_MODULO: UINT := 8;
+    nINDEX_HOME: UINT := 9;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -380,9 +388,7 @@ VAR_INST
     bInternalReleasedMoveCmd: BOOL := FALSE;
     nWaitCounter: UINT := 0;
     RTRIG_Execute: R_TRIG;
-    FTRIG_Moving: F_TRIG;
     TON_CommandHandlerTimeout: TON;
-    RTRIG_ReleasedMoveCommand: R_TRIG;
     TON_LatchReleasedCommandStatus: TON;
     TON_DisableAxis: TON;
     RTRIG_DisableAxis: R_TRIG;
@@ -391,7 +397,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//State machine for command handling
 RTRIG_Execute(CLK := _stAxis.stControl.bExecute);
-RTRIG_ReleasedMoveCommand(CLK := bInternalReleasedMoveCmd);
 
 CASE eState OF
     E_CommandHandlerState.eIdle:
@@ -401,26 +406,41 @@ CASE eState OF
                 E_MotionFunctions.eMoveRelative,
                 E_MotionFunctions.eMoveVelocity,
                 E_MotionFunctions.eMoveModulo,
-                E_MotionFunctions.eGearInMultiMaster,
-                E_MotionFunctions.eGearOut,
                 E_MotionFunctions.eHome :
                     eLatchedCommand := _stAxis.stControl.eCommand;
+                    //The previous command no longer owns bDone/bCommandAborted
+                    eActiveMotionCommand := E_MotionFunctions.eWaitingForCommand;
                     nWaitCounter := 0;
                     _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+                    _stAxis.stError.nCommandHandlerErrorID := 0;
+                    _stAxis.stControl.bHalt := FALSE;
 
-                    IF _stAxis.stConfig.bAutoEnable THEN
-                        _stAxis.stControl.bEnable := TRUE;
+                    IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
+                        AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
+                            OR _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming) THEN
+                        eState := E_CommandHandlerState.eReleaseNonMoveCommand;
+                    ELSE
+                        IF _stAxis.stConfig.bAutoEnable THEN
+                            _stAxis.stControl.bEnable := TRUE;
+                        END_IF
+                        eState := E_CommandHandlerState.eWaitPermits;
                     END_IF
-                    eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
         IF (bPermitRequired AND bAxisPermittedToMove)
-            OR NOT bPermitRequired
-            OR (bPermitRequired AND NOT _stAxis.stConfig.bAutoEnable AND NOT _stAxis.stStatus.bEnabled) THEN
-
-            eState := E_CommandHandlerState.eStabilizeNC;
+            OR NOT bPermitRequired THEN
+            //Already moving under a valid permit. Stop is handled by the halt/stop block below, which overrides eState
+            IF bInternalMovePermit AND _stAxis.stStatus.bMoving THEN
+                eState := E_CommandHandlerState.eReleaseCommand;
+            ELSE
+                eState := E_CommandHandlerState.eStabilizeNC;
+            END_IF
+        ELSIF bPermitRequired
+            AND NOT _stAxis.stConfig.bAutoEnable
+            AND NOT _stAxis.stStatus.bEnabled THEN
+            eState := E_CommandHandlerState.eReleaseCommand;
         END_IF
 
     E_CommandHandlerState.eStabilizeNC:
@@ -435,61 +455,79 @@ CASE eState OF
         END_IF
 
     E_CommandHandlerState.eReleaseCommand:
+        eActiveMotionCommand := eLatchedCommand;
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
+    E_CommandHandlerState.eReleaseNonMoveCommand:
+        eActiveMotionCommand := eLatchedCommand;
+        _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
+        bInternalExecute := TRUE;
+        eState := E_CommandHandlerState.eIdle;
+
     E_CommandHandlerState.eWaitForMotionStart:
         IF _stAxis.stStatus.bMoving
-            OR _stAxis.stStatus.bDone
-            OR _stAxis.stStatus.bError THEN
+            OR _stAxis.Axis.Status.HomingBusy THEN
+            eState := E_CommandHandlerState.eIdle;
+        ELSIF _stAxis.stStatus.bDone
+            OR _stAxis.stStatus.bCommandAborted
+            OR _stAxis.stStatus.bError
+            OR _stAxis.stStatus.nErrorID <> 0 THEN
             eState := E_CommandHandlerState.eIdle;
         END_IF
 
 END_CASE
 
-bInternalWaitingForMovePermit := (eState = E_CommandHandlerState.eWaitPermits OR eState = E_CommandHandlerState.eStabilizeNC);
-
 TON_CommandHandlerTimeout(
-    IN := bInternalWaitingForMovePermit,
+    IN := (eState = E_CommandHandlerState.eWaitPermits
+        OR eState = E_CommandHandlerState.eStabilizeNC
+        OR eState = E_CommandHandlerState.eWaitForMotionStart),
     PT := _stAxis.stConfig.tCommandHandlerTimeout);
 
-TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
-
 IF TON_CommandHandlerTimeout.Q THEN
+    IF eState = E_CommandHandlerState.eWaitForMotionStart THEN
+        _stAxis.stControl.bHalt := TRUE; // never leave a released move running under an error
+    END_IF
     eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
-    bInternalMovePermit := FALSE;
-    bInternalReleasedMoveCmd := FALSE;
     _stAxis.stStatus.bCommandHandlerTimeoutError := TRUE;
 END_IF
 
 IF _stAxis.stControl.bHalt
     OR _stAxis.stControl.bStop THEN
-    bCommandAborted := bInternalWaitingForMovePermit;
+    bCommandAborted := (eState = E_CommandHandlerState.eWaitPermits
+        OR eState = E_CommandHandlerState.eStabilizeNC);
     eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
+END_IF
+
+IF _stAxis.stStatus.bError THEN
+    eState := E_CommandHandlerState.eIdle;
+END_IF
+
+bInternalWaitingForMovePermit :=
+    (eState = E_CommandHandlerState.eWaitPermits
+    OR eState = E_CommandHandlerState.eStabilizeNC);
+
+IF _stAxis.stStatus.bError
+    OR (eState <> E_CommandHandlerState.eWaitForMotionStart
+        AND NOT _stAxis.stStatus.bMoving
+        AND NOT _stAxis.Axis.Status.HomingBusy) THEN
     bInternalMovePermit := FALSE;
     bInternalReleasedMoveCmd := FALSE;
 END_IF
 
-FTRIG_Moving(CLK :=
-    (_stAxis.stStatus.bMoving AND NOT _stAxis.Axis.Status.HomingBusy)
-    OR _stAxis.Axis.Status.HomingBusy);
-
-IF FTRIG_Moving.Q
-    OR _stAxis.stStatus.bError THEN
-    eState := E_CommandHandlerState.eIdle;
-    bInternalWaitingForMovePermit := FALSE;
-    bInternalMovePermit := FALSE;
+TON_LatchReleasedCommandStatus(IN := bInternalReleasedMoveCmd, PT := T#1S);
+IF TON_LatchReleasedCommandStatus.Q THEN
     bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 TON_DisableAxis(
     IN := _stAxis.stConfig.bAutoDisable
         AND _stAxis.stStatus.bEnabled
+        AND NOT _stAxis.stStatus.bMoving
+        AND NOT _stAxis.Axis.Status.HomingBusy
         AND NOT bInternalWaitingForMovePermit
         AND NOT bInternalMovePermit
         AND NOT bInternalReleasedMoveCmd,
@@ -498,14 +536,6 @@ RTRIG_DisableAxis(CLK := TON_DisableAxis.Q);
 IF RTRIG_DisableAxis.Q
     AND _stAxis.stConfig.bAutoDisable THEN
     _stAxis.stControl.bEnable := FALSE;
-END_IF
-
-IF RTRIG_ReleasedMoveCommand.Q THEN
-    bInternalReleasedMoveCmd := TRUE;
-END_IF
-
-IF TON_LatchReleasedCommandStatus.Q THEN
-    bInternalReleasedMoveCmd := FALSE;
 END_IF
 
 bWaitingForMovePermit := bInternalWaitingForMovePermit;
@@ -1783,6 +1813,35 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="mStatus_IsStaleMotionIndex" Id="{3b7d2c64-5e1a-4f0b-9a38-6c2d8e41f7a5}" FolderPath="Status Methods\">
+      <Declaration><![CDATA[//bDone, bCommandAborted and bBusy describe the most recently accepted command.
+//A motion FB that does not own the result is stale, so its Done/abort is ignored.
+METHOD mStatus_IsStaleMotionIndex : BOOL
+VAR_INPUT
+    nIndex: UINT;
+END_VAR
+VAR
+    nActiveIndex: UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eActiveMotionCommand OF
+    E_MotionFunctions.eMoveAbsolute: nActiveIndex := nINDEX_MOVE_ABSOLUTE;
+    E_MotionFunctions.eMoveRelative: nActiveIndex := nINDEX_MOVE_RELATIVE;
+    E_MotionFunctions.eMoveVelocity: nActiveIndex := nINDEX_MOVE_VELOCITY;
+    E_MotionFunctions.eMoveModulo:   nActiveIndex := nINDEX_MOVE_MODULO;
+    E_MotionFunctions.eHome:         nActiveIndex := nINDEX_HOME;
+    ELSE
+        nActiveIndex := 0;
+END_CASE
+
+//Only the motion FBs are filtered. Parameter, backlash and handler results always count
+mStatus_IsStaleMotionIndex := nIndex >= nINDEX_MOVE_ABSOLUTE
+    AND nIndex <= nINDEX_HOME
+    AND nIndex <> nActiveIndex;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="mStatus_Busy" Id="{41cf8366-0cbd-0f66-1e94-c9cc649849e7}" FolderPath="Status Methods\">
       <Declaration><![CDATA[METHOD mStatus_Busy : BOOL
 VAR
@@ -1807,7 +1866,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
-    tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
+    IF NOT mStatus_IsStaleMotionIndex(i) THEN
+        tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
+    END_IF
 END_FOR
 
 fbCommandAbortedRTrig(CLK := tmpCmdAborted);
@@ -1826,7 +1887,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
-    tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    IF NOT mStatus_IsStaleMotionIndex(i) THEN
+        tmpDone := astMcStatus[i]^.Done OR tmpDone;
+    END_IF
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
 fbDoneRTrig(CLK := tmpDone);
