@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZEtherCATDiagOut" Id="{a0ab436b-b983-0c14-3039-f900c1f5e992}">
+    <Declaration><![CDATA[TYPE ST_PNOZEtherCATDiagOut :
+STRUCT
+    astDiagnosticElementsOut: ARRAY[1..GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementOut; //Input Byte 00-63
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

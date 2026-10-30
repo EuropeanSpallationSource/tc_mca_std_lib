@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MCCStatusIn" Id="{72c2d88f-a765-0a04-1255-9624a4d4f1ce}">
+    <Declaration><![CDATA[// Decoded common cabinet status: PNOZ --> IPC.
+TYPE ST_MCCStatusIn :
+STRUCT
+    bHeartbeat: BOOL; //Bit 0: heartbeat loop-back from PLC to PNOZ and back to PLC.
+    bAcknowledgeRequired: BOOL; //Bit 1: acknowledgment required.
+    bFault: BOOL; //Bit 2: fault indication; confirm the meaning in the PNOZ mapping.
+    bWarning: BOOL; //Bit 3: warning indication.
+    bMessage: BOOL; //Bit 4: message indication.
+    bEStopOK: BOOL; //Bit 8: TRUE when no connected cabinet E-Stop is pressed.
+    bRemote: BOOL; //Bit 9: remote mode permits E-Stop zone resetting from EPICS/NICOS.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

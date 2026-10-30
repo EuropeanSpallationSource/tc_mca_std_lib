@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZModuleData" Id="{001a6950-5ffb-0137-3c77-ac959c325897}">
+    <Declaration><![CDATA[TYPE ST_PNOZModuleData :
+STRUCT
+    //Identification
+    sName: STRING(30);
+    nID: UDINT;
+    nSerialNumber: UDINT;
+    eDeviceType: E_PNOZDeviceType;
+
+    //Original device-type code, including types outside the enum
+    nDeviceType: WORD;
+    anDeviceVersion: ARRAY[1..2] OF BYTE;
+
+    //Firmware
+    anFirmwareVersionA: ARRAY[1..2] OF BYTE;
+    anFirmwareVersionB: ARRAY[1..2] OF BYTE;
+    nFirmwareChecksumA: WORD;
+    nFirmwareChecksumB: WORD;
+
+    //Cyclic process data
+    stLEDState: ST_LEDState;
+    anInput: ARRAY[1..4] OF ST_8Bit;
+    anOutput: ARRAY[1..4] OF ST_8Bit;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
