@@ -6,6 +6,7 @@ VAR_INPUT
     bEnable: BOOL;
 END_VAR
 VAR_OUTPUT
+    bDataValid: BOOL;
     bMCC_OK: BOOL;
     bAxisEnableAllowed: BOOL;
     bMCCWatchdogFault: BOOL;
@@ -20,6 +21,7 @@ VAR
 
     i: UINT := 1; //Index for loops
     ftrigAxisEnableAllowed: F_TRIG;
+    bInit: BOOL := TRUE;
 
     //Heartbeat
     tHeartbeatElapsed: TIME;
@@ -29,13 +31,18 @@ VAR
 
     fbSafetyAcknowledgeLedPulse: FB_PulseGenerator;
 
+    bInitPNOZ: BOOL := TRUE;
+    fbPNOZData: FB_PNOZData; //Reads project and device data via table-segment requests.
+
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_3^TxPDO_1'}
     stPNOZEtherCATDiagIn AT %I*: ST_PNOZEtherCATDiagIn; //Raw EtherCAT Input of TxPDO_1
 
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_3^TxPDO'}
-    stPNOZEtherCATIn AT %I*: ST_PNOZEtherCATIn; //Raw EtherCAT input
+    stPNOZEtherCATIn AT %I*: ST_PNOZEtherCATIn; //Raw EtherCAT input of TxPDO
+
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^SmPdoVariables^PNOZ_m_ES_EtherCAT__2_2__SM_2^RxPDO'}
-    stPNOZEtherCATOut AT %Q*: ST_PNOZEtherCATOut; //Raw EtherCAT output
+    stPNOZEtherCATOut AT %Q*: ST_PNOZEtherCATOut; //Raw EtherCAT output of RxPDO
+
     {attribute 'TcLinkTo' :=  'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^WcState^WcState'}
     bWcState AT %I*: BOOL;
 
@@ -48,8 +55,8 @@ VAR
                               [2] := TIID^Device 2 (EtherCAT)^TA702 (iPOS8020 BX-CAT)^Transmit PDO 3 mapping parameters^Motion Error Register'}
     astTechnosoftMotionError AT %I*: ARRAY[1..GVL_APP.nNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError;
 
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 3^Output'}
-    bSafetyAcknowledgeLED AT %Q*: BOOL;
+    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 3^Output'}
+    bSafetyAcknowledgeLED AT %Q*: BOOL; //Cabinet status indicator
 END_VAR
 VAR CONSTANT
     tPLC_CYCLE_TIME: TIME := T#10MS; //PLC task cycle time
@@ -57,15 +64,23 @@ VAR CONSTANT
     cHEARTBEAT_PW: LREAL := 50.0; //Heartbeat pulse width percentage
     tMCC_WATCHDOG_TIME: TIME := T#1S; //MCC watchdog timeout
 END_VAR
-
-
-
-
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[_bReadFromSafetyController := bEnable;
-stSafety.stSafetyIn.stPNOZCommDiag.bWcState := bWcState;
-stSafety.stSafetyIn.stPNOZCommDiag.nEtherCATState := nEtherCATState;
+      <ST><![CDATA[ IF NOT fbPNOZData.bInitDone THEN
+    fbPNOZData(
+    bInit := bInitPNOZ,
+    nReturnedTable := stPNOZEtherCATIn.nTableNumber,
+    nReturnedSegment := stPNOZEtherCATIn.nSegmentNumber,
+    anSegmentData := stPNOZEtherCATIn.anSegmentByte,
+    nRequestedTable => stPNOZEtherCATOut.nTableNumber,
+    nRequestedSegment => stPNOZEtherCATOut.nSegmentNumber
+    );
+END_IF
+
+_bReadFromSafetyController := bEnable;
+stSafety.stIn.stPNOZCommDiag.bWcState := bWcState;
+stSafety.stIn.stPNOZCommDiag.nEtherCATState := nEtherCATState;
+bDataValid := FALSE;
 
 IF NOT bEnable OR bWcState THEN
     bAxisEnableAllowed := FALSE; //Withdraw general motion permission
@@ -79,22 +94,23 @@ IF NOT bEnable OR bWcState THEN
         tHeartbeatPeriod := tHEARTBEAT_PERIOD,
         fHeartbeatPW := cHEARTBEAT_PW,
         tWatchdogTime := tMCC_WATCHDOG_TIME,
-        bHeartbeatOut => stSafety.stSafetyOut.stMCCStatusOut.bHeartbeat,
+        bHeartbeatOut => stSafety.stOut.stMCCStatus.bHeartbeat,
         bWatchdogFault => bMCCWatchdogFault
     ); //Reset heartbeat generation and watchdog memory
 
-    stSafety.stSafetyOut.stMCCStatusOut.bErrorAcknowledge := FALSE; //Clear fault-acknowledge command
+    stSafety.stOut.stMCCStatus.bErrorAcknowledge := FALSE; //Clear fault-acknowledge command
     mHandleMotionPermission(); //Process falling edge of motion permission
     RETURN;
 END_IF;
 
-mReadInputs(stSafetyData := stSafety);
-mMCCStatus(stSafetyData := stSafety); //Heartbeat generation and MCC watchdog check
-mTechnosoftStatus(stSafetyData := stSafety);
+mReadInputs(stSafetyIn := stSafety.stIn);
+bDataValid := TRUE;
+
+mMCCStatus(stSafetyData := stSafety); //Heartbeat generation, MCC watchdog check
+//mTechnosoftStatus(stSafetyData := stSafety);
 
 mUpdateFaultFeedback(stSafetyData := stSafety); //Fault/Err Ack. handshake
 mHandleMotionPermission();
-
 ]]></ST>
     </Implementation>
     <Property Name="EStopOK" Id="{091ff546-d8eb-0d5e-357d-a3cab02108c2}">
@@ -213,12 +229,12 @@ END_VAR
       <Implementation>
         <ST><![CDATA[bMCC_OK := mCheckMCCHeartbeat(
     bEnable := TRUE,
-    bHeartbeatIn := stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat,
+    bHeartbeatIn := stSafetyData.stIn.stMCCStatus.bHeartbeat,
     tTaskCycleTime := tPLC_CYCLE_TIME,
     tHeartbeatPeriod := tHEARTBEAT_PERIOD,
     fHeartbeatPW := cHEARTBEAT_PW,
     tWatchdogTime := tMCC_WATCHDOG_TIME,
-    bHeartbeatOut => stSafetyData.stSafetyOut.stMCCStatusOut.bHeartbeat,
+    bHeartbeatOut => stSafetyData.stOut.stMCCStatus.bHeartbeat,
     bWatchdogFault => bMCCWatchdogFault
 );
 
@@ -233,15 +249,15 @@ ELSE
 END_CASE
 
 bAxisEnableAllowed :=
-    stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK
+    stSafetyData.stIn.stMCCStatus.bEStopOK
     AND bMCC_OK;
 ]]></ST>
       </Implementation>
     </Method>
     <Method Name="mReadInputs" Id="{c15732b0-7e08-06af-0803-936a25548168}">
-      <Declaration><![CDATA[METHOD mReadInputs : BOOL
+      <Declaration><![CDATA[METHOD mReadInputs
 VAR_IN_OUT
-    stSafetyData: ST_Safety;
+    stSafetyIn: ST_SafetyIn;
 END_VAR
 VAR
     nIndex: UINT; //Array index
@@ -249,97 +265,145 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Common cabinet status: input bytes 00..01.
-stSafetyData.stSafetyIn.stMCCStatusIn.bHeartbeat := stPNOZEtherCATIn.nMCCStatus.0;
-stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired := stPNOZEtherCATIn.nMCCStatus.1;
-stSafetyData.stSafetyIn.stMCCStatusIn.bFault := stPNOZEtherCATIn.nMCCStatus.2;
-stSafetyData.stSafetyIn.stMCCStatusIn.bWarning := stPNOZEtherCATIn.nMCCStatus.3;
-stSafetyData.stSafetyIn.stMCCStatusIn.bMessage := stPNOZEtherCATIn.nMCCStatus.4;
-stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK := stPNOZEtherCATIn.nMCCStatus.8;
-stSafetyData.stSafetyIn.stMCCStatusIn.bRemote := stPNOZEtherCATIn.nMCCStatus.9;
+stSafetyIn.stMCCStatus.bHeartbeat := stPNOZEtherCATIn.nMCCStatus.0;
+stSafetyIn.stMCCStatus.bAcknowledgeRequired := stPNOZEtherCATIn.nMCCStatus.1;
+stSafetyIn.stMCCStatus.bFault := stPNOZEtherCATIn.nMCCStatus.2;
+stSafetyIn.stMCCStatus.bWarning := stPNOZEtherCATIn.nMCCStatus.3;
+stSafetyIn.stMCCStatus.bMessage := stPNOZEtherCATIn.nMCCStatus.4;
+stSafetyIn.stMCCStatus.bEStopOK := stPNOZEtherCATIn.nMCCStatus.8;
+stSafetyIn.stMCCStatus.bRemote := stPNOZEtherCATIn.nMCCStatus.9;
 
+//Application specific: input bytes 02..03.
+stSafetyIn.stMCCAppSpecific.abData[1] := stPNOZEtherCATIn.nMCCAppSpecific.0;
+stSafetyIn.stMCCAppSpecific.abData[2] := stPNOZEtherCATIn.nMCCAppSpecific.1;
+stSafetyIn.stMCCAppSpecific.abData[3] := stPNOZEtherCATIn.nMCCAppSpecific.2;
+stSafetyIn.stMCCAppSpecific.abData[4] := stPNOZEtherCATIn.nMCCAppSpecific.3;
+stSafetyIn.stMCCAppSpecific.abData[5] := stPNOZEtherCATIn.nMCCAppSpecific.4;
+stSafetyIn.stMCCAppSpecific.abData[6] := stPNOZEtherCATIn.nMCCAppSpecific.5;
+stSafetyIn.stMCCAppSpecific.abData[7] := stPNOZEtherCATIn.nMCCAppSpecific.6;
+stSafetyIn.stMCCAppSpecific.abData[8] := stPNOZEtherCATIn.nMCCAppSpecific.7;
+
+stSafetyIn.stMCCAppSpecific.abValid[1] := stPNOZEtherCATIn.nMCCAppSpecific.8;
+stSafetyIn.stMCCAppSpecific.abValid[2] := stPNOZEtherCATIn.nMCCAppSpecific.9;
+stSafetyIn.stMCCAppSpecific.abValid[3] := stPNOZEtherCATIn.nMCCAppSpecific.10;
+stSafetyIn.stMCCAppSpecific.abValid[4] := stPNOZEtherCATIn.nMCCAppSpecific.11;
+stSafetyIn.stMCCAppSpecific.abValid[5] := stPNOZEtherCATIn.nMCCAppSpecific.12;
+stSafetyIn.stMCCAppSpecific.abValid[6] := stPNOZEtherCATIn.nMCCAppSpecific.13;
+stSafetyIn.stMCCAppSpecific.abValid[7] := stPNOZEtherCATIn.nMCCAppSpecific.14;
+stSafetyIn.stMCCAppSpecific.abValid[8] := stPNOZEtherCATIn.nMCCAppSpecific.15;
 
 //Controller LED states: input byte 16.
-stSafetyData.stSafetyIn.stLEDState.bLED_OFAULT := stPNOZEtherCATIn.nLEDState.0;
-stSafetyData.stSafetyIn.stLEDState.bLED_IFAULT := stPNOZEtherCATIn.nLEDState.1;
-stSafetyData.stSafetyIn.stLEDState.bLED_FAULT := stPNOZEtherCATIn.nLEDState.2;
-stSafetyData.stSafetyIn.stLEDState.bLED_DIAG := stPNOZEtherCATIn.nLEDState.3;
-stSafetyData.stSafetyIn.stLEDState.bLED_RUN := stPNOZEtherCATIn.nLEDState.4;
+stSafetyIn.stLEDState.bOutputFault := stPNOZEtherCATIn.nLEDState.0;
+stSafetyIn.stLEDState.bInputFault := stPNOZEtherCATIn.nLEDState.1;
+stSafetyIn.stLEDState.bFault := stPNOZEtherCATIn.nLEDState.2;
+stSafetyIn.stLEDState.bDiag := stPNOZEtherCATIn.nLEDState.3;
+stSafetyIn.stLEDState.bRun := stPNOZEtherCATIn.nLEDState.4;
+
+//TODO! Clean this up
+stSafetyIn.stFieldbusData.stLEDState.bPower := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[1]);
+stSafetyIn.stFieldbusData.stLEDState.bRun := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[1]);
+stSafetyIn.stFieldbusData.stLEDState.bFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[2]);
+
+
+stSafetyIn.stBaseModuleData.stLEDState.bPower := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[1]);
+stSafetyIn.stBaseModuleData.stLEDState.bRun := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[1]);
+stSafetyIn.stBaseModuleData.stLEDState.bDiag := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[2]);
+stSafetyIn.stBaseModuleData.stLEDState.bFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[2]);
+stSafetyIn.stBaseModuleData.stLEDState.bInputFault := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[3]);
+stSafetyIn.stBaseModuleData.stLEDState.bOutputFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[3]);
+stSafetyIn.stBaseModuleData.anInput[1] := stPNOZEtherCATDiagIn.anBaseModuleInput[1];
+stSafetyIn.stBaseModuleData.anInput[2] := stPNOZEtherCATDiagIn.anBaseModuleInput[2];
+stSafetyIn.stBaseModuleData.anInput[3] := stPNOZEtherCATDiagIn.anBaseModuleInput[3];
+stSafetyIn.stBaseModuleData.anOutput[1] := stPNOZEtherCATDiagIn.anBaseModuleOutput[1];
+stSafetyIn.stBaseModuleData.anOutput[2] := stPNOZEtherCATDiagIn.anBaseModuleOutput[2];
+
+FOR nIndex := 1 TO GVL_APP.nNUM_OF_EXPANSION_LEFT BY 1 DO
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bPower :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bRun :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bDiag :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bFault :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bInputFault :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bOutputFault :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3]);
+    stSafetyIn.astExpansionModuleLeftData[nIndex].anInput :=
+        stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anInput;
+    stSafetyIn.astExpansionModuleLeftData[nIndex].anOutput :=
+        stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anOutput;
+END_FOR
+
+FOR nIndex := 1 TO GVL_APP.nNUM_OF_EXPANSION_RIGHT BY 1 DO
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bPower :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bRun :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bDiag :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bFault :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bInputFault :=
+        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bOutputFault :=
+        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3]);
+    stSafetyIn.astExpansionModuleRightData[nIndex].anInput[1] :=
+        stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].nInput;
+    stSafetyIn.astExpansionModuleRightData[nIndex].anOutput[1] :=
+        stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].nOutput;
+END_FOR
 
 //Decode diagnostic elements from TxPDO_1.
-FOR nIndex := 1 TO GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS DO
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bPulseTestError :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.0;
+FOR nIndex := 1 TO GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS DO
+    stSafetyIn.astDiagnosticElement[nIndex].bPulseTestError :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.b0;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn1 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.4;
+    stSafetyIn.astDiagnosticElement[nIndex].bIn1 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.b4;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn2 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.5;
+    stSafetyIn.astDiagnosticElement[nIndex].bIn2 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.b5;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn3 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.6;
+    stSafetyIn.astDiagnosticElement[nIndex].bIn3 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.b6;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bIn4 :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.7;
+    stSafetyIn.astDiagnosticElement[nIndex].bIn4 :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nHigh.b7;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bActive :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.0;
+    stSafetyIn.astDiagnosticElement[nIndex].bActive :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b0;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSafe :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.1;
+    stSafetyIn.astDiagnosticElement[nIndex].bSafe :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b1;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bReady :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.2;
+    stSafetyIn.astDiagnosticElement[nIndex].bReady :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b2;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bTestReq :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.3;
+    stSafetyIn.astDiagnosticElement[nIndex].bTestReq :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b3;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bOperatedLate :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.4;
+    stSafetyIn.astDiagnosticElement[nIndex].bOperatedLate :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b4;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bSwitchError :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.5;
+    stSafetyIn.astDiagnosticElement[nIndex].bSwitchError :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b5;
 
-    stSafetyData.stSafetyIn.astDiagnosticElementIn[nIndex].bDisabled :=
-        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.6;
+    stSafetyIn.astDiagnosticElement[nIndex].bDisabled :=
+        stPNOZEtherCATDiagIn.astDiagnosticElementsIn[nIndex].nLow.b6;
 END_FOR
 
 //Motion error registers from the Technosoft drives.
 IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
     FOR nIndex := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
-        stSafetyData.stSafetyIn.astTechnosoftMotionError[nIndex] :=
+        stSafetyIn.astTechnosoftMotionError[nIndex] :=
             astTechnosoftMotionError[nIndex];
     END_FOR
 END_IF
 
 //Used internally in this function block.
-_bEStopOK := stSafetyData.stSafetyIn.stMCCStatusIn.bEStopOK;
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="mTechnosoftErrorActive" Id="{7236a262-601c-0e8c-2455-9f62247a145f}">
-      <Declaration><![CDATA[METHOD mTechnosoftErrorActive : BOOL
-VAR_INPUT
-     stError: ST_TechnosoftMotionError;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[mTechnosoftErrorActive :=
-    stError.bEtherCATCommunicationError
-    OR stError.bShortCircuit
-    OR stError.bInvalidSetupData
-    OR stError.bControlError
-    OR stError.bCommunicationError
-    OR stError.bFeedbackError
-    OR stError.bPositiveLimitSwitchActive
-    OR stError.bNegativeLimitSwitchActive
-    OR stError.bOverCurrent
-    OR stError.bI2TProtection
-    OR stError.bMotorOverTemperature
-    OR stError.bDriveOverTemperature
-    OR stError.bOverVoltage
-    OR stError.bUnderVoltage
-    OR stError.bCommandError;
+_bEStopOK := stSafetyIn.stMCCStatus.bEStopOK;
 ]]></ST>
       </Implementation>
     </Method>
@@ -356,18 +420,18 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Evaluate Technosoft STO states and motion errors
-stSafetyData.stSafetyOut.bSTOActive := FALSE;
-stSafetyData.stSafetyOut.bTechnosoftMotionErrors := FALSE;
+stSafetyData.stOut.bSTOActive := FALSE;
+stSafetyData.stOut.bTechnosoftMotionErrors := FALSE;
 
 IF GVL_APP.nNUM_OF_TECHNOSOFT <> 0 THEN
     FOR nAxes := 1 TO GVL_APP.nNUM_OF_TECHNOSOFT DO
-        stSafetyData.stSafetyOut.bSTOActive :=
-            stSafetyData.stSafetyOut.bSTOActive
-            OR stSafetyData.stSafetyIn.astTechnosoftMotionError[nAxes].bSTOActive;
+        stSafetyData.stOut.bSTOActive :=
+            stSafetyData.stOut.bSTOActive
+            OR stSafetyData.stIn.astTechnosoftMotionError[nAxes].bSTOActive;
 
-        stSafetyData.stSafetyOut.bTechnosoftMotionErrors :=
-            stSafetyData.stSafetyOut.bTechnosoftMotionErrors
-            OR F_TechnosoftErrorActive(stError := stSafetyData.stSafetyIn.astTechnosoftMotionError[nAxes]);
+        stSafetyData.stOut.bTechnosoftMotionErrors :=
+            stSafetyData.stOut.bTechnosoftMotionErrors
+            OR F_TechnosoftErrorActive(stError := stSafetyData.stIn.astTechnosoftMotionError[nAxes]);
     END_FOR
 END_IF
 
@@ -389,12 +453,12 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Fault feedback to safety controller.
-stSafetyData.stSafetyOut.stMCCStatusOut.bErrorAcknowledge :=
-    stSafetyData.stSafetyIn.stMCCStatusIn.bFault;
+stSafetyData.stOut.stMCCStatus.bErrorAcknowledge :=
+    stSafetyData.stIn.stMCCStatus.bFault;
 
 //Watchdog fault: triple flash. Acknowledgment required: single flash.
 fbSafetyAcknowledgeLedPulse(
-    bEnable := bMCCWatchdogFault OR stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired,
+    bEnable := bMCCWatchdogFault OR stSafetyData.stIn.stMCCStatus.bAcknowledgeRequired,
     tFlashPeriod := T#1S,
     tOffTime := SEL(bMCCWatchdogFault, T#500MS, T#100MS),
     tOnTime := SEL(bMCCWatchdogFault, T#500MS, T#100MS),
@@ -402,10 +466,10 @@ fbSafetyAcknowledgeLedPulse(
 );
 
 //Watchdog fault or acknowledgment required: use flashing output.
-IF bMCCWatchdogFault OR stSafetyData.stSafetyIn.stMCCStatusIn.bAcknowledgeRequired THEN
+IF bMCCWatchdogFault OR stSafetyData.stIn.stMCCStatus.bAcknowledgeRequired THEN
     bSafetyAcknowledgeLED := fbSafetyAcknowledgeLedPulse.bOut;
 ELSE
-    bSafetyAcknowledgeLED := stSafetyData.stSafetyIn.stMCCStatusIn.bFault; //Fault only: solid. No fault: off.
+    bSafetyAcknowledgeLED := stSafetyData.stIn.stMCCStatus.bFault; //Fault only: solid. No fault: off.
 END_IF
 ]]></ST>
       </Implementation>
@@ -413,7 +477,7 @@ END_IF
     <Method Name="mWriteOutputs" Id="{38cfbe25-cd48-0fa9-1b38-9c18bd912579}">
       <Declaration><![CDATA[METHOD mWriteOutputs : BOOL
 VAR_INPUT
-    stSafetyData: ST_Safety;
+    stSafetyOut: ST_SafetyOut;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -421,14 +485,11 @@ END_VAR
 stPNOZEtherCATOut.nMCCStatus := WORD#0;
 
 //Encode common cabinet commands.
-stPNOZEtherCATOut.nMCCStatus.0 :=
-    stSafetyData.stSafetyOut.stMCCStatusOut.bHeartbeat;
+stPNOZEtherCATOut.nMCCStatus.0 := stSafetyOut.stMCCStatus.bHeartbeat;
 
-stPNOZEtherCATOut.nMCCStatus.1 :=
-    stSafetyData.stSafetyOut.stMCCStatusOut.bPLC_OK;
+stPNOZEtherCATOut.nMCCStatus.1 := stSafetyOut.stMCCStatus.bPLC_OK;
 
-stPNOZEtherCATOut.nMCCStatus.2 :=
-    stSafetyData.stSafetyOut.stMCCStatusOut.bErrorAcknowledge;
+stPNOZEtherCATOut.nMCCStatus.2 := stSafetyOut.stMCCStatus.bErrorAcknowledge;
 
 //No custom commands are currently defined.
 stPNOZEtherCATOut.nMCCCustomStatus := WORD#0;
@@ -444,7 +505,7 @@ FOR i := 1 TO SIZEOF(stPNOZEtherCATOut.anSafeOutputGroups) DO
 END_FOR
 
 //Preserve the existing internal STO assignment.
-_bSTO_OK := stSafetyData.stSafetyOut.bSTOActive;
+_bSTO_OK := stSafetyOut.bSTOActive;
 ]]></ST>
       </Implementation>
     </Method>

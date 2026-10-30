@@ -1,0 +1,328 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_PNOZData" Id="{d1b7f8df-8695-0e9b-34f2-1a272e1c0f0d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PNOZData
+VAR_INPUT
+    bInit: BOOL;
+
+    //Raw table response from the existing EtherCAT mapping
+    nReturnedTable: UINT;
+    nReturnedSegment: UINT;
+    anSegmentData: ARRAY[1..13] OF BYTE;
+END_VAR
+
+VAR_OUTPUT
+    //Table request sent through the existing EtherCAT mapping
+    nRequestedTable: USINT;
+    nRequestedSegment: USINT;
+
+    bInitDone: BOOL;
+    stData: ST_PNOZData; //Decoded module and project information
+END_VAR
+
+VAR
+   eStep:
+    (
+        eBaseUnit := 0,  //Table 90
+        eFieldbus,       //Table 93
+        eRightModules,   //Table 91
+        eLeftModules,    //Table 92
+        eProject         //Table 80
+    ) := eBaseUnit;
+    nModuleIndex: UINT := 1;
+    nSegmentIndex: USINT := 0;
+
+    nIndex: INT;
+    nCharacter: INT;
+    nCharacterOffset: INT;
+    nCharacterCount: INT;
+
+    anData: ARRAY[0..5] OF WORD;
+
+    pData: POINTER TO ST_PNOZModuleData; //Pointer for internal data struct
+    pSafety: POINTER TO ST_PNOZModuleData; //Pointer for safety struct
+    pProjectName: POINTER TO WORD;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[mRequestTableSegment();
+
+//Wait for a matching response
+IF (nReturnedTable <> nRequestedTable)
+    OR (nReturnedSegment <> nRequestedSegment)
+THEN
+    RETURN;
+END_IF
+
+mDecodeTableSegment();
+mNext();
+
+]]></ST>
+    </Implementation>
+    <Method Name="mDecodeTableSegment" Id="{ab87a412-8066-0f52-02f5-0d52d38f78d7}">
+      <Declaration><![CDATA[METHOD mDecodeTableSegment
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//For more information (p.150) https://www.pilz.com/download/open/OM_CI_PNOZmulti_2_1002971-EN-14.pdf
+//Convert raw byte pairs to word.
+FOR nIndex := 0 TO 5 DO
+    anData[nIndex] :=
+        SHL(BYTE_TO_WORD(anSegmentData[nIndex * 2 + 1]), 8)
+        OR BYTE_TO_WORD(anSegmentData[nIndex * 2 + 2]);
+END_FOR
+
+//Decode the response
+CASE eStep OF
+    eBaseUnit, eFieldbus, eRightModules, eLeftModules:
+        CASE nSegmentIndex OF
+            0:
+                //Identification
+                pData^.nID := SHL(WORD_TO_UDINT(anData[0]), 16) OR WORD_TO_UDINT(anData[1]);
+                pData^.nSerialNumber := SHL(WORD_TO_UDINT(anData[2]), 16) OR WORD_TO_UDINT(anData[3]);
+                pData^.nDeviceType := anData[4];
+                pData^.anDeviceVersion[1] := anSegmentData[11]; //Major
+                pData^.anDeviceVersion[2] := anSegmentData[12]; //Minor
+
+                CASE pData^.nDeviceType OF
+
+                    WORD#16#0060:
+                        pData^.eDeviceType := E_PNOZDeviceType.eB0;
+                        pData^.sName := 'B0';
+
+                    WORD#16#0061:
+                        pData^.eDeviceType := E_PNOZDeviceType.eB1;
+                        pData^.sName := 'B1';
+
+                    WORD#16#0087:
+                        pData^.eDeviceType :=
+                            E_PNOZDeviceType.eEtherCATFieldbus;
+
+                        pData^.sName := 'ES EtherCAT';
+
+                    WORD#16#00E0:
+                        pData^.eDeviceType := E_PNOZDeviceType.e8DI4DO;
+                        pData^.sName := 'EF 8DI4DO';
+
+                    WORD#16#00E1:
+                        pData^.eDeviceType := E_PNOZDeviceType.e4DI4DOR;
+                        pData^.sName := 'EF 4DI4DOR';
+
+                ELSE
+                    pData^.eDeviceType := E_PNOZDeviceType.eNone;
+                    pData^.sName := 'None';
+                END_CASE
+                pSafety^.nID := pData^.nID;
+                pSafety^.nSerialNumber := pData^.nSerialNumber;
+                pSafety^.nDeviceType := pData^.nDeviceType;
+                pSafety^.anDeviceVersion := pData^.anDeviceVersion;
+                pSafety^.eDeviceType := pData^.eDeviceType;
+                pSafety^.sName := pData^.sName;
+
+            1:
+                pData^.anFirmwareVersionA[1] := anSegmentData[1];
+                pData^.anFirmwareVersionA[2] := anSegmentData[2];
+                pData^.anFirmwareVersionB[1] := anSegmentData[3];
+                pData^.anFirmwareVersionB[2] := anSegmentData[4];
+
+                pData^.nFirmwareChecksumA := anData[2];
+                pData^.nFirmwareChecksumB := anData[3];
+
+                pSafety^.anFirmwareVersionA := pData^.anFirmwareVersionA;
+                pSafety^.anFirmwareVersionB := pData^.anFirmwareVersionB;
+                pSafety^.nFirmwareChecksumA := pData^.nFirmwareChecksumA;
+                pSafety^.nFirmwareChecksumB := pData^.nFirmwareChecksumB;
+
+            2:
+                //Only the base-unit step requests this segment
+                IF eStep = eBaseUnit THEN
+                    stData.nOperatingHoursAtInit :=
+                        SHL(BYTE_TO_UDINT(anSegmentData[2]), 16)
+                        OR SHL(BYTE_TO_UDINT(anSegmentData[3]), 8)
+                        OR BYTE_TO_UDINT(anSegmentData[4]);
+                END_IF
+
+        END_CASE
+
+    eProject:
+        CASE nSegmentIndex OF
+            0:
+                //Project checksums
+                stData.nProjectChecksum := anData[0];
+                stData.nOverallChecksum := anData[1];
+            1:
+                //Project dates and time
+                stData.nCreationDay := BYTE_TO_USINT(anSegmentData[1]);
+                stData.nCreationMonth := BYTE_TO_USINT(anSegmentData[2]);
+                stData.nCreationYear := WORD_TO_UINT(anData[1]);
+
+                stData.nStoredDay := BYTE_TO_USINT(anSegmentData[5]);
+                stData.nStoredMonth := BYTE_TO_USINT(anSegmentData[6]);
+                stData.nStoredYear := WORD_TO_UINT(anData[3]);
+
+                stData.nStoredHour := BYTE_TO_USINT(anSegmentData[9]);
+                stData.nStoredMinute := BYTE_TO_USINT(anSegmentData[10]);
+            2..4:
+                //Project name
+                pProjectName := ADR(stData.wsProjectName);
+
+                IF nSegmentIndex = 2 THEN
+                    //Clear all characters and the terminator
+                    FOR nCharacter := 0 TO 16 DO
+                        pProjectName[nCharacter] := WORD#0;
+                    END_FOR
+                END_IF
+
+                nCharacterOffset := (nSegmentIndex - 2) * 6;
+
+                IF nSegmentIndex = 4 THEN
+                    nCharacterCount := 4;
+                ELSE
+                    nCharacterCount := 6;
+                END_IF
+
+                FOR nCharacter := 0 TO nCharacterCount - 1 DO
+                    IF anData[nCharacter] = WORD#16#FFFF THEN
+                        pProjectName[nCharacterOffset + nCharacter] :=
+                            WORD#0;
+                    ELSE
+                        pProjectName[nCharacterOffset + nCharacter] :=
+                            anData[nCharacter];
+                    END_IF
+                END_FOR
+
+                pProjectName[16] := WORD#0;
+
+        END_CASE
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mNext" Id="{56d3dbb4-3166-0a97-182f-560c9ace61be}">
+      <Declaration><![CDATA[METHOD mNext
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Advance within the table, or continue to the next table
+CASE eStep OF
+
+    eBaseUnit:
+        IF nSegmentIndex < 2 THEN
+            nSegmentIndex := nSegmentIndex + 1;
+        ELSE
+            nSegmentIndex := 0;
+            eStep := eFieldbus;
+        END_IF
+
+    eFieldbus:
+        IF nSegmentIndex = 0 THEN
+            nSegmentIndex := 1;
+        ELSE
+            nSegmentIndex := 0;
+            nModuleIndex := 1;
+            eStep := eRightModules;
+        END_IF
+
+    eRightModules:
+        IF nSegmentIndex = 0 THEN
+            nSegmentIndex := 1;
+        ELSE
+            nSegmentIndex := 0;
+            nModuleIndex := nModuleIndex + 1;
+
+            IF nModuleIndex > GVL_APP.nNUM_OF_EXPANSION_RIGHT THEN
+                nModuleIndex := 1;
+                eStep := eLeftModules;
+            END_IF
+        END_IF
+
+    eLeftModules:
+        IF nSegmentIndex = 0 THEN
+            nSegmentIndex := 1;
+        ELSE
+            nSegmentIndex := 0;
+            nModuleIndex := nModuleIndex + 1;
+
+            IF nModuleIndex > GVL_APP.nNUM_OF_EXPANSION_LEFT THEN
+                nModuleIndex := 1;
+                eStep := eProject;
+            END_IF
+        END_IF
+
+    eProject:
+        IF nSegmentIndex < 4 THEN
+            nSegmentIndex := nSegmentIndex + 1;
+        ELSE
+            bInitDone := TRUE;
+        END_IF
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mRequestTableSegment" Id="{a1418b51-d538-069b-0b19-f3e36e0aa46d}">
+      <Declaration><![CDATA[METHOD mRequestTableSegment
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Skip tables without installed expansion modules
+IF (eStep = eRightModules) AND (GVL_APP.nNUM_OF_EXPANSION_RIGHT = 0) THEN
+    nModuleIndex := 1;
+    nSegmentIndex := 0;
+    eStep := eLeftModules;
+END_IF
+
+IF (eStep = eLeftModules) AND (GVL_APP.nNUM_OF_EXPANSION_LEFT = 0) THEN
+    nModuleIndex := 1;
+    nSegmentIndex := 0;
+    eStep := eProject;
+END_IF
+
+//Select the table, segment and destination module
+CASE eStep OF
+
+    eBaseUnit:
+        nRequestedTable := 90;
+        nRequestedSegment := nSegmentIndex;
+
+        pData := ADR(stData.stBaseUnit);
+        pSafety := ADR(Motion_Safety.stSafety.stIn.stBaseModuleData);
+
+    eFieldbus:
+        nRequestedTable := 93;
+        nRequestedSegment := nSegmentIndex;
+
+        pData := ADR(stData.stFieldbus);
+        pSafety := ADR(Motion_Safety.stSafety.stIn.stFieldbusData);
+
+    eRightModules:
+        nRequestedTable := 91;
+        //Each expansion module occupies three segments 0 = Product, 1 = Firmware, 2 = Empty
+        nRequestedSegment :=
+            UINT_TO_USINT((nModuleIndex - 1) * 3)
+            + nSegmentIndex;
+
+        pData := ADR(stData.astRightModule[nModuleIndex]);
+        pSafety := ADR(
+            Motion_Safety.stSafety.stIn.astExpansionModuleRightData[nModuleIndex]
+        );
+
+    eLeftModules:
+        nRequestedTable := 92;
+        //Each expansion module occupies three segments 0 = Product, 1 = Firmware, 2 = Empty
+        nRequestedSegment :=
+            UINT_TO_USINT((nModuleIndex - 1) * 3)
+            + nSegmentIndex;
+
+        pData := ADR(stData.astLeftModule[nModuleIndex]);
+        pSafety := ADR(
+            Motion_Safety.stSafety.stIn.astExpansionModuleLeftData[nModuleIndex]
+        );
+
+    eProject:
+        nRequestedTable := 80;
+        nRequestedSegment := nSegmentIndex;
+
+ELSE
+    RETURN;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

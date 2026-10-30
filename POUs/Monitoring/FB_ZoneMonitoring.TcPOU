@@ -316,10 +316,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Communication and cabinet alarms.
-mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stSafetyIn.stPNOZCommDiag.bWcState);
-mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stSafetyIn.stMCCStatusIn.bFault);
+mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.bWcState);
+mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stIn.stMCCStatus.bFault);
 mSetReset(stAlarmList := aAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
-mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stSafetyIn.stMCCStatusIn.bEStopOK);
+mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stIn.stMCCStatus.bEStopOK);
 
 //Diagnostic alarms.
 FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
@@ -327,7 +327,7 @@ FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
 
     mSetReset(
         stAlarmList := aAlarmList[nAlarmIndex],
-        bOk := stSafety.stSafetyIn.astDiagnosticElementIn[nIndex].bActive
+        bOk := stSafety.stIn.astDiagnosticElement[nIndex].bActive
     );
 END_FOR
 ]]></ST>
