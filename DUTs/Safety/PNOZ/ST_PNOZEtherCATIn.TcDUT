@@ -13,6 +13,7 @@ STRUCT
     nSegmentNumber: BYTE; //Input byte 18
     anSegmentByte: ARRAY[1..13] OF BYTE; //Input byte 19..31
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

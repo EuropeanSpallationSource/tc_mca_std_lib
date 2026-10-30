@@ -12,6 +12,7 @@ STRUCT
     bEStopOK: BOOL; //Bit 8: TRUE when no connected cabinet E-Stop is pressed.
     bRemote: BOOL; //Bit 9: remote mode permits E-Stop zone resetting from EPICS/NICOS.
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

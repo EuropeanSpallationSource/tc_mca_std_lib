@@ -7,7 +7,8 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[F_IsHighNibbleSet := (nValue AND 16#F0) <> 0;]]></ST>
+      <ST><![CDATA[F_IsHighNibbleSet := (nValue AND 16#F0) <> 0;
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

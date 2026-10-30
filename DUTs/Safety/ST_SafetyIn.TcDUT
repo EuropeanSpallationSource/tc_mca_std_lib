@@ -15,6 +15,7 @@ STRUCT
     astDiagnosticElement: ARRAY[1..GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementIn; //Selected diagnostic information from TxPDO_1.
     astTechnosoftMotionError: ARRAY[1..GVL_APP.nNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError; //Decoded Technosoft drive errors.
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>
