@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_IsHighNibbleSet" Id="{4b91c791-0e9f-036d-15df-1e0a57ceba05}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_IsHighNibbleSet : BOOL
+VAR_IN_OUT CONSTANT
+    nValue: BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_IsHighNibbleSet := (nValue AND 16#F0) <> 0;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
