@@ -3,8 +3,8 @@
   <DUT Name="ST_Safety" Id="{a14bb73e-e071-0777-120d-26666a0ac858}">
     <Declaration><![CDATA[TYPE ST_Safety :
 STRUCT
-    stSafetyIn: ST_SafetyIn;
-    stSafetyOut: ST_SafetyOut;
+    stIn: ST_SafetyIn;
+    stOut: ST_SafetyOut;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

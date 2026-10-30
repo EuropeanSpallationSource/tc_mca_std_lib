@@ -9,7 +9,6 @@ STRUCT
     bPLC_OK: BOOL; //Bit 1: PLC reports OK status.
     bErrorAcknowledge: BOOL; //Bit 2: acknowledgment command to clear applicable cabinet faults.
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

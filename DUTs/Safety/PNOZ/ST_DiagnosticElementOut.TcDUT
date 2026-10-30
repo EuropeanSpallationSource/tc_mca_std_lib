@@ -3,6 +3,7 @@
   <DUT Name="ST_DiagnosticElementOut" Id="{a03f9acf-2cc9-020d-31d2-8b63b6993c66}">
     <Declaration><![CDATA[TYPE ST_DiagnosticElementOut :
 STRUCT
+    sName: STRING(20) := 'Dummy';
     bRun: BOOL;
     bReady: BOOL;
     bSafe: BOOL;

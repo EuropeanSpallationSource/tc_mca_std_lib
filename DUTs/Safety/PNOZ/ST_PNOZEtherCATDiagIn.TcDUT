@@ -3,10 +3,10 @@
   <DUT Name="ST_PNOZEtherCATDiagIn" Id="{fb0d06ad-167f-05a3-2c25-ea5a5015f86f}">
     <Declaration><![CDATA[TYPE ST_PNOZEtherCATDiagIn :
 STRUCT
-    astDiagnosticElementsIn: ARRAY[1..GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS]
-        OF ST_DiagnosticElementRawIn; //Input bytes 00..63
-    anBaseModuleInput: ARRAY[1..3] OF BYTE; //Input bytes 64..66
-    anBaseModuleOutput: ARRAY[1..2] OF BYTE; //Input bytes 66..67
+    astDiagnosticElementsIn: ARRAY[1..GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementRawIn; //Input bytes 00..63
+    anBaseModuleInput: ARRAY[1..3] OF ST_8Bit; //Input bytes 64..66
+    anBaseModuleOutput: ARRAY[1..2] OF ST_8Bit; //Input bytes 66..67
+    anBaseModuleLED: ARRAY[1..3] OF BYTE; //Input bytes 68..69
     anFieldbusModuleLED: ARRAY[1..2] OF BYTE; //Input bytes 68..69
     astExpansionModuleRight: ARRAY[1..4] OF ST_ExpansionModuleRight; //Input bytes 70..90
     astExpansionModuleLeft: ARRAY[1..2] OF ST_ExpansionModuleLeft; //Input bytes 91..113

@@ -18,7 +18,6 @@ STRUCT
     bSwitchError: BOOL; //Bit 5, low byte bit 5: switching error indicated.
     bDisabled: BOOL; //Bit 6, low byte bit 6: element disabled.
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

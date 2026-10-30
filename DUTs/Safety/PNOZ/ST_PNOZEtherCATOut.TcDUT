@@ -7,9 +7,11 @@ STRUCT
     nMCCStatus: WORD; //Output bytes 00..01: common cabinet commands.
     nMCCCustomStatus: WORD; //Output bytes 02..03: application-specific commands.
     anDigitalOutputs: ARRAY[1..4] OF BYTE; //Output bytes 04..07: Currently unused
-    anSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..15: Currently unused
+    anSafeOutputGroups: ARRAY[1..8] OF BYTE; //Output Byte 08..16: Currently unused
+    _NotUsed: BYTE; //Input byte 17
+    nTableNumber: BYTE; //Input byte 18
+    nSegmentNumber: BYTE; //Input byte 19
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

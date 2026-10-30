@@ -5,12 +5,14 @@
 TYPE ST_PNOZEtherCATIn :
 STRUCT
     nMCCStatus: WORD; //Input bytes 00..01: common cabinet status.
-    nMCCCustomStatus: WORD; //Input bytes 02..03: application-specific cabinet status.
+    nMCCAppSpecific: WORD; //Input bytes 02..03: application-specific cabinet status.
     anDigitalInputs: ARRAY[1..4] OF BYTE; //Input bytes 04..07: digital input states.
     anSafeInputGroups: ARRAY[1..8] OF BYTE; //Input bytes 08..15: safe input group states.
     nLEDState: BYTE; //Input byte 16: PNOZ controller LED states.
+    nTableNumber: BYTE; //Input byte 17
+    nSegmentNumber: BYTE; //Input byte 18
+    anSegmentByte: ARRAY[1..13] OF BYTE; //Input byte 19..31
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

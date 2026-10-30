@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_MCCAppSpecificIn" Id="{df2073b5-e18b-0ed8-2c09-46d08095bbc3}">
+    <Declaration><![CDATA[TYPE ST_MCCAppSpecificIn :
+STRUCT
+    abData: ARRAY[1..8] OF BOOL;
+    abValid: ARRAY[1..8] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

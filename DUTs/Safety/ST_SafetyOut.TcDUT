@@ -4,9 +4,9 @@
     <Declaration><![CDATA[//Application output commands, encoded into the raw PDO by mWriteOutputs.
 TYPE ST_SafetyOut :
 STRUCT
-    stMCCStatusOut: ST_MCCStatusOut;
-    stMCC_CustomStatusOut: WORD; //Application-specific
-    astDiagnosticElementOut: ARRAY[1..GVL_APP.nNUM_OF_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementOut;
+    stMCCStatus: ST_MCCStatusOut;
+    stMCC_CustomStatus: WORD; //Application-specific
+    astDiagnosticElement: ARRAY[1..GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementOut;
     bSTOActive : BOOL;
     bTechnosoftMotionErrors : BOOL;
 END_STRUCT
