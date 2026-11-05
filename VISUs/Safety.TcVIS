@@ -5073,17 +5073,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">2</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-6250336</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>1U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -5202,17 +5197,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">2</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-6250336</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>1U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -5331,17 +5321,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">2</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-6250336</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>1U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -5460,17 +5445,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">2</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-6250336</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>1U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -7221,7 +7201,7 @@
                     </o>
                     <o>
                       <v n="Id">1013868361L</v>
-                      <v n="Value">false</v>
+                      <v n="Value">true</v>
                     </o>
                     <o>
                       <v n="Id">2322814029L</v>
@@ -9064,6 +9044,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -9917,6 +9901,10 @@
                     <o>
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
                     </o>
                   </l>
                 </o>
@@ -10772,6 +10760,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -11625,6 +11617,10 @@
                     <o>
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
                     </o>
                   </l>
                 </o>
@@ -12770,6 +12766,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -13624,6 +13624,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -14172,6 +14176,10 @@
                     <o>
                       <v n="Id">874137650L</v>
                       <v n="Value">""</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
                     </o>
                   </l>
                 </o>
@@ -15017,6 +15025,10 @@
                     <o>
                       <v n="Id">783207126L</v>
                       <v n="Value">"4"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
                     </o>
                   </l>
                 </o>
@@ -15872,6 +15884,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -16721,6 +16737,10 @@
                     <o>
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
                     </o>
                   </l>
                 </o>
@@ -17572,6 +17592,10 @@
                       <v n="Id">3528305787L</v>
                       <v n="Value">"-210 * ( GVL_APP.nMAX_EXPANSION_MODULE_LEFT -  GVL_APP.nNUM_OF_EXPANSION_LEFT)"</v>
                     </o>
+                    <o>
+                      <v n="Id">1013868361L</v>
+                      <v n="Value">true</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Frame"</v>
@@ -18225,7 +18249,7 @@
                     <o>
                       <v n="Id">2341735680L</v>
                       <l n="Value" t="ArrayList" cet="UInt32">
-                        <v>4288716960</v>
+                        <v>4294754816</v>
                       </l>
                     </o>
                     <o>
@@ -18915,7 +18939,7 @@
                     <o>
                       <v n="Id">2341735680L</v>
                       <l n="Value" t="ArrayList" cet="UInt32">
-                        <v>4292532954</v>
+                        <v>4294754816</v>
                       </l>
                     </o>
                     <o>
@@ -19617,7 +19641,7 @@
                     <o>
                       <v n="Id">2341735680L</v>
                       <l n="Value" t="ArrayList" cet="UInt32">
-                        <v>4292532954</v>
+                        <v>4294754816</v>
                       </l>
                     </o>
                     <o>
@@ -19773,7 +19797,7 @@
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value" t="Int16">369</v>
+                      <v n="Value" t="Int16">370</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -19781,21 +19805,16 @@
                     </o>
                     <o>
                       <v n="Id">2134141914L</v>
-                      <v n="Value" t="Int16">21</v>
+                      <v n="Value" t="Int16">20</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">0</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-2434342</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>0U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -19950,17 +19969,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">0</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-2434342</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>0U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -20103,17 +20117,12 @@
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
-                      <l n="Value" t="ArrayList" cet="FontDescription">
-                        <o>
-                          <v n="FontStyle">0</v>
-                          <v n="AdditionalFontStyle" t="UInt16">0</v>
-                          <v n="ExplicitColor">-6250336</v>
-                          <v n="FontName">"Segoe UI"</v>
-                          <v n="FontSize">13</v>
-                          <v n="ScriptIdentification">0</v>
-                          <v n="DoubleFontSize" t="Double">0</v>
-                          <n n="NamedColor" />
-                        </o>
+                      <l n="Value" t="ArrayList">
+                        <v>"Segoe UI"</v>
+                        <v t="Single">13.5999994</v>
+                        <v>0U</v>
+                        <v t="Byte">1</v>
+                        <v>4294967295U</v>
                       </l>
                     </o>
                     <o>
@@ -20371,6 +20380,7 @@
         <Type n="BackgroundSettings">{1038f12c-dd4b-4f96-87a3-a350fe8f3552}</Type>
         <Type n="BasicTypeNode">{f7e1e748-ea0f-4fcb-b563-94837ee17e8d}</Type>
         <Type n="Boolean">System.Boolean</Type>
+        <Type n="Byte">System.Byte</Type>
         <Type n="CaseInsensitiveHashtable">{02a85e84-ef2d-46fc-93f2-acb0bbff3eda}</Type>
         <Type n="CaseInsensitiveHashtable_1">{7df88604-7ac5-4e36-91c4-55e4fdad3e68}</Type>
         <Type n="ComplexInput">{1de566f6-72a7-494c-9353-9a418172c96e}</Type>
@@ -20394,6 +20404,7 @@
         <Type n="NamedStyleColor">{fa491db2-51ff-4bc1-9cd0-ce8c94ff6216}</Type>
         <Type n="NamedStyleFont">{9e842eb2-1463-4af2-b605-4fbb17044f94}</Type>
         <Type n="SelectedFrameInfo">{5aaff85c-800d-4b11-a6ba-9c95533622a4}</Type>
+        <Type n="Single">System.Single</Type>
         <Type n="String">System.String</Type>
         <Type n="StructuredTypeNode">{503c5b2e-e80e-4ee7-ae00-c5b93a62b1aa}</Type>
         <Type n="STSnippetInputAction">{6302d3fe-6ea5-4c42-819a-a9734a133b3d}</Type>
