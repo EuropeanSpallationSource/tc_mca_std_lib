@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_CommandHistory" Id="{39e94074-e42b-0657-2248-14d00ab28c33}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CommandHistory
+VAR_OUTPUT
+    aCommandHistory: ARRAY [1..nMAX_HISTORY_ENTRY] OF ST_CommandHistoryEntry;
+END_VAR
+VAR CONSTANT
+    nMAX_HISTORY_ENTRY: USINT := 10;
+    stEMPTY_ENTRY: ST_CommandHistoryEntry := ();
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="mAdd" Id="{814dbda4-eaf2-055a-2536-42e29c3098af}">
+      <Declaration><![CDATA[//Shifts the old entries in the history and adds the new command to the top
+METHOD mAdd
+VAR_IN_OUT CONSTANT
+    stAxisControl: ST_AxisControl;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set top entry to aborted, if it has no result
+IF aCommandHistory[1].eCommand <> E_MotionFunctions.eWaitingForCommand
+    AND aCommandHistory[1].eResult = E_CommandResult.eNone
+THEN
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
+END_IF
+
+//Shift old entries
+IF nMAX_HISTORY_ENTRY > 1 THEN
+    MEMMOVE(
+        destAddr := ADR(aCommandHistory[2]),
+        srcAddr := ADR(aCommandHistory),
+        n := (nMAX_HISTORY_ENTRY - 1) * SIZEOF(ST_CommandHistoryEntry));
+END_IF
+
+//Add new entry
+aCommandHistory[1] := stEMPTY_ENTRY;
+aCommandHistory[1].dtTrigger := FILETIME64_TO_DT(F_GetSystemTime());
+aCommandHistory[1].fVelocity := stAxisControl.fVelocity;
+aCommandHistory[1].fAcceleration := stAxisControl.fAcceleration;
+aCommandHistory[1].fDeceleration := stAxisControl.fDeceleration;
+aCommandHistory[1].fPosition := stAxisControl.fPosition;
+aCommandHistory[1].eCommand := stAxisControl.eCommand;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetHalted" Id="{1f3a1779-2f80-0b97-1b8f-3aa2dcc923d9}">
+      <Declaration><![CDATA[//Sets the result of the top entry to halted
+METHOD mSetHalted
+VAR_IN_OUT CONSTANT
+    bExecute: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
+    RETURN;
+END_IF
+
+IF bExecute THEN
+    aCommandHistory[1].eResult := E_CommandResult.eHalted;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetRelease" Id="{340a6c28-35e6-0fbc-3027-e0dab46adcda}">
+      <Declaration><![CDATA[//Sets the release time of the top entry
+METHOD mSetRelease
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aCommandHistory[1].dtRelease := FILETIME64_TO_DT(F_GetSystemTime());
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetResultOfCommand" Id="{c37cdde3-a4ed-0365-3874-96cbe0e75c19}">
+      <Declaration><![CDATA[//Sets the command result and finish time, if command matches top entry
+METHOD mSetResultOfCommand
+VAR_INPUT
+    eCommand: E_MotionFunctions;
+END_VAR
+VAR_IN_OUT CONSTANT
+    stStatus: ST_McStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command or mismatching commands
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone
+    OR aCommandHistory[1].eCommand <> eCommand
+THEN
+    RETURN;
+END_IF
+
+IF stStatus.Done THEN
+    aCommandHistory[1].eResult := E_CommandResult.eDone;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.CommandAborted THEN
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.Error THEN
+    aCommandHistory[1].eResult := E_CommandResult.eError;
+    aCommandHistory[1].nErrorID := stStatus.ErrorID;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetStopped" Id="{3f61dcd9-0b60-03e6-3923-c1c6c4c79e3e}">
+      <Declaration><![CDATA[//Sets the result of the top entry to stopped
+METHOD mSetStopped
+VAR_IN_OUT CONSTANT
+    bExecute: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
+    RETURN;
+END_IF
+
+IF bExecute THEN
+    aCommandHistory[1].eResult := E_CommandResult.eStopped;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
