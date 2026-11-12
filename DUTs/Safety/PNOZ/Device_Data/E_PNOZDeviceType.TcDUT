@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_PNOZDeviceType" Id="{c4cb2da4-c45b-0e74-3b5e-09ed1346e58c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_PNOZDeviceType :
+(
+    //Expansion Modules
+    e8DI4DO := 0,
+    e4DI4DOR := 1,
+
+    //Base Modules
+    eB0 := 100,
+    eB1 := 101,
+
+    //Fieldbus Modules
+    eEtherCATFieldbus := 200,
+
+    eNone := 999
+) := eNone;
+END_TYPE
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

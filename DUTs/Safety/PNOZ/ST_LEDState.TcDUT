@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_LEDState" Id="{f261f142-fde3-0208-2395-07dc6293304d}">
+    <Declaration><![CDATA[// Decoded LED states of the PNOZmulti 2 B0 safety controller.
+TYPE ST_LEDState :
+STRUCT
+    bPower: BOOL; //Power
+    bRun: BOOL; //Run
+    bDiag: BOOL; //Diagnostic
+    bFault: BOOL; //Fault
+    bInputFault: BOOL; //Input fault
+    bOutputFault: BOOL; //Output fault
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_SafetyIn" Id="{0d1123b7-648b-0e04-09b5-2fa227393647}">
+    <Declaration><![CDATA[//Selected input information used by the application.
+TYPE ST_SafetyIn :
+STRUCT
+    stMCCStatus: ST_MCCStatusIn; //Decoded common cabinet status.
+    stMCCAppSpecific: ST_MCCAppSpecificIn; //Decoded application specific cabinet status.
+    stLEDState: ST_LEDState;
+    stFieldbusData: ST_PNOZModuleData;
+    stBaseModuleData: ST_PNOZModuleData;
+    astExpansionModuleLeftData: ARRAY [1..GVL_APP.nMAX_EXPANSION_MODULE_LEFT] OF ST_PNOZModuleData;
+    astExpansionModuleRightData: ARRAY [1..GVL_APP.nMAX_EXPANSION_MODULE_RIGHT] OF ST_PNOZModuleData;
+    stPNOZCommDiag: ST_PNOZCommDiag; //EtherCAT communication diagnostics.
+    astDiagnosticElement: ARRAY[1..GVL_APP.nMAX_DIAGNOSTIC_ELEMENTS] OF ST_DiagnosticElementIn; //Selected diagnostic information from TxPDO_1.
+    astTechnosoftMotionError: ARRAY[1..GVL_APP.nNUM_OF_TECHNOSOFT] OF ST_TechnosoftMotionError; //Decoded Technosoft drive errors.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

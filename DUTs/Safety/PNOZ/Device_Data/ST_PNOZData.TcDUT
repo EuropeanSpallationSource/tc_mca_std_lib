@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_PNOZData" Id="{edbe01c0-bb8e-07e4-0dc0-7cf94a8e0c1a}">
+    <Declaration><![CDATA[TYPE ST_PNOZData :
+STRUCT
+    //Project identification
+    wsProjectName: WSTRING(16);
+    nProjectChecksum: WORD;
+    nOverallChecksum: WORD;
+
+    //Project creation date
+    nCreationDay: USINT;
+    nCreationMonth: USINT;
+    nCreationYear: UINT;
+
+    //Additional stored date and time
+    nStoredDay: USINT;
+    nStoredMonth: USINT;
+    nStoredYear: UINT;
+    nStoredHour: USINT;
+    nStoredMinute: USINT;
+
+    //Operating-hours snapshot
+    nOperatingHoursAtInit: UDINT;
+
+    //Modules
+    stBaseUnit: ST_PNOZModuleData;
+    stFieldbus: ST_PNOZModuleData;
+
+    astRightModule: ARRAY[1..MAX(USINT#1, GVL_APP.nNUM_OF_EXPANSION_RIGHT)] OF ST_PNOZModuleData;
+    astLeftModule: ARRAY[1..MAX(USINT#1, GVL_APP.nNUM_OF_EXPANSION_LEFT)] OF ST_PNOZModuleData;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
