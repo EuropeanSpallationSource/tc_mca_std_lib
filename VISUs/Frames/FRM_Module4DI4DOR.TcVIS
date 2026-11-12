@@ -2963,6 +2963,35 @@
                             <n n="DescriptionTextID" />
                             <v n="DescriptionUseParent">false</v>
                           </o>
+                          <o>
+                            <v n="Flags">2L</v>
+                            <v n="BasicTypeNodeValue">"stModuleData.anDeviceVersion"</v>
+                            <v n="BasicTypeNodeAcceptsExpression">true</v>
+                            <n n="BasicTypeNodeFastAccess" />
+                            <a n="BasicTypeNodeEnumValues" et="String" />
+                            <n n="EnumValueDisplayTextIds" />
+                            <n n="EnumValueVisibilityAttributeValues" />
+                            <n n="EnumValueLibraryId" />
+                            <n n="DynamicEnumMemberVisibilityCheckerTypeGuid" />
+                            <l n="TypeNodeChildren" t="ArrayList" />
+                            <o n="TypeNodeType" t="TypeNodeType">
+                              <v n="TypeClass" t="TypeClass">Reference</v>
+                              <v n="QualifiedName">"ARRAY [1..2] OF BYTE"</v>
+                              <v n="Name">"ARRAY [1..2] OF BYTE"</v>
+                            </o>
+                            <v n="TypeNodeName">"anRevision"</v>
+                            <o n="TypeNodeAttributes" t="TypeNodeAttributes2">
+                              <v n="AttrFlags">0UL</v>
+                              <d n="TypeNodeAttributesData" t="CaseInsensitiveHashtable" />
+                              <v n="ConvDone">true</v>
+                            </o>
+                            <v n="TypeNodeId" t="Int16">264</v>
+                            <v n="TypeNodeIdLong">2680047083L</v>
+                            <n n="LibraryId" />
+                            <n n="DisplayTextId" />
+                            <n n="DescriptionTextID" />
+                            <v n="DescriptionUseParent">false</v>
+                          </o>
                         </l>
                         <o n="TypeNodeType" t="TypeNodeType">
                           <v n="TypeClass" t="TypeClass">Userdef</v>
@@ -3025,6 +3054,10 @@
                     <o>
                       <v n="Id">1818237467L</v>
                       <v n="Value">"stModuleData.nSerialNumber"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2680047083L</v>
+                      <v n="Value">"stModuleData.anDeviceVersion"</v>
                     </o>
                   </l>
                 </o>
@@ -15734,7 +15767,7 @@
               <o>
                 <v n="Id">23L</v>
                 <n n="Tag" />
-                <v n="Text">"    stModuleData: ST_ModuleData;"</v>
+                <v n="Text">"    stModuleData: ST_PNOZModuleData;"</v>
               </o>
               <o>
                 <v n="Id">24L</v>
