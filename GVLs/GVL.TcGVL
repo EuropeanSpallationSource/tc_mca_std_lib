@@ -15,8 +15,10 @@
     iPneumaticAxis: UINT; //Index for for loops while going through pneumatic axes
     fbGetCurTaskIndex: GETCURTASKINDEX;
     bLocalMode: BOOL;
-    nAirPressureSensorGroup1 AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic axes group 1
-    nAirPressureSensorGroup2 AT %I*: INT; //Raw value from analog air pressure sensor for pneumatic axes group 2
+
+    //Pressure Monitoring
+    afbPressureGroup: ARRAY[E_PneumaticAxisGroup.ePneumaticAxisGroup1..E_PneumaticAxisGroup.ePneumaticAxisGroup2] OF FB_PressureGroup;
+    fbPSSPressure: FB_PressureGroup;
 END_VAR
 
 VAR_GLOBAL CONSTANT
