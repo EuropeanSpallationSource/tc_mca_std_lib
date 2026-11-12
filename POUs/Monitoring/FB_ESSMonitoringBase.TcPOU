@@ -115,10 +115,10 @@ IF NOT tonInitDelay.Q THEN
     RETURN;
 END_IF
 
+mLink();
 mMonitorAlarms();
 mMonitorCPU();
 mMonitorEtherCAT();
-mLink();
 ]]></ST>
     </Implementation>
     <Property Name="AcknowledgeButton" Id="{4553ddaa-9a47-067f-1824-16747e3b18bb}">
