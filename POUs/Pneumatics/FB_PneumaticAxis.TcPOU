@@ -8,7 +8,7 @@ VAR
     _stConfig: REFERENCE TO ST_PneumaticAxisConfig;
     _iPressureGroup: I_PressureGroup;
 
-    eState: E_PneumaticAxisState := E_PneumaticAxisState.eFailSafe;
+    eState: E_PneumaticAxisState := E_PneumaticAxisState.eDeenergized;
     eSetValveState: E_PneumaticAxisValveState := eVALVE_OFF;
     eActValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 
@@ -245,7 +245,7 @@ END_IF
 IF bErrorPresent
     AND (eState <> E_PneumaticAxisState.eInterlocked)
 THEN
-    eState := E_PneumaticAxisState.eFailSafe;
+    eState := E_PneumaticAxisState.eDeenergized;
 ELSE
     eState := eNextState;
 END_IF
@@ -516,8 +516,8 @@ METHOD PRIVATE mStatusInfo
 
     E_PneumaticAxisErrors.eNoError:
         CASE eState OF
-            E_PneumaticAxisState.eFailSafe:
-                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: FAILSAFE';
+            E_PneumaticAxisState.eDeenergized:
+                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: DE-ENERGIZED';
             E_PneumaticAxisState.eInPosition:
                 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: IN POSITION';
             E_PneumaticAxisState.eMoving:
@@ -558,7 +558,7 @@ mMonitor_Permit();
 
 eNextState := eState;
 CASE eState OF
-    E_PneumaticAxisState.eFailSafe:
+    E_PneumaticAxisState.eDeenergized:
         IF artrigMoveCommand[eVALVE_OFF].Q
             OR artrigMoveCommand[eVALVE_ON].Q
         THEN
