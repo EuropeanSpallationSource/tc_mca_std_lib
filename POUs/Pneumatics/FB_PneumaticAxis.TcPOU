@@ -417,7 +417,7 @@ METHOD PRIVATE mOutputs
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Actuate Solenoids
-_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid14On :=
     //EITHER: Moving with Set ValveOn
     (eState = E_PneumaticAxisState.eMoving
     AND eSetValveState = E_PneumaticAxisValveState.eValveOn)
@@ -426,7 +426,7 @@ _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On :=
     OR eState = E_PneumaticAxisState.eInterlocked)
     AND eActValveState = E_PneumaticAxisValveState.eValveOn);
 
-_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On :=
+_stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid12On :=
     //MUST: Bistable mode
     (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eBistable)
     //EITHER: Moving with Set ValveOff
@@ -450,8 +450,8 @@ _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
 
 _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid1Active :=
-    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid1On;
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid14Active :=
+    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid14On;
 
 //Valve On
 _stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_ON]^;
@@ -462,8 +462,8 @@ _stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn :=
 
 _stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid2Active :=
-    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid2On;
+_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid12Active :=
+    _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid12On;
 
 //Error
 _stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
