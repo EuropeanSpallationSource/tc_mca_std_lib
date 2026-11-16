@@ -3,8 +3,8 @@
   <DUT Name="ST_PneumaticAxisOutputs" Id="{aac9e877-b6e0-0811-2196-0106181b1955}">
     <Declaration><![CDATA[TYPE ST_PneumaticAxisOutputs :
 STRUCT
-    bSolenoid1On AT %Q*: BOOL; //Output of the solenoid valve 1
-    bSolenoid2On AT %Q*: BOOL; //Output of the solenoid valve 2
+    bSolenoid14On AT %Q*: BOOL; //Output of the solenoid valve 14 (valve on)
+    bSolenoid12On AT %Q*: BOOL; //Output of the solenoid valve 12 (valve off)
 END_STRUCT
 END_TYPE
 ]]></Declaration>
