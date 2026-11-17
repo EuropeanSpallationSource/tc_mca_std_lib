@@ -6,26 +6,25 @@
 VAR
     _stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct;
     _stConfig: REFERENCE TO ST_PneumaticAxisConfig;
+    _stStatus: REFERENCE TO ST_PneumaticAxisStatus;
     _iPressureGroup: I_PressureGroup;
 
     eState: E_PneumaticAxisState := E_PneumaticAxisState.eDeenergized;
     eSetValveState: E_PneumaticAxisValveState := eVALVE_OFF;
     eActValveState: E_PneumaticAxisValveState := eVALVE_OFF;
 
-    apEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO BOOL;
-    apMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF POINTER TO INT;
-
+    abEndSwitch: ARRAY [eVALVE_OFF..eVALVE_ON] OF BOOL;
+    anMoveTimeLimit: ARRAY [eVALVE_OFF..eVALVE_ON] OF INT;
+    abMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF BOOL;
     atonMoving: ARRAY [eVALVE_OFF..eVALVE_ON] OF TON;
     afElapsedTime: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
     afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
-    abMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF BOOL;
 
     bPSSPermitNeeded: BOOL;
     bPSSPermitMissing: BOOL;
     bInterlockRequest: BOOL;
 
     tonInitializeTimer: TON := (PT := tINIT);
-    bInitPointers: BOOL := TRUE;
 
     _eError: E_PneumaticAxisErrors := E_PneumaticAxisErrors.eNoError; //Current error, use property eError to GET/SET
     tonErrorAutoReset: TON := (PT := tAUTO_ERROR_RESET);
@@ -94,16 +93,6 @@ _stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="FB_reinit" Id="{1b0a7963-bcaa-0f91-0224-0925d012a176}" FolderPath="Init Methods\">
-      <Declaration><![CDATA[METHOD FB_reinit : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[bInitPointers := TRUE;
-]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="iPressureGroup" Id="{22d0755b-7b13-0cd9-272f-68eae7b24e53}" FolderPath="Properties\">
       <Declaration><![CDATA[PROPERTY iPressureGroup : I_PressureGroup
 ]]></Declaration>
@@ -152,7 +141,7 @@ END_IF
 //Call
 atonMoving[eValve](
     IN := bStart,
-    PT := INT_TO_TIME(apMoveTimeLimit[eValve]^ * 1000));
+    PT := INT_TO_TIME(anMoveTimeLimit[eValve] * 1000));
 
 ]]></ST>
       </Implementation>
@@ -182,12 +171,12 @@ CASE eError OF
         bReset := NOT bPSSPermitMissing;
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
-        bReset := apEndSwitch[eVALVE_OFF]^
+        bReset := abEndSwitch[eVALVE_OFF]
             AND (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eMonostable);
 
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
-        bReset := NOT (apEndSwitch[eVALVE_OFF]^
-            AND apEndSwitch[eVALVE_ON]^);
+        bReset := NOT (abEndSwitch[eVALVE_OFF]
+            AND abEndSwitch[eVALVE_ON]);
 
     E_PneumaticAxisErrors.eValveOffInterlocked,
     E_PneumaticAxisErrors.eValveOnInterlocked:
@@ -235,8 +224,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Try to set initial state to standstill on init
 IF tonInitializeTimer.Q THEN
-    IF apEndSwitch[eVALVE_OFF]^
-        OR apEndSwitch[eVALVE_ON]^
+    IF abEndSwitch[eVALVE_OFF]
+        OR abEndSwitch[eVALVE_ON]
     THEN
         eNextState := E_PneumaticAxisState.eInPosition;
     END_IF
@@ -261,20 +250,6 @@ END_IF
     RETURN;
 END_IF
 
-IF bInitPointers THEN
-    _stConfig REF= _stPneumaticAxis.stPneumaticAxisConfig;
-
-    apEndSwitch[eVALVE_OFF] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff);
-    apMoveTimeLimit[eVALVE_OFF] := ADR(_stConfig.nTimeLimitMovingWithValveOff);
-
-    apEndSwitch[eVALVE_ON] := ADR(_stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn);
-    apMoveTimeLimit[eVALVE_ON] := ADR(_stConfig.nTimeLimitMovingWithValveOn);
-
-    bInitPointers := FALSE;
-END_IF
-
-_iPressureGroup := GVL.afbPressureGroup[_stConfig.eSelectPneumaticAxisGroup];
-
 tonInitializeTimer();
 IF tonInitializeTimer.Q THEN
     tonInitializeTimer.IN := FALSE;
@@ -289,36 +264,51 @@ mInit := NOT tonInitializeTimer.IN;
 METHOD PRIVATE mInputs
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//PSS Permit
+        <ST><![CDATA[//References/Interfaces
+_stConfig REF= _stPneumaticAxis.stPneumaticAxisConfig;
+_stStatus REF= _stPneumaticAxis.stPneumaticAxisStatus;
+_iPressureGroup := GVL.afbPressureGroup[_stConfig.eSelectPneumaticAxisGroup];
+
+//PSS Permit
 bPSSPermitNeeded := _stConfig.bSafetyShutter;
 
-_stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := NOT bPSSPermitNeeded
+_stStatus.bPSSPermitOK := NOT bPSSPermitNeeded
     OR _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK;
 
 bPSSPermitMissing := bPSSPermitNeeded
     AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
 
 //Safety
-_stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing := NOT _stConfig.bSafetyShutter
+_stStatus.bSafetyPermissionMissing := NOT _stConfig.bSafetyShutter
     AND NOT _stPneumaticAxis.stPneumaticAxisInputs.bSafetyPermission;
 
 //Interlock
 bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
     OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
     AND NOT _stConfig.bSafetyShutter;
+    
+//End Switch
+abEndSwitch[eVALVE_OFF] := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff;
+abEndSwitch[eVALVE_ON] := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn;
+
+//Move Time
+anMoveTimeLimit[eVALVE_OFF] := _stConfig.nTimeLimitMovingWithValveOff;
+anMoveTimeLimit[eVALVE_ON] := _stConfig.nTimeLimitMovingWithValveOn;
 
 //Move Command
-artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff);
+artrigMoveCommand[eVALVE_OFF](
+    CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
+        OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff);
     
 abMoveCommand[eVALVE_OFF] := artrigMoveCommand[eVALVE_OFF].Q
-    AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing;
+    AND NOT _stStatus.bSafetyPermissionMissing;
 
-artrigMoveCommand[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
-    OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn);
+artrigMoveCommand[eVALVE_ON](
+    CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
+        OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn);
     
 abMoveCommand[eVALVE_ON] := artrigMoveCommand[eVALVE_ON].Q
-    AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing;
+    AND NOT _stStatus.bSafetyPermissionMissing;
 ]]></ST>
       </Implementation>
     </Method>
@@ -332,10 +322,10 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT apEndSwitch[eActValveState]^ THEN
+        <ST><![CDATA[IF NOT abEndSwitch[eActValveState] THEN
     mMonitor_EndSwitch := aERROR[eActValveState];
-ELSIF apEndSwitch[eVALVE_OFF]^
-    AND apEndSwitch[eVALVE_ON]^
+ELSIF abEndSwitch[eVALVE_OFF]
+    AND abEndSwitch[eVALVE_ON]
 THEN
     mMonitor_EndSwitch := E_PneumaticAxisErrors.eEndSwitchSignalConflict;
 END_IF
@@ -379,7 +369,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Timeout
 IF atonMoving[eSetValveState].Q THEN
-    IF apEndSwitch[eActValveState]^ THEN
+    IF abEndSwitch[eActValveState] THEN
         mMonitor_Move := aERROR_NO_MOVE[eSetValveState];
     ELSE
         mMonitor_Move := aERROR_TIMEOUT[eSetValveState];
@@ -449,36 +439,36 @@ _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid12On :=
     AND eActValveState = E_PneumaticAxisValveState.eValveOff));
 
 //Pressure
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
-_stPneumaticAxis.stPneumaticAxisStatus.bAirPressureHigh := _iPressureGroup.bPressureHigh;
+_stStatus.bAirPressureLow := _iPressureGroup.bPressureLow;
+_stStatus.bAirPressureHigh := _iPressureGroup.bPressureHigh;
 
 //Valve Off
-_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOff := apEndSwitch[eVALVE_OFF]^;
+_stStatus.bInPositionValveOff := abEndSwitch[eVALVE_OFF];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOff :=
+_stStatus.bMovingWithValveOff :=
     (eState = E_PneumaticAxisState.eMoving)
     AND (eSetValveState = E_PneumaticAxisValveState.eValveOff);
 
-_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
+_stStatus.fTimeElapsedMovingWithValveOff := afElapsedTime[eVALVE_OFF];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid14Active :=
+_stStatus.bSolenoid14Active :=
     _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid14On;
 
 //Valve On
-_stPneumaticAxis.stPneumaticAxisStatus.bInPositionValveOn := apEndSwitch[eVALVE_ON]^;
+_stStatus.bInPositionValveOn := abEndSwitch[eVALVE_ON];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bMovingWithValveOn :=
+_stStatus.bMovingWithValveOn :=
     (eState = E_PneumaticAxisState.eMoving)
     AND (eSetValveState = E_PneumaticAxisValveState.eValveOn);
 
-_stPneumaticAxis.stPneumaticAxisStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
+_stStatus.fTimeElapsedMovingWithValveOn := afElapsedTime[eVALVE_ON];
 
-_stPneumaticAxis.stPneumaticAxisStatus.bSolenoid12Active :=
+_stStatus.bSolenoid12Active :=
     _stPneumaticAxis.stPneumaticAxisOutputs.bSolenoid12On;
 
 //Error
-_stPneumaticAxis.stPneumaticAxisStatus.bError := bErrorPresent;
-_stPneumaticAxis.stPneumaticAxisStatus.eError := eError;
+_stStatus.bError := bErrorPresent;
+_stStatus.eError := eError;
 ]]></ST>
       </Implementation>
     </Method>
@@ -490,62 +480,62 @@ METHOD PRIVATE mStatusInfo
         <ST><![CDATA[CASE eError OF
 
     E_PneumaticAxisErrors.eAirPressureErrorLow:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
+        _stStatus.sStatus := 'ERROR: AIR PRESSURE TOO LOW';
 
     E_PneumaticAxisErrors.eAirPressureErrorHigh:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
+        _stStatus.sStatus := 'ERROR: AIR PRESSURE TOO HIGH';
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE OFF';
+        _stStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE OFF';
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOn:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE ON';
+        _stStatus.sStatus := 'ERROR: NO SIGNAL FROM END SWITCH VALVE ON';
 
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: SIGNAL FROM BOTH SWITCH HIGH';
+        _stStatus.sStatus := 'ERROR: SIGNAL FROM BOTH SWITCH HIGH';
 
     E_PneumaticAxisErrors.eNotMovingWithValveOff:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF NOT MOVING';
+        _stStatus.sStatus := 'ERROR: VALVE OFF NOT MOVING';
 
     E_PneumaticAxisErrors.eNotMovingWithValveOn:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON NOT MOVING';
+        _stStatus.sStatus := 'ERROR: VALVE ON NOT MOVING';
 
     E_PneumaticAxisErrors.eMovingWithValveOffTimedOut:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF TIMEDOUT';
+        _stStatus.sStatus := 'ERROR: VALVE OFF TIMEDOUT';
 
     E_PneumaticAxisErrors.eMovingWithValveOnTimedOut:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON TIMEDOUT';
+        _stStatus.sStatus := 'ERROR: VALVE ON TIMEDOUT';
 
     E_PneumaticAxisErrors.eValveOffInterlocked:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE OFF INTERLOCKED';
+        _stStatus.sStatus := 'ERROR: VALVE OFF INTERLOCKED';
 
     E_PneumaticAxisErrors.eValveOnInterlocked:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: VALVE ON INTERLOCKED';
+        _stStatus.sStatus := 'ERROR: VALVE ON INTERLOCKED';
 
     E_PneumaticAxisErrors.eNoPSSPermit:
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'ERROR: NO PSS PERMIT';
+        _stStatus.sStatus := 'ERROR: NO PSS PERMIT';
 
     E_PneumaticAxisErrors.eNoError:
         CASE eState OF
             E_PneumaticAxisState.eDeenergized:
-                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: DE-ENERGIZED';
+                _stStatus.sStatus := 'READY: DE-ENERGIZED';
             E_PneumaticAxisState.eInPosition:
-                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'READY: IN POSITION';
+                _stStatus.sStatus := 'READY: IN POSITION';
             E_PneumaticAxisState.eMoving:
                 IF eSetValveState = E_PneumaticAxisValveState.eValveOn THEN
-                    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE ON';
+                    _stStatus.sStatus := 'MOVING: WITH VALVE ON';
                 ELSE
-                    _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'MOVING: WITH VALVE OFF';
+                    _stStatus.sStatus := 'MOVING: WITH VALVE OFF';
                 END_IF
             E_PneumaticAxisState.eInterlocked:
-                _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
+                _stStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
         END_CASE
         
-        IF _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing THEN
-            _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: SAFETY PERMISSION MISSING';
+        IF _stStatus.bSafetyPermissionMissing THEN
+            _stStatus.sStatus := 'WARNING: SAFETY PERMISSION MISSING';
 		END_IF
     ELSE
-        _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN STATE';
+        _stStatus.sStatus := 'UNKNOWN STATE';
 END_CASE
 ]]></ST>
       </Implementation>
@@ -577,7 +567,7 @@ CASE eState OF
             OR abMoveCommand[eVALVE_ON] 
         THEN
             eNextState := E_PneumaticAxisState.eMoving;
-        ELSIF apEndSwitch[eVALVE_OFF]^ THEN
+        ELSIF abEndSwitch[eVALVE_OFF] THEN
             eActValveState := eVALVE_OFF;
             eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
@@ -594,7 +584,7 @@ CASE eState OF
     E_PneumaticAxisState.eMoving:
         mMonitor_Move();
 
-        IF apEndSwitch[eSetValveState]^ THEN
+        IF abEndSwitch[eSetValveState] THEN
             eActValveState := eSetValveState;
             eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
