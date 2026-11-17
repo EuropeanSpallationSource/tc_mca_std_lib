@@ -47,7 +47,7 @@ END_VAR
     <Folder Name="Monitor Methods" Id="{1de9d575-2430-0608-3cc7-4848c696c067}" />
     <Folder Name="Properties" Id="{91a1fcf0-14fd-0997-1818-cca146c94024}" />
     <Property Name="bErrorPresent" Id="{e61928f7-5b1b-0cb8-323f-b7787336ed0f}" FolderPath="Properties\">
-      <Declaration><![CDATA[PROPERTY bErrorPresent : BOOL
+      <Declaration><![CDATA[PROPERTY bErrorPresent: BOOL
 ]]></Declaration>
       <Get Name="Get" Id="{4c00db51-9bfe-0487-2f10-0681dde6f968}">
         <Declaration><![CDATA[VAR
@@ -60,7 +60,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="eError" Id="{32047246-0707-0216-16bf-04057767b842}" FolderPath="Properties\">
-      <Declaration><![CDATA[PROPERTY eError : E_PneumaticAxisErrors
+      <Declaration><![CDATA[PROPERTY eError: E_PneumaticAxisErrors
 ]]></Declaration>
       <Get Name="Get" Id="{f3f6439d-58c8-0d64-1024-38a7f4d298fb}">
         <Declaration><![CDATA[VAR
@@ -94,7 +94,7 @@ _stPneumaticAxis.stPneumaticAxisControl.bReset := FALSE;
       </Implementation>
     </Method>
     <Property Name="iPressureGroup" Id="{22d0755b-7b13-0cd9-272f-68eae7b24e53}" FolderPath="Properties\">
-      <Declaration><![CDATA[PROPERTY iPressureGroup : I_PressureGroup
+      <Declaration><![CDATA[PROPERTY iPressureGroup: I_PressureGroup
 ]]></Declaration>
       <Get Name="Get" Id="{9ea5e737-d543-0a73-2f8d-8db64b66adcb}">
         <Declaration><![CDATA[VAR
@@ -173,7 +173,7 @@ CASE eError OF
             AND (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eMonostable);
 
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
-        bAutoReset := NOT (abEndSwitch[eVALVE_OFF] 
+        bAutoReset := NOT (abEndSwitch[eVALVE_OFF]
             AND abEndSwitch[eVALVE_ON]);
 
     E_PneumaticAxisErrors.eValveOffInterlocked,
@@ -243,7 +243,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="mInit" Id="{e75835b4-a332-075c-2fc7-dc7ebd157bc6}" FolderPath="Init Methods\">
-      <Declaration><![CDATA[METHOD PRIVATE mInit : BOOL
+      <Declaration><![CDATA[METHOD PRIVATE mInit: BOOL
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT __ISVALIDREF(_stPneumaticAxis) THEN
@@ -286,7 +286,7 @@ _stStatus.bSafetyPermissionMissing := NOT _stConfig.bSafetyShutter
 bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
     OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
     AND NOT _stConfig.bSafetyShutter;
-    
+
 //End Switch
 abEndSwitch[eVALVE_OFF] := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOff;
 abEndSwitch[eVALVE_ON] := _stPneumaticAxis.stPneumaticAxisInputs.bEndSwitchValveOn;
@@ -299,14 +299,14 @@ anMoveTimeLimit[eVALVE_ON] := _stConfig.nTimeLimitMovingWithValveOn;
 artrigMoveCommand[eVALVE_OFF](
     CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
         OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff);
-    
+
 abMoveCommand[eVALVE_OFF] := artrigMoveCommand[eVALVE_OFF].Q
     AND NOT _stStatus.bSafetyPermissionMissing;
 
 artrigMoveCommand[eVALVE_ON](
     CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
         OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn);
-    
+
 abMoveCommand[eVALVE_ON] := artrigMoveCommand[eVALVE_ON].Q
     AND NOT _stStatus.bSafetyPermissionMissing;
 ]]></ST>
@@ -314,7 +314,7 @@ abMoveCommand[eVALVE_ON] := artrigMoveCommand[eVALVE_ON].Q
     </Method>
     <Method Name="mMonitor_EndSwitch" Id="{8fe57045-97da-0040-2f5f-3113c2e4a645}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: End Switch
-METHOD PRIVATE mMonitor_EndSwitch : E_PneumaticAxisErrors
+METHOD PRIVATE mMonitor_EndSwitch: E_PneumaticAxisErrors
 VAR CONSTANT
     aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
         E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff,
@@ -336,7 +336,7 @@ eError := mMonitor_EndSwitch;
     </Method>
     <Method Name="mMonitor_InterlockMove" Id="{5b74e8a2-afbb-097b-0a74-e3f8f8f7ad98}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: Interlock
-METHOD PRIVATE mMonitor_InterlockMove : E_PneumaticAxisErrors
+METHOD PRIVATE mMonitor_InterlockMove: E_PneumaticAxisErrors
 VAR CONSTANT
     aERROR: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
         E_PneumaticAxisErrors.eValveOffInterlocked,
@@ -356,7 +356,7 @@ eError := mMonitor_InterlockMove;
     </Method>
     <Method Name="mMonitor_Move" Id="{759d2f8d-8e84-0713-216f-f31787094c5b}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: Move Timeout & No Movement
-METHOD PRIVATE mMonitor_Move : E_PneumaticAxisErrors
+METHOD PRIVATE mMonitor_Move: E_PneumaticAxisErrors
 VAR CONSTANT
     aERROR_TIMEOUT: ARRAY [eVALVE_OFF..eVALVE_ON] OF E_PneumaticAxisErrors := [
         E_PneumaticAxisErrors.eMovingWithValveOffTimedOut,
@@ -382,7 +382,7 @@ eError := mMonitor_Move;
     </Method>
     <Method Name="mMonitor_Permit" Id="{1368e518-6934-07f8-2e25-d6a5ffa1a744}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: PSS Permit
-METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
+METHOD PRIVATE mMonitor_Permit: E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPSSPermitMissing
@@ -397,7 +397,7 @@ eError := mMonitor_Permit;
     </Method>
     <Method Name="mMonitor_Pressure" Id="{6586e859-2ea5-03c2-26ee-d35e5e7cbace}" FolderPath="Monitor Methods\">
       <Declaration><![CDATA[//Monitor: Pressure Low & High (Auto-Resets)
-METHOD PRIVATE mMonitor_Pressure : E_PneumaticAxisErrors
+METHOD PRIVATE mMonitor_Pressure: E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF _iPressureGroup.bPressureLow THEN
@@ -530,10 +530,10 @@ METHOD PRIVATE mStatusInfo
             E_PneumaticAxisState.eInterlocked:
                 _stStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
         END_CASE
-        
+
         IF _stStatus.bSafetyPermissionMissing THEN
             _stStatus.sStatus := 'WARNING: SAFETY PERMISSION MISSING';
-		END_IF
+        END_IF
     ELSE
         _stStatus.sStatus := 'UNKNOWN STATE';
 END_CASE
@@ -563,8 +563,8 @@ mMonitor_Permit();
 eNextState := eState;
 CASE eState OF
     E_PneumaticAxisState.eDeenergized:
-        IF abMoveCommand[eVALVE_OFF] 
-            OR abMoveCommand[eVALVE_ON] 
+        IF abMoveCommand[eVALVE_OFF]
+            OR abMoveCommand[eVALVE_ON]
         THEN
             eNextState := E_PneumaticAxisState.eMoving;
         ELSIF abEndSwitch[eVALVE_OFF] THEN
@@ -572,7 +572,7 @@ CASE eState OF
             eNextState := E_PneumaticAxisState.eInPosition;
         ELSIF abEndSwitch[eVALVE_ON] THEN
             eActValveState := eVALVE_ON;
-            eNextState := E_PneumaticAxisState.eInPosition;           
+            eNextState := E_PneumaticAxisState.eInPosition;
         END_IF
 
     E_PneumaticAxisState.eInPosition:
@@ -611,7 +611,7 @@ EndOfCycle();
       </Implementation>
     </Method>
     <Property Name="stPneumaticAxis" Id="{32b385f3-2648-4c7a-b2e7-2316433a21ee}" FolderPath="Properties\">
-      <Declaration><![CDATA[PROPERTY PUBLIC stPneumaticAxis : REFERENCE TO ST_PneumaticAxisStruct
+      <Declaration><![CDATA[PROPERTY PUBLIC stPneumaticAxis: REFERENCE TO ST_PneumaticAxisStruct
 ]]></Declaration>
       <Get Name="Get" Id="{adb8011b-822d-0d9a-11a8-4f5c0c464fc5}">
         <Declaration><![CDATA[VAR
