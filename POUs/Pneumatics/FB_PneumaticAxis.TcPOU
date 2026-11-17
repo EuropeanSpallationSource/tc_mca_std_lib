@@ -570,6 +570,9 @@ CASE eState OF
         ELSIF abEndSwitch[eVALVE_OFF] THEN
             eActValveState := eVALVE_OFF;
             eNextState := E_PneumaticAxisState.eInPosition;
+        ELSIF abEndSwitch[eVALVE_ON] THEN
+            eActValveState := eVALVE_ON;
+            eNextState := E_PneumaticAxisState.eInPosition;           
         END_IF
 
     E_PneumaticAxisState.eInPosition:
