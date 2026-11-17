@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ExpansionModuleLeft" Id="{815867ba-4380-0ac7-0732-3a61b4528cb9}">
+    <Declaration><![CDATA[TYPE ST_ExpansionModuleLeft :
+STRUCT
+    anInput: ARRAY[1..4] OF ST_8Bit;
+    anOutput: ARRAY[1..4] OF ST_8Bit;
+    anLEDState: ARRAY[1..3] OF BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

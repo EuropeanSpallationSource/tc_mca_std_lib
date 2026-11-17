@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_TechnosoftErrorActive" Id="{eef2b46f-5f11-055e-1c1e-37029a9985df}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_TechnosoftErrorActive : BOOL
+VAR_INPUT
+     stError: ST_TechnosoftMotionError;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_TechnosoftErrorActive :=
+    stError.bEtherCATCommunicationError
+    OR stError.bShortCircuit
+    OR stError.bInvalidSetupData
+    OR stError.bControlError
+    OR stError.bCommunicationError
+    OR stError.bFeedbackError
+    OR stError.bPositiveLimitSwitchActive
+    OR stError.bNegativeLimitSwitchActive
+    OR stError.bOverCurrent
+    OR stError.bI2TProtection
+    OR stError.bMotorOverTemperature
+    OR stError.bDriveOverTemperature
+    OR stError.bOverVoltage
+    OR stError.bUnderVoltage
+    OR stError.bCommandError;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
