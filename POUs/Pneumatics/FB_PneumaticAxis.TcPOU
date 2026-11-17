@@ -18,6 +18,7 @@ VAR
     atonMoving: ARRAY [eVALVE_OFF..eVALVE_ON] OF TON;
     afElapsedTime: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
     afElapsedTimeTotal: ARRAY [eVALVE_OFF..eVALVE_ON] OF REAL;
+    abMoveCommand: ARRAY [eVALVE_OFF..eVALVE_ON] OF BOOL;
 
     bPSSPermitNeeded: BOOL;
     bPSSPermitMissing: BOOL;
@@ -212,11 +213,11 @@ METHOD PRIVATE mControl_SetValveState
 END_IF
 
 //Update set valve state
-IF artrigMoveCommand[eVALVE_OFF].Q
+IF abMoveCommand[eVALVE_OFF]
     OR bPSSPermitMissing
 THEN
     eSetValveState := eVALVE_OFF;
-ELSIF artrigMoveCommand[eVALVE_ON].Q
+ELSIF abMoveCommand[eVALVE_ON]
     AND (eState <> E_PneumaticAxisState.eMoving)
 THEN
     eSetValveState := eVALVE_ON;
@@ -297,17 +298,27 @@ _stPneumaticAxis.stPneumaticAxisStatus.bPSSPermitOK := NOT bPSSPermitNeeded
 bPSSPermitMissing := bPSSPermitNeeded
     AND (NOT _stPneumaticAxis.stPneumaticAxisInputs.bPSSPermitOK);
 
+//Safety
+_stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing := NOT _stConfig.bSafetyShutter
+    AND NOT _stPneumaticAxis.stPneumaticAxisInputs.bSafetyPermission;
+
 //Interlock
 bInterlockRequest := (_stPneumaticAxis.stPneumaticAxisControl.bInterlockCyclic
     OR _stPneumaticAxis.stPneumaticAxisControl.bInterlockLatched)
     AND NOT _stConfig.bSafetyShutter;
 
-//Move Request
+//Move Command
 artrigMoveCommand[eVALVE_OFF](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOffManual
     OR _stPneumaticAxis.stPneumaticAxisControl.bValveOff);
+    
+abMoveCommand[eVALVE_OFF] := artrigMoveCommand[eVALVE_OFF].Q
+    AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing;
 
 artrigMoveCommand[eVALVE_ON](CLK := _stPneumaticAxis.stPneumaticAxisControl.bValveOnManual
     OR _stPneumaticAxis.stPneumaticAxisControl.bValveOn);
+    
+abMoveCommand[eVALVE_ON] := artrigMoveCommand[eVALVE_ON].Q
+    AND NOT _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing;
 ]]></ST>
       </Implementation>
     </Method>
@@ -343,7 +354,7 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF artrigMoveCommand[eSetValveState].Q
+        <ST><![CDATA[IF abMoveCommand[eSetValveState]
     AND (eSetValveState <> eActValveState)
 THEN
     mMonitor_InterlockMove := aERROR[eActValveState];
@@ -385,7 +396,7 @@ METHOD PRIVATE mMonitor_Permit : E_PneumaticAxisErrors
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF bPSSPermitMissing
-    AND artrigMoveCommand[eVALVE_ON].Q
+    AND abMoveCommand[eVALVE_ON]
 THEN
     mMonitor_Permit := E_PneumaticAxisErrors.eNoPSSPermit;
 END_IF
@@ -529,7 +540,10 @@ METHOD PRIVATE mStatusInfo
             E_PneumaticAxisState.eInterlocked:
                 _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: INTERLOCK ON, CAN NOT MOVE';
         END_CASE
-
+        
+        IF _stPneumaticAxis.stPneumaticAxisStatus.bSafetyPermissionMissing THEN
+            _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'WARNING: SAFETY PERMISSION MISSING';
+		END_IF
     ELSE
         _stPneumaticAxis.stPneumaticAxisStatus.sStatus := 'UNKNOWN STATE';
 END_CASE
@@ -559,8 +573,8 @@ mMonitor_Permit();
 eNextState := eState;
 CASE eState OF
     E_PneumaticAxisState.eDeenergized:
-        IF artrigMoveCommand[eVALVE_OFF].Q
-            OR artrigMoveCommand[eVALVE_ON].Q
+        IF abMoveCommand[eVALVE_OFF] 
+            OR abMoveCommand[eVALVE_ON] 
         THEN
             eNextState := E_PneumaticAxisState.eMoving;
         ELSIF apEndSwitch[eVALVE_OFF]^ THEN
