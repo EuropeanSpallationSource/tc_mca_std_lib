@@ -150,43 +150,43 @@ atonMoving[eValve](
       <Declaration><![CDATA[//Controls error reset
 METHOD PRIVATE mControl_Reset
 VAR
-    bReset: BOOL := FALSE;
+    bAutoReset: BOOL := FALSE;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
-
+        <ST><![CDATA[//Auto Reset
 tonErrorAutoReset.IN := FALSE;
-
 CASE eError OF
     E_PneumaticAxisErrors.eAirPressureErrorLow:
         tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureLow;
-        bReset := tonErrorAutoReset.Q;
+        bAutoReset := tonErrorAutoReset.Q;
 
     E_PneumaticAxisErrors.eAirPressureErrorHigh:
         tonErrorAutoReset.IN := NOT _iPressureGroup.bPressureHigh;
-        bReset := tonErrorAutoReset.Q;
+        bAutoReset := tonErrorAutoReset.Q;
 
     E_PneumaticAxisErrors.eNoPSSPermit:
-        bReset := NOT bPSSPermitMissing;
+        bAutoReset := NOT bPSSPermitMissing;
 
     E_PneumaticAxisErrors.eNoSignalFromEndSwitchValveOff:
-        bReset := abEndSwitch[eVALVE_OFF]
+        bAutoReset := abEndSwitch[eVALVE_OFF]
             AND (_stConfig.ePneumaticAxisMode = E_PneumaticAxisMode.eMonostable);
 
     E_PneumaticAxisErrors.eEndSwitchSignalConflict:
-        bReset := NOT (abEndSwitch[eVALVE_OFF]
+        bAutoReset := NOT (abEndSwitch[eVALVE_OFF] 
             AND abEndSwitch[eVALVE_ON]);
 
     E_PneumaticAxisErrors.eValveOffInterlocked,
     E_PneumaticAxisErrors.eValveOnInterlocked:
-        bReset := NOT bInterlockRequest;
+        bAutoReset := NOT bInterlockRequest;
 
 END_CASE
-
 tonErrorAutoReset();
 
-IF rtrigReset.Q OR bReset THEN
+//Manual Reset
+rtrigReset(CLK := _stPneumaticAxis.stPneumaticAxisControl.bReset);
+
+IF rtrigReset.Q OR bAutoReset THEN
     _eError := E_PneumaticAxisErrors.eNoError;
 END_IF
 ]]></ST>
