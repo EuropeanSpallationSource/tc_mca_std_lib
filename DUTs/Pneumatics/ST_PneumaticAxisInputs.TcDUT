@@ -6,6 +6,7 @@ STRUCT
     bEndSwitchValveOn AT %I*: BOOL; //End Switch valve on input
     bEndSwitchValveOff AT %I*: BOOL; //End Switch valve off input
     bPSSPermitOK: BOOL; //PSS Permit Ok input
+    bSafetyPermission: BOOL; //Safety Permission input
 END_STRUCT
 END_TYPE
 ]]></Declaration>
