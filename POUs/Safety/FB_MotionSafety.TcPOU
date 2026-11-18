@@ -100,7 +100,7 @@ IF NOT bEnable OR bWcState THEN
     ); //Reset heartbeat generation and watchdog memory
 
     stSafety.stOut.stMCCStatus.bErrorAcknowledge := FALSE; //Clear fault-acknowledge command
-    mHandleMotionPermission(); //Process falling edge of motion permission
+    mGeneralMotionPermission();
     RETURN;
 END_IF;
 
@@ -110,7 +110,7 @@ mMCCStatus(stSafetyData := stSafety); //Heartbeat generation, MCC watchdog check
 //mTechnosoftStatus(stSafetyData := stSafety);
 
 mUpdateFaultFeedback(stSafetyData := stSafety); //Fault/Err Ack. handshake
-mHandleMotionPermission();
+mGeneralMotionPermission();
 ]]></ST>
     </Implementation>
     <Property Name="EStopOK" Id="{091ff546-d8eb-0d5e-357d-a3cab02108c2}">
@@ -203,20 +203,45 @@ mCheckMCCHeartbeat := NOT bWatchdogFault;
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mHandleMotionPermission" Id="{702967ef-f83e-0cc8-2e69-b0cc14a3fdac}">
-      <Declaration><![CDATA[METHOD mHandleMotionPermission
+    <Method Name="mGeneralMotionPermission" Id="{8f13f9d3-ef1f-059d-2fc4-3b84e90fdf14}">
+      <Declaration><![CDATA[METHOD mGeneralMotionPermission
 VAR
     nAxis: UINT;
+    nPneumaticAxis: UINT;
+    nGroup: UINT;
+    nIndex: UINT;
+    nAxisID: UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[ftrigAxisEnableAllowed(CLK := bMotionEnableAllowed); //Detect falling edge of motion permission
+        <ST><![CDATA[//Apply global permission to all motor axes
+FOR nAxis := 1 TO GVL_APP.nAXIS_NUM DO
+    GVL.astAxes[nAxis].stInputs.bSafetyPermission := bMotionEnableAllowed;
+END_FOR
 
-IF ftrigAxisEnableAllowed.Q THEN
-    FOR nAxis := 1 TO GVL_APP.nAXIS_NUM DO
-        astAxes[nAxis].stControl.bEnable := FALSE; //Disable each axis once
-    END_FOR;
-END_IF;
+//Apply global permission to all pneumatic axes
+FOR nPneumaticAxis := 1 TO GVL_APP.nPNEUMATIC_AXIS_NUM DO
+    GVL.astPneumaticAxes[nPneumaticAxis].stPneumaticAxisInputs.bSafetyPermission := bMotionEnableAllowed;
+END_FOR
+
+//Apply additional group restrictions (depends on local motion permission)
+FOR nGroup := 1 TO GVL_APP.nNUM_OF_SAFETY_OUTPUT_GROUPS DO
+    FOR nIndex := 1 TO Motion_Safety.astSafetyOutputGroups[nGroup].nMotorAxisCount DO
+        nAxisID := Motion_Safety.astSafetyOutputGroups[nGroup].anMotorAxisID[nIndex];
+
+        GVL.astAxes[nAxisID].stInputs.bSafetyPermission :=
+            GVL.astAxes[nAxisID].stInputs.bSafetyPermission
+            AND Motion_Safety.astSafetyOutputGroups[nGroup].bEnableSO;
+    END_FOR
+
+    FOR nIndex := 1 TO Motion_Safety.astSafetyOutputGroups[nGroup].nPneumaticAxisCount DO
+        nAxisID := Motion_Safety.astSafetyOutputGroups[nGroup].anPneumaticAxisID[nIndex];
+
+        GVL.astPneumaticAxes[nAxisID].stPneumaticAxisInputs.bSafetyPermission :=
+            GVL.astPneumaticAxes[nAxisID].stPneumaticAxisInputs.bSafetyPermission
+            AND Motion_Safety.astSafetyOutputGroups[nGroup].bEnableSO;
+    END_FOR
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
