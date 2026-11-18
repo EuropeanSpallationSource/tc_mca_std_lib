@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_CheckHighNibbleLEDState" Id="{4b91c791-0e9f-036d-15df-1e0a57ceba05}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_CheckHighNibbleLEDState : BOOL
+VAR_IN_OUT CONSTANT
+    nValue:BYTE;
+END_VAR
+VAR_INPUT
+    bFlashOn:BOOL;
+END_VAR
+VAR
+    nNibble:BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nNibble := SHR(nValue, 4);
+F_CheckHighNibbleLEDState := (nNibble <> BYTE#0) AND ((nNibble <> BYTE#3) OR bFlashOn);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
