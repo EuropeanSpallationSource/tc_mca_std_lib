@@ -803,7 +803,7 @@ END_FOR
       <Declaration><![CDATA[METHOD mControl_Power : ST_McStatus
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF mControl_TemperatureDisable(_stAxis.stConfig.bEnableTemperatureDisable) THEN
+        <ST><![CDATA[IF mControl_TemperatureDisable(_stAxis.stConfig.bEnableTemperatureDisable) OR NOT _stAxis.stInputs.bSafetyPermission THEN
     _stAxis.stControl.bEnable := FALSE;
 END_IF
 
