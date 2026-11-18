@@ -6,9 +6,8 @@ VAR_INPUT
     bEnable: BOOL;
 END_VAR
 VAR_OUTPUT
-    bDataValid: BOOL;
     bMCC_OK: BOOL;
-    bAxisEnableAllowed: BOOL;
+    bMotionEnableAllowed: BOOL;
     bMCCWatchdogFault: BOOL;
 END_VAR
 VAR_IN_OUT
@@ -21,7 +20,7 @@ VAR
 
     i: UINT := 1; //Index for loops
     ftrigAxisEnableAllowed: F_TRIG;
-    bInit: BOOL := TRUE;
+    rtrigAxisEnableAllowed: R_TRIG;
 
     //Heartbeat
     tHeartbeatElapsed: TIME;
@@ -57,6 +56,9 @@ VAR
 
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 3^Output'}
     bSafetyAcknowledgeLED AT %Q*: BOOL; //Cabinet status indicator
+
+    tonDeviceLEDFlash: TON;
+    bDeviceLEDFlashOn: BOOL;
 END_VAR
 VAR CONSTANT
     tPLC_CYCLE_TIME: TIME := T#10MS; //PLC task cycle time
@@ -80,10 +82,9 @@ END_IF
 _bReadFromSafetyController := bEnable;
 stSafety.stIn.stPNOZCommDiag.bWcState := bWcState;
 stSafety.stIn.stPNOZCommDiag.nEtherCATState := nEtherCATState;
-bDataValid := FALSE;
 
 IF NOT bEnable OR bWcState THEN
-    bAxisEnableAllowed := FALSE; //Withdraw general motion permission
+    bMotionEnableAllowed := FALSE; //Withdraw general motion permission
     _bEStopOK := FALSE; //Do not publish stale OK states
     _bSTO_OK := FALSE;
 
@@ -104,7 +105,6 @@ IF NOT bEnable OR bWcState THEN
 END_IF;
 
 mReadInputs(stSafetyIn := stSafety.stIn);
-bDataValid := TRUE;
 
 mMCCStatus(stSafetyData := stSafety); //Heartbeat generation, MCC watchdog check
 //mTechnosoftStatus(stSafetyData := stSafety);
@@ -210,7 +210,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[ftrigAxisEnableAllowed(CLK := bAxisEnableAllowed); //Detect falling edge of motion permission
+        <ST><![CDATA[ftrigAxisEnableAllowed(CLK := bMotionEnableAllowed); //Detect falling edge of motion permission
 
 IF ftrigAxisEnableAllowed.Q THEN
     FOR nAxis := 1 TO GVL_APP.nAXIS_NUM DO
@@ -248,7 +248,7 @@ ELSE
     sEtherCATState := 'UNDEFINED';
 END_CASE
 
-bAxisEnableAllowed :=
+bMotionEnableAllowed :=
     stSafetyData.stIn.stMCCStatus.bEStopOK
     AND bMCC_OK;
 ]]></ST>
@@ -264,7 +264,17 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Common cabinet status: input bytes 00..01.
+        <ST><![CDATA[//Toggle the flash bit every 500 ms
+tonDeviceLEDFlash(
+    IN := NOT tonDeviceLEDFlash.Q,
+    PT := T#500MS
+);
+
+IF tonDeviceLEDFlash.Q THEN
+    bDeviceLEDFlashOn := NOT bDeviceLEDFlashOn;
+END_IF
+
+//Common cabinet status: input bytes 00..01.
 stSafetyIn.stMCCStatus.bHeartbeat := stPNOZEtherCATIn.nMCCStatus.0;
 stSafetyIn.stMCCStatus.bAcknowledgeRequired := stPNOZEtherCATIn.nMCCStatus.1;
 stSafetyIn.stMCCStatus.bFault := stPNOZEtherCATIn.nMCCStatus.2;
@@ -300,17 +310,17 @@ stSafetyIn.stLEDState.bDiag := stPNOZEtherCATIn.nLEDState.3;
 stSafetyIn.stLEDState.bRun := stPNOZEtherCATIn.nLEDState.4;
 
 //TODO! Clean this up
-stSafetyIn.stFieldbusData.stLEDState.bPower := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[1]);
-stSafetyIn.stFieldbusData.stLEDState.bRun := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[1]);
-stSafetyIn.stFieldbusData.stLEDState.bFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anFieldbusModuleLED[2]);
+stSafetyIn.stFieldbusData.stLEDState.bPower := F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stFieldbusData.stLEDState.bRun := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stFieldbusData.stLEDState.bFault := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[2], bFlashOn := bDeviceLEDFlashOn);
 
 
-stSafetyIn.stBaseModuleData.stLEDState.bPower := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[1]);
-stSafetyIn.stBaseModuleData.stLEDState.bRun := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[1]);
-stSafetyIn.stBaseModuleData.stLEDState.bDiag := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[2]);
-stSafetyIn.stBaseModuleData.stLEDState.bFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[2]);
-stSafetyIn.stBaseModuleData.stLEDState.bInputFault := F_IsLowNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[3]);
-stSafetyIn.stBaseModuleData.stLEDState.bOutputFault := F_IsHighNibbleSet(stPNOZEtherCATDiagIn.anBaseModuleLED[3]);
+stSafetyIn.stBaseModuleData.stLEDState.bPower := F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stBaseModuleData.stLEDState.bRun := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stBaseModuleData.stLEDState.bDiag := F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[2], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stBaseModuleData.stLEDState.bFault := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[2], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stBaseModuleData.stLEDState.bInputFault := F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[3], bFlashOn := bDeviceLEDFlashOn);
+stSafetyIn.stBaseModuleData.stLEDState.bOutputFault := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anBaseModuleLED[3], bFlashOn := bDeviceLEDFlashOn);
 stSafetyIn.stBaseModuleData.anInput[1] := stPNOZEtherCATDiagIn.anBaseModuleInput[1];
 stSafetyIn.stBaseModuleData.anInput[2] := stPNOZEtherCATDiagIn.anBaseModuleInput[2];
 stSafetyIn.stBaseModuleData.anInput[3] := stPNOZEtherCATDiagIn.anBaseModuleInput[3];
@@ -319,17 +329,17 @@ stSafetyIn.stBaseModuleData.anOutput[2] := stPNOZEtherCATDiagIn.anBaseModuleOutp
 
 FOR nIndex := 1 TO GVL_APP.nNUM_OF_EXPANSION_LEFT BY 1 DO
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bPower :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bRun :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[1], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bDiag :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bFault :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[2], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bInputFault :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].stLEDState.bOutputFault :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anLEDState[3], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleLeftData[nIndex].anInput :=
         stPNOZEtherCATDiagIn.astExpansionModuleLeft[nIndex].anInput;
     stSafetyIn.astExpansionModuleLeftData[nIndex].anOutput :=
@@ -338,17 +348,17 @@ END_FOR
 
 FOR nIndex := 1 TO GVL_APP.nNUM_OF_EXPANSION_RIGHT BY 1 DO
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bPower :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bRun :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[1], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bDiag :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bFault :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[2], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bInputFault :=
-        F_IsLowNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3]);
+        F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].stLEDState.bOutputFault :=
-        F_IsHighNibbleSet(stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3]);
+        F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].anLEDState[3], bFlashOn := bDeviceLEDFlashOn);
     stSafetyIn.astExpansionModuleRightData[nIndex].anInput[1] :=
         stPNOZEtherCATDiagIn.astExpansionModuleRight[nIndex].nInput;
     stSafetyIn.astExpansionModuleRightData[nIndex].anOutput[1] :=
