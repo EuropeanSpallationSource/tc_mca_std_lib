@@ -729,8 +729,8 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="mAntiCollision" Id="{ceddaf27-2734-0a8a-1c66-3bf942e8b7e9}">
-      <Declaration><![CDATA[METHOD PRIVATE mAntiCollision
+    <Method Name="mAnticollision" Id="{ceddaf27-2734-0a8a-1c66-3bf942e8b7e9}">
+      <Declaration><![CDATA[METHOD PRIVATE mAnticollision
 VAR_IN_OUT
     stBladeNegative: ST_AxisStruct; //Axis data of the negative blade
     stBladePositive: ST_AxisStruct; //Axis data of the positive blade

@@ -823,12 +823,12 @@ END_IF
         <ST><![CDATA[(*Linking Fwd/BwdEnabled. Fwd and Bwd can e.g. be enabled by its respective limit
 switches or by both of them (this is normally only during first commissioning*)
 
-_stAxis.stStatus.bInterlockedFwd := 
-    _stAxis.stControl.bInterlockCyclicFwd 
+_stAxis.stStatus.bInterlockedFwd :=
+    _stAxis.stControl.bInterlockCyclicFwd
     OR _stAxis.stControl.bInterlockLatchedFwd;
-_stAxis.stStatus.bInterlockedBwd := 
-    _stAxis.stControl.bInterlockCyclicBwd 
-    OR stAxis.stControl.bInterlockLatchedBwd;
+_stAxis.stStatus.bInterlockedBwd :=
+    _stAxis.stControl.bInterlockCyclicBwd
+    OR _stAxis.stControl.bInterlockLatchedBwd;
 
 _stAxis.stStatus.bFwEnabled :=
     (_stAxis.stInputs.bLimitFwd
