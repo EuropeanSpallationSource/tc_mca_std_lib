@@ -2,7 +2,6 @@
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_MCCStatusOut" Id="{4ca824d4-32e3-0c0c-0c21-10b3968bc3f6}">
     <Declaration><![CDATA[//Application commands from IPC to PNOZ.
-//Encoded into wMCCStatus by mWriteOutputs.
 TYPE ST_MCCStatusOut :
 STRUCT
     bHeartbeat: BOOL; //Bit 0: PLC heartbeat signal, looped back by the PNOZ.
