@@ -758,11 +758,11 @@ IF stBladeNegative.stControl.bExecute THEN
     CASE stBladeNegative.stControl.eCommand OF
 
         E_MotionFunctions.eMoveAbsolute:
-            stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stControl.fPosition
+            stBladeNegative.stControl.bInterlockCyclicFwd S= stBladeNegative.stControl.fPosition
                 >= fPositiveBladePosWithMargin;
 
         E_MotionFunctions.eMoveRelative:
-            stBladeNegative.stControl.bInterlockFwd S= (stBladeNegative.stControl.fPosition
+            stBladeNegative.stControl.bInterlockCyclicFwd S= (stBladeNegative.stControl.fPosition
                 + stBladeNegative.stStatus.fActPosition)
                 >= fPositiveBladePosWithMargin;
 
@@ -770,7 +770,7 @@ IF stBladeNegative.stControl.bExecute THEN
 END_IF
 
 //Check if current position is outside the anticollision margin
-stBladeNegative.stControl.bInterlockFwd S= stBladeNegative.stStatus.fActPosition
+stBladeNegative.stControl.bInterlockCyclicFwd S= stBladeNegative.stStatus.fActPosition
     >= fPositiveBladePosWithMargin;
 
 //Positive Blade
@@ -782,11 +782,11 @@ IF stBladePositive.stControl.bExecute THEN
     CASE stBladePositive.stControl.eCommand OF
 
         E_MotionFunctions.eMoveAbsolute:
-            stBladePositive.stControl.bInterlockBwd S= stBladePositive.stControl.fPosition
+            stBladePositive.stControl.bInterlockCyclicBwd S= stBladePositive.stControl.fPosition
                 <= fNegativeBladePosWithMargin;
 
         E_MotionFunctions.eMoveRelative:
-            stBladePositive.stControl.bInterlockBwd S= (stBladePositive.stControl.fPosition
+            stBladePositive.stControl.bInterlockCyclicBwd S= (stBladePositive.stControl.fPosition
                 + stBladePositive.stStatus.fActPosition)
                 <= fNegativeBladePosWithMargin;
 
@@ -794,7 +794,7 @@ IF stBladePositive.stControl.bExecute THEN
 END_IF
 
 //Check if current position is outside the anticollision margin
-stBladePositive.stControl.bInterlockBwd S= stBladePositive.stStatus.fActPosition
+stBladePositive.stControl.bInterlockCyclicBwd S= stBladePositive.stStatus.fActPosition
     <= fNegativeBladePosWithMargin;
 ]]></ST>
       </Implementation>
