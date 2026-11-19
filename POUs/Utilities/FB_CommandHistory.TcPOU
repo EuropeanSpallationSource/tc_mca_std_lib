@@ -6,7 +6,7 @@ VAR_OUTPUT
     aCommandHistory: ARRAY [1..nMAX_HISTORY_ENTRY] OF ST_CommandHistoryEntry;
 END_VAR
 VAR CONSTANT
-    nMAX_HISTORY_ENTRY: USINT := 10;
+    nMAX_HISTORY_ENTRY: USINT := 50;
     stEMPTY_ENTRY: ST_CommandHistoryEntry := ();
 END_VAR
 ]]></Declaration>
