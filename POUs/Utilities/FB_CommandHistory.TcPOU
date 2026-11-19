@@ -1,0 +1,296 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_CommandHistory" Id="{39e94074-e42b-0657-2248-14d00ab28c33}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CommandHistory
+VAR_OUTPUT
+    aCommandHistory: ARRAY [1..nMAX_HISTORY_ENTRY] OF ST_CommandHistoryEntry;
+END_VAR
+VAR CONSTANT
+    nMAX_HISTORY_ENTRY: USINT := 50;
+    stEMPTY_ENTRY: ST_CommandHistoryEntry := ();
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="mAdd" Id="{814dbda4-eaf2-055a-2536-42e29c3098af}">
+      <Declaration><![CDATA[//Shifts the old entries in the history and adds the new command to the top
+METHOD mAdd
+VAR_IN_OUT CONSTANT
+    stAxisStruct: ST_AxisStruct;
+END_VAR
+VAR
+    iCount: USINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set top entry to aborted, if it has no result
+IF aCommandHistory[1].eCommand <> E_MotionFunctions.eWaitingForCommand
+    AND aCommandHistory[1].eResult = E_CommandResult.eNone
+THEN
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
+END_IF
+
+//Shift old entries
+IF nMAX_HISTORY_ENTRY > 1 THEN
+    MEMMOVE(
+        destAddr := ADR(aCommandHistory[2]),
+        srcAddr := ADR(aCommandHistory),
+        n := (nMAX_HISTORY_ENTRY - 1) * SIZEOF(ST_CommandHistoryEntry));
+END_IF
+
+//Add new entry
+aCommandHistory[1] := stEMPTY_ENTRY;
+aCommandHistory[1].dtTrigger := FILETIME64_TO_DT(F_GetSystemTime());
+aCommandHistory[1].eCommand := stAxisStruct.stControl.eCommand;
+
+//Add info
+CASE aCommandHistory[1].eCommand OF
+    E_MotionFunctions.eMoveAbsolute,
+    E_MotionFunctions.eMoveRelative,
+    E_MotionFunctions.eMoveVelocity,
+    E_MotionFunctions.eMoveModulo:
+        //Vel: 13.24
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := 'Vel: ',
+            STR2 := TO_STRING(stAxisStruct.stControl.fVelocity));
+
+        //Vel: 13.24, Acc:
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := ', Acc: ');
+
+        //Vel: 13.13, Acc: 123.33
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stControl.fAcceleration));
+
+        //Vel: 13.13, Acc: 123.33, Dec:
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := ', Dec: ');
+
+        //Vel: 13.13, Acc: 123.33, Dec: 321.11
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stControl.fDeceleration));
+
+        IF aCommandHistory[1].eCommand <> E_MotionFunctions.eMoveVelocity THEN
+            //Vel: 13.13, Acc: 123.33, Dec: 321.11, Pos:
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := ', Pos: ');
+
+            //Vel: 13.13, Acc: 123.33, Dec: 321.11, Pos: 1133.4
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := TO_STRING(stAxisStruct.stControl.fPosition));
+        END_IF
+
+    E_MotionFunctions.eGearInMultiMaster,
+    E_MotionFunctions.eGearOut:
+        aCommandHistory[1].sInfo := 'Gears: ';
+
+        FOR iCount := 1 TO 4 DO
+            //Gears: 0.15
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := TO_STRING(stAxisStruct.stConfig.astMultiMasterAxis[iCount].fRatio));
+
+            //Gears: 0.15 ->
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := ' -> ');
+
+            //Gears: 0.15 -> 21
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := TO_STRING(stAxisStruct.stConfig.astMultiMasterAxis[iCount].nIndex));
+
+            //Gears: 0.15 -> 21,
+            IF iCount <> 4 THEN
+                aCommandHistory[1].sInfo := CONCAT(
+                    STR1 := aCommandHistory[1].sInfo,
+                    STR2 := ', ');
+            END_IF
+        END_FOR
+
+    E_MotionFunctions.eHome:
+        //eHomeSeq
+        aCommandHistory[1].sInfo := TO_STRING(stAxisStruct.stConfig.eHomeSeq);
+
+        IF stAxisStruct.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming THEN
+            RETURN;
+        END_IF
+
+        //Seq
+        aCommandHistory[1].sInfo := DELETE(
+            STR := aCommandHistory[1].sInfo,
+            LEN := 5,
+            POS := 1);
+
+        IF stAxisStruct.stConfig.stHomingConfig.bAbsoluteMoveAtFinishHoming THEN
+            //Seq: AbsPos:
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := ': AbsPos: ');
+        ELSE
+            //Seq: RelPos:
+            aCommandHistory[1].sInfo := CONCAT(
+                STR1 := aCommandHistory[1].sInfo,
+                STR2 := ': RelPos: ');
+        END_IF
+
+        //Seq: RelPos: 123.12
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fHomeFinishDistance));
+
+        //Seq: RelPos: 123.12, SetPos:
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := ', SetPos: ');
+
+        //Seq: RelPos: 123.12, SetPos: 456.12
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fHomePosition));
+
+    E_MotionFunctions.eWriteParameter:
+        //eAxisParameter:
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := TO_STRING(stAxisStruct.stConfig.eAxisParameters),
+            STR2 := ': ');
+
+        //eAxisParameter: 11.2
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fWriteAxisParameter));
+
+    E_MotionFunctions.eReadParameter:
+        //eAxisParameter
+        aCommandHistory[1].sInfo := TO_STRING(stAxisStruct.stConfig.eAxisParameters);
+
+    E_MotionFunctions.eWriteCoEParameters:
+        //eCoEParameters:
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := TO_STRING(stAxisStruct.stConfig.stCoEParameters.eCoEParameters),
+            STR2 := ': ');
+
+        //eCoEParameters: 213
+        aCommandHistory[1].sInfo := CONCAT(
+            STR1 := aCommandHistory[1].sInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.stCoEParameters.aParWrite[1]));
+
+    E_MotionFunctions.eReadCoEParameters:
+        //eCoEParameters
+        aCommandHistory[1].sInfo := TO_STRING(stAxisStruct.stConfig.stCoEParameters.eCoEParameters);
+
+    ELSE
+        ; //Empty info
+
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetHalted" Id="{1f3a1779-2f80-0b97-1b8f-3aa2dcc923d9}">
+      <Declaration><![CDATA[//Sets the result of the top motion command to halted
+METHOD mSetHalted
+VAR_IN_OUT CONSTANT
+    bExecute: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
+    RETURN;
+END_IF
+
+//Set result for motion commands only
+CASE aCommandHistory[1].eCommand OF
+    E_MotionFunctions.eMoveAbsolute,
+    E_MotionFunctions.eMoveRelative,
+    E_MotionFunctions.eMoveVelocity,
+    E_MotionFunctions.eMoveModulo,
+    E_MotionFunctions.eHome:
+        IF bExecute THEN
+            aCommandHistory[1].eResult := E_CommandResult.eHalted;
+            aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+        END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetRelease" Id="{340a6c28-35e6-0fbc-3027-e0dab46adcda}">
+      <Declaration><![CDATA[//Sets the release time of the top entry
+METHOD mSetRelease
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[aCommandHistory[1].dtRelease := FILETIME64_TO_DT(F_GetSystemTime());
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetResultOfCommand" Id="{c37cdde3-a4ed-0365-3874-96cbe0e75c19}">
+      <Declaration><![CDATA[//Sets the command result and finish time, if command matches top entry
+METHOD mSetResultOfCommand
+VAR_INPUT
+    eCommand: E_MotionFunctions;
+END_VAR
+VAR_IN_OUT CONSTANT
+    stStatus: ST_McStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command or mismatching commands
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone
+    OR aCommandHistory[1].eCommand <> eCommand
+THEN
+    RETURN;
+END_IF
+
+IF stStatus.Done THEN
+    aCommandHistory[1].eResult := E_CommandResult.eDone;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.CommandAborted THEN
+    aCommandHistory[1].eResult := E_CommandResult.eAborted;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+ELSIF stStatus.Error THEN
+    aCommandHistory[1].eResult := E_CommandResult.eError;
+    aCommandHistory[1].nErrorID := stStatus.ErrorID;
+    aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mSetStopped" Id="{3f61dcd9-0b60-03e6-3923-c1c6c4c79e3e}">
+      <Declaration><![CDATA[//Sets the result of the top motion command to stopped
+METHOD mSetStopped
+VAR_IN_OUT CONSTANT
+    bExecute: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check result already set for last command
+IF aCommandHistory[1].eResult <> E_CommandResult.eNone THEN
+    RETURN;
+END_IF
+
+//Set result for motion commands only
+CASE aCommandHistory[1].eCommand OF
+    E_MotionFunctions.eMoveAbsolute,
+    E_MotionFunctions.eMoveRelative,
+    E_MotionFunctions.eMoveVelocity,
+    E_MotionFunctions.eMoveModulo,
+    E_MotionFunctions.eHome:
+        IF bExecute THEN
+            aCommandHistory[1].eResult := E_CommandResult.eStopped;
+            aCommandHistory[1].dtFinish := FILETIME64_TO_DT(F_GetSystemTime());
+        END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
