@@ -410,9 +410,10 @@ CASE eState OF
                         _stAxis.stControl.bEnable := TRUE;
                     END_IF
 
-                    fbCommandHistory.mAdd(_stAxis.stControl);
                     eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
+
+            fbCommandHistory.mAdd(_stAxis);
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
