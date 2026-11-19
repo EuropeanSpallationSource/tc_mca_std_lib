@@ -52,8 +52,9 @@ VAR CONSTANT
     tINIT_DELAY: TIME := T#3S;
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
-
-    nDIAGNOSTIC_ALARM_OFFSET: UINT := 4; //Diagnostic alarms to be padded after the common entries
+	
+	//WIP: Diagnostic elements are padded to the alarm-list based on the E_DiagnosticElement
+    nDIAGNOSTIC_ALARM_OFFSET: UINT := 5; //Diagnostic alarms to be padded after the common entries
     nDIAGNOSTIC_ERROR_BASE: UINT := 800; //Diagnostic element 1 receives error ID 801.
     nDIAGNOSTIC_SAFETY_ALARMS: UINT := nDIAGNOSTIC_ALARM_OFFSET + TO_UINT(E_DiagnosticElements.eCount) - 1;
 END_VAR
@@ -61,7 +62,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[tonInitDelay();
 IF NOT tonInitDelay.Q THEN
-    mInit();
+//    mInit(); WIP
     RETURN;
 END_IF
 
@@ -320,16 +321,17 @@ mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.
 mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stIn.stMCCStatus.bFault);
 mSetReset(stAlarmList := aAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
 mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stIn.stMCCStatus.bEStopOK);
+mSetReset(stAlarmList := aAlarmList[5], bOk := NOT stSafety.stIn.astDiagnosticElement[E_DiagnosticElements.eOPEnable].bSafe);
 
-//Diagnostic alarms.
-FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
-    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
+//Diagnostic alarms. WIP
+//FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
+//    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
 
-    mSetReset(
-        stAlarmList := aAlarmList[nAlarmIndex],
-        bOk := stSafety.stIn.astDiagnosticElement[nIndex].bActive
-    );
-END_FOR
+//    mSetReset(
+//        stAlarmList := aAlarmList[nAlarmIndex],
+//        bOk := NOT stSafety.stIn.astDiagnosticElement[nIndex].bSafe
+//    );
+//END_FOR
 ]]></ST>
       </Implementation>
     </Method>
