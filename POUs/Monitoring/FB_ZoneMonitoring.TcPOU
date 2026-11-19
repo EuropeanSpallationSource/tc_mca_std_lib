@@ -52,8 +52,8 @@ VAR CONSTANT
     tINIT_DELAY: TIME := T#3S;
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
-	
-	//WIP: Diagnostic elements are padded to the alarm-list based on the E_DiagnosticElement
+
+    //WIP: Diagnostic elements are padded to the alarm-list based on the E_DiagnosticElement
     nDIAGNOSTIC_ALARM_OFFSET: UINT := 5; //Diagnostic alarms to be padded after the common entries
     nDIAGNOSTIC_ERROR_BASE: UINT := 800; //Diagnostic element 1 receives error ID 801.
     nDIAGNOSTIC_SAFETY_ALARMS: UINT := nDIAGNOSTIC_ALARM_OFFSET + TO_UINT(E_DiagnosticElements.eCount) - 1;
