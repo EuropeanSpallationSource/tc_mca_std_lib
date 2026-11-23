@@ -18,7 +18,7 @@ VAR
     _bEStopReleased: BOOL;
     _bEStopLED: BOOL;
 
-    aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
+    astAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
 (*[1]*)(nErrorID := 106, sErrorMsg := 'EtherCAT PNOZ is not ok', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
 (*[2]*)(nErrorID := 107, sErrorMsg := 'Zone fault', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
 (*[3]*)(nErrorID := 108, sErrorMsg := 'Watchdog triggered (missing heartbeat), safety zone down', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
@@ -53,8 +53,8 @@ VAR CONSTANT
     tNEW_MESSAGE_TIMEOUT: TIME := T#300S;
     nMAX_ALARMS: UINT := 50;
 
-    //WIP: Diagnostic elements are padded to the alarm-list based on the E_DiagnosticElement
-    nDIAGNOSTIC_ALARM_OFFSET: UINT := 5; //Diagnostic alarms to be padded after the common entries
+    //Diagnostic elements are padded to the alarm-list based on the E_DiagnosticElement
+    nDIAGNOSTIC_ALARM_OFFSET: UINT := 4; //Diagnostic alarms to be padded after the common entries
     nDIAGNOSTIC_ERROR_BASE: UINT := 800; //Diagnostic element 1 receives error ID 801.
     nDIAGNOSTIC_SAFETY_ALARMS: UINT := nDIAGNOSTIC_ALARM_OFFSET + TO_UINT(E_DiagnosticElements.eCount) - 1;
 END_VAR
@@ -62,7 +62,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[tonInitDelay();
 IF NOT tonInitDelay.Q THEN
-//    mInit(); WIP
+    mInit(stSafety.stOut);
     RETURN;
 END_IF
 
@@ -108,7 +108,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Update timer and trigger for new log message
 aStartErrorMsgTimer[i] :=
-    aAlarmList[i].bAlarmActive
+    astAlarmList[i].bAlarmActive
     AND NOT aFbErrorMessageTimer[i].Q;
 
 aFbErrorMessageTimer[i](
@@ -117,22 +117,22 @@ aFbErrorMessageTimer[i](
 
 aFbErrorTrig[i](CLK := aStartErrorMsgTimer[i]);
 
-IF NOT aAlarmList[i].bAlarmActive THEN
+IF NOT astAlarmList[i].bAlarmActive THEN
     RETURN;
 END_IF
 
 nAlarmCnt := nAlarmCnt + 1;
-aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
-aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
+aTempErrorID[nAlarmCnt] := astAlarmList[i].nErrorID;
+aTempErrorMsg[nAlarmCnt] := CONCAT(astAlarmList[i].sErrorMsg, aExtraMessage[i]);
 
 mPrintErrorMessage(
     bPrintLog := aFbErrorTrig[i].Q OR bUpdatedExtraMessage,
     sErrorMessage := aTempErrorMsg[nAlarmCnt],
-    nErrorID := aAlarmList[i].nErrorID,
+    nErrorID := astAlarmList[i].nErrorID,
     nIndex := i);
 
 //Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.'
-CASE aAlarmList[i].nErrorID OF
+CASE astAlarmList[i].nErrorID OF
     106:
         nAlarmBitNumber.0 := TRUE; //EtherCAT PNOZ not OK
     107:
@@ -153,17 +153,23 @@ VAR
     nIndex: UINT; //Diagnostic element index.
     nAlarmIndex: UINT; //Corresponding alarm list index.
 END_VAR
+VAR_INPUT
+    stOut: ST_SafetyOut;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
-    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
+        <ST><![CDATA[nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET;
 
-    aAlarmList[nAlarmIndex].nErrorID := nDIAGNOSTIC_ERROR_BASE + nIndex;
-    aAlarmList[nAlarmIndex].sErrorMsg :=
-        CONCAT(CONCAT('Safety Function ', UINT_TO_STRING(nIndex)), ' is faulted, not safe');
-    aAlarmList[nAlarmIndex].eStatusLED := E_MonitorLed.eFast;
-    aAlarmList[nAlarmIndex].eErrorLED := E_MonitorLed.eUndefined;
-    aAlarmList[nAlarmIndex].bLedAutoReset := TRUE;
+FOR nIndex := 1 TO (TO_UINT(E_DiagnosticElements.eCount) - 1) DO
+    IF stOut.astDiagnosticElement[nIndex].sAlarmMsg <> 'Not defined' THEN
+        nAlarmIndex := nAlarmIndex + 1;
+
+        astAlarmList[nAlarmIndex].nErrorID := nDIAGNOSTIC_ERROR_BASE + nIndex;
+        astAlarmList[nAlarmIndex].sErrorMsg := stOut.astDiagnosticElement[nIndex].sAlarmMsg;
+        astAlarmList[nAlarmIndex].eStatusLED := E_MonitorLed.eFast;
+        astAlarmList[nAlarmIndex].eErrorLED := E_MonitorLed.eUndefined;
+        astAlarmList[nAlarmIndex].bLedAutoReset := TRUE;
+    END_IF
 END_FOR
 ]]></ST>
       </Implementation>
@@ -172,7 +178,7 @@ END_FOR
       <Declaration><![CDATA[METHOD mLink
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF iSafetyProvider <> 0 AND_THEN iSafetyProvider.ReadFromSafetyController THEN
+        <ST><![CDATA[IF iSafetyProvider <> 0 THEN
     _EStopReleased := iSafetyProvider.EStopOK;
     _STOReleased := iSafetyProvider.STO_OK;
 END_IF;
@@ -199,7 +205,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[fbSafetyAcknowledgeButtonTrig(CLK:=_bSafetyAcknowledgeButton);
-mSetResetAlarmsLeds();
+mSetResetAlarmsLeds(stSafety.stOut);
 
 //Reset before loop
 nAlarmCnt := 0;
@@ -214,15 +220,15 @@ FOR i := 1 TO nMAX_ALARMS DO
 
     //Set the alarm LEDs according to first occurrence
     IF NOT bLedActive
-        AND aAlarmList[i].bLedActive THEN
+        AND astAlarmList[i].bLedActive THEN
         bLedActive := TRUE;
-        stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
-        stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
+        stMonitorLed.eErrorLED := astAlarmList[i].eErrorLED;
+        stMonitorLed.eStatusLED := astAlarmList[i].eStatusLED;
     END_IF
 
     //If any error exists requiring an acknowledge, highlight Acknowledge LED.
-    IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
-        stMonitorLed.eErrorAcknowledgeLED := aAlarmList[i].eErrorAcknowledgeLED;
+    IF astAlarmList[i].bLedActive AND NOT astAlarmList[i].bLedAutoReset THEN
+        stMonitorLed.eErrorAcknowledgeLED := astAlarmList[i].eErrorAcknowledgeLED;
     END_IF
 END_FOR
 
@@ -245,7 +251,7 @@ _bSafetyAcknowledgeLED :=
     OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
     OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
 
-_bEStopLED := aAlarmList[4].bLedActive;
+_bEStopLED := astAlarmList[4].bLedActive;
 
 ]]></ST>
       </Implementation>
@@ -311,27 +317,33 @@ END_IF
     <Method Name="mSetResetAlarmsLeds" Id="{0a8103d7-6a7f-0338-02c3-c707c6c6f187}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR
-     nIndex: UINT;
-     nAlarmIndex: UINT;
+    nIndex: UINT; //Diagnostic element index.
+    nAlarmIndex: UINT; //Corresponding alarm list index.
+END_VAR
+VAR_INPUT
+    stOut: ST_SafetyOut;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Communication and cabinet alarms.
-mSetReset(stAlarmList := aAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.bWcState);
-mSetReset(stAlarmList := aAlarmList[2], bOk := NOT stSafety.stIn.stMCCStatus.bFault);
-mSetReset(stAlarmList := aAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
-mSetReset(stAlarmList := aAlarmList[4], bOk := stSafety.stIn.stMCCStatus.bEStopOK);
-mSetReset(stAlarmList := aAlarmList[5], bOk := NOT stSafety.stIn.astDiagnosticElement[E_DiagnosticElements.eOPEnable].bSafe);
+        <ST><![CDATA[mSetReset(stAlarmList := astAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.bWcState);
+mSetReset(stAlarmList := astAlarmList[2], bOk := NOT stSafety.stIn.stMCCStatus.bFault);
+mSetReset(stAlarmList := astAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
+mSetReset(stAlarmList := astAlarmList[4], bOk := stSafety.stIn.stMCCStatus.bEStopOK);
 
-//Diagnostic alarms. WIP
-//FOR nIndex := 1 TO nDIAGNOSTIC_SAFETY_ALARMS DO
-//    nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET + nIndex;
+//Diagnostic alarms
+nAlarmIndex := nDIAGNOSTIC_ALARM_OFFSET;
 
-//    mSetReset(
-//        stAlarmList := aAlarmList[nAlarmIndex],
-//        bOk := NOT stSafety.stIn.astDiagnosticElement[nIndex].bSafe
-//    );
-//END_FOR
+FOR nIndex := 1 TO (TO_UINT(E_DiagnosticElements.eCount) - 1) DO
+    IF stSafety.stOut.astDiagnosticElement[nIndex].sAlarmMsg <> 'Not defined' THEN
+        nAlarmIndex := nAlarmIndex + 1;
+
+        mSetReset(
+            stAlarmList := astAlarmList[nAlarmIndex],
+            bOk := NOT stSafety.stIn.astDiagnosticElement[nIndex].bSafe
+        );
+    END_IF
+END_FOR
+
 ]]></ST>
       </Implementation>
     </Method>

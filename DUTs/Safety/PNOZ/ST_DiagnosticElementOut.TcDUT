@@ -4,6 +4,7 @@
     <Declaration><![CDATA[TYPE ST_DiagnosticElementOut :
 STRUCT
     sName: STRING(20) := 'Unnamed';
+    sAlarmMsg: STRING(20) := 'Not defined';
     bRun: BOOL;
     bReady: BOOL;
     bSafe: BOOL;
