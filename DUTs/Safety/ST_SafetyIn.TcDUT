@@ -6,7 +6,7 @@ TYPE ST_SafetyIn :
 STRUCT
     stMCCStatus: ST_MCCStatusIn; //Decoded common cabinet status.
     stMCCAppSpecific: ST_MCCAppSpecificIn; //Decoded application specific cabinet status.
-    astContactorGroups: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_OUTPUT_GROUPS] OF ST_ContactorGroup; // Decoded contactor group state
+    astContactorGroups: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_OUTPUT_GROUPS] OF ST_ContactorGroup; //Decoded contactor group state
     stLEDState: ST_LEDState;
     stFieldbusData: ST_PNOZModuleData;
     stBaseModuleData: ST_PNOZModuleData;

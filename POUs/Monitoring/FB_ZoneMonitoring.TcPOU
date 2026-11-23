@@ -325,7 +325,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mSetReset(stAlarmList := astAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.bWcState);
+        <ST><![CDATA[mSetReset(stAlarmList := astAlarmList[1], bOk := NOT stSafety.stIn.stPNOZCommDiag.bWcStateInvalid);
 mSetReset(stAlarmList := astAlarmList[2], bOk := NOT stSafety.stIn.stMCCStatus.bFault);
 mSetReset(stAlarmList := astAlarmList[3], bOk := NOT Motion_Safety.bMCCWatchdogFault);
 mSetReset(stAlarmList := astAlarmList[4], bOk := stSafety.stIn.stMCCStatus.bEStopOK);

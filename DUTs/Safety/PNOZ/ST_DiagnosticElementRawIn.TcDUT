@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_DiagnosticElementRawIn" Id="{73f839cd-bda8-090a-1863-d7a20736ae01}">
-    <Declaration><![CDATA[// Raw diagnostic bytes; preserves your existing high-byte-first order.
+    <Declaration><![CDATA[//Raw diagnostic bytes; preserves existing high-byte-first order.
 TYPE ST_DiagnosticElementRawIn :
 STRUCT
     nHigh: ST_8Bit; //Diagnostic bits 8..15: pulse-test error and inputs 1..4.

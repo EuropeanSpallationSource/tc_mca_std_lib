@@ -3,13 +3,13 @@
   <POU Name="F_CheckHighNibbleLEDState" Id="{4b91c791-0e9f-036d-15df-1e0a57ceba05}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION F_CheckHighNibbleLEDState : BOOL
 VAR_IN_OUT CONSTANT
-    nValue:BYTE;
+    nValue: BYTE;
 END_VAR
 VAR_INPUT
-    bFlashOn:BOOL;
+    bFlashOn: BOOL;
 END_VAR
 VAR
-    nNibble:BYTE;
+    nNibble: BYTE;
 END_VAR
 ]]></Declaration>
     <Implementation>

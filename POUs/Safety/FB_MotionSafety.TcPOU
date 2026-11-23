@@ -43,7 +43,7 @@ VAR
     stPNOZEtherCATOut AT %Q*: ST_PNOZEtherCATOut; //Raw EtherCAT output of RxPDO
 
     {attribute 'TcLinkTo' :=  'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^WcState^WcState'}
-    bWcState AT %I*: BOOL;
+    bWcStateInvalid AT %I*: BOOL; //Working counter state
 
     {attribute 'TcLinkTo' :=  'TIID^Device 2 (EtherCAT)^KF509 (PNOZ m ES EtherCAT)^InfoData^State'}
     nEtherCATState AT %I*: UINT; //State of EtherCAT slave
@@ -80,10 +80,10 @@ END_VAR
 END_IF
 
 _bReadFromSafetyController := bEnable;
-stSafety.stIn.stPNOZCommDiag.bWcState := bWcState;
+stSafety.stIn.stPNOZCommDiag.bWcStateInvalid := bWcStateInvalid;
 stSafety.stIn.stPNOZCommDiag.nEtherCATState := nEtherCATState;
 
-IF NOT bEnable OR bWcState THEN
+IF NOT bEnable OR bWcStateInvalid THEN
     bMotionEnableAllowed := FALSE; //Withdraw general motion permission
     _bEStopOK := FALSE; //Do not publish stale OK states
     _bSTO_OK := FALSE;

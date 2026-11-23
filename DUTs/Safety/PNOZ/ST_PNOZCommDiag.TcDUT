@@ -3,7 +3,7 @@
   <DUT Name="ST_PNOZCommDiag" Id="{5cc4dacf-5e42-0a6f-2af9-92b983426889}">
     <Declaration><![CDATA[TYPE ST_PNOZCommDiag :
 STRUCT
-    bWcState: BOOL; //0 = Valid real-time communication in the last cycle, 1 = Invalid real-time communication
+    bWcStateInvalid: BOOL; //Working counter state
     nEtherCATState: UINT; //State of EtherCAT slave
 END_STRUCT
 END_TYPE
