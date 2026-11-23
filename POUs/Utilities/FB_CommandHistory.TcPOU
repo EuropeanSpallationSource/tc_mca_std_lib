@@ -198,7 +198,7 @@ END_CASE
     <Method Name="mSetHalted" Id="{1f3a1779-2f80-0b97-1b8f-3aa2dcc923d9}">
       <Declaration><![CDATA[//Sets the result of the top motion command to halted
 METHOD mSetHalted
-VAR_IN_OUT CONSTANT
+VAR_INPUT
     bExecute: BOOL;
 END_VAR
 ]]></Declaration>
@@ -267,7 +267,7 @@ END_IF
     <Method Name="mSetStopped" Id="{3f61dcd9-0b60-03e6-3923-c1c6c4c79e3e}">
       <Declaration><![CDATA[//Sets the result of the top motion command to stopped
 METHOD mSetStopped
-VAR_IN_OUT CONSTANT
+VAR_INPUT
     bExecute: BOOL;
 END_VAR
 ]]></Declaration>
