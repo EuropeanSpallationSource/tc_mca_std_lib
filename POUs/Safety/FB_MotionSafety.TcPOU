@@ -4,6 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MotionSafety IMPLEMENTS I_SafetyProvider
 VAR_INPUT
     bEnable: BOOL;
+    astSafetyOutputGroups: ARRAY[1..GVL_APP.nNUM_OF_SAFETY_OUTPUT_GROUPS] OF ST_SafetyOutputGroups;
 END_VAR
 VAR_OUTPUT
     bMCC_OK: BOOL;
@@ -226,20 +227,20 @@ END_FOR
 
 //Apply additional group restrictions (depends on local motion permission)
 FOR nGroup := 1 TO GVL_APP.nNUM_OF_SAFETY_OUTPUT_GROUPS DO
-    FOR nIndex := 1 TO Motion_Safety.astSafetyOutputGroups[nGroup].nMotorAxisCount DO
-        nAxisID := Motion_Safety.astSafetyOutputGroups[nGroup].anMotorAxisID[nIndex];
+    FOR nIndex := 1 TO astSafetyOutputGroups[nGroup].nMotorAxisCount DO
+        nAxisID := astSafetyOutputGroups[nGroup].anMotorAxisID[nIndex];
 
         GVL.astAxes[nAxisID].stInputs.bSafetyPermission :=
             GVL.astAxes[nAxisID].stInputs.bSafetyPermission
-            AND Motion_Safety.astSafetyOutputGroups[nGroup].bEnableSO;
+            AND astSafetyOutputGroups[nGroup].bEnableSO;
     END_FOR
 
     FOR nIndex := 1 TO Motion_Safety.astSafetyOutputGroups[nGroup].nPneumaticAxisCount DO
-        nAxisID := Motion_Safety.astSafetyOutputGroups[nGroup].anPneumaticAxisID[nIndex];
+        nAxisID := astSafetyOutputGroups[nGroup].anPneumaticAxisID[nIndex];
 
         GVL.astPneumaticAxes[nAxisID].stPneumaticAxisInputs.bSafetyPermission :=
             GVL.astPneumaticAxes[nAxisID].stPneumaticAxisInputs.bSafetyPermission
-            AND Motion_Safety.astSafetyOutputGroups[nGroup].bEnableSO;
+            AND astSafetyOutputGroups[nGroup].bEnableSO;
     END_FOR
 END_FOR
 ]]></ST>
