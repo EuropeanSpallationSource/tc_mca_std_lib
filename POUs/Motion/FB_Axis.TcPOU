@@ -1562,6 +1562,10 @@ mParameters_ReadParameter.ErrorID := fbReadParameter.ErrorID;
 IF fbReadParameter.Error THEN
     _stAxis.stError.nReadParameterErrorId := fbReadParameter.ErrorID;
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eReadParameter,
+    stStatus := mParameters_ReadParameter);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1697,6 +1701,15 @@ ELSIF fb_coe_writeex.bError THEN
 ELSIF _stAxis.stConfig.stCoEParameters.nState = E_CoEParamState.eError THEN
     mParameters_ReadWriteCoE.ErrorID := 7;
 END_IF
+
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eReadCoEParameters,
+    stStatus := mParameters_ReadWriteCoE);
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eWriteCoEParameters,
+    stStatus := mParameters_ReadWriteCoE);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1724,6 +1737,10 @@ mParameters_WriteParameter.ErrorID := fbWriteParameter.ErrorID;
 IF fbWriteParameter.Error THEN
     _stAxis.stError.nWriteParameterErrorId := fbWriteParameter.ErrorID;
 END_IF
+
+fbCommandHistory.mSetResultOfCommand(
+    eCommand := E_MotionFunctions.eWriteParameter,
+    stStatus := mParameters_WriteParameter);
 ]]></ST>
       </Implementation>
     </Method>
