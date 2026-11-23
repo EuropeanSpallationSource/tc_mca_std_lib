@@ -83,21 +83,29 @@ CASE eStep OF
                 pData^.anDeviceVersion[2] := anSegmentData[12]; //Minor
 
                 CASE pData^.nDeviceType OF
+
                     WORD#16#0060:
                         pData^.eDeviceType := E_PNOZDeviceType.eB0;
                         pData^.sName := 'B0';
+
                     WORD#16#0061:
                         pData^.eDeviceType := E_PNOZDeviceType.eB1;
                         pData^.sName := 'B1';
+
                     WORD#16#0087:
-                        pData^.eDeviceType := E_PNOZDeviceType.eEtherCATFieldbus;
+                        pData^.eDeviceType :=
+                            E_PNOZDeviceType.eEtherCATFieldbus;
+
                         pData^.sName := 'ES EtherCAT';
+
                     WORD#16#00E0:
                         pData^.eDeviceType := E_PNOZDeviceType.e8DI4DO;
                         pData^.sName := 'EF 8DI4DO';
+
                     WORD#16#00E1:
                         pData^.eDeviceType := E_PNOZDeviceType.e4DI4DOR;
                         pData^.sName := 'EF 4DI4DOR';
+
                 ELSE
                     pData^.eDeviceType := E_PNOZDeviceType.eNone;
                     pData^.sName := 'None';
@@ -108,6 +116,7 @@ CASE eStep OF
                 pSafety^.anDeviceVersion := pData^.anDeviceVersion;
                 pSafety^.eDeviceType := pData^.eDeviceType;
                 pSafety^.sName := pData^.sName;
+
             1:
                 pData^.anFirmwareVersionA[1] := anSegmentData[1];
                 pData^.anFirmwareVersionA[2] := anSegmentData[2];
@@ -130,26 +139,35 @@ CASE eStep OF
                         OR SHL(BYTE_TO_UDINT(anSegmentData[3]), 8)
                         OR BYTE_TO_UDINT(anSegmentData[4]);
                 END_IF
+
         END_CASE
 
     eProject:
         CASE nSegmentIndex OF
             0:
+                //Project checksums
                 stData.nProjectChecksum := anData[0];
                 stData.nOverallChecksum := anData[1];
             1:
-                stData.nCreationDay := BYTE_TO_USINT(anSegmentData[1]);
-                stData.nCreationMonth := BYTE_TO_USINT(anSegmentData[2]);
-                stData.nCreationYear := WORD_TO_UINT(anData[1]);
+                //Project dates and time
+                stData.sCreationDate :=  CONCAT(TO_STRING(anData[1]), '-');
+                stData.sCreationDate :=  CONCAT(stData.sCreationDate, TO_STRING(anSegmentData[2]));
+                stData.sCreationDate :=  CONCAT(stData.sCreationDate, '-');
+                stData.sCreationDate :=  CONCAT(stData.sCreationDate, TO_STRING(anSegmentData[1]));
 
-                stData.nStoredDay := BYTE_TO_USINT(anSegmentData[5]);
-                stData.nStoredMonth := BYTE_TO_USINT(anSegmentData[6]);
-                stData.nStoredYear := WORD_TO_UINT(anData[3]);
-
-                stData.nStoredHour := BYTE_TO_USINT(anSegmentData[9]);
-                stData.nStoredMinute := BYTE_TO_USINT(anSegmentData[10]);
+                stData.sStoredDate :=  CONCAT(TO_STRING(anData[3]), '-');
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, TO_STRING(anSegmentData[6]));
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, '-');
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, TO_STRING(anSegmentData[5]));
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, ' ');
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, TO_STRING(anSegmentData[9]));
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, 'h ');
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, TO_STRING(anSegmentData[10]));
+                stData.sStoredDate :=  CONCAT(stData.sStoredDate, 'm');
             2..4:
+                //Project name
                 pProjectName := ADR(stData.wsProjectName);
+
                 IF nSegmentIndex = 2 THEN
                     //Clear all characters and the terminator
                     FOR nCharacter := 0 TO 16 DO
@@ -167,15 +185,19 @@ CASE eStep OF
 
                 FOR nCharacter := 0 TO nCharacterCount - 1 DO
                     IF anData[nCharacter] = WORD#16#FFFF THEN
-                        pProjectName[nCharacterOffset + nCharacter] := WORD#0;
+                        pProjectName[nCharacterOffset + nCharacter] :=
+                            WORD#0;
                     ELSE
-                        pProjectName[nCharacterOffset + nCharacter] := anData[nCharacter];
+                        pProjectName[nCharacterOffset + nCharacter] :=
+                            anData[nCharacter];
                     END_IF
                 END_FOR
+
                 pProjectName[16] := WORD#0;
+
         END_CASE
-END_CASE
-]]></ST>
+
+END_CASE]]></ST>
       </Implementation>
     </Method>
     <Method Name="mNext" Id="{56d3dbb4-3166-0a97-182f-560c9ace61be}">

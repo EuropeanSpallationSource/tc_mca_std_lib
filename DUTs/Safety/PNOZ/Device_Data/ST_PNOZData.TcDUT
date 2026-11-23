@@ -9,16 +9,11 @@ STRUCT
     nOverallChecksum: WORD;
 
     //Project creation date
-    nCreationDay: USINT;
-    nCreationMonth: USINT;
-    nCreationYear: UINT;
+    sCreationDate: STRING(10); //E.g. 2026.3.4
+
 
     //Additional stored date and time
-    nStoredDay: USINT;
-    nStoredMonth: USINT;
-    nStoredYear: UINT;
-    nStoredHour: USINT;
-    nStoredMinute: USINT;
+    sStoredDate: STRING(18); //E.g. 2026.11.12 44h 13m
 
     //Operating-hours snapshot
     nOperatingHoursAtInit: UDINT;
