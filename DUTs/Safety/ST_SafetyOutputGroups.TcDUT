@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <DUT Name="ST_SafetyOutputGroups" Id="{6dbf989c-61f4-07ba-2c4a-53df4ba3b7d2}">
-    <Declaration><![CDATA[(*
-Safety output groups groups are a reprensation of the SO1..SOn groups according to the EPlan.
-*)
+    <Declaration><![CDATA[//Safety output groups groups are a reprensation of the SO1..SOn groups according to the EPlan.
 TYPE ST_SafetyOutputGroups :
 STRUCT
     nMotorAxisCount: UINT;
     nPneumaticAxisCount: UINT;
     anMotorAxisID: ARRAY[1..GVL_APP.nAXIS_NUM] OF UINT;
     anPneumaticAxisID: ARRAY[1..GVL_APP.nPNEUMATIC_AXIS_NUM] OF UINT;
-
     bEnableSO: BOOL;
 END_STRUCT
-END_TYPE]]></Declaration>
+END_TYPE
+]]></Declaration>
   </DUT>
 </TcPlcObject>

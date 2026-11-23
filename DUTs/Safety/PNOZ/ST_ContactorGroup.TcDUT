@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_ContactorGroup" Id="{97f464b4-7a65-0c9b-3e83-1931890b6a0a}">
+    <Declaration><![CDATA[TYPE ST_ContactorGroup :
+STRUCT
+    bSOEnable: BOOL; //Contactor group enabled --> contactors closed.
+    bSO_OK: BOOL; //Contactor group OK
+    bSOFeedback: BOOL; //Contactor feedback = TRUE --> contactors open.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

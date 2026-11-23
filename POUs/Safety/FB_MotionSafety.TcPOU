@@ -327,6 +327,23 @@ stSafetyIn.stMCCAppSpecific.abValid[6] := stPNOZEtherCATIn.nMCCAppSpecific.13;
 stSafetyIn.stMCCAppSpecific.abValid[7] := stPNOZEtherCATIn.nMCCAppSpecific.14;
 stSafetyIn.stMCCAppSpecific.abValid[8] := stPNOZEtherCATIn.nMCCAppSpecific.15;
 
+//Contactor group states (safety output groups): input bytes 08..09.
+stSafetyIn.astContactorGroups[1].bSOEnable := stPNOZEtherCATIn.anContactorGroups[1].0;
+stSafetyIn.astContactorGroups[1].bSO_OK := stPNOZEtherCATIn.anContactorGroups[1].1;
+stSafetyIn.astContactorGroups[1].bSOFeedback := stPNOZEtherCATIn.anContactorGroups[1].2;
+
+stSafetyIn.astContactorGroups[2].bSOEnable := stPNOZEtherCATIn.anContactorGroups[1].4;
+stSafetyIn.astContactorGroups[2].bSO_OK := stPNOZEtherCATIn.anContactorGroups[1].5;
+stSafetyIn.astContactorGroups[2].bSOFeedback := stPNOZEtherCATIn.anContactorGroups[1].6;
+
+stSafetyIn.astContactorGroups[3].bSOEnable := stPNOZEtherCATIn.anContactorGroups[2].0;
+stSafetyIn.astContactorGroups[3].bSO_OK := stPNOZEtherCATIn.anContactorGroups[2].1;
+stSafetyIn.astContactorGroups[3].bSOFeedback := stPNOZEtherCATIn.anContactorGroups[2].2;
+
+stSafetyIn.astContactorGroups[4].bSOEnable := stPNOZEtherCATIn.anContactorGroups[2].4;
+stSafetyIn.astContactorGroups[4].bSO_OK := stPNOZEtherCATIn.anContactorGroups[2].5;
+stSafetyIn.astContactorGroups[4].bSOFeedback := stPNOZEtherCATIn.anContactorGroups[2].6;
+
 //Controller LED states: input byte 16.
 stSafetyIn.stLEDState.bOutputFault := stPNOZEtherCATIn.nLEDState.0;
 stSafetyIn.stLEDState.bInputFault := stPNOZEtherCATIn.nLEDState.1;
@@ -334,7 +351,7 @@ stSafetyIn.stLEDState.bFault := stPNOZEtherCATIn.nLEDState.2;
 stSafetyIn.stLEDState.bDiag := stPNOZEtherCATIn.nLEDState.3;
 stSafetyIn.stLEDState.bRun := stPNOZEtherCATIn.nLEDState.4;
 
-//TODO! Clean this up
+
 stSafetyIn.stFieldbusData.stLEDState.bPower := F_CheckLowNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
 stSafetyIn.stFieldbusData.stLEDState.bRun := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[1], bFlashOn := bDeviceLEDFlashOn);
 stSafetyIn.stFieldbusData.stLEDState.bFault := F_CheckHighNibbleLEDState(nValue := stPNOZEtherCATDiagIn.anFieldbusModuleLED[2], bFlashOn := bDeviceLEDFlashOn);
