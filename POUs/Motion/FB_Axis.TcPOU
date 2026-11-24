@@ -118,6 +118,9 @@ VAR
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
     bEnableAmpCmd: BOOL := FALSE;
+
+    //astMcStatus slot (5..9) currently owning bDone/bCommandAborted; 0 while no motion command has been released yet
+    nActiveMotionIndex: UINT := 0;
 END_VAR
 
 VAR CONSTANT
@@ -377,11 +380,13 @@ END_VAR
 
 VAR
     bCommandAborted: BOOL;
+    nMotionIndex: UINT; //astMcStatus slot for the incoming command this scan; 0 if not a CommandHandler motion command
 END_VAR
 
 VAR_INST
     eState: E_CommandHandlerState := E_CommandHandlerState.eIdle;
     eLatchedCommand: E_MotionFunctions;
+    nLatchedMotionIndex: UINT := 0; //astMcStatus slot matching eLatchedCommand, computed once at accept-time
     bInternalWaitingForMovePermit: BOOL := FALSE;
     bInternalMovePermit: BOOL := FALSE;
     bInternalReleasedMoveCmd: BOOL := FALSE;
@@ -401,28 +406,37 @@ CASE eState OF
     E_CommandHandlerState.eIdle:
         IF RTRIG_Execute.Q THEN
             CASE _stAxis.stControl.eCommand OF
-                E_MotionFunctions.eMoveAbsolute,
-                E_MotionFunctions.eMoveRelative,
-                E_MotionFunctions.eMoveVelocity,
-                E_MotionFunctions.eMoveModulo,
-                E_MotionFunctions.eHome :
-                    eLatchedCommand := _stAxis.stControl.eCommand;
-                    nWaitCounter := 0;
-                    _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
-                    _stAxis.stError.nCommandHandlerErrorID := 0;
-                    _stAxis.stControl.bHalt := FALSE;
-
-                    IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
-                        AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
-                            OR _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming) THEN
-                        eState := E_CommandHandlerState.eReleaseNonMoveCommand;
-                    ELSE
-                        IF _stAxis.stConfig.bAutoEnable THEN
-                            _stAxis.stControl.bEnable := TRUE;
-                        END_IF
-                        eState := E_CommandHandlerState.eWaitPermits;
-                    END_IF
+                E_MotionFunctions.eMoveAbsolute: nMotionIndex := nID_MOVE_ABSOLUTE;
+                E_MotionFunctions.eMoveRelative: nMotionIndex := nID_MOVE_RELATIVE;
+                E_MotionFunctions.eMoveVelocity: nMotionIndex := nID_MOVE_VELOCITY;
+                E_MotionFunctions.eMoveModulo: nMotionIndex := nID_MOVE_MODULO;
+                E_MotionFunctions.eHome: nMotionIndex := nID_HOME;
+            ELSE
+                nMotionIndex := 0; //Not a CommandHandler motion command - ignore
             END_CASE
+
+            IF nMotionIndex <> 0 THEN
+                eLatchedCommand := _stAxis.stControl.eCommand;
+                //No motion FB owns bDone/bCommandAborted while the new command buffers in the CommandHandler
+                nActiveMotionIndex := 0;
+                nLatchedMotionIndex := nMotionIndex;
+                nWaitCounter := 0;
+                _stAxis.stStatus.bCommandHandlerTimeoutError := FALSE;
+                _stAxis.stError.nCommandHandlerErrorID := 0;
+                _stAxis.stControl.bHalt := FALSE;
+
+                IF _stAxis.stControl.eCommand = E_MotionFunctions.eHome
+                    AND (_stAxis.stConfig.eHomeSeq = E_HomingRoutines.eHomeDirect
+                        OR _stAxis.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming)
+                THEN
+                    eState := E_CommandHandlerState.eReleaseNonMoveCommand;
+                ELSE
+                    IF _stAxis.stConfig.bAutoEnable THEN
+                        _stAxis.stControl.bEnable := TRUE;
+                    END_IF
+                    eState := E_CommandHandlerState.eWaitPermits;
+                END_IF
+            END_IF
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
@@ -458,14 +472,15 @@ CASE eState OF
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
-        //Drop status latched by the previous motion while this command was waiting
-        _stAxis.stStatus.bDone := FALSE;
-        _stAxis.stStatus.bCommandAborted := FALSE;
+        //This motion FB now owns bDone/bCommandAborted until the next command is accepted
+        nActiveMotionIndex := nLatchedMotionIndex;
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eReleaseNonMoveCommand:
         _stAxis.stStatus.eInternalMotionCommand := eLatchedCommand;
         bInternalExecute := TRUE;
+        //Home released directly (eHomeDirect / eNoHoming) also owns bDone/bCommandAborted
+        nActiveMotionIndex := nLatchedMotionIndex;
         eState := E_CommandHandlerState.eIdle;
 
     E_CommandHandlerState.eWaitForMotionStart:
@@ -1823,7 +1838,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[//Any active motion or utility FB makes the axis busy
+FOR i := nFIRST_ARRAY_INDEX_BUSY TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -1838,7 +1854,13 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[//Only the currently active motion FB may set CommandAborted.
+//Non-motion/utility FBs (10..19) bypass the CommandHandler, so their CommandAborted always counts.
+IF nActiveMotionIndex <> 0 THEN
+    tmpCmdAborted := astMcStatus[nActiveMotionIndex]^.CommandAborted;
+END_IF
+
+FOR i := nFIRST_ARRAY_INDEX_NON_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -1857,10 +1879,16 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
+        <ST><![CDATA[//Only the currently active motion FB may set Done.
+//Non-motion/utility FBs (10..15) bypass the CommandHandler, so their Done always counts.
+IF nActiveMotionIndex <> 0 THEN
+    tmpDone := astMcStatus[nActiveMotionIndex]^.Done;
+END_IF
+
+FOR i := nFIRST_ARRAY_INDEX_NON_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
     tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
-//fbDoneRTrig(CLK:= mStatus_Done());
+
 fbDoneRTrig(CLK := tmpDone);
 IF fbDoneRTrig.Q THEN
     _stAxis.stStatus.bDone := TRUE;
