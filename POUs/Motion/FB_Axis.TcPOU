@@ -123,9 +123,16 @@ END_VAR
 VAR CONSTANT
     nRATIO_DENOMINATOR_DEFAULT: UINT := 1;
     nNO_GEARING: UINT := 0;
-    nFIRST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 5; //Used for the FOR loops for the Busy, Done, Command Aborted Status
-    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loops for Done
+    nFIRST_ARRAY_INDEX_BUSY: UINT := 5; //Used for the FOR loop for the Busy status
+    nFIRST_ARRAY_INDEX_NON_MOVE_COMMANDS: UINT := 10; //Used for the FOR loops for Done, Command Aborted Status
+    nLAST_ARRAY_INDEX_MOVE_COMMANDS: UINT := 15; //Used for the FOR loop for Done
     nMCSTATUS_ARRAY_SIZE: UINT := 19;
+
+    nID_MOVE_ABSOLUTE: UINT := 5;
+    nID_MOVE_RELATIVE: UINT := 6;
+    nID_MOVE_VELOCITY: UINT := 7;
+    nID_MOVE_MODULO: UINT := 8;
+    nID_HOME: UINT := 9;
     nMULTI_MASTER_MAX_AXES: UINT := 4;
 END_VAR
 ]]></Declaration>
@@ -172,11 +179,11 @@ astMcStatus[1] := ADR(stMcStatusPower);
 astMcStatus[2] := ADR(stMcStatusStop);
 astMcStatus[3] := ADR(stMcStatusHalt);
 astMcStatus[4] := ADR(stMcStatusReset);
-astMcStatus[5] := ADR(stMcStatusMoveAbsolute);
-astMcStatus[6] := ADR(stMcStatusMoveRelative);
-astMcStatus[7] := ADR(stMcStatusMoveVelocity);
-astMcStatus[8] := ADR(stMcStatusMoveModulo);
-astMcStatus[9] := ADR(stMcStatusHome);
+astMcStatus[nID_MOVE_ABSOLUTE] := ADR(stMcStatusMoveAbsolute);
+astMcStatus[nID_MOVE_RELATIVE] := ADR(stMcStatusMoveRelative);
+astMcStatus[nID_MOVE_VELOCITY] := ADR(stMcStatusMoveVelocity);
+astMcStatus[nID_MOVE_MODULO] := ADR(stMcStatusMoveModulo);
+astMcStatus[nID_HOME] := ADR(stMcStatusHome);
 astMcStatus[10] := ADR(stMcStatusGearInMultiMaster);
 astMcStatus[11] := ADR(stMcStatusGearOut);
 astMcStatus[12] := ADR(stMcStatusReadParameter);
@@ -1816,7 +1823,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nMCSTATUS_ARRAY_SIZE DO
     tmpBusy := astMcStatus[i]^.Busy OR tmpBusy;
 END_FOR
 mStatus_Busy := tmpBusy;
@@ -1831,7 +1838,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nMCSTATUS_ARRAY_SIZE DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nMCSTATUS_ARRAY_SIZE DO
     tmpCmdAborted := astMcStatus[i]^.CommandAborted OR tmpCmdAborted;
 END_FOR
 
@@ -1850,7 +1857,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_MOVE_COMMANDS TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
+        <ST><![CDATA[FOR i := nFIRST_ARRAY_INDEX_BUSY TO nLAST_ARRAY_INDEX_MOVE_COMMANDS DO
     tmpDone := astMcStatus[i]^.Done OR tmpDone;
 END_FOR
 //fbDoneRTrig(CLK:= mStatus_Done());
