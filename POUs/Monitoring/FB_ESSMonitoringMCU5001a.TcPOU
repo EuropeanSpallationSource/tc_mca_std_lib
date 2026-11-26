@@ -46,8 +46,6 @@ VAR
     bFuse8_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 1^Input'}
     bEStop_OK AT %I*: BOOL;
-    {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 2^Input'}
-    bSTO_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 2^Input'}
     bMCBFan_OK AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 3^Input'}
@@ -86,12 +84,10 @@ bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
 
-IF iSafetyProvider <> 0 THEN
-    bEStopReleased := iSafetyProvider.EStopOK;
-    bSTOReleased := iSafetyProvider.STO_OK;
+IF iSafetyController <> 0 THEN
+    bEStopReleased := iSafetyController.EStopOK;
 ELSE
     bEStopReleased := bEStop_OK;
-    bSTOReleased := bSTO_OK;
 END_IF;
 
 ]]></ST>

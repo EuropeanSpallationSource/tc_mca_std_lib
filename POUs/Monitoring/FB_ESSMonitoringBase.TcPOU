@@ -4,7 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_ESSMonitoringBase
 VAR_INPUT
     nEcMasterNetId: T_AmsNetId;
-    iSafetyProvider: I_SafetyProvider;
+    iSafetyController: I_SafetyController;
 END_VAR
 VAR_OUTPUT
     aErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
@@ -23,7 +23,6 @@ VAR
     _nEcMasterDevState: UINT;
 
     bEStopReleased: BOOL;
-    bSTOReleased: BOOL;
 
     aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
 (*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
