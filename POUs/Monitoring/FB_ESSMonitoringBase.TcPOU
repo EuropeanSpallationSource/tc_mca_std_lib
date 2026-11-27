@@ -3,12 +3,12 @@
   <POU Name="FB_ESSMonitoringBase" Id="{16375c53-a76d-0f86-34ec-9cedc05223d1}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_ESSMonitoringBase
 VAR_INPUT
-    nEcMasterNetId: T_AmsNetId;
+    sEcMasterNetId: T_AmsNetId;
     iSafetyController: I_SafetyController;
 END_VAR
 VAR_OUTPUT
-    aErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
-    aErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
+    anErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
+    asErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
     nEcMasterFramesLost: UDINT;
     nCPULoad: UDINT;
     fCycleExecTime_ms: REAL;
@@ -24,50 +24,50 @@ VAR
 
     bEStopReleased: BOOL;
 
-    aAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
-(*[1]*)(nErrorID:=241, sErrorMsg:='The DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[2]*)(nErrorID:=242, sErrorMsg:='The DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[3]*)(nErrorID:=243, sErrorMsg:='The DC OK Status from PS 24V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[4]*)(nErrorID:=481, sErrorMsg:='The DC OK Status from PS 48V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[5]*)(nErrorID:=482, sErrorMsg:='The DC OK Status from PS 48V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[6]*)(nErrorID:=483, sErrorMsg:='The DC OK Status from PS 48V-3 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[7]*)(nErrorID:=484, sErrorMsg:='The DC OK Status from PS 48V-4 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[8]*)(nErrorID:=11, sErrorMsg:='MCB Fan OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[9]*)(nErrorID:=12, sErrorMsg:='SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[10]*)(nErrorID:=13, sErrorMsg:='Cabinet door Opened', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[11]*)(nErrorID:=301, sErrorMsg:='Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined),
-(*[12]*)(nErrorID:=302, sErrorMsg:='Fuse 2 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady),
-(*[13]*)(nErrorID:=303, sErrorMsg:='Fuse 3 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eSteady),
-(*[14]*)(nErrorID:=304, sErrorMsg:='Fuse 4 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[15]*)(nErrorID:=305, sErrorMsg:='Fuse 5 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[16]*)(nErrorID:=306, sErrorMsg:='Fuse 6 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[17]*)(nErrorID:=307, sErrorMsg:='Fuse 7 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[18]*)(nErrorID:=308, sErrorMsg:='Fuse 8 tripped', eStatusLED:=E_MonitorLed.eSlow, eErrorLED:=E_MonitorLed.eUndefined),
-(*[19]*)(nErrorID:=501, sErrorMsg:='E-Stop active', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined, eEStopLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[20]*)(nErrorID:=14, sErrorMsg:='Temperature 1 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[21]*)(nErrorID:=15, sErrorMsg:='Temperature 2 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[22]*)(nErrorID:=16, sErrorMsg:='Temperature 3 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[23]*)(nErrorID:=17, sErrorMsg:='Temperature 4 too high', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eSteady),
-(*[24]*)(nErrorID:=101, sErrorMsg:='EtherCAT Master is not ok', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[25]*)(nErrorID:=102, sErrorMsg:='EtherCAT slave(s) not in OP state', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
-(*[26]*)(nErrorID:=103, sErrorMsg:='EtherCAT slave(s) link fault', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eSteady),
-(*[27]*)(nErrorID:=104, sErrorMsg:='Overflow in PLC cycle time', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[28]*)(nErrorID:=105, sErrorMsg:='CPU Load High', eStatusLED:=E_MonitorLed.eSteady, eErrorLED:=E_MonitorLed.eUndefined),
-(*[29]*)(nErrorID:=18, sErrorMsg:='MCB Piezo Controller Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[30]*)(nErrorID:=19, sErrorMsg:='MCB VFD Off', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady),
-(*[31]*)(nErrorID:=601, sErrorMsg:='Shutter OP Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[32]*)(nErrorID:=602, sErrorMsg:='Shutter OP Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[33]*)(nErrorID:=603, sErrorMsg:='Shutter OP DC OK Status from PS 24V is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[34]*)(nErrorID:=604, sErrorMsg:='Shutter OP SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[35]*)(nErrorID:=701, sErrorMsg:='EC Nodebox Fuse 1 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[36]*)(nErrorID:=702, sErrorMsg:='EC Nodebox Fuse 2 tripped', eStatusLED:=E_MonitorLed.eUndefined, eErrorLED:=E_MonitorLed.eUndefined, bLedAutoReset:=TRUE),
-(*[37]*)(nErrorID:=703, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-1 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[38]*)(nErrorID:=704, sErrorMsg:='EC Nodebox DC OK Status from PS 24V-2 is OFF.', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE),
-(*[39]*)(nErrorID:=705, sErrorMsg:='EC Nodebox SPD OK status is OFF', eStatusLED:=E_MonitorLed.eFast, eErrorLED:=E_MonitorLed.eSteady, bLedAutoReset:=TRUE)];
+    astAlarmList: ARRAY [1..nMAX_ALARMS] OF ST_MonitoringAlarm := [
+(*[1]*)(nErrorID := 241, sErrorMsg := 'The DC OK Status from PS 24V-1 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[2]*)(nErrorID := 242, sErrorMsg := 'The DC OK Status from PS 24V-2 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[3]*)(nErrorID := 243, sErrorMsg := 'The DC OK Status from PS 24V-3 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[4]*)(nErrorID := 481, sErrorMsg := 'The DC OK Status from PS 48V-1 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[5]*)(nErrorID := 482, sErrorMsg := 'The DC OK Status from PS 48V-2 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[6]*)(nErrorID := 483, sErrorMsg := 'The DC OK Status from PS 48V-3 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[7]*)(nErrorID := 484, sErrorMsg := 'The DC OK Status from PS 48V-4 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[8]*)(nErrorID := 11, sErrorMsg := 'MCB Fan OK status is OFF', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[9]*)(nErrorID := 12, sErrorMsg := 'SPD OK status is OFF', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[10]*)(nErrorID := 13, sErrorMsg := 'Cabinet door Opened', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[11]*)(nErrorID := 301, sErrorMsg := 'Fuse 1 tripped', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eUndefined),
+(*[12]*)(nErrorID := 302, sErrorMsg := 'Fuse 2 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eSteady),
+(*[13]*)(nErrorID := 303, sErrorMsg := 'Fuse 3 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eSteady),
+(*[14]*)(nErrorID := 304, sErrorMsg := 'Fuse 4 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eUndefined),
+(*[15]*)(nErrorID := 305, sErrorMsg := 'Fuse 5 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eUndefined),
+(*[16]*)(nErrorID := 306, sErrorMsg := 'Fuse 6 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eUndefined),
+(*[17]*)(nErrorID := 307, sErrorMsg := 'Fuse 7 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eUndefined),
+(*[18]*)(nErrorID := 308, sErrorMsg := 'Fuse 8 tripped', eStatusLED := E_MonitorLed.eSlow, eErrorLED := E_MonitorLed.eUndefined),
+(*[19]*)(nErrorID := 501, sErrorMsg := 'E-Stop active', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined, eEStopLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[20]*)(nErrorID := 14, sErrorMsg := 'Temperature 1 too high', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eSteady),
+(*[21]*)(nErrorID := 15, sErrorMsg := 'Temperature 2 too high', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eSteady),
+(*[22]*)(nErrorID := 16, sErrorMsg := 'Temperature 3 too high', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eSteady),
+(*[23]*)(nErrorID := 17, sErrorMsg := 'Temperature 4 too high', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eSteady),
+(*[24]*)(nErrorID := 101, sErrorMsg := 'EtherCAT Master is not ok', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[25]*)(nErrorID := 102, sErrorMsg := 'EtherCAT slave(s) not in OP state', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eSteady),
+(*[26]*)(nErrorID := 103, sErrorMsg := 'EtherCAT slave(s) link fault', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eSteady),
+(*[27]*)(nErrorID := 104, sErrorMsg := 'Overflow in PLC cycle time', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[28]*)(nErrorID := 105, sErrorMsg := 'CPU Load High', eStatusLED := E_MonitorLed.eSteady, eErrorLED := E_MonitorLed.eUndefined),
+(*[29]*)(nErrorID := 18, sErrorMsg := 'MCB Piezo Controller Off', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[30]*)(nErrorID := 19, sErrorMsg := 'MCB VFD Off', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady),
+(*[31]*)(nErrorID := 601, sErrorMsg := 'Shutter OP Fuse 1 tripped', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[32]*)(nErrorID := 602, sErrorMsg := 'Shutter OP Fuse 2 tripped', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[33]*)(nErrorID := 603, sErrorMsg := 'Shutter OP DC OK Status from PS 24V is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[34]*)(nErrorID := 604, sErrorMsg := 'Shutter OP SPD OK status is OFF', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[35]*)(nErrorID := 701, sErrorMsg := 'EC Nodebox Fuse 1 tripped', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[36]*)(nErrorID := 702, sErrorMsg := 'EC Nodebox Fuse 2 tripped', eStatusLED := E_MonitorLed.eUndefined, eErrorLED := E_MonitorLed.eUndefined, bLedAutoReset := TRUE),
+(*[37]*)(nErrorID := 703, sErrorMsg := 'EC Nodebox DC OK Status from PS 24V-1 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[38]*)(nErrorID := 704, sErrorMsg := 'EC Nodebox DC OK Status from PS 24V-2 is OFF.', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE),
+(*[39]*)(nErrorID := 705, sErrorMsg := 'EC Nodebox SPD OK status is OFF', eStatusLED := E_MonitorLed.eFast, eErrorLED := E_MonitorLed.eSteady, bLedAutoReset := TRUE)];
 
 
-    aTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
-    aTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
+    anTempErrorID: ARRAY [1..nMAX_ALARMS] OF INT;
+    asTempErrorMsg: ARRAY [1..nMAX_ALARMS] OF STRING;
 
     nAlarmCnt: INT;
     nAlarmBitNumber: UDINT;
@@ -76,7 +76,7 @@ VAR
     bEcMasterError: BOOL;
     bSlaveStateNotOP: BOOL;
     bSlaveLinkError: BOOL;
-    aExtraMessage: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+    asExtraMessage: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
     bCycleTimeExceeded: BOOL;
 
     //Ethercat master device state
@@ -95,7 +95,7 @@ VAR
     bEcDCnotInSync: BOOL;
 
     tonInitDelay: TON := (IN := TRUE, PT := tINIT_DELAY);
-    fbAcknowledgeButtonTrig: R_TRIG;
+    rtrigErrorAcknowledgeButton: R_TRIG;
 END_VAR
 
 VAR CONSTANT
@@ -104,8 +104,8 @@ VAR CONSTANT
     nMAX_ALARMS: UINT := 50;
     nMAX_EC_SLAVES: INT := 255;
     nMAX_TEMP: INT := 10000;
-    nSLAVE_NOT_OP_STATE_ENTRY: UDINT := 28;
-    nSLAVE_LINK_ERROR_ENTRY: UDINT := 29;
+    nSLAVE_NOT_OP_STATE_ENTRY: UDINT := 25;
+    nSLAVE_LINK_ERROR_ENTRY: UDINT := 26;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -120,32 +120,6 @@ mMonitorCPU();
 mMonitorEtherCAT();
 ]]></ST>
     </Implementation>
-    <Property Name="AcknowledgeButton" Id="{4553ddaa-9a47-067f-1824-16747e3b18bb}">
-      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeButton : BOOL
-]]></Declaration>
-      <Set Name="Set" Id="{097bd8e4-8f42-0d2f-3b2d-68c813444beb}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[_bErrorAcknowledgeButton := AcknowledgeButton;
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
-    <Property Name="AcknowledgeLED" Id="{87e182de-d7eb-0e63-0a1a-4287ee4dac3d}">
-      <Declaration><![CDATA[PROPERTY PROTECTED AcknowledgeLED : BOOL
-]]></Declaration>
-      <Get Name="Get" Id="{c85992ab-d415-0e8f-2295-5c0c5b4bcb43}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[AcknowledgeLED := _bErrorAcknowledgeLED;
-]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Property Name="EcMasterDevState" Id="{4d86de19-f4c1-0929-075b-548e5f42ca15}">
       <Declaration><![CDATA[PROPERTY EcMasterDevState : UINT
 ]]></Declaration>
@@ -158,6 +132,32 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Set>
+    </Property>
+    <Property Name="ErrorAcknowledgeButton" Id="{4553ddaa-9a47-067f-1824-16747e3b18bb}">
+      <Declaration><![CDATA[PROPERTY PROTECTED ErrorAcknowledgeButton : BOOL
+]]></Declaration>
+      <Set Name="Set" Id="{097bd8e4-8f42-0d2f-3b2d-68c813444beb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_bErrorAcknowledgeButton := ErrorAcknowledgeButton;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ErrorAcknowledgeLED" Id="{87e182de-d7eb-0e63-0a1a-4287ee4dac3d}">
+      <Declaration><![CDATA[PROPERTY PROTECTED ErrorAcknowledgeLED : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{c85992ab-d415-0e8f-2295-5c0c5b4bcb43}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorAcknowledgeLED := _bErrorAcknowledgeLED;
+]]></ST>
+        </Implementation>
+      </Get>
     </Property>
     <Property Name="ErrorLED" Id="{7eb12b12-2c1a-030f-02c0-dc876b161c7d}">
       <Declaration><![CDATA[PROPERTY PROTECTED ErrorLED : BOOL
@@ -188,20 +188,20 @@ END_VAR
     <Method Name="FB_init" Id="{fbc6fe99-d298-01aa-2f2e-75ad59229db1}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
-    bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
-    bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+    bInitRetains: BOOL; //if TRUE, the retain variables are initialized (warm start / cold start)
+    bInCopyCode: BOOL; //if TRUE, the instance afterwards gets moved into the copy code (online change)
 END_VAR
 
 VAR
-    i : UINT := 0;
+    i: UINT := 0;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 1 TO THIS^.nMAX_ALARMS DO
-    IF THIS^.aAlarmList[i].bLedAutoReset THEN
-        THIS^.aAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eUndefined;
+    IF THIS^.astAlarmList[i].bLedAutoReset THEN
+        THIS^.astAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eUndefined;
     ELSE
-        THIS^.aAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eSteady;
+        THIS^.astAlarmList[i].eErrorAcknowledgeLED := E_MonitorLed.eSteady;
     END_IF
 END_FOR
 ]]></ST>
@@ -211,42 +211,37 @@ END_FOR
       <Declaration><![CDATA[METHOD mAlarmActive
 VAR_INPUT
     i: UINT;
-    bUpdatedExtraMessage : BOOL;
+    bUpdatedExtraMessage: BOOL;
 END_VAR
 
 VAR_INST
-    aFbErrorMessageTimer: ARRAY[1..nMAX_ALARMS] OF TON;
-    aStartErrorMsgTimer: ARRAY[1..nMAX_ALARMS] OF BOOL;
-    aFbErrorTrig: ARRAY[1..nMAX_ALARMS] OF R_TRIG;
+    atonErrorMessageTimer: ARRAY[1..nMAX_ALARMS] OF TON;
+    abStartErrorMsgTimer: ARRAY[1..nMAX_ALARMS] OF BOOL;
+    artrigError: ARRAY[1..nMAX_ALARMS] OF R_TRIG;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Update timer and trigger for new log message
-aStartErrorMsgTimer[i] :=
-    aAlarmList[i].bAlarmActive
-    AND NOT aFbErrorMessageTimer[i].Q;
-aFbErrorMessageTimer[i](
-    IN:=aStartErrorMsgTimer[i],
-    PT:=tNEW_MESSAGE_TIMEOUT);
-aFbErrorTrig[i](
-    CLK:=aStartErrorMsgTimer[i]);
+        <ST><![CDATA[//Update timer and trigger for new log message
+abStartErrorMsgTimer[i] := astAlarmList[i].bAlarmActive AND NOT atonErrorMessageTimer[i].Q;
+atonErrorMessageTimer[i](IN := abStartErrorMsgTimer[i], PT := tNEW_MESSAGE_TIMEOUT);
+artrigError[i](CLK := abStartErrorMsgTimer[i]);
 
-IF NOT aAlarmList[i].bAlarmActive THEN
+IF NOT astAlarmList[i].bAlarmActive THEN
     RETURN;
 END_IF
 
 nAlarmCnt := nAlarmCnt + 1;
-aTempErrorID[nAlarmCnt] := aAlarmList[i].nErrorID;
-aTempErrorMsg[nAlarmCnt] := CONCAT(aAlarmList[i].sErrorMsg, aExtraMessage[i]);
+anTempErrorID[nAlarmCnt] := astAlarmList[i].nErrorID;
+asTempErrorMsg[nAlarmCnt] := CONCAT(astAlarmList[i].sErrorMsg, asExtraMessage[i]);
 
 mPrintErrorMessage(
-    bPrintLog:=aFbErrorTrig[i].Q OR bUpdatedExtraMessage,
-    sErrorMessage:=aTempErrorMsg[nAlarmCnt],
-    nErrorID:=aAlarmList[i].nErrorID,
-    nIndex:=i);
+    bPrintLog := artrigError[i].Q OR bUpdatedExtraMessage,
+    sErrorMessage := asTempErrorMsg[nAlarmCnt],
+    nErrorID := astAlarmList[i].nErrorID,
+    nIndex := i);
 
-// Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
-CASE aAlarmList[i].nErrorID OF
+//Map nErrorID to nAlarmBitnumber, which later is mapped to output variable nAlarmGrpBitNumber.
+CASE astAlarmList[i].nErrorID OF
     241, 242, 243:
     nAlarmBitNumber.0 := TRUE;
     481, 482, 483, 484:
@@ -257,7 +252,7 @@ CASE aAlarmList[i].nErrorID OF
     nAlarmBitNumber.3 := TRUE;
     13:
     nAlarmBitNumber.4 := TRUE;
-    14,15,16,17:
+    14, 15, 16, 17:
     nAlarmBitNumber.5 := TRUE;
     301, 302, 303, 304, 305, 306, 307, 308:
     nAlarmBitNumber.6 := TRUE;
@@ -271,7 +266,7 @@ CASE aAlarmList[i].nErrorID OF
     nAlarmBitNumber.10 := TRUE;
     104, 105:
     nAlarmBitNumber.11 := TRUE;
-    18,19:
+    18, 19:
     nAlarmBitNumber.12 := TRUE;
 END_CASE
 ]]></ST>
@@ -293,70 +288,70 @@ VAR
 END_VAR
 
 VAR_INST
-    aExtraMessageOld: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
+    asExtraMessageOld: ARRAY[1..nMAX_ALARMS] OF STRING := [nMAX_ALARMS('')];
     bLedActive: BOOL := FALSE;
-    fbFastBlinkOn: TON;
-    fbFastBlinkOff: TON;
-    fbSlowBlinkOn: TON;
-    fbSlowBlinkOff: TON;
+    tonFastBlinkOn: TON;
+    tonFastBlinkOff: TON;
+    tonSlowBlinkOn: TON;
+    tonSlowBlinkOff: TON;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[fbAcknowledgeButtonTrig(CLK:=_bErrorAcknowledgeButton);
+        <ST><![CDATA[rtrigErrorAcknowledgeButton(CLK := _bErrorAcknowledgeButton);
 mSetResetAlarmsLeds();
 
-// Reset before loop
+//Reset before loop
 nAlarmCnt := 0;
 nAlarmBitNumber := 0;
-MEMSET(ADR(aTempErrorID), 0, SIZEOF(aTempErrorID));
-MEMSET(ADR(aTempErrorMsg), 0, SIZEOF(aTempErrorMsg));
+MEMSET(ADR(anTempErrorID), 0, SIZEOF(anTempErrorID));
+MEMSET(ADR(asTempErrorMsg), 0, SIZEOF(asTempErrorMsg));
 bLedActive := FALSE;
 
-FOR i:=1 TO nMAX_ALARMS DO
-    // Handle log prints, alarm bits and prepare alarm LEDs
-    mAlarmActive(i:=i, bUpdatedExtraMessage := aExtraMessage[i] <> aExtraMessageOld[i]);
+FOR i := 1 TO nMAX_ALARMS DO
+    //Handle log prints, alarm bits and prepare alarm LEDs
+    mAlarmActive(i := i, bUpdatedExtraMessage := asExtraMessage[i] <> asExtraMessageOld[i]);
 
-    // Set the alarm LEDs according to first occurrence
+    //Set the alarm LEDs according to first occurrence
     IF NOT bLedActive
-        AND aAlarmList[i].bLedActive THEN
+        AND astAlarmList[i].bLedActive THEN
         bLedActive := TRUE;
-        stMonitorLed.eErrorLED := aAlarmList[i].eErrorLED;
-        stMonitorLed.eStatusLED := aAlarmList[i].eStatusLED;
+        stMonitorLed.eErrorLED := astAlarmList[i].eErrorLED;
+        stMonitorLed.eStatusLED := astAlarmList[i].eStatusLED;
     END_IF
 
-    // If any error exists requiring an acknowledge, highlight Acknowledge LED.
-    IF aAlarmList[i].bLedActive AND NOT aAlarmList[i].bLedAutoReset THEN
-        stMonitorLed.eErrorAcknowledgeLED := aAlarmList[i].eErrorAcknowledgeLED;
+    //If any error exists requiring an acknowledge, highlight Acknowledge LED.
+    IF astAlarmList[i].bLedActive AND NOT astAlarmList[i].bLedAutoReset THEN
+        stMonitorLed.eErrorAcknowledgeLED := astAlarmList[i].eErrorAcknowledgeLED;
     END_IF
 END_FOR
 
-// Save last messages for next iteration
-aExtraMessageOld := aExtraMessage;
+//Save last messages for next iteration
+asExtraMessageOld := asExtraMessage;
 
-// Copy to output variables
-aErrorID := aTempErrorID;
-aErrorMsg := aTempErrorMsg;
+//Copy to output variables
+anErrorID := anTempErrorID;
+asErrorMsg := asTempErrorMsg;
 nAlarmGrpBitNumber := nAlarmBitNumber;
 
-// Handle LED blinking
-fbFastBlinkOn(IN:=NOT fbFastBlinkOff.Q, PT:=T#250MS);
-fbFastBlinkOff(IN:=fbFastBlinkOn.Q, PT:=T#250MS);
+//Handle LED blinking
+tonFastBlinkOn(IN := NOT tonFastBlinkOff.Q, PT := T#250MS);
+tonFastBlinkOff(IN := tonFastBlinkOn.Q, PT := T#250MS);
 
-fbSlowBlinkOn(IN:=NOT fbSlowBlinkOff.Q, PT:=T#750MS);
-fbSlowBlinkOff(IN:=fbSlowBlinkOn.Q, PT:=T#750MS);
+tonSlowBlinkOn(IN := NOT tonSlowBlinkOff.Q, PT := T#750MS);
+tonSlowBlinkOff(IN := tonSlowBlinkOn.Q, PT := T#750MS);
 
 _bErrorLED :=
     (stMonitorLed.eErrorLED = E_MonitorLed.eSteady)
-    OR (stMonitorLed.eErrorLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (stMonitorLed.eErrorLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    OR (stMonitorLed.eErrorLED = E_MonitorLed.eFast AND tonFastBlinkOn.Q)
+    OR (stMonitorLed.eErrorLED = E_MonitorLed.eSlow AND tonSlowBlinkOn.Q);
 _bStatusLED :=
     (stMonitorLed.eStatusLED = E_MonitorLed.eSteady)
-    OR (stMonitorLed.eStatusLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (stMonitorLed.eStatusLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    OR (stMonitorLed.eStatusLED = E_MonitorLed.eFast AND tonFastBlinkOn.Q)
+    OR (stMonitorLed.eStatusLED = E_MonitorLed.eSlow AND tonSlowBlinkOn.Q);
 _bErrorAcknowledgeLED :=
     (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSteady)
-    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eFast AND fbFastBlinkOn.Q)
-    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSlow AND fbSlowBlinkOn.Q);
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eFast AND tonFastBlinkOn.Q)
+    OR (stMonitorLed.eErrorAcknowledgeLED = E_MonitorLed.eSlow AND tonSlowBlinkOn.Q);
 _bEStopLED := NOT bEStopReleased;
 ]]></ST>
       </Implementation>
@@ -366,16 +361,16 @@ _bEStopLED := NOT bEStopReleased;
 
 VAR_INST
     fbMonitorCPU: TC_CpuUsage;
-    fbUpdateCPULoadTON: TON;
-    fMaxCPULoad: USINT := 85;
+    tonUpdateCPULoad: TON;
+    nMaxCPULoad: USINT := 85;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Cpu Monitor
-fbUpdateCPULoadTON(IN:=NOT fbUpdateCPULoadTON.q , PT:=T#100MS , Q=> , ET=> );
-fbMonitorCPU(START:=fbUpdateCPULoadTON.q, TMOUT:= T#5S);
+tonUpdateCPULoad(IN := NOT tonUpdateCPULoad.q, PT := T#100MS, Q=> , ET=> );
+fbMonitorCPU(START := tonUpdateCPULoad.q, TMOUT := T#5S);
 
-bCPUOverloaded := fbMonitorCPU.USAGE > fMaxCPULoad;
+bCPUOverloaded := fbMonitorCPU.USAGE > nMaxCPULoad;
 nCPULoad := fbMonitorCPU.USAGE;
 
 fCycleExecTime_ms := UDINT_TO_REAL(_TaskInfo[fbGetCurTaskIndex.index].LastExecTime) / 10000;
@@ -391,11 +386,11 @@ END_VAR
 
 VAR_INST
     fbGetEcSlaveStates: FB_EcGetAllSlaveStates;
-    stSlaveState: ARRAY[0..nMAX_EC_SLAVES] OF ST_EcSlaveState;
+    astSlaveState: ARRAY[0..nMAX_EC_SLAVES] OF ST_EcSlaveState;
     nActualEcSlaves: UINT := 0;
     fbGetEcConfSlaves: FB_EcGetConfSlaves;
-    aSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
-    aSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
+    astSlaveConfigBuffer1: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 1 for EtherCAT Slave Config Data
+    astSlaveConfigBuffer2: ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Buffer 2 for EtherCAT Slave Config Data
     pWriteSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with write access
     pReadSlaveConfigBuffer: POINTER TO ARRAY[1..EC_MAX_SLAVES] OF ST_EcSlaveConfigData; //Pointer to the buffer with read access
     fbGetEcMasterFrames: FB_EcMasterFrameStatistic;
@@ -411,8 +406,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[IF bInit THEN
     bInit := FALSE;
-    pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
-    pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+    pWriteSlaveConfigBuffer := ADR(astSlaveConfigBuffer1);
+    pReadSlaveConfigBuffer := ADR(astSlaveConfigBuffer2);
 END_IF
 
 tonAutoResetError(
@@ -424,7 +419,7 @@ tonAutoResetError(
 
 //Read the frame statistics of the EtherCAT master.
 fbGetEcMasterFrames(
-    sNetId := nEcMasterNetId,
+    sNetId := sEcMasterNetId,
     bExecute := NOT (fbGetEcMasterFrames.bBusy
         OR fbGetEcMasterFrames.bError)
         OR tonAutoResetError.Q);
@@ -432,7 +427,7 @@ nEcMasterFramesLost := fbGetEcMasterFrames.nLostFrames;
 
 //Read a list of configured slaves from the EtherCAT master object directory.
 fbGetEcConfSlaves(
-    sNetId := nEcMasterNetId,
+    sNetId := sEcMasterNetId,
     pArrEcConfSlaveInfo := pWriteSlaveConfigBuffer,
     cbBufLen := SIZEOF(pWriteSlaveConfigBuffer^),
     bExecute := NOT (fbGetEcConfSlaves.bBusy
@@ -445,20 +440,20 @@ IF NOT (fbGetEcConfSlaves.bBusy
     OR fbGetEcConfSlaves.nSlaves = 0)
 THEN
     bFirstReadSlaveConfigDone := TRUE;
-    IF pWriteSlaveConfigBuffer = ADR(aSlaveConfigBuffer1) THEN
-        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
-        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
+    IF pWriteSlaveConfigBuffer = ADR(astSlaveConfigBuffer1) THEN
+        pWriteSlaveConfigBuffer := ADR(astSlaveConfigBuffer2);
+        pReadSlaveConfigBuffer := ADR(astSlaveConfigBuffer1);
     ELSE
-        pWriteSlaveConfigBuffer := ADR(aSlaveConfigBuffer1);
-        pReadSlaveConfigBuffer := ADR(aSlaveConfigBuffer2);
+        pWriteSlaveConfigBuffer := ADR(astSlaveConfigBuffer1);
+        pReadSlaveConfigBuffer := ADR(astSlaveConfigBuffer2);
     END_IF
 END_IF
 
 //Get EtherCAT status and the Link status of all the slaves connected to the master.
 fbGetEcSlaveStates(
-    sNetId := nEcMasterNetId,
-    pStateBuf := ADR(stSlaveState),
-    cbBufLen := SIZEOF(stSlaveState),
+    sNetId := sEcMasterNetId,
+    pStateBuf := ADR(astSlaveState),
+    cbBufLen := SIZEOF(astSlaveState),
     //fbGetEcSlaveStates never goes bBusy (finishes same cycle as bExecute)
     //Starts on bExecute of fbGetEcConfSlaves instead
     bExecute := (fbGetEcConfSlaves.bExecute
@@ -486,8 +481,8 @@ bEcMasterError := _nEcMasterDevState > 0;
 //After startup reset variables before loop
 bSlaveStateNotOP := FALSE;
 bSlaveLinkError := FALSE;
-aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
-aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
+asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] := ', Slave Id #: ';
+asExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', Slave Id #: ';
 
 IF nActualEcSlaves = 0 THEN
     IF NOT bErrorZeroEcSlavesFound THEN
@@ -498,7 +493,7 @@ IF nActualEcSlaves = 0 THEN
             strArg := '0 EtherCAT Slaves found, check correct AmsNetId in CabinetMonitoring');
     END_IF
     bSlaveLinkError := TRUE;
-    aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
+    asExtraMessage[nSLAVE_LINK_ERROR_ENTRY] := ', 0 EtherCAT Slaves found';
     RETURN;
 END_IF
 bErrorZeroEcSlavesFound := FALSE;
@@ -507,30 +502,30 @@ IF NOT bFirstReadSlaveConfigDone THEN
     RETURN;
 END_IF
 
-FOR i:=0 TO nActualEcSlaves-1 DO
-    IF stSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
-        aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
-            CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=UINT_TO_STRING(i+1));
+FOR i := 0 TO nActualEcSlaves - 1 DO
+    IF astSlaveState[i].linkState <> EC_LINK_STATE_OK  THEN
+        asExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+            CONCAT(STR1 := asExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2 := UINT_TO_STRING(i + 1));
         IF NOT bSlaveLinkError THEN
-            aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
+            asExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+                CONCAT(STR1 := asExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2 := CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i + 1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (') - 1)));
         END_IF
-        aExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
-            CONCAT(STR1:=aExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2:=', ');
+        asExtraMessage[nSLAVE_LINK_ERROR_ENTRY] :=
+            CONCAT(STR1 := asExtraMessage[nSLAVE_LINK_ERROR_ENTRY], STR2 := ', ');
         bSlaveLinkError := TRUE;
-        // Do not print slave numbers for deviceState if already printed for linkState
+        //Do not print slave numbers for deviceState if already printed for linkState
         CONTINUE;
     END_IF
 
-    IF stSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
-        aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
-            CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:= UINT_TO_STRING(i+1));
+    IF astSlaveState[i].deviceState <> EC_DEVICE_STATE_OP THEN
+        asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+            CONCAT(STR1 := asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2 := UINT_TO_STRING(i + 1));
         IF NOT bSlaveStateNotOP THEN
-            aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
-                CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i+1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (')-1)));
+            asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+                CONCAT(STR1 := asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2 := CONCAT('-', LEFT(pReadSlaveConfigBuffer^[i + 1].sName, FIND(pReadSlaveConfigBuffer^[i+1].sName,' (') - 1)));
         END_IF
-        aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
-            CONCAT(STR1:=aExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2:=', ');
+        asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY] :=
+            CONCAT(STR1 := asExtraMessage[nSLAVE_NOT_OP_STATE_ENTRY], STR2 := ', ');
         bSlaveStateNotOP := TRUE;
     END_IF
 END_FOR
@@ -540,7 +535,7 @@ END_FOR
     <Method Name="mPrintErrorMessage" Id="{3e321397-22af-4d7e-a9bd-c132b0a3b842}">
       <Declaration><![CDATA[METHOD mPrintErrorMessage
 VAR_INPUT
-    bPrintLog : BOOL;
+    bPrintLog: BOOL;
     sErrorMessage: STRING;
     nErrorID: INT;
     nIndex: UINT;
@@ -554,13 +549,13 @@ END_VAR
     RETURN;
 END_IF
 
-sErrorId := CONCAT(STR1:='ErrorID: ', STR2:=INT_TO_STRING(nErrorID));
-sErrorId := CONCAT(STR1:=sErrorId, STR2:='. %s');
+sErrorId := CONCAT(STR1 := 'ErrorID: ', STR2 := INT_TO_STRING(nErrorID));
+sErrorId := CONCAT(STR1 := sErrorId, STR2 := '. %s');
 
 ADSLOGSTR(
-    msgCtrlMask:=ADSLOG_MSGTYPE_ERROR,
-    msgFmtStr:=sErrorId,
-    strArg:=sErrorMessage);
+    msgCtrlMask := ADSLOG_MSGTYPE_ERROR,
+    msgFmtStr := sErrorId,
+    strArg := sErrorMessage);
 ]]></ST>
       </Implementation>
     </Method>
@@ -583,7 +578,7 @@ END_IF
 
 stAlarmList.bAlarmActive := FALSE;
 
-IF stAlarmList.bLedAutoReset OR fbAcknowledgeButtonTrig.Q THEN
+IF stAlarmList.bLedAutoReset OR rtrigErrorAcknowledgeButton.Q THEN
     stAlarmList.bLedActive := FALSE;
 END_IF
 ]]></ST>

@@ -7,7 +7,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 1^Output'}
     bStatusLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF207 (EL2014)^DIG Outputs^Channel 4^Output'}
-    bAcknowledgeLED AT %Q*: BOOL;
+    bErrorAcknowledgeLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 2^Output'}
     bEStopLED AT %Q*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF208 (EL2014)^DIG Outputs^Channel 4^Output'}
@@ -53,7 +53,7 @@ VAR
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF206 (EL1808)^Channel 4^Input'}
     bDoorClosed AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF205 (EL1808)^Channel 8^Input'}
-    bAcknowledgeButton AT %I*: BOOL;
+    bErrorAcknowledgeButton AT %I*: BOOL;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 1^Value'}
     nTemp1 AT %I*: INT;
     {attribute 'TcLinkTo' := 'TIID^Device 2 (EtherCAT)^KF201 (EK1100)^KF209 (EL3214)^RTD Inputs Channel 2^Value'}
@@ -74,12 +74,12 @@ END_VAR
       <Declaration><![CDATA[METHOD mLink
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Input variables
-AcknowledgeButton := bAcknowledgeButton;
+        <ST><![CDATA[//Input variables
+ErrorAcknowledgeButton := bErrorAcknowledgeButton;
 EcMasterDevState := nEcMasterDevState;
 
-// Output variables
-bAcknowledgeLED := AcknowledgeLED;
+//Output variables
+bErrorAcknowledgeLED := ErrorAcknowledgeLED;
 bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
@@ -96,67 +96,67 @@ END_IF;
     <Method Name="mSetResetAlarmsLeds" Id="{1241012c-ae73-450a-94a3-e603ad15f437}">
       <Declaration><![CDATA[METHOD mSetResetAlarmsLeds
 VAR_INST
-    index: UINT;
-    aDeadBandActive: ARRAY [1..4] OF BOOL;
+    nIndex: UINT;
+    abDeadBandActive: ARRAY [1..4] OF BOOL;
     nDeadBandTemperature: INT := 3;
-    aTemperatureAlarm: ARRAY [1..4] OF BOOL;
+    abTemperatureAlarm: ARRAY [1..4] OF BOOL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[mSetReset(stAlarmList := aAlarmList[1], bOk := b24VDC1_OK);
-mSetReset(stAlarmList := aAlarmList[2], bOk := b24VDC2_OK);
-mSetReset(stAlarmList := aAlarmList[3], bOk := b24VDC3_OK);
+        <ST><![CDATA[mSetReset(stAlarmList := astAlarmList[1], bOk := b24VDC1_OK);
+mSetReset(stAlarmList := astAlarmList[2], bOk := b24VDC2_OK);
+mSetReset(stAlarmList := astAlarmList[3], bOk := b24VDC3_OK);
 
-mSetReset(stAlarmList := aAlarmList[4], bOk := b48VDC1_OK);
-mSetReset(stAlarmList := aAlarmList[5], bOk := b48VDC2_OK);
-mSetReset(stAlarmList := aAlarmList[6], bOk := b48VDC3_OK);
-mSetReset(stAlarmList := aAlarmList[7], bOk := b48VDC4_OK);
+mSetReset(stAlarmList := astAlarmList[4], bOk := b48VDC1_OK);
+mSetReset(stAlarmList := astAlarmList[5], bOk := b48VDC2_OK);
+mSetReset(stAlarmList := astAlarmList[6], bOk := b48VDC3_OK);
+mSetReset(stAlarmList := astAlarmList[7], bOk := b48VDC4_OK);
 
-mSetReset(stAlarmList := aAlarmList[8], bOk := bMCBFan_OK);
-mSetReset(stAlarmList := aAlarmList[9], bOk := bSPD_OK);
-mSetReset(stAlarmList := aAlarmList[10], bOk := bDoorClosed);
+mSetReset(stAlarmList := astAlarmList[8], bOk := bMCBFan_OK);
+mSetReset(stAlarmList := astAlarmList[9], bOk := bSPD_OK);
+mSetReset(stAlarmList := astAlarmList[10], bOk := bDoorClosed);
 
-mSetReset(stAlarmList := aAlarmList[11], bOk := bFuse1_OK);
-mSetReset(stAlarmList := aAlarmList[12], bOk := NOT bFuse2_Error);
-mSetReset(stAlarmList := aAlarmList[13], bOk := NOT bFuse3_Error);
-mSetReset(stAlarmList := aAlarmList[14], bOk := bFuse4_OK);
-mSetReset(stAlarmList := aAlarmList[15], bOk := bFuse5_OK);
-mSetReset(stAlarmList := aAlarmList[16], bOk := bFuse6_OK);
-mSetReset(stAlarmList := aAlarmList[17], bOk := bFuse7_OK);
-mSetReset(stAlarmList := aAlarmList[18], bOk := bFuse8_OK);
+mSetReset(stAlarmList := astAlarmList[11], bOk := bFuse1_OK);
+mSetReset(stAlarmList := astAlarmList[12], bOk := NOT bFuse2_Error);
+mSetReset(stAlarmList := astAlarmList[13], bOk := NOT bFuse3_Error);
+mSetReset(stAlarmList := astAlarmList[14], bOk := bFuse4_OK);
+mSetReset(stAlarmList := astAlarmList[15], bOk := bFuse5_OK);
+mSetReset(stAlarmList := astAlarmList[16], bOk := bFuse6_OK);
+mSetReset(stAlarmList := astAlarmList[17], bOk := bFuse7_OK);
+mSetReset(stAlarmList := astAlarmList[18], bOk := bFuse8_OK);
 
-mSetReset(stAlarmList := aAlarmList[19], bOk := bEStopReleased);
+mSetReset(stAlarmList := astAlarmList[19], bOk := bEStopReleased);
 
-mSetReset(stAlarmList := aAlarmList[24], bOk := NOT bEcMasterError);
-mSetReset(stAlarmList := aAlarmList[25], bOk := NOT bSlaveStateNotOP);
-mSetReset(stAlarmList := aAlarmList[26], bOk := NOT bSlaveLinkError);
-mSetReset(stAlarmList := aAlarmList[27], bOk := NOT bCycleTimeExceeded);
-mSetReset(stAlarmList := aAlarmList[28], bOk := NOT bCPUOverloaded);
+mSetReset(stAlarmList := astAlarmList[24], bOk := NOT bEcMasterError);
+mSetReset(stAlarmList := astAlarmList[25], bOk := NOT bSlaveStateNotOP);
+mSetReset(stAlarmList := astAlarmList[26], bOk := NOT bSlaveLinkError);
+mSetReset(stAlarmList := astAlarmList[27], bOk := NOT bCycleTimeExceeded);
+mSetReset(stAlarmList := astAlarmList[28], bOk := NOT bCPUOverloaded);
 
 
-aTemperatureAlarm[1] :=
+abTemperatureAlarm[1] :=
     nTemp1 > nMAX_TEMP
-    OR (aDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
-aDeadBandActive[1] := aTemperatureAlarm[1];
-mSetReset(stAlarmList := aAlarmList[20], bOk := NOT aTemperatureAlarm[1]);
+    OR (abDeadBandActive[1] AND nTemp1 > (nMAX_TEMP - nDeadBandTemperature));
+abDeadBandActive[1] := abTemperatureAlarm[1];
+mSetReset(stAlarmList := astAlarmList[20], bOk := NOT abTemperatureAlarm[1]);
 
-aTemperatureAlarm[2] :=
+abTemperatureAlarm[2] :=
     nTemp2 > nMAX_TEMP
-    OR (aDeadBandActive[2] AND nTemp2 > (nMAX_TEMP - nDeadBandTemperature));
-aDeadBandActive[2] := aTemperatureAlarm[2];
-mSetReset(stAlarmList := aAlarmList[21], bOk := NOT aTemperatureAlarm[2]);
+    OR (abDeadBandActive[2] AND nTemp2 > (nMAX_TEMP - nDeadBandTemperature));
+abDeadBandActive[2] := abTemperatureAlarm[2];
+mSetReset(stAlarmList := astAlarmList[21], bOk := NOT abTemperatureAlarm[2]);
 
-aTemperatureAlarm[3] :=
+abTemperatureAlarm[3] :=
     nTemp3 > nMAX_TEMP
-    OR (aDeadBandActive[3] AND nTemp3 > (nMAX_TEMP - nDeadBandTemperature));
-aDeadBandActive[3] := aTemperatureAlarm[3];
-mSetReset(stAlarmList := aAlarmList[22], bOk := NOT aTemperatureAlarm[3]);
+    OR (abDeadBandActive[3] AND nTemp3 > (nMAX_TEMP - nDeadBandTemperature));
+abDeadBandActive[3] := abTemperatureAlarm[3];
+mSetReset(stAlarmList := astAlarmList[22], bOk := NOT abTemperatureAlarm[3]);
 
-aTemperatureAlarm[4] :=
+abTemperatureAlarm[4] :=
     nTemp4 > nMAX_TEMP
-    OR (aDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
-aDeadBandActive[4] := aTemperatureAlarm[4];
-mSetReset(stAlarmList := aAlarmList[23], bOk := NOT aTemperatureAlarm[4]);
+    OR (abDeadBandActive[4] AND nTemp4 > (nMAX_TEMP - nDeadBandTemperature));
+abDeadBandActive[4] := abTemperatureAlarm[4];
+mSetReset(stAlarmList := astAlarmList[23], bOk := NOT abTemperatureAlarm[4]);
 ]]></ST>
       </Implementation>
     </Method>
