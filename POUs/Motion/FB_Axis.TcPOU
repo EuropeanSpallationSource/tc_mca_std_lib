@@ -114,6 +114,8 @@ VAR
     fbModMovDyn1RiseEdge: R_TRIG;
     fbModMovDyn2RiseEdge: R_TRIG;
 
+    _fbCommandHistory: REFERENCE TO FB_CommandHistory;
+
     bInternalExecute: BOOL := FALSE;
     bEnableCmdOld: BOOL := FALSE;
     bEnabledOld: BOOL := FALSE;
@@ -190,6 +192,19 @@ astMcStatus[19] := ADR(stMcStatusExternalBrake);
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="fbCommandHistory" Id="{90612c33-c3e5-0a22-01ee-d870a40ad7de}">
+      <Declaration><![CDATA[PROPERTY fbCommandHistory : REFERENCE TO FB_CommandHistory
+]]></Declaration>
+      <Set Name="Set" Id="{c2b0811e-801e-07e0-10ef-6a4e037013eb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_fbCommandHistory REF= fbCommandHistory;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Method Name="mControl_Airpad" Id="{ec15769e-bbb8-0e4f-2638-9a7ccf63a25a}" FolderPath="Control Methods\">
       <Declaration><![CDATA[// Controls pressure to airpad
 METHOD mControl_Airpad : ST_McStatus
@@ -411,8 +426,13 @@ CASE eState OF
                     IF _stAxis.stConfig.bAutoEnable THEN
                         _stAxis.stControl.bEnable := TRUE;
                     END_IF
+
                     eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
+
+            _fbCommandHistory.mPush(
+                eCommand := _stAxis.stControl.eCommand,
+                sInfo := F_ExtractAxisCommandInfo(_stAxis));
         END_IF
 
     E_CommandHandlerState.eWaitPermits:
@@ -439,6 +459,7 @@ CASE eState OF
         bInternalExecute := TRUE;
         bInternalMovePermit := TRUE;
         bInternalReleasedMoveCmd := TRUE;
+        _fbCommandHistory.mSetReleaseTime();
         eState := E_CommandHandlerState.eWaitForMotionStart;
 
     E_CommandHandlerState.eWaitForMotionStart:
@@ -735,6 +756,10 @@ mControl_GearInMultiMaster.CommandAborted := fbGearInMultiMaster.CommandAborted;
 IF fbGearInMultiMaster.Error THEN
     _stAxis.stError.nGearInMultiMasterErrorID := fbGearInMultiMaster.ErrorID; //Set the error
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eGearInMultiMaster,
+    stStatus := mControl_GearInMultiMaster);
 ]]></ST>
       </Implementation>
     </Method>
@@ -766,6 +791,10 @@ mControl_GearOut.ErrorID := fbGearOut.ErrorID;
 IF fbGearOut.Error THEN
     _stAxis.stError.nGearOutErrorID := fbGearOut.ErrorID; //Set the error
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eGearOut,
+    stStatus := mControl_GearOut);
 ]]></ST>
       </Implementation>
     </Method>
@@ -802,6 +831,10 @@ mControl_Home.ErrorID := fbHome.nErrorId;
 IF fbHome.bError THEN
     _stAxis.stError.nHomeErrorID := fbHome.nErrorID; //Set the error
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eHome,
+    stStatus := mControl_Home);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1085,6 +1118,8 @@ mMove_Halt.ErrorID := fbHalt.ErrorID;
 mMove_Halt.Active := fbHalt.Active;
 mMove_Halt.CommandAborted := fbHalt.CommandAborted;
 
+_fbCommandHistory.mSetResultToHalted(bExecute := fbHalt.Execute);
+
 IF fbHalt.Error THEN
     _stAxis.stError.nHaltErrorID := fbHalt.ErrorID; //Set the error
 END_IF
@@ -1128,13 +1163,11 @@ fbMoveAbsolute2(Axis := _stAxis.Axis);
 fbMoveAbsolute.Execute := FALSE;
 fbMoveAbsolute2.Execute := FALSE;
 
-
 // STATUS bits
 mMove_MoveAbsolute.Active := fbMoveAbsolute.Active OR fbMoveAbsolute2.Active;
 mMove_MoveAbsolute.Done := fbMoveAbsolute.Done OR fbMoveAbsolute2.Done;
 mMove_MoveAbsolute.Busy := fbMoveAbsolute.Busy OR fbMoveAbsolute2.Busy;
 mMove_MoveAbsolute.Error := fbMoveAbsolute.Error OR fbMoveAbsolute2.Error;
-
 
 // Capture the CommandAborted for first scan if the other absolute move overtakes the current
 fbAbsMovDyn1RiseEdge(CLK:= fbMoveAbsolute.Busy AND fbMoveAbsolute2.CommandAborted, Q=>);
@@ -1151,6 +1184,10 @@ IF fbMoveAbsolute2.Error THEN
     _stAxis.stError.nMoveAbsoluteErrorID := fbMoveAbsolute2.ErrorID; //Set the error
     mMove_MoveAbsolute.ErrorID := fbMoveAbsolute2.ErrorID;
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eMoveAbsolute,
+    stStatus := mMove_MoveAbsolute);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1204,6 +1241,10 @@ IF fbMoveModulo2.Error THEN
     _stAxis.stError.nMoveModuloErrorID := fbMoveModulo2.ErrorID; //Set the error
     mMove_MoveModulo.ErrorID := fbMoveModulo2.ErrorID;
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eMoveModulo,
+    stStatus := mMove_MoveModulo);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1233,6 +1274,10 @@ mMove_MoveRelative.CommandAborted := fbMoveRelative.CommandAborted;
 IF fbMoveRelative.Error THEN
     _stAxis.stError.nMoveRelativeErrorID := fbMoveRelative.ErrorID; //Set the error
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eMoveRelative,
+    stStatus := mMove_MoveRelative);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1262,6 +1307,10 @@ mMove_MoveVelocity.CommandAborted := fbMoveVelocity.CommandAborted;
 IF fbMoveVelocity.Error THEN
     _stAxis.stError.nMoveVelocityErrorID := fbMoveVelocity.ErrorID; //Set the error
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eMoveVelocity,
+    stStatus := mMove_MoveVelocity);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1280,6 +1329,8 @@ mMove_Stop.Error := fbStop.Error;
 mMove_Stop.ErrorID := fbStop.ErrorID;
 mMove_Stop.Active := fbStop.Active;
 mMove_Stop.CommandAborted := fbStop.CommandAborted;
+
+_fbCommandHistory.mSetResultToStopped(bExecute := fbStop.Execute);
 
 IF fbStop.Error THEN
     _stAxis.stError.nStopErrorID := fbStop.ErrorID; //Set the error
@@ -1526,6 +1577,10 @@ mParameters_ReadParameter.ErrorID := fbReadParameter.ErrorID;
 IF fbReadParameter.Error THEN
     _stAxis.stError.nReadParameterErrorId := fbReadParameter.ErrorID;
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eReadParameter,
+    stStatus := mParameters_ReadParameter);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1661,6 +1716,15 @@ ELSIF fb_coe_writeex.bError THEN
 ELSIF _stAxis.stConfig.stCoEParameters.nState = E_CoEParamState.eError THEN
     mParameters_ReadWriteCoE.ErrorID := 7;
 END_IF
+
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eReadCoEParameters,
+    stStatus := mParameters_ReadWriteCoE);
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eWriteCoEParameters,
+    stStatus := mParameters_ReadWriteCoE);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1688,6 +1752,10 @@ mParameters_WriteParameter.ErrorID := fbWriteParameter.ErrorID;
 IF fbWriteParameter.Error THEN
     _stAxis.stError.nWriteParameterErrorId := fbWriteParameter.ErrorID;
 END_IF
+
+_fbCommandHistory.mSetResultToStatus(
+    eCommand := E_MotionFunctions.eWriteParameter,
+    stStatus := mParameters_WriteParameter);
 ]]></ST>
       </Implementation>
     </Method>
