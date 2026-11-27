@@ -75,8 +75,8 @@ bStatusLED := StatusLED;
 bEStopLED := EStopLED;
 bErrorLED := ErrorLED;
 
-IF iSafetyProvider <> 0 THEN
-    bEStopReleased := iSafetyProvider.EStopOK;
+IF iSafetyController <> 0 THEN
+    bEStopReleased := iSafetyController.EStopOK;
 ELSE
     bEStopReleased := bEStop_OK;
 END_IF;
