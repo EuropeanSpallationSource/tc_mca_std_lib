@@ -36332,7 +36332,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">72808681L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory"</v>
                     </o>
                     <o>
                       <v n="Id">1636615684L</v>
@@ -36352,22 +36352,22 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                           <v>DateAndTime</v>
                           <v>Userdef</v>
                           <v>String</v>
-                          <v>String</v>
+                          <v>Userdef</v>
                           <v>UDInt</v>
                         </a>
                         <a n="ColumnNames" cet="String">
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtTrigger</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtRelease</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtFinish</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eCommand</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].sInfo</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eResult</v>
-                          <v>MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].nErrorID</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtTrigger</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtRelease</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtFinish</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eCommand</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].sInfo</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eResult</v>
+                          <v>GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].nErrorID</v>
                         </a>
                         <v n="BaseType">false</v>
                         <a n="Bounds" cet="ArrayBound">
                           <o>
-                            <v n="Identifier">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.nMAX_HISTORY_ENTRY"</v>
+                            <v n="Identifier">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].nMAX_HISTORY_ENTRY"</v>
                             <v n="Value">50</v>
                           </o>
                         </a>
@@ -36408,31 +36408,31 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">3854506369L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtTrigger"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtTrigger"</v>
                     </o>
                     <o>
                       <v n="Id">1892666644L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtRelease"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtRelease"</v>
                     </o>
                     <o>
                       <v n="Id">338671338L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtFinish"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtFinish"</v>
                     </o>
                     <o>
                       <v n="Id">2170511999L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eCommand"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eCommand"</v>
                     </o>
                     <o>
                       <v n="Id">3723444502L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].sInfo"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].sInfo"</v>
                     </o>
                     <o>
                       <v n="Id">1218418051L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eResult"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eResult"</v>
                     </o>
                     <o>
                       <v n="Id">746581629L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].nErrorID"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].nErrorID"</v>
                     </o>
                     <o>
                       <v n="Id">2232123230L</v>
@@ -36460,35 +36460,35 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">1757482276L</v>
-                      <v n="Value">"Error ID"</v>
+                      <v n="Value">"ErrorID"</v>
                     </o>
                     <o>
                       <v n="Id">2685023577L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtTrigger"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtTrigger"</v>
                     </o>
                     <o>
                       <v n="Id">3312258591L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtRelease"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtRelease"</v>
                     </o>
                     <o>
                       <v n="Id">1791247317L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtFinish"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtFinish"</v>
                     </o>
                     <o>
                       <v n="Id">262371475L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eCommand"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eCommand"</v>
                     </o>
                     <o>
                       <v n="Id">4008173056L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].sInfo"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].sInfo"</v>
                     </o>
                     <o>
                       <v n="Id">2340480326L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eResult"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eResult"</v>
                     </o>
                     <o>
                       <v n="Id">606709900L</v>
-                      <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].nErrorID"</v>
+                      <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].nErrorID"</v>
                     </o>
                     <o>
                       <v n="Id">4036189354L</v>
@@ -36504,7 +36504,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">2115787593L</v>
-                      <v n="Value">138</v>
+                      <v n="Value" t="Int16">138</v>
                     </o>
                     <o>
                       <v n="Id">1960399440L</v>
@@ -36516,7 +36516,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                     </o>
                     <o>
                       <v n="Id">922506541L</v>
-                      <v n="Value">68</v>
+                      <v n="Value" t="Int16">68</v>
                     </o>
                     <o>
                       <v n="Id">3669839856L</v>
@@ -36666,6 +36666,30 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                       <v n="Id">2766787066L</v>
                       <v n="Value">"782"</v>
                     </o>
+                    <o>
+                      <v n="Id">3736079596L</v>
+                      <v n="Value">"387"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1893244285L</v>
+                      <v n="Value">"789"</v>
+                    </o>
+                    <o>
+                      <v n="Id">1494231439L</v>
+                      <v n="Value">"1290"</v>
+                    </o>
+                    <o>
+                      <v n="Id">4151883806L</v>
+                      <v n="Value">"1191"</v>
+                    </o>
+                    <o>
+                      <v n="Id">176242795L</v>
+                      <v n="Value">"234"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2367776008L</v>
+                      <v n="Value">"1058"</v>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Table"</v>
@@ -36755,7 +36779,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtTrigger"</v>
+                          <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtTrigger"</v>
                         </o>
                         <o>
                           <v n="Id">2812299069L</v>
@@ -36890,7 +36914,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtRelease"</v>
+                          <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtRelease"</v>
                         </o>
                         <o>
                           <v n="Id">2812299069L</v>
@@ -37025,7 +37049,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].dtFinish"</v>
+                          <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].dtFinish"</v>
                         </o>
                         <o>
                           <v n="Id">2812299069L</v>
@@ -37160,7 +37184,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].eCommand"</v>
+                          <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].eCommand"</v>
                         </o>
                         <o>
                           <v n="Id">2812299069L</v>
@@ -37295,7 +37319,7 @@ GVL.astAxes[Main.hmiAxisSelection].stControl.bExecute := TRUE;"</v>
                         </o>
                         <o>
                           <v n="Id">2477733581L</v>
-                          <v n="Value">"MAIN.afbAxes[MAIN.hmiAxisSelection].fbCommandHistory.aCommandHistory[INDEX].sInfo"</v>
+                          <v n="Value">"GVL.afbAxisCommandHistory[MAIN.hmiAxisSelection].aCommandHistory[INDEX].sInfo"</v>
                         </o>
                         <o>
                           <v n="Id">2812299069L</v>
