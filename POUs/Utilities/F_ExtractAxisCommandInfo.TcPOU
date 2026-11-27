@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_ExtractAxisCommandInfo" Id="{eec1c8b1-77e3-0c8e-2e97-d133e167f627}" SpecialFunc="None">
+    <Declaration><![CDATA[//Extracts information from axis struct based on current command
+FUNCTION F_ExtractAxisCommandInfo: T_MaxString
+VAR_IN_OUT CONSTANT
+    stAxisStruct: ST_AxisStruct;
+END_VAR
+VAR
+    iCount: USINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE stAxisStruct.stControl.eCommand OF
+    E_MotionFunctions.eMoveAbsolute,
+    E_MotionFunctions.eMoveRelative,
+    E_MotionFunctions.eMoveVelocity,
+    E_MotionFunctions.eMoveModulo:
+        //Vel: 13.24
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := 'Vel: ',
+            STR2 := TO_STRING(stAxisStruct.stControl.fVelocity));
+
+        //Vel: 13.24, Acc:
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := ', Acc: ');
+
+        //Vel: 13.13, Acc: 123.33
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stControl.fAcceleration));
+
+        //Vel: 13.13, Acc: 123.33, Dec:
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := ', Dec: ');
+
+        //Vel: 13.13, Acc: 123.33, Dec: 321.11
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stControl.fDeceleration));
+
+        IF stAxisStruct.stControl.eCommand <> E_MotionFunctions.eMoveVelocity THEN
+            //Vel: 13.13, Acc: 123.33, Dec: 321.11, Pos:
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := ', Pos: ');
+
+            //Vel: 13.13, Acc: 123.33, Dec: 321.11, Pos: 1133.4
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := TO_STRING(stAxisStruct.stControl.fPosition));
+        END_IF
+
+    E_MotionFunctions.eGearInMultiMaster,
+    E_MotionFunctions.eGearOut:
+        F_ExtractAxisCommandInfo := 'Gears: ';
+
+        FOR iCount := 1 TO 4 DO
+            //Gears: 0.15
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := TO_STRING(stAxisStruct.stConfig.astMultiMasterAxis[iCount].fRatio));
+
+            //Gears: 0.15 ->
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := ' -> ');
+
+            //Gears: 0.15 -> 21
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := TO_STRING(stAxisStruct.stConfig.astMultiMasterAxis[iCount].nIndex));
+
+            //Gears: 0.15 -> 21,
+            IF iCount <> 4 THEN
+                F_ExtractAxisCommandInfo := CONCAT(
+                    STR1 := F_ExtractAxisCommandInfo,
+                    STR2 := ', ');
+            END_IF
+        END_FOR
+
+    E_MotionFunctions.eHome:
+        //eHomeSeq
+        F_ExtractAxisCommandInfo := TO_STRING(stAxisStruct.stConfig.eHomeSeq);
+
+        IF stAxisStruct.stConfig.eHomeSeq = E_HomingRoutines.eNoHoming THEN
+            RETURN;
+        END_IF
+
+        //Seq
+        F_ExtractAxisCommandInfo := DELETE(
+            STR := F_ExtractAxisCommandInfo,
+            LEN := 5,
+            POS := 1);
+
+        IF stAxisStruct.stConfig.stHomingConfig.bAbsoluteMoveAtFinishHoming THEN
+            //Seq: AbsPos:
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := ': AbsPos: ');
+        ELSE
+            //Seq: RelPos:
+            F_ExtractAxisCommandInfo := CONCAT(
+                STR1 := F_ExtractAxisCommandInfo,
+                STR2 := ': RelPos: ');
+        END_IF
+
+        //Seq: RelPos: 123.12
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fHomeFinishDistance));
+
+        //Seq: RelPos: 123.12, SetPos:
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := ', SetPos: ');
+
+        //Seq: RelPos: 123.12, SetPos: 456.12
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fHomePosition));
+
+    E_MotionFunctions.eWriteParameter:
+        //eAxisParameter:
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := TO_STRING(stAxisStruct.stConfig.eAxisParameters),
+            STR2 := ': ');
+
+        //eAxisParameter: 11.2
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.fWriteAxisParameter));
+
+    E_MotionFunctions.eReadParameter:
+        //eAxisParameter
+        F_ExtractAxisCommandInfo := TO_STRING(stAxisStruct.stConfig.eAxisParameters);
+
+    E_MotionFunctions.eWriteCoEParameters:
+        //eCoEParameters:
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := TO_STRING(stAxisStruct.stConfig.stCoEParameters.eCoEParameters),
+            STR2 := ': ');
+
+        //eCoEParameters: 213
+        F_ExtractAxisCommandInfo := CONCAT(
+            STR1 := F_ExtractAxisCommandInfo,
+            STR2 := TO_STRING(stAxisStruct.stConfig.stCoEParameters.aParWrite[1]));
+
+    E_MotionFunctions.eReadCoEParameters:
+        //eCoEParameters
+        F_ExtractAxisCommandInfo := TO_STRING(stAxisStruct.stConfig.stCoEParameters.eCoEParameters);
+
+    ELSE
+        ; //Empty info
+
+END_CASE
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

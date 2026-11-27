@@ -426,7 +426,9 @@ CASE eState OF
                     eState := E_CommandHandlerState.eWaitPermits;
             END_CASE
 
-            _fbCommandHistory.mPush(_stAxis);
+            _fbCommandHistory.mPush(
+                eCommand := _stAxis.stControl.eCommand,
+                sInfo := F_ExtractAxisCommandInfo(_stAxis));
         END_IF
 
     E_CommandHandlerState.eWaitPermits:

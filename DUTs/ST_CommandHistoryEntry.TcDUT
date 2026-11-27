@@ -7,7 +7,7 @@ STRUCT
     dtRelease: DT;
     dtFinish: DT;
     eCommand: E_MotionFunctions := E_MotionFunctions.eWaitingForCommand;
-    sInfo: STRING;
+    sInfo: T_MaxString;
     eResult: E_CommandResult := E_CommandResult.eNone;
     nErrorID: UDINT;
 END_STRUCT
